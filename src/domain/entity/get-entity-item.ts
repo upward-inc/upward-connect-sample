@@ -1,0 +1,48 @@
+import { prisma } from "../../libs/prisma"
+import type { Entity } from "../../schema/entity"
+import { type EntityItem, EntityItemSchema } from "../../schema/entity-item"
+
+export const getEntityItem = async (
+	entityName: Entity["name"],
+	name: EntityItem["name"],
+): Promise<EntityItem | null> => {
+	const entity = await prisma.entity.findUnique({
+		where: { name: entityName },
+	})
+	if (!entity) {
+		return null
+	}
+
+	const result = await prisma.entity_item
+		.findUnique({
+			where: {
+				entity_id_name: {
+					entity_id: entity.id,
+					name: name,
+				},
+			},
+			include: {
+				entity_item_option: {
+					select: {
+						name: true,
+						display_name: true,
+						is_default: true,
+					},
+					orderBy: [{ order: "asc" }],
+				},
+			},
+		})
+		.then((result) => {
+			return result
+				? {
+						...result,
+						reference_entities: result.reference_entities
+							? JSON.parse(result.reference_entities)
+							: null,
+						options: result.entity_item_option,
+					}
+				: null
+		})
+
+	return result ? EntityItemSchema.parse(result) : null
+}

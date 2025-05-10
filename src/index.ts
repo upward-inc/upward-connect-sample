@@ -1,9 +1,25 @@
-import { Hono } from 'hono'
+import { Hono } from "hono"
+import { compress } from "hono/compress"
+import { secureHeaders } from "hono/secure-headers"
+import { trimTrailingSlash } from "hono/trailing-slash"
+import { handleError, handleNotFound } from "./error-handler"
+import { apiRouter } from "./routes/api"
 
 const app = new Hono()
 
-app.get('/', (c) => {
-  return c.text('Hello Hono!')
-})
+// middleware
+app.use(secureHeaders())
+// app.use(compress()) // APIドキュメントが表示されないためコメントアウト
+app.use(trimTrailingSlash())
 
-export default app
+// routing
+app.route("/api", apiRouter)
+
+// handle error
+app.onError(handleError)
+app.notFound(handleNotFound)
+
+export default {
+  port: process.env.PORT ?? 8787,
+  fetch: app.fetch,
+}
