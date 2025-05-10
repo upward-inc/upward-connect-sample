@@ -1,25 +1,13 @@
 {
   "name": "multi-platform-sample",
+  "version": "1.0.0",
   "scripts": {
-    "dev": "bun run --hot src/index.ts",
-    "db#up": "docker compose -f compose-db.yml up -d",
-    "db#down": "docker compose -f compose-db.yml down",
-    "db#init": "prisma migrate dev --name init",
-    "db#seed": "bun run seed/index.ts",
-    "prisma#generate": "prisma generate"
+    "dev": "bun run --filter api dev",
+    "db#up": "bun run --filter api db#up",
+    "db#down": "bun run --filter api db#down",
+    "db#init": "bun run --filter api db#init",
+    "db#seed": "bun run --filter api db#seed",
+    "prisma#generate": "bun run --filter api prisma#generate"
   },
-  "dependencies": {
-    "@formkit/tempo": "^0.1.2",
-    "@hono/zod-validator": "^0.5.0",
-    "@prisma/client": "^6.7.0",
-    "@scalar/hono-api-reference": "^0.8.8",
-    "hono": "^4.7.9",
-    "hono-openapi": "^0.4.8",
-    "zod": "^3.24.4",
-    "zod-openapi": "^4.2.4"
-  },
-  "devDependencies": {
-    "@types/bun": "latest",
-    "prisma": "^6.7.0"
-  }
+  "workspaces": ["apps/*"]
 }

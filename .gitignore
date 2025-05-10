@@ -1,8 +1,2 @@
 # deps
 node_modules/
-
-# Local env files
-.env
-
-# Local db files
-mssql/
