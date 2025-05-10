@@ -2,7 +2,8 @@
   "name": "multi-platform-sample",
   "version": "1.0.0",
   "scripts": {
-    "dev": "bun run --filter api dev",
+    "api#dev": "bun run --filter api dev",
+    "login#dev": "bun run --filter login-app dev",
     "db#up": "bun run --filter api db#up",
     "db#down": "bun run --filter api db#down",
     "db#init": "bun run --filter api db#init",
