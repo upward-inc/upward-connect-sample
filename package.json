@@ -4,9 +4,11 @@
     "dev": "bun run --hot src/index.ts",
     "db#up": "docker compose -f compose-db.yml up -d",
     "db#down": "docker compose -f compose-db.yml down",
-    "db#init": "prisma migrate dev --name init"
+    "db#init": "prisma migrate dev --name init",
+    "db#seed": "bun run seed/index.ts"
   },
   "dependencies": {
+    "@formkit/tempo": "^0.1.2",
     "@prisma/client": "^6.7.0",
     "hono": "^4.7.9"
   },
