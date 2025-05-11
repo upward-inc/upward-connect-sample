@@ -20,6 +20,6 @@ app.onError(handleError)
 app.notFound(handleNotFound)
 
 export default {
-  port: process.env.PORT ?? 8787,
-  fetch: app.fetch,
+	port: process.env.PORT ?? 8787,
+	fetch: app.fetch,
 }
