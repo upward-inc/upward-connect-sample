@@ -6,7 +6,10 @@
     "db#down": "docker compose -f compose-db.yml down",
     "db#init": "prisma migrate dev --name init",
     "db#seed": "bun run seed/index.ts",
-    "prisma#generate": "prisma generate"
+    "prisma#generate": "prisma generate",
+    "format": "biome format --write ./src",
+    "lint": "biome lint --write ./src",
+    "check": "biome check --write ./src"
   },
   "dependencies": {
     "@formkit/tempo": "^0.1.2",
