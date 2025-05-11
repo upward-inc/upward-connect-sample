@@ -1,9 +1,9 @@
 import type { Prisma, user } from "@prisma/client"
 import {
 	getAnyRow,
-	getZeroPaddingString,
 	getRandomBoolean,
 	getUniquePersons,
+	getZeroPaddingString,
 } from "./utility"
 
 export async function seedContacts(

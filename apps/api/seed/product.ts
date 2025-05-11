@@ -1,5 +1,5 @@
 import type { Prisma, user } from "@prisma/client"
-import { getAnyRow, getZeroPaddingString, getRandomBoolean } from "./utility"
+import { getAnyRow, getRandomBoolean, getZeroPaddingString } from "./utility"
 
 export async function seedProducts(
 	prisma: Prisma.TransactionClient,

@@ -1,11 +1,11 @@
+import { addMinute, addYear, date, format } from "@formkit/tempo"
 import type { Prisma, user } from "@prisma/client"
-import { date, format, addYear, addMinute } from "@formkit/tempo"
 import {
 	getAnyRow,
-	getZeroPaddingString,
-	getRandomInteger,
 	getRandomBoolean,
 	getRandomDate,
+	getRandomInteger,
+	getZeroPaddingString,
 } from "./utility"
 
 export async function seedActivities(

@@ -1,11 +1,11 @@
 import type { Prisma, user } from "@prisma/client"
+import { addresses } from "./static/address"
 import {
 	getAnyRow,
-	getZeroPaddingString,
-	getRandomInteger,
 	getRandomBoolean,
+	getRandomInteger,
+	getZeroPaddingString,
 } from "./utility"
-import { addresses } from "./static/address"
 
 export async function seedAccounts(
 	prisma: Prisma.TransactionClient,
