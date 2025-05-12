@@ -1,12 +1,12 @@
 import { StrictMode } from "react"
 import { createRoot } from "react-dom/client"
-import App from "./pages/home/home.tsx"
+import { LoginPage } from "./pages/login/login.tsx"
 
 const rootElement = document.getElementById("root")
 if (rootElement) {
 	createRoot(rootElement).render(
 		<StrictMode>
-			<App />
+			<LoginPage />
 		</StrictMode>,
 	)
 } else {
