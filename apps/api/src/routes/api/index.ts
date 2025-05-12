@@ -1,4 +1,4 @@
-import { apiReference } from "@scalar/hono-api-reference"
+import { Scalar } from "@scalar/hono-api-reference"
 import { Hono } from "hono"
 import { openAPISpecs } from "hono-openapi"
 import { bearerAuth } from "../../middleware/bearer-auth"
@@ -41,7 +41,7 @@ apiRouter
 	// serve API documentation
 	.get(
 		"/docs",
-		apiReference({
+		Scalar({
 			theme: "saturn",
 			pageTitle: "Sample API Reference",
 			spec: { url: "/api/openapi" },
