@@ -1,9 +1,14 @@
+import { createFileRoute } from "@tanstack/react-router"
 import { useRef, useState } from "react"
-import { Button } from "../../components/button"
-import { Input } from "../../components/input"
-import { Label } from "../../components/label"
+import { Button } from "../components/button"
+import { Input } from "../components/input"
+import { Label } from "../components/label"
 
-export function LoginPage() {
+export const Route = createFileRoute("/login")({
+	component: Login,
+})
+
+function Login() {
 	const [isLoading, setIsLoading] = useState(false)
 	const [errorMessage, setErrorMessage] = useState("")
 	const formRef = useRef<HTMLFormElement>(null)
