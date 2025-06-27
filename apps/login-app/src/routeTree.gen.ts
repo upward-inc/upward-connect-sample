@@ -15,6 +15,7 @@ import { Route as LoginImport } from './routes/login'
 import { Route as AuthImport } from './routes/_auth'
 import { Route as IndexImport } from './routes/index'
 import { Route as AuthPrivateImport } from './routes/_auth/private'
+import { Route as AuthOauth2AuthorizeImport } from './routes/_auth/oauth2/authorize'
 
 // Create/Update Routes
 
@@ -38,6 +39,12 @@ const IndexRoute = IndexImport.update({
 const AuthPrivateRoute = AuthPrivateImport.update({
   id: '/private',
   path: '/private',
+  getParentRoute: () => AuthRoute,
+} as any)
+
+const AuthOauth2AuthorizeRoute = AuthOauth2AuthorizeImport.update({
+  id: '/oauth2/authorize',
+  path: '/oauth2/authorize',
   getParentRoute: () => AuthRoute,
 } as any)
 
@@ -73,6 +80,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthPrivateImport
       parentRoute: typeof AuthImport
     }
+    '/_auth/oauth2/authorize': {
+      id: '/_auth/oauth2/authorize'
+      path: '/oauth2/authorize'
+      fullPath: '/oauth2/authorize'
+      preLoaderRoute: typeof AuthOauth2AuthorizeImport
+      parentRoute: typeof AuthImport
+    }
   }
 }
 
@@ -80,10 +94,12 @@ declare module '@tanstack/react-router' {
 
 interface AuthRouteChildren {
   AuthPrivateRoute: typeof AuthPrivateRoute
+  AuthOauth2AuthorizeRoute: typeof AuthOauth2AuthorizeRoute
 }
 
 const AuthRouteChildren: AuthRouteChildren = {
   AuthPrivateRoute: AuthPrivateRoute,
+  AuthOauth2AuthorizeRoute: AuthOauth2AuthorizeRoute,
 }
 
 const AuthRouteWithChildren = AuthRoute._addFileChildren(AuthRouteChildren)
@@ -93,6 +109,7 @@ export interface FileRoutesByFullPath {
   '': typeof AuthRouteWithChildren
   '/login': typeof LoginRoute
   '/private': typeof AuthPrivateRoute
+  '/oauth2/authorize': typeof AuthOauth2AuthorizeRoute
 }
 
 export interface FileRoutesByTo {
@@ -100,6 +117,7 @@ export interface FileRoutesByTo {
   '': typeof AuthRouteWithChildren
   '/login': typeof LoginRoute
   '/private': typeof AuthPrivateRoute
+  '/oauth2/authorize': typeof AuthOauth2AuthorizeRoute
 }
 
 export interface FileRoutesById {
@@ -108,14 +126,21 @@ export interface FileRoutesById {
   '/_auth': typeof AuthRouteWithChildren
   '/login': typeof LoginRoute
   '/_auth/private': typeof AuthPrivateRoute
+  '/_auth/oauth2/authorize': typeof AuthOauth2AuthorizeRoute
 }
 
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '' | '/login' | '/private'
+  fullPaths: '/' | '' | '/login' | '/private' | '/oauth2/authorize'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '' | '/login' | '/private'
-  id: '__root__' | '/' | '/_auth' | '/login' | '/_auth/private'
+  to: '/' | '' | '/login' | '/private' | '/oauth2/authorize'
+  id:
+    | '__root__'
+    | '/'
+    | '/_auth'
+    | '/login'
+    | '/_auth/private'
+    | '/_auth/oauth2/authorize'
   fileRoutesById: FileRoutesById
 }
 
@@ -152,7 +177,8 @@ export const routeTree = rootRoute
     "/_auth": {
       "filePath": "_auth.tsx",
       "children": [
-        "/_auth/private"
+        "/_auth/private",
+        "/_auth/oauth2/authorize"
       ]
     },
     "/login": {
@@ -160,6 +186,10 @@ export const routeTree = rootRoute
     },
     "/_auth/private": {
       "filePath": "_auth/private.tsx",
+      "parent": "/_auth"
+    },
+    "/_auth/oauth2/authorize": {
+      "filePath": "_auth/oauth2/authorize.tsx",
       "parent": "/_auth"
     }
   }
