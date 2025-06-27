@@ -3,6 +3,7 @@ import { Hono } from "hono"
 import { openAPISpecs } from "hono-openapi"
 import { cors } from "hono/cors"
 import { bearerAuth } from "../../middleware/bearer-auth"
+import { authRouter } from "./auth"
 import { entityRouter } from "./entity"
 import { fileRouter } from "./file"
 import { profileRouter } from "./profile"
@@ -16,7 +17,11 @@ apiRouter
 	.use("/*", cors())
 	// bearer auth
 	.use("/*", async (c, next) => {
-		if (c.req.path === "/api/openapi" || c.req.path === "/api/docs") {
+		if (
+			c.req.path === "/api/openapi" ||
+			c.req.path === "/api/docs" ||
+			c.req.path.startsWith("/api/auth/")
+		) {
 			return next()
 		}
 		return bearerAuth(c, next)
@@ -49,6 +54,7 @@ apiRouter
 			spec: { url: "/api/openapi" },
 		}),
 	)
+	.route("/auth", authRouter)
 	.route("/system-users", systemUserRouter)
 	.route("/profiles", profileRouter)
 	.route("/roles", roleRouter)
