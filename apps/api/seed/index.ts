@@ -105,11 +105,9 @@ try {
 	)
 
 	console.info("seed execution completed")
-
 } catch (error) {
 	console.error("error occurred during seed execution:", error)
 	process.exit(1)
 } finally {
-  await prisma.$disconnect();
+	await prisma.$disconnect()
 }
-

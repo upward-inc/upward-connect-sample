@@ -1,20 +1,20 @@
 {
-  "name": "multi-platform-sample",
-  "version": "1.0.0",
-  "scripts": {
-    "api#dev": "bun run --filter api dev",
-    "login#dev": "bun run --filter login-app dev",
-    "db#up": "bun run --filter api db#up",
-    "db#down": "bun run --filter api db#down",
-    "db#init": "bun run --filter api db#init",
-    "db#seed": "bun run --filter api db#seed",
-    "prisma#generate": "bun run --filter api prisma#generate",
-    "format": "bun run --filter api --filter login-app format",
-    "lint": "bun run --filter api --filter login-app lint",
-    "check": "bun run --filter api --filter login-app check"
-  },
-  "devDependencies": {
-    "@biomejs/biome": "^1.9.4"
-  },
-  "workspaces": ["apps/*"]
+	"name": "multi-platform-sample",
+	"version": "1.0.0",
+	"scripts": {
+		"api#dev": "bun run --filter api dev",
+		"login#dev": "bun run --filter login-app dev",
+		"db#up": "bun run --filter api db#up",
+		"db#down": "bun run --filter api db#down",
+		"db#init": "bun run --filter api db#init",
+		"db#seed": "bun run --filter api db#seed",
+		"prisma#generate": "bun run --filter api prisma#generate",
+		"format": "bun run --filter api --filter login-app format",
+		"lint": "bun run --filter api --filter login-app lint",
+		"check": "bun run --filter api --filter login-app check"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "^1.9.4"
+	},
+	"workspaces": ["apps/*"]
 }

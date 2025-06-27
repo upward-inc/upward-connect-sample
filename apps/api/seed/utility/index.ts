@@ -83,7 +83,6 @@ export const getUniquePersons = (size: number) => {
 				})
 			}
 		}
-
 	}
 
 	return result
