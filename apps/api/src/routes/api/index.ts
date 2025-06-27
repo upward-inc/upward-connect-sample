@@ -1,6 +1,7 @@
 import { Scalar } from "@scalar/hono-api-reference"
 import { Hono } from "hono"
 import { openAPISpecs } from "hono-openapi"
+import { cors } from "hono/cors"
 import { bearerAuth } from "../../middleware/bearer-auth"
 import { entityRouter } from "./entity"
 import { fileRouter } from "./file"
@@ -12,6 +13,7 @@ import { systemUserRouter } from "./system-user"
 const apiRouter = new Hono()
 
 apiRouter
+	.use("/*", cors())
 	// bearer auth
 	.use("/*", async (c, next) => {
 		if (c.req.path === "/api/openapi" || c.req.path === "/api/docs") {
