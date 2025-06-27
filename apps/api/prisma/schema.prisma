@@ -9,7 +9,7 @@ datasource db {
 }
 
 model account {
-  id                   String   @id(map: "pk_account") @default(dbgenerated("newid()"), map: "DF__account__id__54EEBDFC") @db.UniqueIdentifier
+  id                   String   @id(map: "pk_account") @default(dbgenerated("newid()"), map: "DF__account__id__1C722D53") @db.UniqueIdentifier
   name                 String   @db.NVarChar(256)
   account_number       String?  @db.NVarChar(20)
   main_phone_number    String?  @db.NVarChar(50)
@@ -28,21 +28,21 @@ model account {
   description          String?  @db.NVarChar(Max)
   originating_lead     String?  @db.NVarChar(Max)
   parent               String?  @db.NVarChar(Max)
-  is_deleted           Boolean  @default(false, map: "DF__account__is_dele__55E2E235")
+  is_deleted           Boolean  @default(false, map: "DF__account__is_dele__1D66518C")
   owner                String   @db.NVarChar(Max)
-  created_at           DateTime @default(dbgenerated("getutcdate()"), map: "DF__account__created__56D7066E") @db.DateTime
+  created_at           DateTime @default(dbgenerated("getutcdate()"), map: "DF__account__created__1E5A75C5") @db.DateTime
   created_by           String   @db.NVarChar(Max)
-  modified_at          DateTime @default(dbgenerated("getutcdate()"), map: "DF__account__modifie__57CB2AA7") @db.DateTime
+  modified_at          DateTime @default(dbgenerated("getutcdate()"), map: "DF__account__modifie__1F4E99FE") @db.DateTime
   modified_by          String   @db.NVarChar(Max)
 }
 
 model activity {
-  id                 String    @id(map: "pk_activity") @default(dbgenerated("newid()"), map: "DF__activity__id__74676955") @db.UniqueIdentifier
+  id                 String    @id(map: "pk_activity") @default(dbgenerated("newid()"), map: "DF__activity__id__3BEAD8AC") @db.UniqueIdentifier
   subject            String?   @db.NVarChar(256)
   target             String?   @db.NVarChar(256)
   start_date_time    DateTime? @db.DateTime
   end_date_time      DateTime? @db.DateTime
-  is_all_day_event   Boolean   @default(false, map: "DF__activity__is_all__755B8D8E")
+  is_all_day_event   Boolean   @default(false, map: "DF__activity__is_all__3CDEFCE5")
   status             String?   @db.NVarChar(Max)
   location           String?   @db.NVarChar(256)
   required_attendees String?   @db.NVarChar(Max)
@@ -50,17 +50,17 @@ model activity {
   organizer          String?   @db.NVarChar(Max)
   meeting_url        String?   @db.NVarChar(Max)
   description        String?   @db.NVarChar(Max)
-  is_archived        Boolean   @default(false, map: "DF__activity__is_arc__764FB1C7")
-  is_deleted         Boolean   @default(false, map: "DF__activity__is_del__7743D600")
+  is_archived        Boolean   @default(false, map: "DF__activity__is_arc__3DD3211E")
+  is_deleted         Boolean   @default(false, map: "DF__activity__is_del__3EC74557")
   owner              String    @db.NVarChar(Max)
-  created_at         DateTime  @default(dbgenerated("getutcdate()"), map: "DF__activity__create__7837FA39") @db.DateTime
+  created_at         DateTime  @default(dbgenerated("getutcdate()"), map: "DF__activity__create__3FBB6990") @db.DateTime
   created_by         String    @db.NVarChar(Max)
-  modified_at        DateTime  @default(dbgenerated("getutcdate()"), map: "DF__activity__modifi__792C1E72") @db.DateTime
+  modified_at        DateTime  @default(dbgenerated("getutcdate()"), map: "DF__activity__modifi__40AF8DC9") @db.DateTime
   modified_by        String    @db.NVarChar(Max)
 }
 
 model campaign {
-  id                String    @id(map: "pk_campaign") @default(dbgenerated("newid()"), map: "DF__campaign__id__6EAE8FFF") @db.UniqueIdentifier
+  id                String    @id(map: "pk_campaign") @default(dbgenerated("newid()"), map: "DF__campaign__id__3631FF56") @db.UniqueIdentifier
   name              String    @db.NVarChar(256)
   code              String?   @db.NVarChar(32)
   type              String?   @db.NVarChar(Max)
@@ -71,17 +71,17 @@ model campaign {
   budgeted_cost     Decimal?  @db.Decimal(16, 0)
   expected_revenue  Decimal?  @db.Decimal(16, 0)
   status            String?   @db.NVarChar(Max)
-  is_deleted        Boolean   @default(false, map: "DF__campaign__is_del__6FA2B438")
+  is_deleted        Boolean   @default(false, map: "DF__campaign__is_del__3726238F")
   owner             String    @db.NVarChar(Max)
-  created_at        DateTime  @default(dbgenerated("getutcdate()"), map: "DF__campaign__create__7096D871") @db.DateTime
+  created_at        DateTime  @default(dbgenerated("getutcdate()"), map: "DF__campaign__create__381A47C8") @db.DateTime
   created_by        String    @db.NVarChar(Max)
-  modified_at       DateTime  @default(dbgenerated("getutcdate()"), map: "DF__campaign__modifi__718AFCAA") @db.DateTime
+  modified_at       DateTime  @default(dbgenerated("getutcdate()"), map: "DF__campaign__modifi__390E6C01") @db.DateTime
   modified_by       String    @db.NVarChar(Max)
 }
 
 /// This model has been renamed to 'Renamedcase' during introspection, because the original name 'case' is reserved.
 model Renamedcase {
-  id              String    @id(map: "pk_case") @default(dbgenerated("newid()"), map: "DF__case__id__606070A8") @db.UniqueIdentifier
+  id              String    @id(map: "pk_case") @default(dbgenerated("newid()"), map: "DF__case__id__27E3DFFF") @db.UniqueIdentifier
   case_number     String    @db.NVarChar(30)
   subject         String    @db.NVarChar(256)
   detail          String?   @db.NVarChar(Max)
@@ -93,21 +93,21 @@ model Renamedcase {
   reason          String?   @db.NVarChar(Max)
   origin          String?   @db.NVarChar(Max)
   priority        String?   @db.NVarChar(Max)
-  is_escalated    Boolean   @default(false, map: "DF__case__is_escalat__615494E1")
+  is_escalated    Boolean   @default(false, map: "DF__case__is_escalat__28D80438")
   closed_datetime DateTime? @db.DateTime
   description     String?   @db.NVarChar(Max)
-  is_deleted      Boolean   @default(false, map: "DF__case__is_deleted__6248B91A")
+  is_deleted      Boolean   @default(false, map: "DF__case__is_deleted__29CC2871")
   owner           String    @db.NVarChar(Max)
-  created_at      DateTime  @default(dbgenerated("getutcdate()"), map: "DF__case__created_at__633CDD53") @db.DateTime
+  created_at      DateTime  @default(dbgenerated("getutcdate()"), map: "DF__case__created_at__2AC04CAA") @db.DateTime
   created_by      String    @db.NVarChar(Max)
-  modified_at     DateTime  @default(dbgenerated("getutcdate()"), map: "DF__case__modified_a__6431018C") @db.DateTime
+  modified_at     DateTime  @default(dbgenerated("getutcdate()"), map: "DF__case__modified_a__2BB470E3") @db.DateTime
   modified_by     String    @db.NVarChar(Max)
 
   @@map("case")
 }
 
 model contact {
-  id                   String   @id(map: "pk_contact") @default(dbgenerated("newid()"), map: "DF__contact__id__5AA79752") @db.UniqueIdentifier
+  id                   String   @id(map: "pk_contact") @default(dbgenerated("newid()"), map: "DF__contact__id__222B06A9") @db.UniqueIdentifier
   first_name           String?  @db.NVarChar(256)
   last_name            String   @db.NVarChar(256)
   gender               String?  @db.NVarChar(Max)
@@ -120,22 +120,22 @@ model contact {
   website              String?  @db.NVarChar(Max)
   originating_lead     String?  @db.NVarChar(Max)
   description          String?  @db.NVarChar(Max)
-  is_deleted           Boolean  @default(false, map: "DF__contact__is_dele__5B9BBB8B")
+  is_deleted           Boolean  @default(false, map: "DF__contact__is_dele__231F2AE2")
   owner                String   @db.NVarChar(Max)
-  created_at           DateTime @default(dbgenerated("getutcdate()"), map: "DF__contact__created__5C8FDFC4") @db.DateTime
+  created_at           DateTime @default(dbgenerated("getutcdate()"), map: "DF__contact__created__24134F1B") @db.DateTime
   created_by           String   @db.NVarChar(Max)
-  modified_at          DateTime @default(dbgenerated("getutcdate()"), map: "DF__contact__modifie__5D8403FD") @db.DateTime
+  modified_at          DateTime @default(dbgenerated("getutcdate()"), map: "DF__contact__modifie__25077354") @db.DateTime
   modified_by          String   @db.NVarChar(Max)
 }
 
 model entity {
-  id                            String        @id(map: "pk_entity") @default(dbgenerated("newid()"), map: "DF__entity__id__2BECA869") @db.UniqueIdentifier
+  id                            String        @id(map: "pk_entity") @default(dbgenerated("newid()"), map: "DF__entity__id__737017C0") @db.UniqueIdentifier
   name                          String        @unique(map: "uk_entity_1") @db.NVarChar(255)
   display_name                  String        @db.NVarChar(255)
-  order                         Int           @default(0, map: "DF__entity__order__2CE0CCA2") @db.SmallInt
-  created_at                    DateTime      @default(dbgenerated("getutcdate()"), map: "DF__entity__created___2DD4F0DB") @db.DateTime
+  order                         Int           @default(0, map: "DF__entity__order__74643BF9") @db.SmallInt
+  created_at                    DateTime      @default(dbgenerated("getutcdate()"), map: "DF__entity__created___75586032") @db.DateTime
   created_by                    String        @db.UniqueIdentifier
-  modified_at                   DateTime      @default(dbgenerated("getutcdate()"), map: "DF__entity__modified__2EC91514") @db.DateTime
+  modified_at                   DateTime      @default(dbgenerated("getutcdate()"), map: "DF__entity__modified__764C846B") @db.DateTime
   modified_by                   String        @db.UniqueIdentifier
   user_entity_created_byTouser  user          @relation("entity_created_byTouser", fields: [created_by], references: [id], onUpdate: NoAction, map: "fk_entity_created_by")
   user_entity_modified_byTouser user          @relation("entity_modified_byTouser", fields: [modified_by], references: [id], onUpdate: NoAction, map: "fk_entity_modified_by")
@@ -143,25 +143,25 @@ model entity {
 }
 
 model entity_item {
-  id                                 String               @id(map: "pk_entity_item") @default(dbgenerated("newid()"), map: "DF__entity_item__id__3481EE6A") @db.UniqueIdentifier
+  id                                 String               @id(map: "pk_entity_item") @default(dbgenerated("newid()"), map: "DF__entity_item__id__7C055DC1") @db.UniqueIdentifier
   entity_id                          String               @db.UniqueIdentifier
   name                               String               @db.NVarChar(255)
   display_name                       String               @db.NVarChar(255)
-  order                              Int                  @default(0, map: "DF__entity_it__order__357612A3") @db.SmallInt
+  order                              Int                  @default(0, map: "DF__entity_it__order__7CF981FA") @db.SmallInt
   type                               String               @db.NVarChar(20)
   sub_type                           String?              @db.NVarChar(20)
-  is_required                        Boolean              @default(false, map: "DF__entity_it__is_re__366A36DC")
-  is_filterable                      Boolean              @default(false, map: "DF__entity_it__is_fi__375E5B15")
-  is_creatable                       Boolean              @default(false, map: "DF__entity_it__is_cr__38527F4E")
-  is_updatable                       Boolean              @default(false, map: "DF__entity_it__is_up__3946A387")
-  is_formula                         Boolean              @default(false, map: "DF__entity_it__is_fo__3A3AC7C0")
+  is_required                        Boolean              @default(false, map: "DF__entity_it__is_re__7DEDA633")
+  is_filterable                      Boolean              @default(false, map: "DF__entity_it__is_fi__7EE1CA6C")
+  is_creatable                       Boolean              @default(false, map: "DF__entity_it__is_cr__7FD5EEA5")
+  is_updatable                       Boolean              @default(false, map: "DF__entity_it__is_up__00CA12DE")
+  is_formula                         Boolean              @default(false, map: "DF__entity_it__is_fo__01BE3717")
   max_length                         Int?                 @db.SmallInt
   precision                          Int?                 @db.SmallInt
   scale                              Int?                 @db.SmallInt
   reference_entities                 String?              @db.NVarChar(Max)
-  created_at                         DateTime             @default(dbgenerated("getutcdate()"), map: "DF__entity_it__creat__3B2EEBF9") @db.DateTime
+  created_at                         DateTime             @default(dbgenerated("getutcdate()"), map: "DF__entity_it__creat__02B25B50") @db.DateTime
   created_by                         String               @db.UniqueIdentifier
-  modified_at                        DateTime             @default(dbgenerated("getutcdate()"), map: "DF__entity_it__modif__3C231032") @db.DateTime
+  modified_at                        DateTime             @default(dbgenerated("getutcdate()"), map: "DF__entity_it__modif__03A67F89") @db.DateTime
   modified_by                        String               @db.UniqueIdentifier
   user_entity_item_created_byTouser  user                 @relation("entity_item_created_byTouser", fields: [created_by], references: [id], onUpdate: NoAction, map: "fk_entity_item_created_by")
   entity                             entity               @relation(fields: [entity_id], references: [id], onUpdate: NoAction, map: "fk_entity_item_entity_id")
@@ -172,15 +172,15 @@ model entity_item {
 }
 
 model entity_item_option {
-  id                                        String      @id(map: "pk_entity_item_option") @default(dbgenerated("newid()"), map: "DF__entity_item___id__44B85633") @db.UniqueIdentifier
+  id                                        String      @id(map: "pk_entity_item_option") @default(dbgenerated("newid()"), map: "DF__entity_item___id__0C3BC58A") @db.UniqueIdentifier
   entity_item_id                            String      @db.UniqueIdentifier
   name                                      String      @db.NVarChar(255)
   display_name                              String      @db.NVarChar(255)
-  order                                     Int         @default(0, map: "DF__entity_it__order__45AC7A6C") @db.SmallInt
-  is_default                                Boolean     @default(false, map: "DF__entity_it__is_de__46A09EA5")
-  created_at                                DateTime    @default(dbgenerated("getutcdate()"), map: "DF__entity_it__creat__4794C2DE") @db.DateTime
+  order                                     Int         @default(0, map: "DF__entity_it__order__0D2FE9C3") @db.SmallInt
+  is_default                                Boolean     @default(false, map: "DF__entity_it__is_de__0E240DFC")
+  created_at                                DateTime    @default(dbgenerated("getutcdate()"), map: "DF__entity_it__creat__0F183235") @db.DateTime
   created_by                                String      @db.UniqueIdentifier
-  modified_at                               DateTime    @default(dbgenerated("getutcdate()"), map: "DF__entity_it__modif__4888E717") @db.DateTime
+  modified_at                               DateTime    @default(dbgenerated("getutcdate()"), map: "DF__entity_it__modif__100C566E") @db.DateTime
   modified_by                               String      @db.UniqueIdentifier
   entity_item                               entity_item @relation(fields: [entity_item_id], references: [id], onUpdate: NoAction, map: "fk_entity_item_entity_item_id")
   user_entity_item_option_created_byTouser  user        @relation("entity_item_option_created_byTouser", fields: [created_by], references: [id], onUpdate: NoAction, map: "fk_entity_item_option_created_by")
@@ -189,8 +189,21 @@ model entity_item_option {
   @@unique([entity_item_id, name], map: "uk_entity_item_option_1")
 }
 
+model file {
+  id                          String   @id(map: "pk_file") @default(dbgenerated("newid()"), map: "DF__file__id__6BCEF5F8") @db.UniqueIdentifier
+  name                        String   @db.NVarChar(255)
+  type                        String   @db.NVarChar(20)
+  content                     Bytes
+  created_at                  DateTime @default(dbgenerated("getutcdate()"), map: "DF__file__created_at__6CC31A31") @db.DateTime
+  created_by                  String   @db.UniqueIdentifier
+  modified_at                 DateTime @default(dbgenerated("getutcdate()"), map: "DF__file__modified_a__6DB73E6A") @db.DateTime
+  modified_by                 String   @db.UniqueIdentifier
+  user_file_created_byTouser  user     @relation("file_created_byTouser", fields: [created_by], references: [id], onUpdate: NoAction, map: "fk_file_created_by")
+  user_file_modified_byTouser user     @relation("file_modified_byTouser", fields: [modified_by], references: [id], onUpdate: NoAction, map: "fk_file_modified_by")
+}
+
 model lead {
-  id                   String    @id(map: "pk_lead") @default(dbgenerated("newid()"), map: "DF__lead__id__4E41C06D") @db.UniqueIdentifier
+  id                   String    @id(map: "pk_lead") @default(dbgenerated("newid()"), map: "DF__lead__id__15C52FC4") @db.UniqueIdentifier
   company              String    @db.NVarChar(256)
   first_name           String?   @db.NVarChar(256)
   last_name            String    @db.NVarChar(256)
@@ -212,18 +225,18 @@ model lead {
   rating               String?   @db.NVarChar(Max)
   annual_revenue       Decimal?  @db.Decimal(16, 0)
   number_of_employees  Decimal?  @db.Decimal(6, 0)
-  is_converted         Boolean?  @default(false, map: "DF__lead__is_convert__4F35E4A6")
+  is_converted         Boolean?  @default(false, map: "DF__lead__is_convert__16B953FD")
   converted_date       DateTime? @db.Date
-  is_deleted           Boolean   @default(false, map: "DF__lead__is_deleted__502A08DF")
+  is_deleted           Boolean   @default(false, map: "DF__lead__is_deleted__17AD7836")
   owner                String    @db.NVarChar(Max)
-  created_at           DateTime  @default(dbgenerated("getutcdate()"), map: "DF__lead__created_at__511E2D18") @db.DateTime
+  created_at           DateTime  @default(dbgenerated("getutcdate()"), map: "DF__lead__created_at__18A19C6F") @db.DateTime
   created_by           String    @db.NVarChar(Max)
-  modified_at          DateTime  @default(dbgenerated("getutcdate()"), map: "DF__lead__modified_a__52125151") @db.DateTime
+  modified_at          DateTime  @default(dbgenerated("getutcdate()"), map: "DF__lead__modified_a__1995C0A8") @db.DateTime
   modified_by          String    @db.NVarChar(Max)
 }
 
 model opportunity {
-  id          String   @id(map: "pk_opportunity") @default(dbgenerated("newid()"), map: "DF__opportunity__id__01C16473") @db.UniqueIdentifier
+  id          String   @id(map: "pk_opportunity") @default(dbgenerated("newid()"), map: "DF__opportunity__id__4944D3CA") @db.UniqueIdentifier
   name        String   @db.NVarChar(256)
   account     String   @db.NVarChar(Max)
   phase       String   @db.NVarChar(Max)
@@ -235,18 +248,18 @@ model opportunity {
   lead_source String?  @db.NVarChar(Max)
   campaign    String?  @db.NVarChar(Max)
   contact     String?  @db.NVarChar(Max)
-  is_closed   Boolean  @default(false, map: "DF__opportuni__is_cl__02B588AC")
+  is_closed   Boolean  @default(false, map: "DF__opportuni__is_cl__4A38F803")
   description String?  @db.NVarChar(Max)
-  is_deleted  Boolean  @default(false, map: "DF__opportuni__is_de__03A9ACE5")
+  is_deleted  Boolean  @default(false, map: "DF__opportuni__is_de__4B2D1C3C")
   owner       String   @db.NVarChar(Max)
-  created_at  DateTime @default(dbgenerated("getutcdate()"), map: "DF__opportuni__creat__049DD11E") @db.DateTime
+  created_at  DateTime @default(dbgenerated("getutcdate()"), map: "DF__opportuni__creat__4C214075") @db.DateTime
   created_by  String   @db.NVarChar(Max)
-  modified_at DateTime @default(dbgenerated("getutcdate()"), map: "DF__opportuni__modif__0591F557") @db.DateTime
+  modified_at DateTime @default(dbgenerated("getutcdate()"), map: "DF__opportuni__modif__4D1564AE") @db.DateTime
   modified_by String   @db.NVarChar(Max)
 }
 
 model phone_call {
-  id              String    @id(map: "pk_phone_call") @default(dbgenerated("newid()"), map: "DF__phone_call__id__7C088B1D") @db.UniqueIdentifier
+  id              String    @id(map: "pk_phone_call") @default(dbgenerated("newid()"), map: "DF__phone_call__id__438BFA74") @db.UniqueIdentifier
   subject         String    @db.NVarChar(256)
   user            String    @db.NVarChar(Max)
   their           String    @db.NVarChar(Max)
@@ -256,41 +269,41 @@ model phone_call {
   end_date_time   DateTime? @db.DateTime
   status          String?   @db.NVarChar(Max)
   description     String?   @db.NVarChar(Max)
-  is_deleted      Boolean   @default(false, map: "DF__phone_cal__is_de__7CFCAF56")
+  is_deleted      Boolean   @default(false, map: "DF__phone_cal__is_de__44801EAD")
   owner           String    @db.NVarChar(Max)
-  created_at      DateTime  @default(dbgenerated("getutcdate()"), map: "DF__phone_cal__creat__7DF0D38F") @db.DateTime
+  created_at      DateTime  @default(dbgenerated("getutcdate()"), map: "DF__phone_cal__creat__457442E6") @db.DateTime
   created_by      String    @db.NVarChar(Max)
-  modified_at     DateTime  @default(dbgenerated("getutcdate()"), map: "DF__phone_cal__modif__7EE4F7C8") @db.DateTime
+  modified_at     DateTime  @default(dbgenerated("getutcdate()"), map: "DF__phone_cal__modif__4668671F") @db.DateTime
   modified_by     String    @db.NVarChar(Max)
 }
 
 model product {
-  id            String   @id(map: "pk_product") @default(dbgenerated("newid()"), map: "DF__product__id__670D6E37") @db.UniqueIdentifier
+  id            String   @id(map: "pk_product") @default(dbgenerated("newid()"), map: "DF__product__id__2E90DD8E") @db.UniqueIdentifier
   name          String   @db.NVarChar(256)
   product       String?  @db.NVarChar(256)
   description   String?  @db.NVarChar(Max)
-  is_active     Boolean  @default(false, map: "DF__product__is_acti__68019270")
+  is_active     Boolean  @default(false, map: "DF__product__is_acti__2F8501C7")
   family        String?  @db.NVarChar(Max)
   external_id   String?  @db.NVarChar(256)
   url           String?  @db.NVarChar(Max)
   quantity_unit String?  @db.NVarChar(Max)
-  is_archived   Boolean  @default(false, map: "DF__product__is_arch__68F5B6A9")
-  is_deleted    Boolean  @default(false, map: "DF__product__is_dele__69E9DAE2")
+  is_archived   Boolean  @default(false, map: "DF__product__is_arch__30792600")
+  is_deleted    Boolean  @default(false, map: "DF__product__is_dele__316D4A39")
   owner         String   @db.NVarChar(Max)
-  created_at    DateTime @default(dbgenerated("getutcdate()"), map: "DF__product__created__6ADDFF1B") @db.DateTime
+  created_at    DateTime @default(dbgenerated("getutcdate()"), map: "DF__product__created__32616E72") @db.DateTime
   created_by    String   @db.NVarChar(Max)
-  modified_at   DateTime @default(dbgenerated("getutcdate()"), map: "DF__product__modifie__6BD22354") @db.DateTime
+  modified_at   DateTime @default(dbgenerated("getutcdate()"), map: "DF__product__modifie__335592AB") @db.DateTime
   modified_by   String   @db.NVarChar(Max)
 }
 
 model profile {
-  id                             String                @id(map: "pk_profile") @default(dbgenerated("newid()"), map: "DF__profile__id__0F5069BB") @db.UniqueIdentifier
+  id                             String                @id(map: "pk_profile") @default(dbgenerated("newid()"), map: "DF__profile__id__5026DB83") @db.UniqueIdentifier
   name                           String                @unique(map: "uk_profile_1") @db.NVarChar(256)
   display_name                   String                @db.NVarChar(256)
-  order                          Int                   @default(0, map: "DF__profile__order__10448DF4") @db.SmallInt
-  created_at                     DateTime              @default(dbgenerated("getutcdate()"), map: "DF__profile__created__1138B22D") @db.DateTime
+  order                          Int                   @default(0, map: "DF__profile__order__511AFFBC") @db.SmallInt
+  created_at                     DateTime              @default(dbgenerated("getutcdate()"), map: "DF__profile__created__520F23F5") @db.DateTime
   created_by                     String                @db.UniqueIdentifier
-  modified_at                    DateTime              @default(dbgenerated("getutcdate()"), map: "DF__profile__modifie__122CD666") @db.DateTime
+  modified_at                    DateTime              @default(dbgenerated("getutcdate()"), map: "DF__profile__modifie__5303482E") @db.DateTime
   modified_by                    String                @db.UniqueIdentifier
   user_profile_created_byTouser  user                  @relation("profile_created_byTouser", fields: [created_by], references: [id], onUpdate: NoAction, map: "fk_profile_created_by")
   user_profile_modified_byTouser user                  @relation("profile_modified_byTouser", fields: [modified_by], references: [id], onUpdate: NoAction, map: "fk_profile_modified_by")
@@ -298,14 +311,14 @@ model profile {
 }
 
 model role {
-  id                          String                @id(map: "pk_role") @default(dbgenerated("newid()"), map: "DF__role__id__17E5AFBC") @db.UniqueIdentifier
+  id                          String                @id(map: "pk_role") @default(dbgenerated("newid()"), map: "DF__role__id__58BC2184") @db.UniqueIdentifier
   name                        String                @unique(map: "uk_role_1") @db.NVarChar(256)
   display_name                String                @db.NVarChar(256)
-  order                       Int                   @default(0, map: "DF__role__order__18D9D3F5") @db.SmallInt
+  order                       Int                   @default(0, map: "DF__role__order__59B045BD") @db.SmallInt
   parent_id                   String?               @db.UniqueIdentifier
-  created_at                  DateTime              @default(dbgenerated("getutcdate()"), map: "DF__role__created_at__19CDF82E") @db.DateTime
+  created_at                  DateTime              @default(dbgenerated("getutcdate()"), map: "DF__role__created_at__5AA469F6") @db.DateTime
   created_by                  String                @db.UniqueIdentifier
-  modified_at                 DateTime              @default(dbgenerated("getutcdate()"), map: "DF__role__modified_a__1AC21C67") @db.DateTime
+  modified_at                 DateTime              @default(dbgenerated("getutcdate()"), map: "DF__role__modified_a__5B988E2F") @db.DateTime
   modified_by                 String                @db.UniqueIdentifier
   user_role_created_byTouser  user                  @relation("role_created_byTouser", fields: [created_by], references: [id], onUpdate: NoAction, map: "fk_role_created_by")
   user_role_modified_byTouser user                  @relation("role_modified_byTouser", fields: [modified_by], references: [id], onUpdate: NoAction, map: "fk_role_modified_by")
@@ -314,17 +327,47 @@ model role {
   user_access_control         user_access_control[]
 }
 
+model sample {
+  id                                String    @id(map: "pk_sample") @default(dbgenerated("newid()"), map: "DF__sample__id__4FF1D159") @db.UniqueIdentifier
+  name                              String    @db.NVarChar(256)
+  text                              String?   @db.NVarChar(Max)
+  textarea                          String?   @db.NVarChar(Max)
+  phone_number                      String?   @db.NVarChar(50)
+  email                             String?   @db.NVarChar(Max)
+  url                               String?   @db.NVarChar(Max)
+  combobox                          String?   @db.NVarChar(Max)
+  integer                           Decimal?  @db.Decimal(16, 0)
+  decimal                           Decimal?  @db.Decimal(16, 2)
+  boolean                           Boolean?  @default(false, map: "DF__sample__boolean__50E5F592")
+  date                              DateTime? @db.Date
+  datetime                          DateTime? @db.DateTime
+  time                              DateTime? @db.Time
+  option_single                     String?   @db.NVarChar(Max)
+  option_multi                      String?   @db.NVarChar(Max)
+  reference_single_target_single_id String?   @db.NVarChar(Max)
+  reference_single_target_multi_id  String?   @db.NVarChar(Max)
+  reference_multi_target_single_id  String?   @db.NVarChar(Max)
+  reference_multi_target_multi_id   String?   @db.NVarChar(Max)
+  is_deleted                        Boolean   @default(false, map: "DF__sample__is_delet__51DA19CB")
+  owner                             String    @db.NVarChar(Max)
+  created_at                        DateTime  @default(dbgenerated("getutcdate()"), map: "DF__sample__created___52CE3E04") @db.DateTime
+  created_by                        String    @db.NVarChar(Max)
+  modified_at                       DateTime  @default(dbgenerated("getutcdate()"), map: "DF__sample__modified__53C2623D") @db.DateTime
+  modified_by                       String    @db.NVarChar(Max)
+}
+
 model user {
-  id                                                        String                @id(map: "pk_user") @default(dbgenerated("newid()"), map: "DF__user__id__08A36C2C") @db.UniqueIdentifier
+  id                                                        String                @id(map: "pk_user") @default(dbgenerated("newid()"), map: "DF__user__id__4979DDF4") @db.UniqueIdentifier
   user_name                                                 String                @unique(map: "uk_user_1") @db.NVarChar(256)
+  hashed_password                                           String                @db.NVarChar(Max)
   first_name                                                String                @db.NVarChar(256)
   last_name                                                 String                @db.NVarChar(256)
   email                                                     String?               @db.NVarChar(Max)
   timezone                                                  String?               @db.NVarChar(Max)
   language                                                  String?               @db.NVarChar(Max)
-  is_active                                                 Boolean               @default(false, map: "DF__user__is_active__09979065")
-  created_at                                                DateTime              @default(dbgenerated("getutcdate()"), map: "DF__user__created_at__0A8BB49E") @db.DateTime
-  modified_at                                               DateTime              @default(dbgenerated("getutcdate()"), map: "DF__user__modified_a__0B7FD8D7") @db.DateTime
+  is_active                                                 Boolean               @default(false, map: "DF__user__is_active__4A6E022D")
+  created_at                                                DateTime              @default(dbgenerated("getutcdate()"), map: "DF__user__created_at__4B622666") @db.DateTime
+  modified_at                                               DateTime              @default(dbgenerated("getutcdate()"), map: "DF__user__modified_a__4C564A9F") @db.DateTime
   entity_entity_created_byTouser                            entity[]              @relation("entity_created_byTouser")
   entity_entity_modified_byTouser                           entity[]              @relation("entity_modified_byTouser")
   entity_item_entity_item_created_byTouser                  entity_item[]         @relation("entity_item_created_byTouser")
@@ -343,13 +386,13 @@ model user {
 }
 
 model user_access_control {
-  id                                         String   @id(map: "pk_user_access_control") @default(dbgenerated("newid()"), map: "DF__user_access___id__216F19F6") @db.UniqueIdentifier
+  id                                         String   @id(map: "pk_user_access_control") @default(dbgenerated("newid()"), map: "DF__user_access___id__62458BBE") @db.UniqueIdentifier
   user_id                                    String   @unique(map: "uk_user_access_control_1") @db.UniqueIdentifier
   profile_id                                 String   @db.UniqueIdentifier
   role_id                                    String?  @db.UniqueIdentifier
-  created_at                                 DateTime @default(dbgenerated("getutcdate()"), map: "DF__user_acce__creat__22633E2F") @db.DateTime
+  created_at                                 DateTime @default(dbgenerated("getutcdate()"), map: "DF__user_acce__creat__6339AFF7") @db.DateTime
   created_by                                 String   @db.UniqueIdentifier
-  modified_at                                DateTime @default(dbgenerated("getutcdate()"), map: "DF__user_acce__modif__23576268") @db.DateTime
+  modified_at                                DateTime @default(dbgenerated("getutcdate()"), map: "DF__user_acce__modif__642DD430") @db.DateTime
   modified_by                                String   @db.UniqueIdentifier
   user_user_access_control_created_byTouser  user     @relation("user_access_control_created_byTouser", fields: [created_by], references: [id], onUpdate: NoAction, map: "fk_user_access_control_created_by")
   user_user_access_control_modified_byTouser user     @relation("user_access_control_modified_byTouser", fields: [modified_by], references: [id], onUpdate: NoAction, map: "fk_user_access_control_modified_by")
@@ -358,60 +401,48 @@ model user_access_control {
   user_user_access_control_user_idTouser     user     @relation("user_access_control_user_idTouser", fields: [user_id], references: [id], onUpdate: NoAction, map: "fk_user_access_control_user_id")
 }
 
-model sample {
-  id                                String    @id(map: "pk_sample") @default(dbgenerated("newid()"), map: "DF__sample__id__7AAA5290") @db.UniqueIdentifier
-  name                              String    @db.NVarChar(256)
-  text                              String?   @db.NVarChar(Max)
-  textarea                          String?   @db.NVarChar(Max)
-  phone_number                      String?   @db.NVarChar(50)
-  email                             String?   @db.NVarChar(Max)
-  url                               String?   @db.NVarChar(Max)
-  combobox                          String?   @db.NVarChar(Max)
-  integer                           Decimal?  @db.Decimal(16, 0)
-  decimal                           Decimal?  @db.Decimal(16, 2)
-  boolean                           Boolean?  @default(false, map: "DF__sample__boolean__7B9E76C9")
-  date                              DateTime? @db.Date
-  datetime                          DateTime? @db.DateTime
-  time                              DateTime? @db.Time
-  option_single                     String?   @db.NVarChar(Max)
-  option_multi                      String?   @db.NVarChar(Max)
-  reference_single_target_single_id String?   @db.NVarChar(Max)
-  reference_single_target_multi_id  String?   @db.NVarChar(Max)
-  reference_multi_target_single_id  String?   @db.NVarChar(Max)
-  reference_multi_target_multi_id   String?   @db.NVarChar(Max)
-  is_deleted                        Boolean   @default(false, map: "DF__sample__is_delet__7C929B02")
-  owner                             String    @db.NVarChar(Max)
-  created_at                        DateTime  @default(dbgenerated("getutcdate()"), map: "DF__sample__created___7D86BF3B") @db.DateTime
-  created_by                        String    @db.NVarChar(Max)
-  modified_at                       DateTime  @default(dbgenerated("getutcdate()"), map: "DF__sample__modified__7E7AE374") @db.DateTime
-  modified_by                       String    @db.NVarChar(Max)
-}
-
-model file {
-  id                          String   @id(map: "pk_file") @default(dbgenerated("newid()"), map: "DF__file__id__3FC983E4") @db.UniqueIdentifier
-  name                        String   @db.NVarChar(255)
-  type                        String   @db.NVarChar(20)
-  content                     Bytes
-  created_at                  DateTime @default(dbgenerated("getutcdate()"), map: "DF__file__created_at__40BDA81D") @db.DateTime
-  created_by                  String   @db.UniqueIdentifier
-  modified_at                 DateTime @default(dbgenerated("getutcdate()"), map: "DF__file__modified_a__41B1CC56") @db.DateTime
-  modified_by                 String   @db.UniqueIdentifier
-  user_file_created_byTouser  user     @relation("file_created_byTouser", fields: [created_by], references: [id], onUpdate: NoAction, map: "fk_file_created_by")
-  user_file_modified_byTouser user     @relation("file_modified_byTouser", fields: [modified_by], references: [id], onUpdate: NoAction, map: "fk_file_modified_by")
-}
-
 view user_view {
-  id          String   @unique @db.UniqueIdentifier
-  user_name   String   @db.NVarChar(256)
-  first_name  String   @db.NVarChar(256)
-  last_name   String   @db.NVarChar(256)
-  email       String?  @db.NVarChar(Max)
-  timezone    String?  @db.NVarChar(Max)
-  language    String?  @db.NVarChar(Max)
-  is_active   Boolean
-  created_at  DateTime @db.DateTime
-  modified_at DateTime @db.DateTime
-  full_name   String   @db.NVarChar(512)
+  id              String   @unique @db.UniqueIdentifier
+  user_name       String   @db.NVarChar(256)
+  hashed_password String   @db.NVarChar(Max)
+  first_name      String   @db.NVarChar(256)
+  last_name       String   @db.NVarChar(256)
+  email           String?  @db.NVarChar(Max)
+  timezone        String?  @db.NVarChar(Max)
+  language        String?  @db.NVarChar(Max)
+  is_active       Boolean
+  created_at      DateTime @db.DateTime
+  modified_at     DateTime @db.DateTime
+  full_name       String   @db.NVarChar(512)
+}
+
+view account_view {
+  id                   String    @unique @db.UniqueIdentifier
+  name                 String    @db.NVarChar(256)
+  account_number       String?   @db.NVarChar(20)
+  main_phone_number    String?   @db.NVarChar(50)
+  sub_phone_number     String?   @db.NVarChar(50)
+  website              String?   @db.NVarChar(Max)
+  industry             String?   @db.NVarChar(Max)
+  number_of_employees  Decimal?  @db.Decimal(6, 0)
+  revenue              Decimal?  @db.Decimal(16, 0)
+  address_zipcode      String?   @db.NVarChar(20)
+  address_prefecture   String?   @db.NVarChar(256)
+  address_municipality String?   @db.NVarChar(256)
+  address_street       String?   @db.NVarChar(256)
+  latitude             Decimal?  @db.Decimal(18, 15)
+  longitude            Decimal?  @db.Decimal(18, 15)
+  market_cap           Decimal?  @db.Decimal(16, 0)
+  description          String?   @db.NVarChar(Max)
+  originating_lead     String?   @db.NVarChar(Max)
+  parent               String?   @db.NVarChar(Max)
+  is_deleted           Boolean
+  owner                String    @db.NVarChar(Max)
+  created_at           DateTime  @db.DateTime
+  created_by           String    @db.NVarChar(Max)
+  modified_at          DateTime  @db.DateTime
+  modified_by          String    @db.NVarChar(Max)
+  last_activity_date   DateTime? @db.Date
 }
 
 view lead_view {
@@ -447,58 +478,6 @@ view lead_view {
   modified_by          String    @db.NVarChar(Max)
   full_name            String    @db.NVarChar(512)
   last_activity_date   DateTime? @db.Date
-}
-
-view account_view {
-  id                   String    @unique @db.UniqueIdentifier
-  name                 String    @db.NVarChar(256)
-  account_number       String?   @db.NVarChar(20)
-  main_phone_number    String?   @db.NVarChar(50)
-  sub_phone_number     String?   @db.NVarChar(50)
-  website              String?   @db.NVarChar(Max)
-  industry             String?   @db.NVarChar(Max)
-  number_of_employees  Decimal?  @db.Decimal(6, 0)
-  revenue              Decimal?  @db.Decimal(16, 0)
-  address_zipcode      String?   @db.NVarChar(20)
-  address_prefecture   String?   @db.NVarChar(256)
-  address_municipality String?   @db.NVarChar(256)
-  address_street       String?   @db.NVarChar(256)
-  latitude             Decimal?  @db.Decimal(18, 15)
-  longitude            Decimal?  @db.Decimal(18, 15)
-  market_cap           Decimal?  @db.Decimal(16, 0)
-  description          String?   @db.NVarChar(Max)
-  originating_lead     String?   @db.NVarChar(Max)
-  parent               String?   @db.NVarChar(Max)
-  is_deleted           Boolean
-  owner                String    @db.NVarChar(Max)
-  created_at           DateTime  @db.DateTime
-  created_by           String    @db.NVarChar(Max)
-  modified_at          DateTime  @db.DateTime
-  modified_by          String    @db.NVarChar(Max)
-  last_activity_date   DateTime? @db.Date
-}
-
-view contact_view {
-  id                   String   @unique @db.UniqueIdentifier
-  first_name           String?  @db.NVarChar(256)
-  last_name            String   @db.NVarChar(256)
-  gender               String?  @db.NVarChar(Max)
-  account              String?  @db.NVarChar(Max)
-  business_unit        String?  @db.NVarChar(256)
-  title                String?  @db.NVarChar(256)
-  company_phone_number String?  @db.NVarChar(50)
-  mobile_phone_number  String?  @db.NVarChar(50)
-  email                String?  @db.NVarChar(Max)
-  website              String?  @db.NVarChar(Max)
-  originating_lead     String?  @db.NVarChar(Max)
-  description          String?  @db.NVarChar(Max)
-  is_deleted           Boolean
-  owner                String   @db.NVarChar(Max)
-  created_at           DateTime @db.DateTime
-  created_by           String   @db.NVarChar(Max)
-  modified_at          DateTime @db.DateTime
-  modified_by          String   @db.NVarChar(Max)
-  full_name            String   @db.NVarChar(512)
 }
 
 view activity_view {
@@ -543,6 +522,29 @@ view phone_call_view {
   modified_at         DateTime  @db.DateTime
   modified_by         String    @db.NVarChar(Max)
   duration_in_minutes Int?
+}
+
+view contact_view {
+  id                   String   @unique @db.UniqueIdentifier
+  first_name           String?  @db.NVarChar(256)
+  last_name            String   @db.NVarChar(256)
+  gender               String?  @db.NVarChar(Max)
+  account              String?  @db.NVarChar(Max)
+  business_unit        String?  @db.NVarChar(256)
+  title                String?  @db.NVarChar(256)
+  company_phone_number String?  @db.NVarChar(50)
+  mobile_phone_number  String?  @db.NVarChar(50)
+  email                String?  @db.NVarChar(Max)
+  website              String?  @db.NVarChar(Max)
+  originating_lead     String?  @db.NVarChar(Max)
+  description          String?  @db.NVarChar(Max)
+  is_deleted           Boolean
+  owner                String   @db.NVarChar(Max)
+  created_at           DateTime @db.DateTime
+  created_by           String   @db.NVarChar(Max)
+  modified_at          DateTime @db.DateTime
+  modified_by          String   @db.NVarChar(Max)
+  full_name            String   @db.NVarChar(512)
 }
 
 view opportunity_view {
