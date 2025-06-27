@@ -1,7 +1,9 @@
 {
   "name": "multi-platform-sample",
   "scripts": {
-    "dev": "bun run --hot src/index.ts"
+    "dev": "bun run --hot src/index.ts",
+    "db#up": "docker compose -f compose-db.yml up -d",
+    "db#down": "docker compose -f compose-db.yml down"
   },
   "dependencies": {
     "hono": "^4.7.9"
