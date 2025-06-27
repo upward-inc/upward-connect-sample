@@ -3,8 +3,10 @@ import { Hono } from "hono"
 import { sign, verify } from "jsonwebtoken"
 import { customAlphabet, customRandom, nanoid, urlAlphabet } from "nanoid"
 import { z } from "zod"
+import { verifyUser } from "../../domain/auth"
 import { env } from "../../env"
 import { describeRoute, validator } from "../../libs/hono-openapi"
+import { PostLoginParamSchema } from "../../schema/auth"
 
 // 認証用のスキーマ定義
 const PostAuthJsonSchema = z.object({
@@ -41,6 +43,16 @@ const authorizationCodes = new Map<
 >()
 
 export const authRouter = new Hono()
+	.post("/login", validator("form", PostLoginParamSchema), async (c) => {
+		const { username, password } = c.req.valid("form")
+
+		const result = await verifyUser(username, password).catch(() => null)
+
+		if (!result) {
+			return c.json({ message: "Invalid username or password" }, 401)
+		}
+		return c.json(result)
+	})
 	// .get("/.well-known/openid-configuration", async (c) => {
 	// 	// OpenID Connect Discoveryドキュメントを返す
 	// 	// https://openid.net/specs/openid-connect-discovery-1_0.html
