@@ -1,17 +1,40 @@
-import { createFileRoute } from "@tanstack/react-router"
+import {
+	createFileRoute,
+	redirect,
+	useNavigate,
+	useSearch,
+} from "@tanstack/react-router"
 import { useRef, useState } from "react"
+import { z } from "zod"
+import { useAuth } from "../auth"
 import { Button } from "../components/button"
 import { Input } from "../components/input"
 import { Label } from "../components/label"
 
+const SearchParamsSchema = z.object({
+	redirect: z.string().optional(),
+})
+
+const fallback = "/private" as const
+
 export const Route = createFileRoute("/login")({
+	beforeLoad: ({ context }) => {
+		// すでに認証済みの場合はリダイレクト
+		if (context.auth.isAuthenticated) {
+			throw redirect({ to: fallback })
+		}
+	},
 	component: Login,
+	validateSearch: SearchParamsSchema,
 })
 
 function Login() {
+	const { redirect } = useSearch({ from: "/login" })
 	const [isLoading, setIsLoading] = useState(false)
 	const [errorMessage, setErrorMessage] = useState("")
 	const formRef = useRef<HTMLFormElement>(null)
+	const navigate = useNavigate()
+	const auth = useAuth()
 
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault()
@@ -24,20 +47,16 @@ function Login() {
 			const username = formData.get("username") as string
 			const password = formData.get("password") as string
 
-			// ログイン処理
-			console.log("ログイン試行:", username, password)
-
-			// 仮の遅延処理
-			await new Promise((resolve) => setTimeout(resolve, 1000))
-
-			// 成功時の処理
-			alert("ログイン成功!")
+			await auth.login(username, password)
 
 			// フォームをリセット
 			if (formRef.current) {
 				formRef.current.reset()
 			}
-		} catch {
+
+			// リダイレクト処理
+			navigate({ to: redirect ?? fallback })
+		} catch (error) {
 			setErrorMessage(
 				"ログインに失敗しました。ユーザー名とパスワードを確認してください。",
 			)
