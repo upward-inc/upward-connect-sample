@@ -2,6 +2,7 @@ import { Hono } from "hono"
 import { compress } from "hono/compress"
 import { secureHeaders } from "hono/secure-headers"
 import { trimTrailingSlash } from "hono/trailing-slash"
+import { env } from "./env"
 import { handleError, handleNotFound } from "./error-handler"
 import { apiRouter } from "./routes/api"
 
@@ -20,6 +21,6 @@ app.onError(handleError)
 app.notFound(handleNotFound)
 
 export default {
-	port: process.env.PORT ?? 8787,
+	port: env.PORT,
 	fetch: app.fetch,
 }
