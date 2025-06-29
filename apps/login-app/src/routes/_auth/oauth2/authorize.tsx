@@ -94,7 +94,7 @@ function AuthorizePage() {
 			formData.append("state", strictQueryParams.state)
 		}
 
-		const response = await fetch("http://localhost:8787/api/auth/authorize", {
+		const response = await fetch("http://localhost:8787/api/oauth2/authorize", {
 			method: "POST",
 			headers: {
 				authorization: `Bearer ${token}`,
