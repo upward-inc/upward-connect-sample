@@ -58,7 +58,7 @@ export const authRouter = new Hono()
 		}
 
 		const { accessToken } = generateToken({
-			id: result.id,
+			userId: result.id,
 			userName: result.user_name,
 		})
 		return c.json({ ...result, access_token: accessToken })
