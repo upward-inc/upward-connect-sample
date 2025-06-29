@@ -8,7 +8,7 @@ import {
 } from "../../domain/auth"
 import { env } from "../../env"
 import { validator } from "../../libs/hono-openapi"
-import { PostLoginParamSchema } from "../../schema/auth"
+import type { PostLoginParamSchema } from "../../schema/auth"
 
 // 認証用のスキーマ定義
 const PostAuthJsonSchema = z.object({

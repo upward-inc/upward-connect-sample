@@ -27,3 +27,8 @@ export const PostLoginParamSchema = z.object({
 })
 
 export type LoggedInUser = z.infer<typeof LoggedInUserSchema>
+
+// 認証ルート用コンテキスト（認証済みユーザー情報）
+export type AuthContexts = {
+	user: Pick<LoggedInUser, "id">
+}

@@ -1,12 +1,30 @@
-import { env } from "hono/adapter"
 import { bearerAuth as honoBearerAuth } from "hono/bearer-auth"
 import { createMiddleware } from "hono/factory"
+import { verify } from "jsonwebtoken"
+import { env } from "../env"
+import type { AuthContexts } from "../schema/auth"
 
-export const bearerAuth = createMiddleware(async (c, next) => {
+export const bearerAuth = createMiddleware<{
+	Variables: AuthContexts
+}>(async (c, next) => {
 	const bearer = honoBearerAuth({
 		verifyToken: async (token, c) => {
-			const { DUMMY_TOKEN } = env<{ DUMMY_TOKEN: string }>(c)
-			return token === DUMMY_TOKEN
+			try {
+				// トークンの検証
+				const result = verify(token, env.OIDC_TOKEN_SECRET)
+				if (!(typeof result.sub === "string" && result.sub.length > 0)) {
+					return false
+				}
+
+				const userContext: AuthContexts["user"] = { id: result.sub }
+
+				// ユーザー情報をコンテキストに保存
+				c.set("user", userContext)
+
+				return true
+			} catch {
+				return false
+			}
 		},
 		invalidTokenMessage: "Invalid token",
 		invalidAuthenticationHeaderMessage: "Invalid authentication header",
