@@ -414,6 +414,16 @@ model published_auth_code {
   user         user     @relation(fields: [user_id], references: [id], onUpdate: NoAction, map: "fk_published_auth_code_user_id")
 }
 
+model oauth_client {
+  id            String   @id(map: "pk_oauth_client") @default(dbgenerated("newid()"), map: "DF__oauth_client__id__2C938683") @db.UniqueIdentifier
+  name          String?  @db.NVarChar(20)
+  secret        String   @db.NVarChar(Max)
+  redirect_uris String   @db.NVarChar(Max)
+  scopes        String   @db.NVarChar(Max)
+  created_at    DateTime @default(dbgenerated("getutcdate()"), map: "DF__oauth_cli__creat__2D87AABC") @db.DateTime
+  modified_at   DateTime @default(dbgenerated("getutcdate()"), map: "DF__oauth_cli__modif__2E7BCEF5") @db.DateTime
+}
+
 view user_view {
   id              String   @unique @db.UniqueIdentifier
   user_name       String   @db.NVarChar(256)

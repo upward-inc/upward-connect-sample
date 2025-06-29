@@ -8,6 +8,7 @@ import { seedEntities } from "./entitiy"
 import { seedEntityItems } from "./entity-item"
 import { seedEntityItemOptions } from "./entity-item-option"
 import { seedLeads } from "./lead"
+import { seedOauthClients } from "./oauth-client"
 import { seedOpportunities } from "./opportunity"
 import { seedPhoneCalls } from "./phone-call"
 import { seedProducts } from "./product"
@@ -42,6 +43,9 @@ try {
 			await txClient.role.deleteMany()
 			await txClient.profile.deleteMany()
 			await txClient.user.deleteMany()
+			await txClient.oauth_client.deleteMany()
+
+			await seedOauthClients(txClient)
 
 			// system users
 			const users = await seedUsers(txClient)
