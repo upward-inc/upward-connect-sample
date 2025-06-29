@@ -22,8 +22,8 @@ apiRouter
 		const publicPaths = [
 			"/api/openapi",
 			"/api/docs",
-			"/api/auth/login",
-			"/api/auth/token",
+			"/api/oauth2/login",
+			"/api/oauth2/token",
 		]
 
 		if (publicPaths.includes(normalizedPath)) {
@@ -59,7 +59,7 @@ apiRouter
 			spec: { url: "/api/openapi" },
 		}),
 	)
-	.route("/auth", authRouter)
+	.route("/oauth2", authRouter)
 	.route("/system-users", systemUserRouter)
 	.route("/profiles", profileRouter)
 	.route("/roles", roleRouter)

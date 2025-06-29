@@ -67,7 +67,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 		formData.append("password", password)
 
 		// TODO: URLを環境変数で指定する
-		const response = await fetch("http://localhost:8787/api/auth/login", {
+		const response = await fetch("http://localhost:8787/api/oauth2/login", {
 			method: "POST",
 			body: formData,
 		})
