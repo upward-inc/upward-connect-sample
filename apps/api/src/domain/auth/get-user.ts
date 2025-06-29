@@ -7,7 +7,6 @@ import { type LoggedInUser, LoggedInUserSchema } from "../../schema/auth"
 export const getUserById = async (
 	userId: string,
 ): Promise<LoggedInUser | null> => {
-	// ユーザー名で検索
 	const user = await prisma.user.findUnique({
 		where: {
 			id: userId,
@@ -35,7 +34,6 @@ export const getUserByUsernameAndPassword = async (
 	username: string,
 	password: string,
 ): Promise<LoggedInUser | null> => {
-	// ユーザー名で検索
 	const user = await prisma.user.findUnique({
 		where: {
 			user_name: username,
