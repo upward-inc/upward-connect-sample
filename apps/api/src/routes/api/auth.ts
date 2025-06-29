@@ -1,38 +1,20 @@
 import { Hono } from "hono"
 import { nanoid } from "nanoid"
-import { z } from "zod"
 import {
 	generateRefreshToken,
 	generateToken,
+	getAuthorizationCode,
 	saveAuthorizationCode,
 	verifyUser,
 } from "../../domain/auth"
 import { env } from "../../env"
 import { validator } from "../../libs/hono-openapi"
-import { type AuthContexts, PostLoginParamSchema } from "../../schema/auth"
-
-// 認証用のスキーマ定義
-const PostAuthJsonSchema = z.object({
-	username: z.string().min(1, { message: "ユーザー名は必須です" }),
-	password: z.string().min(1, { message: "パスワードは必須です" }),
-})
-
-// 認可コードリクエスト用のスキーマ
-const PostAuthorizeParamSchema = z.object({
-	response_type: z.literal("code"),
-	client_id: z.string().min(1),
-	redirect_uri: z.string().url(),
-	scope: z.string().optional(),
-	state: z.string().optional(),
-})
-
-// トークンリクエスト用のスキーマ
-const TokenRequestSchema = z.object({
-	grant_type: z.literal("authorization_code"),
-	code: z.string().min(1),
-	redirect_uri: z.string().url(),
-	client_id: z.string().min(1),
-})
+import {
+	type AuthContexts,
+	PostAuthorizeParamSchema,
+	PostLoginParamSchema,
+	TokenRequestSchema,
+} from "../../schema/auth"
 
 // 認可コードの一時保存用
 // TODO: データベースに保存するようにする
