@@ -378,6 +378,7 @@ model user {
   file_file_modified_byTouser                               file[]                @relation("file_modified_byTouser")
   profile_profile_created_byTouser                          profile[]             @relation("profile_created_byTouser")
   profile_profile_modified_byTouser                         profile[]             @relation("profile_modified_byTouser")
+  published_auth_code                                       published_auth_code[]
   role_role_created_byTouser                                role[]                @relation("role_created_byTouser")
   role_role_modified_byTouser                               role[]                @relation("role_modified_byTouser")
   user_access_control_user_access_control_created_byTouser  user_access_control[] @relation("user_access_control_created_byTouser")
@@ -399,6 +400,18 @@ model user_access_control {
   profile                                    profile  @relation(fields: [profile_id], references: [id], onUpdate: NoAction, map: "fk_user_access_control_profile_id")
   role                                       role?    @relation(fields: [role_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_user_access_control_role_id")
   user_user_access_control_user_idTouser     user     @relation("user_access_control_user_idTouser", fields: [user_id], references: [id], onUpdate: NoAction, map: "fk_user_access_control_user_id")
+}
+
+model published_auth_code {
+  auth_code    String   @id(map: "pk_published_auth_code") @db.NVarChar(255)
+  client_id    String   @db.NVarChar(Max)
+  scope        String?  @db.NVarChar(Max)
+  state        String?  @db.NVarChar(Max)
+  nonce        String?  @db.NVarChar(Max)
+  published_at DateTime @db.DateTime
+  expire_at    DateTime @db.DateTime
+  user_id      String   @db.UniqueIdentifier
+  user         user     @relation(fields: [user_id], references: [id], onUpdate: NoAction, map: "fk_published_auth_code_user_id")
 }
 
 view user_view {
