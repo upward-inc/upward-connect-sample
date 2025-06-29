@@ -62,13 +62,30 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
 	// ログイン処理
 	const login = useCallback(async (username: string, password: string) => {
+		const formData = new FormData()
+		formData.append("username", username)
+		formData.append("password", password)
+
+		// TODO: URLを環境変数で指定する
+		const response = await fetch("http://localhost:8787/api/auth/login", {
+			method: "POST",
+			body: formData,
+		})
+
+		if (!response.ok) {
+			const errorMessage = await response.json().then((data) => data.message)
+			throw new Error(errorMessage)
+		}
+
+		const data = await response.json()
+
 		// TODO: APIを使用してログイン処理
 		const token = "dummy-token"
 		const userData = {
-			id: "dummy-id",
-			username,
-			firstName: "太郎",
-			lastName: "ダミー",
+			id: data.id,
+			username: data.user_name,
+			firstName: data.first_name,
+			lastName: data.last_name,
 		}
 
 		localStorage.setItem(AUTH_TOKEN_KEY, token)
