@@ -18,11 +18,15 @@ apiRouter
 	.use("/*", cors())
 	// bearer auth
 	.use("/*", async (c, next) => {
-		if (
-			c.req.path === "/api/openapi" ||
-			c.req.path === "/api/docs" ||
-			c.req.path.startsWith("/api/auth/")
-		) {
+		const normalizedPath = c.req.path.replace(/\/$/, "")
+		const publicPaths = [
+			"/api/openapi",
+			"/api/docs",
+			"/api/auth/login",
+			"/api/auth/token",
+		]
+
+		if (publicPaths.includes(normalizedPath)) {
 			return next()
 		}
 		return bearerAuth(c, next)
