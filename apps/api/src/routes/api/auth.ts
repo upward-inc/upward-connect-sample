@@ -4,11 +4,12 @@ import { z } from "zod"
 import {
 	generateRefreshToken,
 	generateToken,
+	saveAuthorizationCode,
 	verifyUser,
 } from "../../domain/auth"
 import { env } from "../../env"
 import { validator } from "../../libs/hono-openapi"
-import type { PostLoginParamSchema } from "../../schema/auth"
+import { type AuthContexts, PostLoginParamSchema } from "../../schema/auth"
 
 // 認証用のスキーマ定義
 const PostAuthJsonSchema = z.object({
@@ -18,7 +19,6 @@ const PostAuthJsonSchema = z.object({
 
 // 認可コードリクエスト用のスキーマ
 const PostAuthorizeParamSchema = z.object({
-	user_id: z.string().min(1),
 	response_type: z.literal("code"),
 	client_id: z.string().min(1),
 	redirect_uri: z.string().url(),
@@ -48,7 +48,7 @@ const authorizationCodes = new Map<
 	}
 >()
 
-export const authRouter = new Hono()
+export const authRouter = new Hono<{ Variables: AuthContexts }>()
 	.post("/login", validator("form", PostLoginParamSchema), async (c) => {
 		const { username, password } = c.req.valid("form")
 
@@ -67,29 +67,29 @@ export const authRouter = new Hono()
 		"/authorize",
 		validator("form", PostAuthorizeParamSchema),
 		async (c) => {
-			const { redirect_uri, client_id, scope } = c.req.valid("form")
+			const user = c.get("user")
+			const { client_id, redirect_uri, scope, state } = c.req.valid("form")
 
 			// TODO: client_idが登録されたものと完全一致していることの確認
 			// TODO: redirect_uriがクライアントIDに対して登録されたものと完全一致していることの確認
 
 			// 認証済みかどうかの確認（実際の実装ではセッション管理が必要）
 			// この例では簡易的に認証済みとして扱います
-			const userId = "user123" // 実際の実装ではセッションから取得
 
 			// 認可コードを生成
-			const authorizationCode = nanoid(64)
+			const authorizationCode = nanoid(128)
 
-			// 認可コードを保存
-			authorizationCodes.set(authorizationCode, {
-				clientId: client_id,
+			await saveAuthorizationCode(authorizationCode, user.id, {
+				client_id,
 				scope: scope ?? null,
-				nonce: null,
-				redirectUri: redirect_uri,
-				userId,
-				expiresAt: Date.now() + 10 * 60 * 1000, // 10 minutes
+				state: state ?? null,
+				nonce: null, // TODO nonceの実装
+				published_at: new Date(),
+				expire_at: new Date(
+					Date.now() + 1000 * 60 * env.OAUTH2_AUTH_CODE_EXPIRES_IN_MINUTE,
+				),
 			})
 
-			// 成功レスポンスを返す
 			return c.json({
 				code: authorizationCode,
 			})

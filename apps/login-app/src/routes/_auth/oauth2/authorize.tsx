@@ -1,7 +1,7 @@
-import { createFileRoute } from "@tanstack/react-router"
-import { useSearch } from "@tanstack/react-router"
+import { createFileRoute, useSearch } from "@tanstack/react-router"
 import { useEffect } from "react"
 import { z } from "zod"
+import { useAuth } from "../../../auth"
 import { Button } from "../../../components/button"
 
 // see: RFC6749 OAuth 2.0
@@ -52,6 +52,8 @@ export const Route = createFileRoute("/_auth/oauth2/authorize")({
 })
 
 function AuthorizePage() {
+	const { token } = useAuth()
+
 	const searchParams = useSearch({ from: "/_auth/oauth2/authorize" })
 
 	// クエリパラメータを検証
@@ -94,6 +96,9 @@ function AuthorizePage() {
 
 		const response = await fetch("http://localhost:8787/api/auth/authorize", {
 			method: "POST",
+			headers: {
+				authorization: `Bearer ${token}`,
+			},
 			body: formData,
 		})
 
