@@ -31,11 +31,14 @@ const TokenRequestSchema = z.object({
 	client_id: z.string().min(1),
 })
 
-// 認可コードの一時保存用（実際の実装ではデータベースを使用すべき）
+// 認可コードの一時保存用
+// TODO: データベースに保存するようにする
 const authorizationCodes = new Map<
 	string,
 	{
 		clientId: string
+		scope: string | null
+		nonce: string | null
 		redirectUri: string
 		userId: string
 		expiresAt: number
@@ -110,16 +113,21 @@ export const authRouter = new Hono()
 			const { redirect_uri, client_id, response_type, scope, state } =
 				c.req.valid("form")
 
+			// TODO: client_idが登録されたものと完全一致していることの確認
+			// TODO: redirect_uriがクライアントIDに対して登録されたものと完全一致していることの確認
+
 			// 認証済みかどうかの確認（実際の実装ではセッション管理が必要）
 			// この例では簡易的に認証済みとして扱います
 			const userId = "user123" // 実際の実装ではセッションから取得
 
 			// 認可コードを生成
-			const authorizationCode = nanoid(32)
+			const authorizationCode = nanoid(64)
 
 			// 認可コードを保存
 			authorizationCodes.set(authorizationCode, {
 				clientId: client_id,
+				scope: scope ?? null,
+				nonce: null,
 				redirectUri: redirect_uri,
 				userId,
 				expiresAt: Date.now() + 10 * 60 * 1000, // 10 minutes

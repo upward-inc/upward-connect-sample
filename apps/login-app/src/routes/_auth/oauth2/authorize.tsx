@@ -21,7 +21,7 @@ const SearchParamsSchema = z.object({
 	state: z.string().optional(),
 })
 
-const AuthorizeParamsRedirectUriSchema = z.string().url().startsWith("https://")
+const AuthorizeParamsRedirectUriSchema = z.string().url().startsWith("https:/")
 
 const AuthorizeParamsWithoutRedirectUriSchema = z.object({
 	response_type: z.literal("code"),
@@ -70,7 +70,7 @@ function AuthorizePage() {
 
 		if (!validationResult.withoutRedirectUri.success) {
 			// `redirect_uri`以外のパラメータに不備がある場合は、リダイレクト
-			redirectWithError(validationResult.redirectUri.data, "invalid_request")
+			redirectFail(validationResult.redirectUri.data, "invalid_request")
 		}
 	}, [validationResult.redirectUri, validationResult.withoutRedirectUri])
 
@@ -98,31 +98,38 @@ function AuthorizePage() {
 			const error: AuthorizeError =
 				response.status === 503 ? "temporarily_unavailable" : "server_error"
 
-			redirectWithError(strictQueryParams.redirect_uri, error)
+			redirectFail(strictQueryParams.redirect_uri, error)
 			return
 		}
 
 		const { code }: { code: string } = await response.json()
 
-		redirectWithCode(strictQueryParams.redirect_uri, code)
+		redirectSuccess(
+			strictQueryParams.redirect_uri,
+			code,
+			strictQueryParams.state,
+		)
 	}
 
 	// 拒否時の処理
 	const handleDeny = () => {
 		const strictQueryParams = AuthorizeParamsSchema.parse(searchParams)
 
-		redirectWithError(strictQueryParams.redirect_uri, "access_denied")
+		redirectFail(strictQueryParams.redirect_uri, "access_denied")
 	}
 
 	// リクエスト成功時のリダイレクト処理
-	const redirectWithCode = (url: string, code: string) => {
+	const redirectSuccess = (url: string, code: string, state?: string) => {
 		const redirectUrl = new URL(url)
 		redirectUrl.searchParams.append("code", code)
+		if (state) {
+			redirectUrl.searchParams.append("state", state)
+		}
 		window.location.href = redirectUrl.toString()
 	}
 
 	// リクエスト失敗時のリダイレクト処理
-	const redirectWithError = (url: string, error: AuthorizeError) => {
+	const redirectFail = (url: string, error: AuthorizeError) => {
 		const redirectUrl = new URL(url)
 		redirectUrl.searchParams.append("error", error)
 		window.location.href = redirectUrl.toString()
