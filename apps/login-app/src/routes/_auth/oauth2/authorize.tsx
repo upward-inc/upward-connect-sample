@@ -4,10 +4,13 @@ import { useEffect } from "react"
 import { z } from "zod"
 import { Button } from "../../../components/button"
 
-// see: RFC 6749 - 4.1.1. Authorization Request (https://datatracker.ietf.org/doc/html/rfc6749#section-4.1)
+// see: RFC6749 OAuth 2.0
+//   - https://www.rfc-editor.org/rfc/rfc6749.html
+// see: OpenID Connect Core 1.0 - 3.1. Authentication using the Authorization Code Flow
+//   - https://openid.net/specs/openid-connect-core-1_0.html#CodeFlowAuth
+//   - https://openid-foundation-japan.github.io/openid-connect-core-1_0.ja.html#CodeFlowAuth
 
 // TODO: 環境変数の使用
-// TODO: ログイン後に表示できるようにする（未ログイン時はログイン画面を経由する）
 // TODO: client_idの検証
 // TODO: scopeの検証
 // TODO: stateの検証
