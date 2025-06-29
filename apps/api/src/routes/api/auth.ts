@@ -1,11 +1,14 @@
+import { isBefore } from "@formkit/tempo"
 import { Hono } from "hono"
 import { nanoid } from "nanoid"
 import {
+	deleteAuthorizationCode,
 	generateRefreshToken,
 	generateToken,
 	getAuthorizationCode,
+	getUserById,
+	getUserByUsernameAndPassword,
 	saveAuthorizationCode,
-	verifyUser,
 } from "../../domain/auth"
 import { env } from "../../env"
 import { validator } from "../../libs/hono-openapi"
@@ -16,34 +19,20 @@ import {
 	TokenRequestSchema,
 } from "../../schema/auth"
 
-// 認可コードの一時保存用
-// TODO: データベースに保存するようにする
-const authorizationCodes = new Map<
-	string,
-	{
-		clientId: string
-		scope: string | null
-		nonce: string | null
-		redirectUri: string
-		userId: string
-		expiresAt: number
-	}
->()
-
 export const authRouter = new Hono<{ Variables: AuthContexts }>()
 	.post("/login", validator("form", PostLoginParamSchema), async (c) => {
 		const { username, password } = c.req.valid("form")
 
-		const result = await verifyUser(username, password).catch(() => null)
-		if (!result) {
+		const user = await getUserByUsernameAndPassword(username, password)
+		if (!user) {
 			return c.json({ message: "Invalid username or password" }, 401)
 		}
 
 		const { accessToken } = generateToken({
-			userId: result.id,
-			userName: result.user_name,
+			userId: user.id,
+			userName: user.user_name,
 		})
-		return c.json({ ...result, access_token: accessToken })
+		return c.json({ ...user, access_token: accessToken })
 	})
 	.post(
 		"/authorize",
@@ -78,59 +67,75 @@ export const authRouter = new Hono<{ Variables: AuthContexts }>()
 		},
 	)
 	.post("/token", validator("form", TokenRequestSchema), async (c) => {
-		const { code, redirect_uri, client_id } = c.req.valid("form")
+		const { grant_type, code, redirect_uri, client_id, client_secret } =
+			c.req.valid("form")
 
-		// 認可コードの検証
-		const codeData = authorizationCodes.get(code)
-		if (!codeData) {
-			c.status(400)
-			return c.json({
-				error: "invalid_grant",
-				error_description: "認可コードが無効です",
-			})
+		const getInvalidGrantError = (description: string) => {
+			return c.json(
+				{ error: "invalid_grant", error_description: description },
+				400,
+			)
 		}
 
-		// 有効期限の確認
-		if (codeData.expiresAt < Date.now()) {
-			authorizationCodes.delete(code)
-			c.status(400)
+		if (grant_type === "authorization_code") {
+			// 発行済み認可コードの存在確認
+			const publishedAuthCode = await getAuthorizationCode(code)
+			if (!publishedAuthCode) {
+				return getInvalidGrantError("invalid authorization code")
+			}
+
+			// 有効期限の検証
+			if (isBefore(publishedAuthCode.expire_at, new Date())) {
+				return getInvalidGrantError("expired authorization code")
+			}
+
+			// クライアントIDの検証
+			if (publishedAuthCode.client_id !== client_id) {
+				return getInvalidGrantError("invalid client_id")
+			}
+
+			// クライアントシークレットの検証
+			// TODO: クライアント管理用テーブルを作成し`client_secret`を保持する
+			// if (publishedAuthCode.client_secret !== client_secret) {
+			// 	return getInvalidGrantError("invalid client_secret")
+			// }
+
+			// リダイレクトURIの検証
+			// TODO: `published_auth_code`テーブルに`redirect_uri`を保持する
+			// if (
+			// 	publishedAuthCode.redirect_uri !== redirect_uri
+			// ) {
+			// 	return getInvalidGrantError("invalid redirect_uri")
+			// }
+
+			// 認可コードを使用済みにする（データベースから削除する）
+			await deleteAuthorizationCode(publishedAuthCode.auth_code)
+
+			// ユーザーの取得
+			const user = await getUserById(publishedAuthCode.user_id)
+			if (!user) {
+				return c.json({ message: "Unknown user" }, 500)
+			}
+
+			// アクセストークン、IDトークンを生成
+			const { accessToken, idToken } = generateToken({
+				userId: user.id,
+				userName: user.user_name,
+			})
+
+			// リフレッシュトークンを生成
+			const { refreshToken } = generateRefreshToken({
+				userId: user.id,
+			})
+
 			return c.json({
-				error: "invalid_grant",
-				error_description: "認可コードの有効期限が切れています",
+				token_type: "Bearer",
+				access_token: accessToken,
+				id_token: idToken,
+				refresh_token: refreshToken,
+				expires_in: env.OIDC_TOKEN_EXPIRES_IN_MINUTE * 60,
 			})
 		}
-
-		// クライアントIDとリダイレクトURIの検証
-		if (
-			codeData.clientId !== client_id ||
-			codeData.redirectUri !== redirect_uri
-		) {
-			c.status(400)
-			return c.json({
-				error: "invalid_grant",
-				error_description: "クライアントIDまたはリダイレクトURIが一致しません",
-			})
-		}
-
-		// 認可コードを使用済みにする
-		authorizationCodes.delete(code)
-
-		// アクセストークンを生成
-		const accessToken = "" // TODO: アクセストークンを生成するロジックを使用
-
-		// IDトークンを生成
-		const idToken = "" // TODO: IDトークンを生成するロジックを使用
-
-		// リフレッシュトークンを生成
-		const refreshToken = nanoid(64)
-
-		return c.json({
-			token_type: "Bearer",
-			access_token: accessToken,
-			id_token: idToken,
-			refresh_token: refreshToken,
-			expires_in: env.OIDC_TOKEN_EXPIRES_IN_MINUTE * 60,
-		})
 	})
 // .get("/.well-known/openid-configuration", async (c) => {
 // 	// OpenID Connect Discoveryドキュメントを返す

@@ -41,6 +41,7 @@ export const TokenRequestSchema = z.object({
 	code: z.string().min(1),
 	redirect_uri: z.string().url(),
 	client_id: z.string().min(1),
+	client_secret: z.string().min(1),
 })
 
 export type LoggedInUser = z.infer<typeof LoggedInUserSchema>

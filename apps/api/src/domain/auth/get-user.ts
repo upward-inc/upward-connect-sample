@@ -2,9 +2,36 @@ import { prisma } from "../../libs/prisma"
 import { type LoggedInUser, LoggedInUserSchema } from "../../schema/auth"
 
 /**
- * ユーザー名とパスワードでユーザーを検証する
+ * IDでユーザーを取得する
  */
-export const verifyUser = async (
+export const getUserById = async (
+	userId: string,
+): Promise<LoggedInUser | null> => {
+	// ユーザー名で検索
+	const user = await prisma.user.findUnique({
+		where: {
+			id: userId,
+		},
+		select: {
+			id: true,
+			user_name: true,
+			hashed_password: true,
+			first_name: true,
+			last_name: true,
+		},
+	})
+
+	if (!user) {
+		return null
+	}
+
+	return LoggedInUserSchema.parse(user)
+}
+
+/**
+ * ユーザー名とパスワードでユーザーを取得する
+ */
+export const getUserByUsernameAndPassword = async (
 	username: string,
 	password: string,
 ): Promise<LoggedInUser | null> => {

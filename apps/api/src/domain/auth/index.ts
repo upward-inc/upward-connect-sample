@@ -1,4 +1,6 @@
-export * from "./verify-user"
+export * from "./get-user"
 export * from "./generate-token"
+export * from "./get-code"
 export * from "./save-code"
+export * from "./delete-code"
 export * from "./get-logged-in-user"
