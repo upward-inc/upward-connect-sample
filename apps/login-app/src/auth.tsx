@@ -79,8 +79,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
 		const data = await response.json()
 
-		// TODO: APIを使用してログイン処理
-		const token = "dummy-token"
+		const token = data.access_token
 		const userData = {
 			id: data.id,
 			username: data.user_name,
