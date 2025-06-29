@@ -1,6 +1,9 @@
 import { prisma } from "../../libs/prisma"
 import { type LoggedInUser, LoggedInUserSchema } from "../../schema/auth"
 
+/**
+ * ユーザー名とパスワードでユーザーを検証する
+ */
 export const verifyUser = async (
 	username: string,
 	password: string,

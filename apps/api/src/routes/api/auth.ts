@@ -1,11 +1,13 @@
-import { zValidator } from "@hono/zod-validator"
 import { Hono } from "hono"
-import { sign, verify } from "jsonwebtoken"
-import { customAlphabet, customRandom, nanoid, urlAlphabet } from "nanoid"
+import { nanoid } from "nanoid"
 import { z } from "zod"
-import { verifyUser } from "../../domain/auth"
+import {
+	generateRefreshToken,
+	generateToken,
+	verifyUser,
+} from "../../domain/auth"
 import { env } from "../../env"
-import { describeRoute, validator } from "../../libs/hono-openapi"
+import { validator } from "../../libs/hono-openapi"
 import { PostLoginParamSchema } from "../../schema/auth"
 
 // 認証用のスキーマ定義
@@ -16,6 +18,7 @@ const PostAuthJsonSchema = z.object({
 
 // 認可コードリクエスト用のスキーマ
 const PostAuthorizeParamSchema = z.object({
+	user_id: z.string().min(1),
 	response_type: z.literal("code"),
 	client_id: z.string().min(1),
 	redirect_uri: z.string().url(),
@@ -50,68 +53,21 @@ export const authRouter = new Hono()
 		const { username, password } = c.req.valid("form")
 
 		const result = await verifyUser(username, password).catch(() => null)
-
 		if (!result) {
 			return c.json({ message: "Invalid username or password" }, 401)
 		}
-		return c.json(result)
+
+		const { accessToken } = generateToken({
+			id: result.id,
+			userName: result.user_name,
+		})
+		return c.json({ ...result, access_token: accessToken })
 	})
-	// .get("/.well-known/openid-configuration", async (c) => {
-	// 	// OpenID Connect Discoveryドキュメントを返す
-	// 	// https://openid.net/specs/openid-connect-discovery-1_0.html
-	// 	return c.json({
-	// 		issuer: env.OIDC_ISSUER,
-	// 		authorization_endpoint: `${env.OIDC_ISSUER}/auth/authorize`,
-	// 		token_endpoint: `${env.OIDC_ISSUER}/auth/token`,
-	// 		userinfo_endpoint: `${env.OIDC_ISSUER}/auth/userinfo`,
-	// 		jwks_uri: `${env.OIDC_ISSUER}/auth/.well-known/jwks.json`,
-	// 		response_types_supported: [
-	// 			"code",
-	// 			"token",
-	// 			"id_token",
-	// 			"code token",
-	// 			"code id_token",
-	// 			"token id_token",
-	// 			"code token id_token",
-	// 		],
-	// 		subject_types_supported: ["public"],
-	// 		id_token_signing_alg_values_supported: ["HS256", "RS256"],
-	// 		scopes_supported: ["openid", "profile", "email"],
-	// 		token_endpoint_auth_methods_supported: [
-	// 			"client_secret_basic",
-	// 			"client_secret_post",
-	// 		],
-	// 		claims_supported: ["sub", "iss", "name", "email", "picture"],
-	// 		grant_types_supported: [
-	// 			"authorization_code",
-	// 			"refresh_token",
-	// 			"password",
-	// 		],
-	// 		// その他の必要な設定...
-	// 	})
-	// })
-	// .get("/.well-known/jwks.json", async (c) => {
-	// 	// JWKS（JSON Web Key Set）を返す
-	// 	// 実際の実装ではRSA鍵ペアを使用し、公開鍵を返すべきです
-	// 	// この例ではシンプルな対称鍵を使用しているため、実際のJWKSは返しません
-	// 	return c.json({
-	// 		keys: [
-	// 			// 実際のアプリケーションでは、ここに公開鍵情報を含めます
-	// 			{
-	// 				kty: "oct",
-	// 				use: "sig",
-	// 				kid: "sample-key-id",
-	// 				alg: "HS256",
-	// 			},
-	// 		],
-	// 	})
-	// })
 	.post(
 		"/authorize",
 		validator("form", PostAuthorizeParamSchema),
 		async (c) => {
-			const { redirect_uri, client_id, response_type, scope, state } =
-				c.req.valid("form")
+			const { redirect_uri, client_id, scope } = c.req.valid("form")
 
 			// TODO: client_idが登録されたものと完全一致していることの確認
 			// TODO: redirect_uriがクライアントIDに対して登録されたものと完全一致していることの確認
@@ -177,45 +133,11 @@ export const authRouter = new Hono()
 		// 認可コードを使用済みにする
 		authorizationCodes.delete(code)
 
-		// ユーザー情報を取得（実際の実装ではデータベースから取得）
-		const user = {
-			id: codeData.userId,
-			name: "demo",
-			email: "demo@example.com",
-			role: "user",
-		}
-
 		// アクセストークンを生成
-		const accessToken = sign(
-			{
-				username: user.name,
-			},
-			env.OIDC_JWT_SECRET,
-			{
-				algorithm: "HS256",
-				issuer: env.OIDC_ISSUER,
-				subject: user.id,
-				audience: env.OIDC_AUDIENCE,
-				expiresIn: env.OIDC_JWT_EXPIRES_IN_SECOND,
-			},
-		)
+		const accessToken = "" // TODO: アクセストークンを生成するロジックを使用
 
 		// IDトークンを生成
-		const idToken = sign(
-			{
-				username: user.name,
-				name: user.name,
-				email: user.email,
-			},
-			env.OIDC_JWT_SECRET,
-			{
-				algorithm: "HS256",
-				issuer: env.OIDC_ISSUER,
-				subject: user.id,
-				audience: client_id,
-				expiresIn: env.OIDC_JWT_EXPIRES_IN_SECOND,
-			},
-		)
+		const idToken = "" // TODO: IDトークンを生成するロジックを使用
 
 		// リフレッシュトークンを生成
 		const refreshToken = nanoid(64)
@@ -225,98 +147,56 @@ export const authRouter = new Hono()
 			access_token: accessToken,
 			id_token: idToken,
 			refresh_token: refreshToken,
-			expires_in: env.OIDC_JWT_EXPIRES_IN_SECOND,
+			expires_in: env.OIDC_TOKEN_EXPIRES_IN_MINUTE * 60,
 		})
 	})
-	.post("/token", validator("json", PostAuthJsonSchema), async (c) => {
-		const { username, password } = c.req.valid("json")
-
-		// ここでは簡易的な認証を行います
-		// 実際のアプリケーションではデータベースなどで検証する必要があります
-		if (username === "demo" && password === "password") {
-			// ユーザー情報
-			const user = {
-				id: "user123",
-				name: username,
-				email: `${username}@example.com`,
-				role: "user",
-			}
-
-			const accessToken = sign(
-				{
-					username,
-				},
-				env.OIDC_JWT_SECRET,
-				{
-					algorithm: "HS256",
-					issuer: env.OIDC_ISSUER,
-					subject: user.id,
-					audience: "https://app.upward.jp",
-					expiresIn: env.OIDC_JWT_EXPIRES_IN_SECOND,
-				},
-			)
-
-			const idToken = sign(
-				{
-					username,
-					name: user.name,
-					email: user.email,
-				},
-				env.OIDC_JWT_SECRET,
-				{
-					algorithm: "HS256",
-					issuer: env.OIDC_ISSUER,
-					subject: user.id,
-					audience: "https://app.upward.jp",
-					expiresIn: env.OIDC_JWT_EXPIRES_IN_SECOND,
-				},
-			)
-
-			return c.json({
-				token_type: "Bearer",
-				access_token: accessToken,
-				id_token: idToken,
-				expires_in: env.OIDC_JWT_EXPIRES_IN_SECOND,
-			})
-		}
-
-		// 認証失敗
-		c.status(401)
-		return c.json({
-			error: "invalid_credentials",
-			error_description: "ユーザー名またはパスワードが無効です",
-		})
-	})
-	.get("/userinfo", async (c) => {
-		// Authorizationヘッダーからトークンを取得
-		const authHeader = c.req.header("Authorization")
-		if (!authHeader || !authHeader.startsWith("Bearer ")) {
-			c.status(401)
-			return c.json({
-				error: "invalid_token",
-				error_description: "有効なBearerトークンが必要です",
-			})
-		}
-
-		const token = authHeader.substring(7) // "Bearer "の後の部分
-
-		try {
-			// トークンの検証（実際のアプリケーションではより堅牢な検証が必要）
-			// このサンプルではシンプルにしています
-			const decoded = verify(token, env.OIDC_JWT_SECRET)
-
-			// ユーザー情報を返す
-			return c.json({
-				sub: decoded.sub,
-				name: decoded.username,
-				email: `${decoded.username}@example.com`,
-				// その他のユーザー情報...
-			})
-		} catch (error) {
-			c.status(401)
-			return c.json({
-				error: "invalid_token",
-				error_description: "トークンが無効です",
-			})
-		}
-	})
+// .get("/.well-known/openid-configuration", async (c) => {
+// 	// OpenID Connect Discoveryドキュメントを返す
+// 	// https://openid.net/specs/openid-connect-discovery-1_0.html
+// 	return c.json({
+// 		issuer: env.OIDC_ISSUER,
+// 		authorization_endpoint: `${env.OIDC_ISSUER}/auth/authorize`,
+// 		token_endpoint: `${env.OIDC_ISSUER}/auth/token`,
+// 		userinfo_endpoint: `${env.OIDC_ISSUER}/auth/userinfo`,
+// 		jwks_uri: `${env.OIDC_ISSUER}/auth/.well-known/jwks.json`,
+// 		response_types_supported: [
+// 			"code",
+// 			"token",
+// 			"id_token",
+// 			"code token",
+// 			"code id_token",
+// 			"token id_token",
+// 			"code token id_token",
+// 		],
+// 		subject_types_supported: ["public"],
+// 		id_token_signing_alg_values_supported: ["HS256", "RS256"],
+// 		scopes_supported: ["openid", "profile", "email"],
+// 		token_endpoint_auth_methods_supported: [
+// 			"client_secret_basic",
+// 			"client_secret_post",
+// 		],
+// 		claims_supported: ["sub", "iss", "name", "email", "picture"],
+// 		grant_types_supported: [
+// 			"authorization_code",
+// 			"refresh_token",
+// 			"password",
+// 		],
+// 		// その他の必要な設定...
+// 	})
+// })
+// .get("/.well-known/jwks.json", async (c) => {
+// 	// JWKS（JSON Web Key Set）を返す
+// 	// 実際の実装ではRSA鍵ペアを使用し、公開鍵を返すべきです
+// 	// この例ではシンプルな対称鍵を使用しているため、実際のJWKSは返しません
+// 	return c.json({
+// 		keys: [
+// 			// 実際のアプリケーションでは、ここに公開鍵情報を含めます
+// 			{
+// 				kty: "oct",
+// 				use: "sig",
+// 				kid: "sample-key-id",
+// 				alg: "HS256",
+// 			},
+// 		],
+// 	})
+// })

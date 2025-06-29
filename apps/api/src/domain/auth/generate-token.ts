@@ -8,19 +8,13 @@ export const generateToken = (user: {
 	id: string
 	userName: string
 }) => {
-	const accessToken = sign(
-		{
-			username: user.userName,
-		},
-		env.OIDC_TOKEN_SECRET,
-		{
-			algorithm: "HS256",
-			issuer: env.OIDC_ISSUER,
-			subject: user.id,
-			audience: env.OIDC_AUDIENCE,
-			expiresIn: `${env.OIDC_TOKEN_EXPIRES_IN_MINUTE} minutes`,
-		},
-	)
+	const accessToken = sign({}, env.OIDC_TOKEN_SECRET, {
+		algorithm: "HS256",
+		issuer: env.OIDC_ISSUER,
+		subject: user.id,
+		audience: env.OIDC_AUDIENCE,
+		expiresIn: `${env.OIDC_TOKEN_EXPIRES_IN_MINUTE} minutes`,
+	})
 
 	const idToken = sign(
 		{
