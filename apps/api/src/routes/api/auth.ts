@@ -6,9 +6,11 @@ import {
 	generateRefreshToken,
 	generateToken,
 	getAuthorizationCode,
+	getOAuthClientById,
 	getUserById,
 	getUserByUsernameAndPassword,
 	saveAuthorizationCode,
+	validateAuthorizeParams,
 } from "../../domain/auth"
 import { env } from "../../env"
 import { validator } from "../../libs/hono-openapi"
@@ -34,26 +36,44 @@ export const authRouter = new Hono<{ Variables: AuthContexts }>()
 		})
 		return c.json({ ...user, access_token: accessToken })
 	})
+	.get("/clients/:id", async (c) => {
+		const clientId = c.req.param("id")
+
+		const client = await getOAuthClientById(clientId)
+		if (!client) {
+			return c.json({ message: "Client not found" }, 404)
+		}
+
+		// 必要最低限のフィールドのみ返却
+		return c.json({ id: client.id, name: client.name })
+	})
 	.post(
 		"/authorize",
 		validator("form", PostAuthorizeParamSchema),
 		async (c) => {
 			const user = c.get("user")
-			const { client_id, redirect_uri, scope, state } = c.req.valid("form")
+			const params = c.req.valid("form")
 
-			// TODO: client_idが登録されたものと完全一致していることの確認
-			// TODO: redirect_uriがクライアントIDに対して登録されたものと完全一致していることの確認
+			// パラメータの検証
+			const validateResult = await validateAuthorizeParams(params)
 
-			// 認証済みかどうかの確認（実際の実装ではセッション管理が必要）
-			// この例では簡易的に認証済みとして扱います
+			if (!validateResult.success) {
+				return c.json(
+					{
+						error: validateResult.error,
+						error_description: validateResult.error_description,
+					},
+					400,
+				)
+			}
 
 			// 認可コードを生成
 			const authorizationCode = nanoid(128)
 
 			await saveAuthorizationCode(authorizationCode, user.id, {
-				client_id,
-				scope: scope ?? null,
-				state: state ?? null,
+				client_id: validateResult.client_id,
+				scope: validateResult.scope ?? null,
+				state: validateResult.state ?? null,
 				nonce: null, // TODO nonceの実装
 				published_at: new Date(),
 				expire_at: new Date(

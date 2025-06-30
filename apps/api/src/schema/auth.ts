@@ -1,5 +1,28 @@
 import { z } from "zod"
 import "zod-openapi/extend"
+import { StringToArraySchema } from "./utility"
+
+export const OAuthClientSchema = z
+	.object({
+		id: z.string().openapi({
+			description: "クライアントID",
+		}),
+		name: z.string().openapi({
+			description: "クライアント名",
+		}),
+		secret: z.string().openapi({
+			description: "クライアントシークレット",
+		}),
+		redirect_uris: StringToArraySchema().openapi({
+			description: "リダイレクトURI",
+		}),
+		scopes: StringToArraySchema().openapi({
+			description: "スコープ",
+		}),
+	})
+	.openapi({
+		description: "登録済みOAuthクライアント",
+	})
 
 export const LoggedInUserSchema = z
 	.object({
@@ -44,6 +67,7 @@ export const TokenRequestSchema = z.object({
 	client_secret: z.string().min(1),
 })
 
+export type OAuthClient = z.infer<typeof OAuthClientSchema>
 export type LoggedInUser = z.infer<typeof LoggedInUserSchema>
 export type PostLoginParam = z.infer<typeof PostLoginParamSchema>
 export type PostAuthorizeParam = z.infer<typeof PostAuthorizeParamSchema>
