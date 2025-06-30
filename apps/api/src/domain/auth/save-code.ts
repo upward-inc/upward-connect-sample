@@ -1,7 +1,7 @@
 import { prisma } from "../../libs/prisma"
 
 /**
- * 認可コードを保存する
+ * 認可コード情報を保存する
  */
 export const saveAuthorizationCode = async (
 	code: string,
