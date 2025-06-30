@@ -9,6 +9,7 @@ CREATE TABLE [published_auth_code]
   [auth_code] NVARCHAR(255) NOT NULL,
   [client_id] NVARCHAR(MAX) NOT NULL,
   [client_secret] NVARCHAR(MAX) NOT NULL,
+  [redirect_uri] NVARCHAR(MAX) NOT NULL,
   [scope] NVARCHAR(MAX),
   [state] NVARCHAR(MAX),
   [nonce] NVARCHAR(MAX),
