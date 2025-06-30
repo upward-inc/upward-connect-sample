@@ -8,6 +8,7 @@ export const saveAuthorizationCode = async (
 	userId: string,
 	payload: {
 		client_id: string
+		client_secret: string
 		scope: string | null
 		state: string | null
 		nonce: string | null

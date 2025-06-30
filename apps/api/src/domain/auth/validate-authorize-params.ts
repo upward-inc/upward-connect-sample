@@ -35,6 +35,7 @@ interface AuthorizeResultSuccess {
 	success: true
 	response_type: string
 	client_id: string
+	client_secret: string
 	redirect_uri: string
 	scope: string | undefined
 	state: string | undefined
@@ -86,6 +87,7 @@ export const validateAuthorizeParams = async (
 			success: true,
 			response_type: params.response_type,
 			client_id: params.client_id,
+			client_secret: oauthClient.secret,
 			redirect_uri: params.redirect_uri,
 			scope: params.scope,
 			state: params.state,
