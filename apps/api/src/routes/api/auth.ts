@@ -1,16 +1,14 @@
-import { isBefore } from "@formkit/tempo"
 import { Hono } from "hono"
 import { nanoid } from "nanoid"
 import {
 	deleteAuthorizationCode,
 	generateRefreshToken,
 	generateToken,
-	getAuthorizationCode,
 	getOAuthClientById,
-	getUserById,
 	getUserByUsernameAndPassword,
 	saveAuthorizationCode,
 	validateAuthorizeParams,
+	validateTokenParams,
 } from "../../domain/auth"
 import { env } from "../../env"
 import { validator } from "../../libs/hono-openapi"
@@ -89,65 +87,36 @@ export const authRouter = new Hono<{ Variables: AuthContexts }>()
 		},
 	)
 	.post("/token", validator("form", TokenRequestSchema), async (c) => {
-		const { grant_type, code, redirect_uri, client_id, client_secret } =
-			c.req.valid("form")
+		const params = c.req.valid("form")
 
-		const getInvalidGrantError = (description: string) => {
-			return c.json(
-				{ error: "invalid_grant", error_description: description },
-				400,
-			)
-		}
+		if (params.grant_type === "authorization_code") {
+			// パラメータの検証
+			const validateResult = await validateTokenParams(params)
 
-		if (grant_type === "authorization_code") {
-			// 発行済み認可コードの存在確認
-			const publishedAuthCode = await getAuthorizationCode(code)
-			if (!publishedAuthCode) {
-				return getInvalidGrantError("invalid authorization code")
+			if (!validateResult.success) {
+				return c.json(
+					{
+						error: "invalid_grant",
+						error_description: validateResult.error_message,
+					},
+					400,
+				)
 			}
 
-			// 有効期限の検証
-			if (isBefore(publishedAuthCode.expire_at, new Date())) {
-				return getInvalidGrantError("expired authorization code")
-			}
-
-			// クライアントIDの検証
-			if (publishedAuthCode.client_id !== client_id) {
-				return getInvalidGrantError("invalid client_id")
-			}
-
-			// クライアントシークレットの検証
-			// TODO: クライアント管理用テーブルを作成し`client_secret`を保持する
-			// if (publishedAuthCode.client_secret !== client_secret) {
-			// 	return getInvalidGrantError("invalid client_secret")
-			// }
-
-			// リダイレクトURIの検証
-			// TODO: `published_auth_code`テーブルに`redirect_uri`を保持する
-			// if (
-			// 	publishedAuthCode.redirect_uri !== redirect_uri
-			// ) {
-			// 	return getInvalidGrantError("invalid redirect_uri")
-			// }
+			const { user_id, user_name } = validateResult
 
 			// 認可コードを使用済みにする（データベースから削除する）
-			await deleteAuthorizationCode(publishedAuthCode.auth_code)
-
-			// ユーザーの取得
-			const user = await getUserById(publishedAuthCode.user_id)
-			if (!user) {
-				return c.json({ message: "Unknown user" }, 500)
-			}
+			await deleteAuthorizationCode(params.code)
 
 			// アクセストークン、IDトークンを生成
 			const { accessToken, idToken } = generateToken({
-				userId: user.id,
-				userName: user.user_name,
+				userId: user_id,
+				userName: user_name,
 			})
 
 			// リフレッシュトークンを生成
 			const { refreshToken } = generateRefreshToken({
-				userId: user.id,
+				userId: user_id,
 			})
 
 			return c.json({
