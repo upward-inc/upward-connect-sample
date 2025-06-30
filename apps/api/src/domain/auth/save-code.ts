@@ -9,6 +9,7 @@ export const saveAuthorizationCode = async (
 	payload: {
 		client_id: string
 		client_secret: string
+		redirect_uri: string
 		scope: string | null
 		state: string | null
 		nonce: string | null

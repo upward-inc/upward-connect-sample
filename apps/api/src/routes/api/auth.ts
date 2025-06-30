@@ -73,6 +73,7 @@ export const authRouter = new Hono<{ Variables: AuthContexts }>()
 			await saveAuthorizationCode(authorizationCode, user.id, {
 				client_id: validateResult.client_id,
 				client_secret: validateResult.client_secret,
+				redirect_uri: validateResult.redirect_uri,
 				scope: validateResult.scope ?? null,
 				state: validateResult.state ?? null,
 				nonce: null, // TODO nonceの実装
