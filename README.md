@@ -23,12 +23,6 @@
 ## コマンド
 
 ```bash
-# リポジトリをクローン
-git clone https://github.com/yourusername/multi-platform-sample.git
-
-# ディレクトリに移動
-cd multi-platform-sample
-
 # APIアプリケーションを開発モードで起動
 bun api#dev
 
