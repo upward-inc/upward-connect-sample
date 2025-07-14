@@ -14,6 +14,7 @@ export const getLoggedInUser = async (
 			user_name: true,
 			first_name: true,
 			last_name: true,
+			email: true,
 		},
 	})
 
