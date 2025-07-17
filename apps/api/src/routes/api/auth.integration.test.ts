@@ -1,9 +1,13 @@
 import { afterAll, beforeAll, describe, expect, it } from "vitest"
+import { env } from "../../env"
 import { app } from "../../index"
 import {
 	cleanupTestData,
+	createExpiredRefreshToken,
 	createExpiredToken,
+	createIntegrationTestOAuthClient,
 	createIntegrationTestUser,
+	createRefreshToken,
 	createValidToken,
 } from "../../test/integration-utils"
 
@@ -211,6 +215,253 @@ describe("Auth Integration Tests", () => {
 				error_description:
 					"The user associated with the provided token does not exist.",
 			})
+		})
+	})
+
+	describe("Token Endpoint - Refresh Token", () => {
+		it("should return new tokens for valid refresh token", async () => {
+			// Create a test user
+			const testUser = await createIntegrationTestUser({
+				user_name: "refresh_user",
+				first_name: "Refresh",
+				last_name: "User",
+				email: "refresh_user@example.com",
+			})
+
+			// Create a test OAuth client
+			const testClient = await createIntegrationTestOAuthClient({
+				name: "refresh_cli",
+				secret: "test_secret_12345",
+				redirect_uris: "https://localhost:3000/callback",
+				scopes: "openid,profile,email",
+			})
+
+			// Create a refresh token
+			const refreshToken = createRefreshToken(testUser.id)
+
+			const response = await app.request("/api/oauth2/token", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/x-www-form-urlencoded",
+				},
+				body: new URLSearchParams({
+					grant_type: "refresh_token",
+					refresh_token: refreshToken,
+					client_id: testClient.id,
+					client_secret: testClient.secret,
+				}),
+			})
+
+			expect(response.status).toBe(200)
+			const data = JSON.parse(await response.text())
+			expect(data).toHaveProperty("access_token")
+			expect(data).toHaveProperty("id_token")
+			expect(data).toHaveProperty("refresh_token")
+			expect(data).toHaveProperty("token_type", "Bearer")
+			expect(data).toHaveProperty(
+				"expires_in",
+				env.OIDC_TOKEN_EXPIRES_IN_MINUTE,
+			)
+		})
+
+		it("should return 400 for invalid client_id", async () => {
+			const testUser = await createIntegrationTestUser({
+				user_name: "refresh_user_invalid_client",
+				first_name: "Refresh",
+				last_name: "User",
+				email: "refresh_user_invalid_client@example.com",
+			})
+
+			const refreshToken = createRefreshToken(testUser.id)
+			const nonExistentClientId = crypto.randomUUID()
+
+			const response = await app.request("/api/oauth2/token", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/x-www-form-urlencoded",
+				},
+				body: new URLSearchParams({
+					grant_type: "refresh_token",
+					refresh_token: refreshToken,
+					client_id: nonExistentClientId,
+					client_secret: "test_secret_12345",
+				}),
+			})
+
+			expect(response.status).toBe(400)
+			const data = JSON.parse(await response.text())
+			expect(data).toEqual({
+				error: "invalid_grant",
+				error_description: "Invalid client id",
+			})
+		})
+
+		it("should return 400 for invalid client_secret", async () => {
+			const testUser = await createIntegrationTestUser({
+				user_name: "refresh_user_invalid_secret",
+				first_name: "Refresh",
+				last_name: "User",
+				email: "refresh_user_invalid_secret@example.com",
+			})
+
+			const testClient = await createIntegrationTestOAuthClient({
+				name: "inv_secret",
+				secret: "test_secret_12345",
+				redirect_uris: "https://localhost:3000/callback",
+				scopes: "openid,profile,email",
+			})
+
+			const refreshToken = createRefreshToken(testUser.id)
+
+			const response = await app.request("/api/oauth2/token", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/x-www-form-urlencoded",
+				},
+				body: new URLSearchParams({
+					grant_type: "refresh_token",
+					refresh_token: refreshToken,
+					client_id: testClient.id,
+					client_secret: "wrong_secret",
+				}),
+			})
+
+			expect(response.status).toBe(400)
+			const data = JSON.parse(await response.text())
+			expect(data).toEqual({
+				error: "invalid_grant",
+				error_description: "Invalid client secret",
+			})
+		})
+
+		it("should return 400 for expired refresh token", async () => {
+			const testUser = await createIntegrationTestUser({
+				user_name: "refresh_user_expired",
+				first_name: "Refresh",
+				last_name: "User",
+				email: "refresh_user_expired@example.com",
+			})
+
+			const testClient = await createIntegrationTestOAuthClient({
+				name: "exp_token",
+				secret: "test_secret_12345",
+				redirect_uris: "https://localhost:3000/callback",
+				scopes: "openid,profile,email",
+			})
+
+			const expiredRefreshToken = createExpiredRefreshToken(testUser.id)
+
+			const response = await app.request("/api/oauth2/token", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/x-www-form-urlencoded",
+				},
+				body: new URLSearchParams({
+					grant_type: "refresh_token",
+					refresh_token: expiredRefreshToken,
+					client_id: testClient.id,
+					client_secret: testClient.secret,
+				}),
+			})
+
+			expect(response.status).toBe(400)
+			const data = JSON.parse(await response.text())
+			expect(data).toEqual({
+				error: "invalid_grant",
+				error_description: "Invalid refresh token",
+			})
+		})
+
+		it("should return 400 for malformed refresh token", async () => {
+			const testClient = await createIntegrationTestOAuthClient({
+				name: "malformed",
+				secret: "test_secret_12345",
+				redirect_uris: "https://localhost:3000/callback",
+				scopes: "openid,profile,email",
+			})
+
+			const response = await app.request("/api/oauth2/token", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/x-www-form-urlencoded",
+				},
+				body: new URLSearchParams({
+					grant_type: "refresh_token",
+					refresh_token: "invalid.malformed.token",
+					client_id: testClient.id,
+					client_secret: testClient.secret,
+				}),
+			})
+
+			expect(response.status).toBe(400)
+			const data = JSON.parse(await response.text())
+			expect(data).toEqual({
+				error: "invalid_grant",
+				error_description: "Invalid refresh token",
+			})
+		})
+
+		it("should return 400 for non-existent user in refresh token", async () => {
+			const testClient = await createIntegrationTestOAuthClient({
+				name: "unknown_user",
+				secret: "test_secret_12345",
+				redirect_uris: "https://localhost:3000/callback",
+				scopes: "openid,profile,email",
+			})
+
+			const nonExistentUserId = crypto.randomUUID()
+			const refreshToken = createRefreshToken(nonExistentUserId)
+
+			const response = await app.request("/api/oauth2/token", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/x-www-form-urlencoded",
+				},
+				body: new URLSearchParams({
+					grant_type: "refresh_token",
+					refresh_token: refreshToken,
+					client_id: testClient.id,
+					client_secret: testClient.secret,
+				}),
+			})
+
+			expect(response.status).toBe(400)
+			const data = JSON.parse(await response.text())
+			expect(data).toEqual({
+				error: "invalid_grant",
+				error_description: "Unknown user",
+			})
+		})
+
+		it("should return 400 for unsupported grant type", async () => {
+			const testClient = await createIntegrationTestOAuthClient({
+				name: "unsupported",
+				secret: "test_secret_12345",
+				redirect_uris: "https://localhost:3000/callback",
+				scopes: "openid,profile,email",
+			})
+
+			const response = await app.request("/api/oauth2/token", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/x-www-form-urlencoded",
+				},
+				body: new URLSearchParams({
+					grant_type: "unsupported_type",
+					client_id: testClient.id,
+					client_secret: testClient.secret,
+				}),
+			})
+
+			expect(response.status).toBe(400)
+			const data = JSON.parse(await response.text())
+			// Zod validation error for unsupported grant type
+			expect(data.success).toBe(false)
+			expect(data.error).toHaveProperty("issues")
+			expect(data.error.issues[0].code).toBe("invalid_union_discriminator")
+			expect(data.error.issues[0].message).toContain(
+				"Invalid discriminator value",
+			)
 		})
 	})
 })
