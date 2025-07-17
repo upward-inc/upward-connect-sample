@@ -1,5 +1,6 @@
 import { Hono } from "hono"
 import { nanoid } from "nanoid"
+import { validate as isValidUUID } from "uuid"
 import {
 	deleteAuthorizationCode,
 	generateRefreshToken,
@@ -131,6 +132,16 @@ export const authRouter = new Hono<{ Variables: AuthContexts }>()
 	})
 	.get("/userinfo", async (c) => {
 		const user = c.get("user")
+
+		if (!user || !user.id || !isValidUUID(user.id)) {
+			return c.json(
+				{
+					message: "Bad request",
+					error_description: "Invalid user information provided.",
+				},
+				400,
+			)
+		}
 
 		const loggedInUser = await getLoggedInUser(user.id)
 

@@ -2,6 +2,7 @@
 	"name": "api",
 	"scripts": {
 		"dev": "bun run --hot src/index.ts",
+		"test#integration": "vitest run --config vitest.integration.config.ts",
 		"db#up": "docker compose -f compose-db.yml up -d",
 		"db#down": "docker compose -f compose-db.yml down",
 		"db#migrate": "prisma migrate dev",
@@ -24,8 +25,13 @@
 		"zod-openapi": "^4.2.4"
 	},
 	"devDependencies": {
+		"@types/bcrypt": "^5.0.2",
 		"@types/bun": "latest",
 		"@types/jsonwebtoken": "^9.0.9",
-		"prisma": "^6.7.0"
+		"@types/uuid": "^10.0.0",
+		"@vitest/ui": "^3.2.4",
+		"bcrypt": "^6.0.0",
+		"prisma": "^6.7.0",
+		"vitest": "^3.2.4"
 	}
 }
