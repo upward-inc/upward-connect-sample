@@ -1,3 +1,4 @@
+import { execSync } from "node:child_process"
 import { PrismaClient } from "@prisma/client"
 import { MSSQLServerContainer } from "@testcontainers/mssqlserver"
 import type { StartedMSSQLServerContainer } from "@testcontainers/mssqlserver"
@@ -44,7 +45,6 @@ beforeAll(async () => {
 	console.log("✅ MSSQL container started and connected")
 
 	// Run migrations
-	const { execSync } = require("node:child_process")
 	process.env.DATABASE_URL = sqlServerConnectionString
 
 	try {
