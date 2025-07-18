@@ -4,6 +4,7 @@ import {
 	deleteAuthorizationCode,
 	generateRefreshToken,
 	generateToken,
+	getLoggedInUser,
 	getOAuthClientById,
 	getUserByUsernameAndPassword,
 	saveAuthorizationCode,
@@ -127,6 +128,30 @@ export const authRouter = new Hono<{ Variables: AuthContexts }>()
 				expires_in: env.OIDC_TOKEN_EXPIRES_IN_MINUTE * 60,
 			})
 		}
+	})
+	.get("/userinfo", async (c) => {
+		const user = c.get("user")
+
+		const loggedInUser = await getLoggedInUser(user.id)
+
+		if (!loggedInUser) {
+			return c.json(
+				{
+					error: "User not found",
+					error_description:
+						"The user associated with the provided token does not exist.",
+				},
+				404,
+			)
+		}
+
+		return c.json({
+			sub: loggedInUser.id,
+			name: loggedInUser.user_name,
+			given_name: loggedInUser.first_name,
+			family_name: loggedInUser.last_name,
+			email: loggedInUser.email,
+		})
 	})
 // .get("/.well-known/openid-configuration", async (c) => {
 // 	// OpenID Connect Discoveryドキュメントを返す

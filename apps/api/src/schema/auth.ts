@@ -38,6 +38,9 @@ export const LoggedInUserSchema = z
 		last_name: z.string().openapi({
 			description: "姓",
 		}),
+		email: z.string().email().openapi({
+			description: "メールアドレス",
+		}),
 	})
 	.openapi({
 		description: "ログインに成功したユーザーの情報",

@@ -17,6 +17,7 @@ export const getUserById = async (
 			hashed_password: true,
 			first_name: true,
 			last_name: true,
+			email: true,
 		},
 	})
 
@@ -44,6 +45,7 @@ export const getUserByUsernameAndPassword = async (
 			hashed_password: true,
 			first_name: true,
 			last_name: true,
+			email: true,
 		},
 	})
 

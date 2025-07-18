@@ -1,12 +1,11 @@
 import { Hono } from "hono"
-import { compress } from "hono/compress"
 import { secureHeaders } from "hono/secure-headers"
 import { trimTrailingSlash } from "hono/trailing-slash"
 import { env } from "./env"
 import { handleError, handleNotFound } from "./error-handler"
 import { apiRouter } from "./routes/api"
 
-const app = new Hono()
+export const app = new Hono()
 
 // middleware
 app.use(secureHeaders())
