@@ -1,5 +1,4 @@
 import { randomUUID } from "node:crypto"
-import { testClient } from "hono/testing"
 import { afterAll, beforeAll, describe, expect, it } from "vitest"
 import { app } from "../../index"
 import {
