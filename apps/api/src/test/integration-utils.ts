@@ -1,4 +1,3 @@
-import * as bcrypt from "bcrypt"
 import { sign } from "jsonwebtoken"
 import type * as ms from "ms"
 import { testPrisma } from "./integration-setup"
@@ -44,16 +43,13 @@ export async function createIntegrationTestUser(userData: {
 	email: string | null
 }) {
 	try {
-		// Hash a default password for test users
-		const hashedPassword = await bcrypt.hash("test-password-123", 10)
-
 		const user = await testPrisma.user.create({
 			data: {
 				user_name: `test_${userData.user_name}`,
 				first_name: userData.first_name,
 				last_name: userData.last_name,
 				email: userData.email,
-				hashed_password: hashedPassword,
+				hashed_password: "test-password-123", // Use a fixed password for testing purposes
 				is_active: true,
 				timezone: "Asia/Tokyo",
 				language: "ja",
