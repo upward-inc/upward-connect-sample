@@ -1,4 +1,3 @@
-import { randomUUID } from "node:crypto"
 import { afterAll, beforeAll, describe, expect, it } from "vitest"
 import { app } from "../../index"
 import {
@@ -198,7 +197,7 @@ describe("Auth Integration Tests", () => {
 		})
 
 		it("should return 404 for non-existent user", async () => {
-			const nonExistentUserId = randomUUID()
+			const nonExistentUserId = crypto.randomUUID()
 			const token = createValidToken(nonExistentUserId)
 			const response = await app.request("/api/oauth2/userinfo", {
 				method: "GET",
