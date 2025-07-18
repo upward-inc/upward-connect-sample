@@ -1,6 +1,5 @@
 import { Hono } from "hono"
 import { nanoid } from "nanoid"
-import { validate as isValidUUID } from "uuid"
 import {
 	deleteAuthorizationCode,
 	generateRefreshToken,
