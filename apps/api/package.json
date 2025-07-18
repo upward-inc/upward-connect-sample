@@ -18,6 +18,7 @@
 		"@hono/zod-validator": "^0.5.0",
 		"@prisma/client": "^6.7.0",
 		"@scalar/hono-api-reference": "^0.8.8",
+		"@testcontainers/mssqlserver": "^11.2.1",
 		"hono": "^4.7.9",
 		"hono-openapi": "^0.4.8",
 		"jsonwebtoken": "^9.0.2",
