@@ -25,10 +25,8 @@ export async function cleanupTestData() {
 				},
 			},
 		})
-
-		console.log("🧹 Test data cleanup completed")
 	} catch (error) {
-		console.error("❌ Error during cleanup:", error)
+		console.error("Error during cleanup:", error)
 		throw error
 	}
 }
@@ -64,10 +62,9 @@ export async function createIntegrationTestUser(userData: {
 			},
 		})
 
-		console.log(`✅ Created test user: ${user.user_name}`)
 		return user
 	} catch (error) {
-		console.error("❌ Error creating test user:", error)
+		console.error("Error creating test user:", error)
 		throw error
 	}
 }

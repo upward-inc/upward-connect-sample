@@ -11,13 +11,11 @@ describe("Auth Integration Tests", () => {
 	beforeAll(async () => {
 		// Clean up any existing test data
 		await cleanupTestData()
-		console.log("🧪 Starting OIDC authentication integration tests")
 	})
 
 	afterAll(async () => {
 		// Clean up all test data
 		await cleanupTestData()
-		console.log("🧹 Integration test cleanup completed")
 	})
 
 	describe("Userinfo Endpoint", () => {
