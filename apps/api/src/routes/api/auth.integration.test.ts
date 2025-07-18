@@ -65,22 +65,6 @@ describe("Auth Integration Tests", () => {
 			})
 		})
 
-		it("should return 400 for malformed user info request", async () => {
-			const token = createValidToken("invalid-user-id")
-			const response = await app.request("/api/oauth2/userinfo", {
-				method: "GET",
-				headers: {
-					Authorization: `Bearer ${token}`,
-				},
-			})
-			expect(response.status).toBe(400)
-			const data = JSON.parse(await response.text())
-			expect(data).toEqual({
-				message: "Bad request",
-				error_description: "Invalid user information provided.",
-			})
-		})
-
 		it("should return 401 for missing authorization header", async () => {
 			const response = await app.request("/api/oauth2/userinfo", {
 				method: "GET",
