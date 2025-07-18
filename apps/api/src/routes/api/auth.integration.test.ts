@@ -37,7 +37,7 @@ describe("Auth Integration Tests", () => {
 				},
 			})
 
-			const data = JSON.parse(await response.text())
+			const data = await response.json()
 			expect(response.status).toBe(200)
 			expect(data).toEqual({
 				sub: testUser.id,
@@ -56,7 +56,7 @@ describe("Auth Integration Tests", () => {
 				},
 			})
 
-			const data = JSON.parse(await response.text())
+			const data = await response.json()
 			expect(response.status).toBe(400)
 			expect(data).toEqual({
 				message: "Invalid authentication header",
@@ -68,7 +68,7 @@ describe("Auth Integration Tests", () => {
 				method: "GET",
 			})
 
-			const data = JSON.parse(await response.text())
+			const data = await response.json()
 			expect(response.status).toBe(401)
 			expect(data).toEqual({
 				message: "No authentication header",
@@ -91,7 +91,7 @@ describe("Auth Integration Tests", () => {
 				},
 			})
 
-			const data = JSON.parse(await response.text())
+			const data = await response.json()
 			expect(response.status).toBe(401)
 			expect(data).toEqual({
 				message: "Invalid token",
@@ -106,7 +106,7 @@ describe("Auth Integration Tests", () => {
 				},
 			})
 
-			const data = JSON.parse(await response.text())
+			const data = await response.json()
 			expect(response.status).toBe(401)
 			expect(data).toEqual({
 				message: "Invalid token",
@@ -139,7 +139,7 @@ describe("Auth Integration Tests", () => {
 				},
 			})
 
-			const data = JSON.parse(await response.text())
+			const data = await response.json()
 			expect(response.status).toBe(401)
 			expect(data).toEqual({
 				message: "Invalid token",
@@ -164,7 +164,7 @@ describe("Auth Integration Tests", () => {
 				},
 			})
 
-			const data = JSON.parse(await response.text())
+			const data = await response.json()
 			expect(response.status).toBe(401)
 			expect(data).toEqual({
 				message: "Invalid token",
@@ -189,7 +189,7 @@ describe("Auth Integration Tests", () => {
 				},
 			})
 
-			const data = JSON.parse(await response.text())
+			const data = await response.json()
 			expect(response.status).toBe(401)
 			expect(data).toEqual({
 				message: "Invalid token",
@@ -206,7 +206,7 @@ describe("Auth Integration Tests", () => {
 				},
 			})
 
-			const data = JSON.parse(await response.text())
+			const data = await response.json()
 			expect(response.status).toBe(404)
 			expect(data).toEqual({
 				error: "User not found",
