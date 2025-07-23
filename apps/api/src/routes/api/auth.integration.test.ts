@@ -260,8 +260,8 @@ describe("Auth Integration Tests", () => {
 			expect(data).toHaveProperty("token_type", "Bearer")
 			expect(data).toHaveProperty(
 				"expires_in",
-				env.OIDC_TOKEN_EXPIRES_IN_MINUTE,
-			)
+				env.OIDC_TOKEN_EXPIRES_IN_MINUTE * 60,
+			) // Default expiration time in seconds
 		})
 
 		it("should return 400 for invalid client_id", async () => {

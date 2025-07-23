@@ -113,10 +113,9 @@ export async function createIntegrationTestOAuthClient(clientData: {
 			},
 		})
 
-		console.log(`✅ Created test OAuth client: ${client.name}`)
 		return client
 	} catch (error) {
-		console.error("❌ Error creating test OAuth client:", error)
+		console.error("Error creating test OAuth client:", error)
 		throw error
 	}
 }
