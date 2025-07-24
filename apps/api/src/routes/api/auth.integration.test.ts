@@ -252,8 +252,8 @@ describe("Auth Integration Tests", () => {
 				}),
 			})
 
+			const data = await response.json()
 			expect(response.status).toBe(200)
-			const data = JSON.parse(await response.text())
 			expect(data).toHaveProperty("access_token")
 			expect(data).toHaveProperty("id_token")
 			expect(data).toHaveProperty("refresh_token")
@@ -288,8 +288,8 @@ describe("Auth Integration Tests", () => {
 				}),
 			})
 
+			const data = await response.json()
 			expect(response.status).toBe(400)
-			const data = JSON.parse(await response.text())
 			expect(data).toEqual({
 				error: "invalid_grant",
 				error_description: "Invalid client id",
@@ -326,8 +326,8 @@ describe("Auth Integration Tests", () => {
 				}),
 			})
 
+			const data = await response.json()
 			expect(response.status).toBe(400)
-			const data = JSON.parse(await response.text())
 			expect(data).toEqual({
 				error: "invalid_grant",
 				error_description: "Invalid client secret",
@@ -364,8 +364,8 @@ describe("Auth Integration Tests", () => {
 				}),
 			})
 
+			const data = await response.json()
 			expect(response.status).toBe(400)
-			const data = JSON.parse(await response.text())
 			expect(data).toEqual({
 				error: "invalid_grant",
 				error_description: "Invalid refresh token",
@@ -393,8 +393,8 @@ describe("Auth Integration Tests", () => {
 				}),
 			})
 
+			const data = await response.json()
 			expect(response.status).toBe(400)
-			const data = JSON.parse(await response.text())
 			expect(data).toEqual({
 				error: "invalid_grant",
 				error_description: "Invalid refresh token",
@@ -425,8 +425,8 @@ describe("Auth Integration Tests", () => {
 				}),
 			})
 
+			const data = await response.json()
 			expect(response.status).toBe(400)
-			const data = JSON.parse(await response.text())
 			expect(data).toEqual({
 				error: "invalid_grant",
 				error_description: "Unknown user",
@@ -453,8 +453,8 @@ describe("Auth Integration Tests", () => {
 				}),
 			})
 
+			const data = await response.json()
 			expect(response.status).toBe(400)
-			const data = JSON.parse(await response.text())
 			// Zod validation error for unsupported grant type
 			expect(data.success).toBe(false)
 			expect(data.error).toHaveProperty("issues")
