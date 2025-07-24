@@ -62,13 +62,21 @@ export const PostAuthorizeParamSchema = z.object({
 })
 
 // トークンリクエスト用のスキーマ
-export const TokenRequestSchema = z.object({
-	grant_type: z.literal("authorization_code"),
-	code: z.string().min(1),
-	redirect_uri: z.string().url(),
-	client_id: z.string().min(1),
-	client_secret: z.string().min(1),
-})
+export const TokenRequestSchema = z.discriminatedUnion("grant_type", [
+	z.object({
+		grant_type: z.literal("authorization_code"),
+		code: z.string().min(1),
+		redirect_uri: z.string().url(),
+		client_id: z.string().min(1),
+		client_secret: z.string().min(1),
+	}),
+	z.object({
+		grant_type: z.literal("refresh_token"),
+		refresh_token: z.string().min(1),
+		client_id: z.string().min(1),
+		client_secret: z.string().min(1),
+	}),
+])
 
 export type OAuthClient = z.infer<typeof OAuthClientSchema>
 export type LoggedInUser = z.infer<typeof LoggedInUserSchema>

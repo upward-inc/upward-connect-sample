@@ -9,6 +9,7 @@ import {
 	getUserByUsernameAndPassword,
 	saveAuthorizationCode,
 	validateAuthorizeParams,
+	validateRefreshTokenParams,
 	validateTokenParams,
 } from "../../domain/auth"
 import { env } from "../../env"
@@ -103,11 +104,45 @@ export const authRouter = new Hono<{ Variables: AuthContexts }>()
 					400,
 				)
 			}
-
 			const { user_id, user_name } = validateResult
 
 			// 認可コードを使用済みにする（データベースから削除する）
 			await deleteAuthorizationCode(params.code)
+
+			// アクセストークン、IDトークンを生成
+			const { accessToken, idToken } = generateToken({
+				userId: user_id,
+				userName: user_name,
+			})
+
+			// リフレッシュトークンを生成
+			const { refreshToken } = generateRefreshToken({
+				userId: user_id,
+			})
+
+			return c.json({
+				token_type: "Bearer",
+				access_token: accessToken,
+				id_token: idToken,
+				refresh_token: refreshToken,
+				expires_in: env.OIDC_TOKEN_EXPIRES_IN_MINUTE * 60,
+			})
+		}
+
+		if (params.grant_type === "refresh_token") {
+			// リフレッシュトークンパラメータの検証
+			const validateResult = await validateRefreshTokenParams(params)
+
+			if (!validateResult.success) {
+				return c.json(
+					{
+						error: "invalid_grant",
+						error_description: validateResult.error_message,
+					},
+					400,
+				)
+			}
+			const { user_id, user_name } = validateResult
 
 			// アクセストークン、IDトークンを生成
 			const { accessToken, idToken } = generateToken({
