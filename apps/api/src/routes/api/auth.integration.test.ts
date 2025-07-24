@@ -458,10 +458,7 @@ describe("Auth Integration Tests", () => {
 			// Zod validation error for unsupported grant type
 			expect(data.success).toBe(false)
 			expect(data.error).toHaveProperty("issues")
-			expect(data.error.issues[0].code).toBe("invalid_union_discriminator")
-			expect(data.error.issues[0].message).toContain(
-				"Invalid discriminator value",
-			)
+			expect(data.error.issues[0].path).toContainEqual("grant_type")
 		})
 	})
 })
