@@ -91,79 +91,78 @@ export const authRouter = new Hono<{ Variables: AuthContexts }>()
 	.post("/token", validator("form", TokenRequestSchema), async (c) => {
 		const params = c.req.valid("form")
 
-		let user_id: string
-		let user_name: string
+		if (params.grant_type === "authorization_code") {
+			// パラメータの検証
+			const validateResult = await validateTokenParams(params)
 
-		switch (params.grant_type) {
-			case "authorization_code": {
-				// パラメータの検証
-				const validateResult = await validateTokenParams(params)
-
-				if (!validateResult.success) {
-					return c.json(
-						{
-							error: "invalid_grant",
-							error_description: validateResult.error_message,
-						},
-						400,
-					)
-				}
-				user_id = validateResult.user_id
-				user_name = validateResult.user_name
-
-				// 認可コードを使用済みにする（データベースから削除する）
-				await deleteAuthorizationCode(params.code)
-
-				break
-			}
-			case "refresh_token": {
-				// リフレッシュトークンパラメータの検証
-				const validateResult = await validateRefreshTokenParams(params)
-
-				if (!validateResult.success) {
-					return c.json(
-						{
-							error: "invalid_grant",
-							error_description: validateResult.error_message,
-						},
-						400,
-					)
-				}
-				user_id = validateResult.user_id
-				user_name = validateResult.user_name
-				break
-			}
-			default: {
-				// サポートされていないgrant_type
+			if (!validateResult.success) {
 				return c.json(
 					{
-						error: "unsupported_grant_type",
-						error_description:
-							"The authorization grant type is not supported by the authorization server.",
+						error: "invalid_grant",
+						error_description: validateResult.error_message,
 					},
 					400,
 				)
 			}
+			const { user_id, user_name } = validateResult
+
+			// 認可コードを使用済みにする（データベースから削除する）
+			await deleteAuthorizationCode(params.code)
+
+			// アクセストークン、IDトークンを生成
+			const { accessToken, idToken } = generateToken({
+				userId: user_id,
+				userName: user_name,
+			})
+
+			// リフレッシュトークンを生成
+			const { refreshToken } = generateRefreshToken({
+				userId: user_id,
+			})
+
+			return c.json({
+				token_type: "Bearer",
+				access_token: accessToken,
+				id_token: idToken,
+				refresh_token: refreshToken,
+				expires_in: env.OIDC_TOKEN_EXPIRES_IN_MINUTE * 60,
+			})
 		}
 
-		// アクセストークン、IDトークンを生成
-		const { accessToken, idToken } = generateToken({
-			userId: user_id,
-			userName: user_name,
-		})
+		if (params.grant_type === "refresh_token") {
+			// リフレッシュトークンパラメータの検証
+			const validateResult = await validateRefreshTokenParams(params)
 
-		// リフレッシュトークンを生成
-		const { refreshToken } = generateRefreshToken({
-			userId: user_id,
-		})
+			if (!validateResult.success) {
+				return c.json(
+					{
+						error: "invalid_grant",
+						error_description: validateResult.error_message,
+					},
+					400,
+				)
+			}
+			const { user_id, user_name } = validateResult
 
-		return c.json({
-			token_type: "Bearer",
-			access_token: accessToken,
-			id_token: idToken,
-			refresh_token: refreshToken,
-			expires_in: env.OIDC_TOKEN_EXPIRES_IN_MINUTE * 60,
-		})
+			// アクセストークン、IDトークンを生成
+			const { accessToken, idToken } = generateToken({
+				userId: user_id,
+				userName: user_name,
+			})
+
+			// リフレッシュトークンを生成
+			const { refreshToken } = generateRefreshToken({
+				userId: user_id,
+			})
+
+			return c.json({
+				token_type: "Bearer",
+				access_token: accessToken,
+				id_token: idToken,
+				refresh_token: refreshToken,
+				expires_in: env.OIDC_TOKEN_EXPIRES_IN_MINUTE * 60,
+			})
+		}
 	})
 	.get("/userinfo", async (c) => {
 		const user = c.get("user")
