@@ -15,7 +15,7 @@ const SearchParamsSchema = z.object({
 	state: z.string().optional(),
 })
 
-const AuthorizeParamsRedirectUriSchema = z.string().url().startsWith("https:/")
+const AuthorizeParamsRedirectUriSchema = z.string().url().startsWith("https://")
 
 const AuthorizeParamsWithoutRedirectUriSchema = z.object({
 	response_type: z.literal("code"),
