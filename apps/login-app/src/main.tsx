@@ -1,7 +1,7 @@
 import { RouterProvider, createRouter } from "@tanstack/react-router"
 import { StrictMode } from "react"
 import { createRoot } from "react-dom/client"
-import { AuthProvider, useAuth } from "./auth"
+import { type AuthContextType, AuthProvider, useAuth } from "./auth"
 import { routeTree } from "./routeTree.gen"
 
 // Create a new router instance
@@ -10,8 +10,8 @@ const router = createRouter({
 	defaultPreload: "intent",
 	scrollRestoration: true,
 	context: {
-		// 初期値はnullで、後でAuthProviderから渡す
-		auth: null,
+		// 初期値は空値で、後でAuthProviderから渡す
+		auth: {} as AuthContextType,
 	},
 })
 
