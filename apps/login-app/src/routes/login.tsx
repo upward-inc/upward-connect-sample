@@ -30,12 +30,6 @@ export const Route = createFileRoute("/login")({
 
 function Login() {
 	const { redirect } = useSearch({ from: "/login" })
-	const [redirectBase, searchParams] = (redirect ?? fallback).split("?")
-	// Parse searchParams string into an object
-	const parsedSearchParams = Object.fromEntries(
-		new URLSearchParams(searchParams),
-	)
-
 	const [isLoading, setIsLoading] = useState(false)
 	const [errorMessage, setErrorMessage] = useState("")
 	const formRef = useRef<HTMLFormElement>(null)
@@ -61,10 +55,7 @@ function Login() {
 			}
 
 			// リダイレクト処理
-			navigate({
-				to: redirectBase,
-				search: parsedSearchParams,
-			})
+			navigate({ href: redirect ?? fallback })
 		} catch (error) {
 			setErrorMessage(
 				"ログインに失敗しました。ユーザー名とパスワードを確認してください。",
