@@ -5,6 +5,7 @@ import {
 	useEffect,
 	useState,
 } from "react"
+import { env } from "../env"
 
 const AUTH_TOKEN_KEY = "auth.token"
 const AUTH_USER_KEY = "auth.user"
@@ -66,8 +67,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 		formData.append("username", username)
 		formData.append("password", password)
 
-		// TODO: URLを環境変数で指定する
-		const response = await fetch("http://localhost:8787/api/oauth2/login", {
+		const response = await fetch(`${env.API_URL}/oauth2/login`, {
 			method: "POST",
 			body: formData,
 		})
