@@ -1,20 +1,23 @@
 import { Hono } from "hono"
 import { createFile, getFile } from "../../domain/file"
-import { describeRoute, validator } from "../../libs/hono-openapi"
-import { prisma } from "../../libs/prisma"
 import {
-	FileSchema,
+	describeRoute,
+	describeRouteWithoutResponseValidation,
+	validator,
+} from "../../libs/hono-openapi"
+import type { AuthContexts } from "../../schema/auth"
+import {
 	GetFileParamSchema,
 	PostFileFormSchema,
 	PostFileResultSchema,
 } from "../../schema/file"
 
-export const fileRouter = new Hono()
+export const fileRouter = new Hono<{ Variables: AuthContexts }>()
 	.get(
 		"/:id",
-		describeRoute({
+		// Response は json ではないので schema validation は行わない
+		describeRouteWithoutResponseValidation({
 			description: "単一のファイルを返却する",
-			schema: FileSchema,
 		}),
 		validator("param", GetFileParamSchema),
 		async (c) => {
@@ -49,8 +52,7 @@ export const fileRouter = new Hono()
 				return c.json({ message: "No file uploaded" }, 400)
 			}
 
-			// TODO: 認証機能を実装したらAPIリクエストユーザーに置き換える
-			const user = await prisma.user.findFirst()
+			const user = c.get("user")
 			if (!user) {
 				throw new Error("User not found")
 			}

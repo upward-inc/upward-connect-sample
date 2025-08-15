@@ -23,4 +23,19 @@ export const describeRoute = <S extends ZodType>(options: {
 	})
 }
 
+export const describeRouteWithoutResponseValidation = (options: {
+	description: string
+}) => {
+	const { description } = options
+	return honoOpenApi.describeRoute({
+		description,
+		validateResponse: false,
+		responses: {
+			200: {
+				description: "Success",
+			},
+		},
+	})
+}
+
 export const validator = honoOpenApiZod.validator

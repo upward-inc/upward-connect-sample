@@ -2,14 +2,16 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest"
 import { env } from "../../env"
 import { app } from "../../index"
 import {
-	cleanupTestData,
 	createExpiredRefreshToken,
 	createExpiredToken,
 	createIntegrationTestOAuthClient,
-	createIntegrationTestUser,
 	createRefreshToken,
 	createValidToken,
-} from "../../test/integration-utils"
+} from "../../test/integration-utils/auth"
+import {
+	cleanupTestData,
+	createIntegrationTestUser,
+} from "../../test/integration-utils/common"
 
 describe("Auth Integration Tests", () => {
 	beforeAll(async () => {
