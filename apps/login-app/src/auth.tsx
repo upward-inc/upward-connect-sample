@@ -5,7 +5,7 @@ import {
 	useEffect,
 	useState,
 } from "react"
-import { env } from "../env"
+import { env } from "./env"
 
 const AUTH_TOKEN_KEY = "auth.token"
 const AUTH_USER_KEY = "auth.user"
