@@ -59,7 +59,6 @@ export const validateAuthorizeParams = async (
 ): Promise<AuthorizeResult> => {
 	try {
 		// TODO: scopeの検証
-		// TODO: stateの検証
 
 		if (params.response_type !== "code") {
 			return { success: false, error: "invalid_request" }

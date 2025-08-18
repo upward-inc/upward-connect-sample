@@ -7,6 +7,17 @@ export async function cleanupTestData() {
 	try {
 		// Clean up in reverse order of dependencies
 
+		// Clean up published_auth_code first (references user)
+		await testPrisma.published_auth_code.deleteMany({
+			where: {
+				user: {
+					user_name: {
+						contains: "test_",
+					},
+				},
+			},
+		})
+
 		// Clean up files created by test users
 		await testPrisma.file.deleteMany({
 			where: {

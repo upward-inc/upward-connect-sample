@@ -29,11 +29,13 @@ const AuthorizeParamsSchema = AuthorizeParamsWithoutRedirectUriSchema.extend({
 
 interface AuthorizeResultSuccess {
 	code: string
+	state?: string
 }
 
 interface AuthorizeResultFailure {
 	error: AuthorizeError
 	error_description?: string
+	state?: string
 }
 
 type OAuthClientFetchResult =
@@ -120,11 +122,16 @@ function useAuthorizeValidation(
 			// `redirect_uri`以外のパラメータに不備がある場合は、リダイレクト
 			redirectFail(validationResult.redirectUri.data, {
 				error: "invalid_request",
+				state: searchParams.state,
 			})
 		}
 
 		setIsValidating(false)
-	}, [validationResult.redirectUri, validationResult.withoutRedirectUri])
+	}, [
+		validationResult.redirectUri,
+		validationResult.withoutRedirectUri,
+		searchParams.state,
+	])
 
 	return { isValidating }
 }
@@ -199,6 +206,9 @@ const redirectFail = (url: string, result: AuthorizeResultFailure) => {
 			result.error_description,
 		)
 	}
+	if (result.state) {
+		redirectUrl.searchParams.append("state", result.state)
+	}
 	window.location.href = redirectUrl.toString()
 }
 
@@ -254,24 +264,24 @@ function AuthorizePage() {
 				error:
 					response.status === 503 ? "temporarily_unavailable" : result.error,
 				error_description: result.error_description,
+				state: result.state,
 			})
 			return
 		}
 
-		const { code }: AuthorizeResultSuccess = await response.json()
+		const { code, state }: AuthorizeResultSuccess = await response.json()
 
-		redirectSuccess(
-			strictQueryParams.redirect_uri,
-			code,
-			strictQueryParams.state,
-		)
+		redirectSuccess(strictQueryParams.redirect_uri, code, state)
 	}
 
 	// 拒否時の処理
 	const handleDeny = () => {
 		const strictQueryParams = AuthorizeParamsSchema.parse(searchParams)
 
-		redirectFail(strictQueryParams.redirect_uri, { error: "access_denied" })
+		redirectFail(strictQueryParams.redirect_uri, {
+			error: "access_denied",
+			state: strictQueryParams.state,
+		})
 	}
 
 	if (isValidating) {
@@ -288,6 +298,7 @@ function AuthorizePage() {
 		redirectFail(strictQueryParams.redirect_uri, {
 			error: oauthClientFetchResult.error,
 			error_description: oauthClientFetchResult.error_description,
+			state: strictQueryParams.state,
 		})
 		return null
 	}

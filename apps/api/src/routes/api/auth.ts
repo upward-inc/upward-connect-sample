@@ -62,6 +62,7 @@ export const authRouter = new Hono<{ Variables: AuthContexts }>()
 					{
 						error: validateResult.error,
 						error_description: validateResult.error_description,
+						state: params.state ?? null,
 					},
 					400,
 				)
@@ -85,6 +86,7 @@ export const authRouter = new Hono<{ Variables: AuthContexts }>()
 
 			return c.json({
 				code: authorizationCode,
+				state: validateResult.state ?? null,
 			})
 		},
 	)
