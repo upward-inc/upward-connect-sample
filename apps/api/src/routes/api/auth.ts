@@ -4,6 +4,7 @@ import {
 	deleteAuthorizationCode,
 	generateRefreshToken,
 	generateToken,
+	getFirstOAuthClientByName,
 	getOAuthClientById,
 	getUserById,
 	getUserByUsernameAndPassword,
@@ -30,9 +31,15 @@ export const authRouter = new Hono<{ Variables: AuthContexts }>()
 			return c.json({ message: "Invalid username or password" }, 401)
 		}
 
+		const client = await getFirstOAuthClientByName(env.OIDC_CLIENT_NAME)
+		if (!client) {
+			throw new Error("no default oauth2 client")
+		}
+
 		const { accessToken } = generateToken({
 			userId: user.id,
 			userName: user.user_name,
+			clientId: client.id,
 		})
 		return c.json({ ...user, access_token: accessToken })
 	})
@@ -106,7 +113,7 @@ export const authRouter = new Hono<{ Variables: AuthContexts }>()
 					400,
 				)
 			}
-			const { user_id, user_name, nonce } = validateResult
+			const { user_id, user_name, client_id, nonce } = validateResult
 
 			// 認可コードを使用済みにする（データベースから削除する）
 			await deleteAuthorizationCode(params.code)
@@ -115,12 +122,14 @@ export const authRouter = new Hono<{ Variables: AuthContexts }>()
 			const { accessToken, idToken } = generateToken({
 				userId: user_id,
 				userName: user_name,
+				clientId: client_id,
 				nonce: nonce,
 			})
 
 			// リフレッシュトークンを生成
 			const { refreshToken } = generateRefreshToken({
 				userId: user_id,
+				clientId: client_id,
 			})
 
 			return c.json({
@@ -145,17 +154,19 @@ export const authRouter = new Hono<{ Variables: AuthContexts }>()
 					400,
 				)
 			}
-			const { user_id, user_name } = validateResult
+			const { user_id, user_name, client_id } = validateResult
 
 			// アクセストークンを生成
 			const { accessToken } = generateToken({
 				userId: user_id,
 				userName: user_name,
+				clientId: client_id,
 			})
 
 			// リフレッシュトークンを生成
 			const { refreshToken } = generateRefreshToken({
 				userId: user_id,
+				clientId: client_id,
 			})
 
 			// `Upon successful validation of the Refresh Token, the response body is the Token Response of Section 3.1.3.3 except that it might not contain an id_token.`

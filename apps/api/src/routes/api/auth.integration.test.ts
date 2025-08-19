@@ -1,5 +1,5 @@
 import { type JwtPayload, sign, verify } from "jsonwebtoken"
-import { afterAll, beforeAll, describe, expect, it } from "vitest"
+import { afterAll, beforeAll, describe, expect, it, test } from "vitest"
 import { env } from "../../env"
 import { app } from "../../index"
 import {
@@ -19,12 +19,6 @@ describe("Auth Integration Tests", () => {
 	interface DecodedIdToken extends JwtPayload {
 		nonce?: string
 		username?: string
-		preferred_username?: string
-		given_name?: string
-		family_name?: string
-		email?: string
-		email_verified?: string
-		name?: string
 	}
 
 	beforeAll(async () => {
@@ -941,6 +935,269 @@ describe("Auth Integration Tests", () => {
 				tokenSecret,
 			) as DecodedIdToken
 			expect(decodedIdToken.nonce).toBe(specialNonce)
+		})
+	})
+
+	describe("OIDC Token Audience (aud) Validation", () => {
+		it("should set aud claim in id_token equal to client_id from request", async () => {
+			// Create a test user and client
+			const testUser = await createIntegrationTestUser({
+				user_name: "aud_test_user",
+				first_name: "Audience",
+				last_name: "Test",
+				email: "aud_test@example.com",
+			})
+
+			const testClient = await createIntegrationTestOAuthClient({
+				name: "aud_cli",
+				secret: "test_secret_12345",
+				redirect_uris: "https://example.com/callback",
+				scopes: "openid,profile,email",
+			})
+
+			const token = createValidToken(testUser.id)
+
+			// Step 1: Authorize request
+			const authorizeResponse = await app.request("/api/oauth2/authorize", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/x-www-form-urlencoded",
+					Authorization: `Bearer ${token}`,
+				},
+				body: new URLSearchParams({
+					response_type: "code",
+					client_id: testClient.id,
+					redirect_uri: "https://example.com/callback",
+					scope: "openid profile email",
+				}),
+			})
+
+			const authorizeData = await authorizeResponse.json()
+			expect(authorizeResponse.status).toBe(200)
+			expect(authorizeData).toHaveProperty("code")
+
+			// Step 2: Exchange authorization code for tokens
+			const tokenResponse = await app.request("/api/oauth2/token", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/x-www-form-urlencoded",
+				},
+				body: new URLSearchParams({
+					grant_type: "authorization_code",
+					code: authorizeData.code,
+					redirect_uri: "https://example.com/callback",
+					client_id: testClient.id,
+					client_secret: testClient.secret,
+				}),
+			})
+
+			const tokenData = await tokenResponse.json()
+			expect(tokenResponse.status).toBe(200)
+			expect(tokenData).toHaveProperty("id_token")
+
+			// Step 3: Verify aud claim in ID token equals client_id
+			const decodedIdToken = verify(
+				tokenData.id_token,
+				tokenSecret,
+			) as DecodedIdToken
+
+			// The audience (aud) claim should match the client_id from the request
+			expect(decodedIdToken.aud).toBe(testClient.id)
+			expect(decodedIdToken.sub).toBe(testUser.id)
+			expect(decodedIdToken.username).toBe(testUser.user_name)
+		})
+
+		it("should set aud claim in access_token equal to client_id from request", async () => {
+			// Create a test user and client
+			const testUser = await createIntegrationTestUser({
+				user_name: "aud_access_test_user",
+				first_name: "Access",
+				last_name: "Test",
+				email: "aud_access_test@example.com",
+			})
+
+			const testClient = await createIntegrationTestOAuthClient({
+				name: "aud_acc_cli",
+				secret: "test_secret_67890",
+				redirect_uris: "https://example.com/callback",
+				scopes: "openid,profile,email",
+			})
+
+			const token = createValidToken(testUser.id)
+
+			// Step 1: Authorize request
+			const authorizeResponse = await app.request("/api/oauth2/authorize", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/x-www-form-urlencoded",
+					Authorization: `Bearer ${token}`,
+				},
+				body: new URLSearchParams({
+					response_type: "code",
+					client_id: testClient.id,
+					redirect_uri: "https://example.com/callback",
+					scope: "openid profile email",
+				}),
+			})
+
+			const authorizeData = await authorizeResponse.json()
+			expect(authorizeResponse.status).toBe(200)
+			expect(authorizeData).toHaveProperty("code")
+
+			// Step 2: Exchange authorization code for tokens
+			const tokenResponse = await app.request("/api/oauth2/token", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/x-www-form-urlencoded",
+				},
+				body: new URLSearchParams({
+					grant_type: "authorization_code",
+					code: authorizeData.code,
+					redirect_uri: "https://example.com/callback",
+					client_id: testClient.id,
+					client_secret: testClient.secret,
+				}),
+			})
+
+			const tokenData = await tokenResponse.json()
+			expect(tokenResponse.status).toBe(200)
+			expect(tokenData).toHaveProperty("access_token")
+
+			// Step 3: Verify aud claim in access token equals client_id
+			const decodedAccessToken = verify(
+				tokenData.access_token,
+				tokenSecret,
+			) as JwtPayload
+
+			// The audience (aud) claim should match the client_id from the request
+			expect(decodedAccessToken.aud).toBe(testClient.id)
+			expect(decodedAccessToken.sub).toBe(testUser.id)
+		})
+
+		it("should maintain consistent aud claim when using refresh token", async () => {
+			// Create a test user and client
+			const testUser = await createIntegrationTestUser({
+				user_name: "aud_refresh_test_user",
+				first_name: "Refresh",
+				last_name: "Test",
+				email: "aud_refresh_test@example.com",
+			})
+
+			const testClient = await createIntegrationTestOAuthClient({
+				name: "aud_ref_cli",
+				secret: "test_secret_refresh_123",
+				redirect_uris: "https://example.com/callback",
+				scopes: "openid,profile,email",
+			})
+
+			const token = createValidToken(testUser.id)
+
+			// Step 1: Get initial tokens through authorization code flow
+			const authorizeResponse = await app.request("/api/oauth2/authorize", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/x-www-form-urlencoded",
+					Authorization: `Bearer ${token}`,
+				},
+				body: new URLSearchParams({
+					response_type: "code",
+					client_id: testClient.id,
+					redirect_uri: "https://example.com/callback",
+					scope: "openid profile email",
+				}),
+			})
+
+			const authorizeData = await authorizeResponse.json()
+			expect(authorizeResponse.status).toBe(200)
+
+			const tokenResponse = await app.request("/api/oauth2/token", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/x-www-form-urlencoded",
+				},
+				body: new URLSearchParams({
+					grant_type: "authorization_code",
+					code: authorizeData.code,
+					redirect_uri: "https://example.com/callback",
+					client_id: testClient.id,
+					client_secret: testClient.secret,
+				}),
+			})
+
+			const tokenData = await tokenResponse.json()
+			expect(tokenResponse.status).toBe(200)
+
+			// Step 2: Use refresh token to get new access token
+			const refreshResponse = await app.request("/api/oauth2/token", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/x-www-form-urlencoded",
+				},
+				body: new URLSearchParams({
+					grant_type: "refresh_token",
+					refresh_token: tokenData.refresh_token,
+					client_id: testClient.id,
+					client_secret: testClient.secret,
+				}),
+			})
+
+			const refreshData = await refreshResponse.json()
+			expect(refreshResponse.status).toBe(200)
+			expect(refreshData).toHaveProperty("access_token")
+
+			// Step 3: Verify aud claim in refreshed access token equals client_id
+			const decodedRefreshedToken = verify(
+				refreshData.access_token,
+				tokenSecret,
+			) as JwtPayload
+
+			// The audience (aud) claim should still match the client_id
+			expect(decodedRefreshedToken.aud).toBe(testClient.id)
+			expect(decodedRefreshedToken.sub).toBe(testUser.id)
+		})
+
+		// TODO: Skip this test until we shift to `bun test` from `vitest`.
+		// We use Bun.password.hash() in /login and it is not compatible with vitest
+		// see: https://github.com/vitest-dev/vscode/discussions/473#discussioncomment-10740173
+		//
+		// `testcontainers` is not compatible with `bun test` because it uses `nan` (V8 C++ APIs)
+		// see: https://github.com/oven-sh/bun/issues/7810#issuecomment-2276549353
+		test.skip("should set aud claim in access_token equal to default client_id for /login", async () => {
+			// Create a test user
+			const testUser = await createIntegrationTestUser({
+				user_name: "aud_login_test_user",
+				first_name: "Aud",
+				last_name: "Login",
+				email: "aud_login_test@example.com",
+			})
+
+			// TODO: Use the real test default client
+			const testDefaultClient = {
+				id: crypto.randomUUID(),
+			}
+
+			// Access login endpoint with the correct password format expected by the test utility
+			const response = await app.request("/api/oauth2/login", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/x-www-form-urlencoded",
+				},
+				body: new URLSearchParams({
+					username: testUser.user_name,
+					password: "test-password-123", // Use the actual password stored in createIntegrationTestUser
+				}),
+			})
+
+			const responseData = await response.json()
+			expect(response.status).toBe(200)
+			expect(responseData).toHaveProperty("access_token")
+
+			// Verify audience claim in access token should match default client ID
+			const decodedAccessToken = verify(
+				responseData.access_token,
+				tokenSecret,
+			) as JwtPayload
+			expect(decodedAccessToken.aud).toBe(testDefaultClient.id)
 		})
 	})
 })

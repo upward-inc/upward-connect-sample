@@ -16,6 +16,7 @@ interface ValidateResultSuccess {
 	success: true
 	user_id: string
 	user_name: string
+	client_id: string
 }
 
 interface ValidateResultFailure {
@@ -64,6 +65,7 @@ export const validateRefreshTokenParams = async (
 			success: true,
 			user_id: user.id,
 			user_name: user.user_name,
+			client_id: client.id,
 		}
 	} catch (error) {
 		return { success: false, error_message: "Invalid refresh token" }
