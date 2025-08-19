@@ -55,7 +55,7 @@ function Login() {
 			}
 
 			// リダイレクト処理
-			navigate({ to: redirect ?? fallback })
+			navigate({ href: redirect ?? fallback })
 		} catch (error) {
 			setErrorMessage(
 				"ログインに失敗しました。ユーザー名とパスワードを確認してください。",

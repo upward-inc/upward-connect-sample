@@ -10,8 +10,14 @@ const router = createRouter({
 	defaultPreload: "intent",
 	scrollRestoration: true,
 	context: {
-		// 初期値はnullで、後でAuthProviderから渡す
-		auth: null,
+		// 初期値は空値で、後でAuthProviderから渡す
+		auth: {
+			isAuthenticated: false,
+			user: null,
+			token: null,
+			login: async () => {},
+			logout: async () => {},
+		},
 	},
 })
 
