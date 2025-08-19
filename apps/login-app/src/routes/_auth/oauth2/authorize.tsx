@@ -3,8 +3,7 @@ import { useEffect, useState } from "react"
 import { z } from "zod"
 import { useAuth } from "../../../auth"
 import { Button } from "../../../components/button"
-
-// TODO: 環境変数の使用
+import { env } from "../../../env"
 
 // OAuth2認可リクエストのパラメータと同等のクエリパラメータを受け取る
 const SearchParamsSchema = z.object({
@@ -148,7 +147,7 @@ function useOAuthClient(
 					setIsFetching(true)
 
 					const response = await fetch(
-						`http://localhost:8787/api/oauth2/clients/${clientId}`,
+						`${env.API_URL}/oauth2/clients/${clientId}`,
 						{
 							headers: { authorization: `Bearer ${token}` },
 						},
@@ -234,7 +233,7 @@ function AuthorizePage() {
 		}
 
 		// サーバーサイドで検証
-		const response = await fetch("http://localhost:8787/api/oauth2/authorize", {
+		const response = await fetch(`${env.API_URL}/oauth2/authorize`, {
 			method: "POST",
 			headers: {
 				authorization: `Bearer ${token}`,
