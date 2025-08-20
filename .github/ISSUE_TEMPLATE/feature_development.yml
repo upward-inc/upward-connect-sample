@@ -1,6 +1,6 @@
 name: Feature development
 description: 機能開発用テンプレート
-title: ""
+title: "[Feature]: "
 labels: []
 body:
   - type: textarea
