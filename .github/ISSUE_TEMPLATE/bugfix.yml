@@ -1,6 +1,6 @@
 name: Bugfix
 description: 不具合修正用テンプレート
-title: ""
+title: "[Bug]: "
 labels: ["bug"]
 body:
   - type: textarea
