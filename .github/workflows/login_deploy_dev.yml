@@ -3,11 +3,14 @@ name: Azure Static Web Apps CI/CD
 on:
   push:
     branches:
-      - feature/19
+      - develop
   pull_request:
     types: [opened, synchronize, reopened, closed]
     branches:
-      - feature/19
+      - develop
+      
+  # Allow manually trigger
+  workflow_dispatch:
 
 env:
   TARGET_ENV: dev
