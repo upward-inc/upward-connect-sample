@@ -8,7 +8,7 @@ on:
       [ develop ]
     paths:
       - 'apps/api/**'
-      - '.github/workflows/api_deploy_develop.yml'
+      - '.github/workflows/api_deploy_dev.yml'
 
   # Allow manually trigger
   workflow_dispatch:
