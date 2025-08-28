@@ -32,7 +32,6 @@ jobs:
   build:
     runs-on: ubuntu-latest
     environment: ${{ inputs.environment }}
-
     steps:
       - name: Checkout to the branch
         uses: actions/checkout@v4
