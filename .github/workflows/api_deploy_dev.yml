@@ -15,7 +15,7 @@ on:
 
 jobs:
   build:
-    uses: ./.github/workflows/build.yml
+    uses: ./.github/workflows/api_build.yml
     with:
       environment: 'develop'
       registry_domain: 'multipfdevjecr.azurecr.io'
@@ -27,7 +27,7 @@ jobs:
 
   deploy:
     needs: build
-    uses: ./.github/workflows/deploy.yml
+    uses: ./.github/workflows/api_deploy.yml
     with:
       environment: 'develop'
       container_app_name: 'multi-pf-dev-je-api'
