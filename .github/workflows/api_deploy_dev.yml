@@ -22,7 +22,7 @@ jobs:
       repository_name: 'multi-pf-api'
       tag: 'latest'
       dockerfile_path: './apps/api/Dockerfile'
-      context_path: './'
+      context_path: './apps/api'
     secrets: inherit
 
   deploy:
