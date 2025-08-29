@@ -7,10 +7,8 @@ const envSchema = z.object({
 		.regex(/^(https:\/\/|http:\/\/localhost(:[0-9]+)?(\/.*)?$)/), // start with https:// or http://localhost:[port]
 })
 
-const processedEnv = {
+export const env = envSchema.parse({
 	API_URL: import.meta.env.VITE_API_URL,
-}
-
-export const env = envSchema.parse(processedEnv)
+})
 
 export type Environment = z.infer<typeof envSchema>
