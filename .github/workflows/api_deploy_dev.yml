@@ -1,0 +1,38 @@
+name: api (develop) - deploy
+
+# When this action will be executed
+on:
+  # Automatically trigger it when detected changes in repo
+  push:
+    branches:
+      [ develop ]
+    paths:
+      - 'apps/api/**'
+      - '.github/workflows/api_deploy_dev.yml'
+
+  # Allow manually trigger
+  workflow_dispatch:
+
+jobs:
+  build:
+    uses: ./.github/workflows/api_build.yml
+    with:
+      environment: 'develop'
+      registry_domain: 'multipfdevjecr.azurecr.io'
+      repository_name: 'multi-pf-api'
+      tag: 'latest'
+      dockerfile_path: './apps/api/Dockerfile'
+      context_path: './'
+    secrets: inherit
+
+  deploy:
+    needs: build
+    uses: ./.github/workflows/api_deploy.yml
+    with:
+      environment: 'develop'
+      container_app_name: 'multi-pf-dev-je-api'
+      resource_group: 'multi-pf-dev-je'
+      registry_domain: 'multipfdevjecr.azurecr.io'
+      repository_name: 'multi-pf-api'
+      tag: 'latest'
+    secrets: inherit
