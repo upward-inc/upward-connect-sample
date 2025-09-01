@@ -1,0 +1,85 @@
+name: Azure Static Web Apps CI/CD
+
+on:
+  push:
+    branches:
+      - develop
+  pull_request:
+    types: [opened, synchronize, reopened, closed]
+    branches:
+      - develop
+  # Allow manually trigger
+  workflow_dispatch:
+
+env:
+  TARGET_ENV: dev
+
+jobs:
+  build_job:
+    name: Build Job
+    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch' || (github.event_name == 'pull_request' && github.event.action != 'closed')
+    runs-on: ubuntu-latest
+    steps:
+      # Checkout
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Setup Bun
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.2.12
+
+      # Build
+      - name: Build
+        working-directory: ./apps/login-app
+        run: |
+          bun install --frozen-lockfile
+          cp .env.${{ env.TARGET_ENV }} .env
+          bun run build
+          cp ../../staticwebapp.config.json ./dist
+
+      # Upload Publish Files
+      - name: Upload Publish Files
+        uses: actions/upload-artifact@v4
+        with:
+          name: publish-files
+          path: ./apps/login-app/dist
+
+  deploy_job:
+    name: Deploy Job
+    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    needs: build_job
+    steps:
+      # Download artifact
+      - name: Download Publish Files
+        uses: actions/download-artifact@v5
+        with:
+          name: publish-files
+          path: dist
+
+      # Deploy to SWA
+      - name: Deploy
+        id: builddeploy
+        uses: Azure/static-web-apps-deploy@v1
+        with:
+          azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_DEPLOY_TOKEN }}
+          repo_token: ${{ secrets.GITHUB_TOKEN }} # Used for Github integrations (i.e. PR comments)
+          action: 'upload'
+          app_location: '/dist'
+          # `build_job`を個別に定義している為、デフォルトのビルドステップを使用しない
+          skip_app_build: true
+
+  close_pull_request_job:
+    name: Close Pull Request Job
+    if: github.event_name == 'pull_request' && github.event.action == 'closed'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Close Pull Request
+        id: closepullrequest
+        uses: Azure/static-web-apps-deploy@v1
+        with:
+          azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_DEPLOY_TOKEN }}
+          action: 'close'
+          app_location: '/dist'
