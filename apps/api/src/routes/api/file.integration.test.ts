@@ -326,10 +326,9 @@ describe("File Integration Tests", () => {
 				},
 			})
 
+			const content = await getResponse.text()
 			expect(getResponse.status).toBe(200)
 			expect(getResponse.headers.get("Content-Type")).toBe("text/plain")
-
-			const content = await getResponse.text()
 			expect(content).toBe(fileContent)
 		})
 
@@ -371,14 +370,58 @@ describe("File Integration Tests", () => {
 				},
 			})
 
+			const responseContent = await getResponse.text()
 			expect(getResponse.status).toBe(200)
 			expect(getResponse.headers.get("Content-Type")).toBe("application/json")
 			expect(getResponse.headers.get("Content-Length")).toBe(
 				jsonContent.length.toString(),
 			)
-
-			const responseContent = await getResponse.text()
 			expect(responseContent).toBe(jsonContent)
+		})
+
+		it("should handle binary file downloads correctly", async () => {
+			const testUser = await createIntegrationTestUser({
+				user_name: "binary_download_user",
+				first_name: "Binary",
+				last_name: "Download",
+				email: "binary_download@example.com",
+			})
+			const token = createValidToken(testUser.id)
+
+			// Create binary file
+			const binaryContent = new Uint8Array([
+				137, 80, 78, 71, 13, 10, 26, 10, 255, 0, 128,
+			]) // PNG header
+			const binaryFile = new File([binaryContent], "binary.png", {
+				type: "image/png",
+			})
+			const formData = new FormData()
+			formData.append("file", binaryFile)
+
+			const createResponse = await app.request("/api/files", {
+				method: "POST",
+				headers: {
+					Authorization: `Bearer ${token}`,
+				},
+				body: formData,
+			})
+
+			const createData = await createResponse.json()
+			expect(createResponse.status).toBe(200)
+
+			// Download the binary file
+			const getResponse = await app.request(`/api/files/${createData.id}`, {
+				method: "GET",
+				headers: {
+					Authorization: `Bearer ${token}`,
+				},
+			})
+
+			const arrayBuffer = await getResponse.arrayBuffer()
+			const responseBytes = new Uint8Array(arrayBuffer)
+			expect(getResponse.status).toBe(200)
+			expect(getResponse.headers.get("Content-Type")).toBe("image/png")
+			expect(responseBytes).toEqual(binaryContent)
 		})
 
 		it("should return 404 for non-existent file ID", async () => {
@@ -440,50 +483,19 @@ describe("File Integration Tests", () => {
 			})
 		})
 
-		it("should handle binary file downloads correctly", async () => {
-			const testUser = await createIntegrationTestUser({
-				user_name: "binary_download_user",
-				first_name: "Binary",
-				last_name: "Download",
-				email: "binary_download@example.com",
-			})
-			const token = createValidToken(testUser.id)
-
-			// Create binary file
-			const binaryContent = new Uint8Array([
-				137, 80, 78, 71, 13, 10, 26, 10, 255, 0, 128,
-			]) // PNG header
-			const binaryFile = new File([binaryContent], "binary.png", {
-				type: "image/png",
-			})
-			const formData = new FormData()
-			formData.append("file", binaryFile)
-
-			const createResponse = await app.request("/api/files", {
-				method: "POST",
-				headers: {
-					Authorization: `Bearer ${token}`,
-				},
-				body: formData,
-			})
-
-			const createData = await createResponse.json()
-			expect(createResponse.status).toBe(200)
-
-			// Download the binary file
-			const getResponse = await app.request(`/api/files/${createData.id}`, {
+		it("should return 401 for malformed token", async () => {
+			const response = await app.request("/api/files/some-id", {
 				method: "GET",
 				headers: {
-					Authorization: `Bearer ${token}`,
+					Authorization: "Bearer invalid.malformed.token",
 				},
 			})
 
-			expect(getResponse.status).toBe(200)
-			expect(getResponse.headers.get("Content-Type")).toBe("image/png")
-
-			const arrayBuffer = await getResponse.arrayBuffer()
-			const responseBytes = new Uint8Array(arrayBuffer)
-			expect(responseBytes).toEqual(binaryContent)
+			const data = await response.json()
+			expect(response.status).toBe(401)
+			expect(data).toEqual({
+				message: "Invalid token",
+			})
 		})
 	})
 })
