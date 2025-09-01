@@ -17,7 +17,7 @@ export const describeRoute = <S extends ZodType>(options: {
 		: undefined
 	return honoOpenApi.describeRoute({
 		description,
-		validateResponse: true,
+		validateResponse: !!schema,
 		responses: {
 			200: {
 				description: "Success",
