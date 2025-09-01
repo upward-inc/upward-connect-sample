@@ -4,8 +4,8 @@ import {
 	deleteAuthorizationCode,
 	generateRefreshToken,
 	generateToken,
-	getLoggedInUser,
 	getOAuthClientById,
+	getUserById,
 	getUserByUsernameAndPassword,
 	saveAuthorizationCode,
 	validateAuthorizeParams,
@@ -167,7 +167,7 @@ export const authRouter = new Hono<{ Variables: AuthContexts }>()
 	.get("/userinfo", async (c) => {
 		const user = c.get("user")
 
-		const loggedInUser = await getLoggedInUser(user.id)
+		const loggedInUser = await getUserById(user.id)
 
 		if (!loggedInUser) {
 			return c.json(
