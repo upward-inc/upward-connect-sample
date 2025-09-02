@@ -15,7 +15,7 @@ import {
 } from "../../test/integration-utils/common"
 
 describe("Auth Integration Tests", () => {
-	const tokenSecret = process.env.OIDC_TOKEN_SECRET as string
+	const tokenSecret = env.OIDC_TOKEN_SECRET
 	interface DecodedIdToken extends JwtPayload {
 		nonce?: string
 		username?: string
