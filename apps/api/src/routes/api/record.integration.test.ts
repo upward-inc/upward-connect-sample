@@ -442,7 +442,7 @@ describe("Record Integration Tests", () => {
 			const data = await response.json()
 			expect(response.status).toBe(400)
 			expect(data).toEqual({
-				message: "name is required for account",
+				message: "'name' is required for 'account'",
 			})
 		})
 

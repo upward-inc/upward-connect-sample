@@ -36,9 +36,9 @@ export const createRecord = async (
 	)
 
 	if (missingRequiredFields.length > 0) {
-		const fieldNames = missingRequiredFields.map((f) => f.name).join(", ")
+		const fieldNames = missingRequiredFields.map((f) => f.name).join("', '")
 		throw new HTTPException(400, {
-			message: `${fieldNames} ${missingRequiredFields.length === 1 ? "is" : "are"} required for ${entity_name}`,
+			message: `'${fieldNames}' ${missingRequiredFields.length === 1 ? "is" : "are"} required for '${entity_name}'`,
 		})
 	}
 
@@ -131,15 +131,15 @@ const createRecordInDatabase = async (
 
 		if (!result || result.length === 0) {
 			throw new HTTPException(500, {
-				message: `Failed to create record in ${entityName}`,
+				message: `Failed to create record in '${entityName}'`,
 			})
 		}
 
 		return { id: result[0].id }
 	} catch (error) {
-		console.error(`Error creating record in ${entityName}:`, error)
+		console.error(`Error creating record in '${entityName}':`, error)
 		throw new HTTPException(500, {
-			message: `Failed to create record in ${entityName}`,
+			message: `Failed to create record in '${entityName}'`,
 		})
 	}
 }
