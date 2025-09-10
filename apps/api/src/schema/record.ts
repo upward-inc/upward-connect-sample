@@ -52,7 +52,60 @@ export const GetRecordListResponseSchema = z.object({
 	data: RecordListSchema.openapi({ description: "クエリの結果を表す配列" }),
 })
 
+export const CreateRecordDataSchema = z
+	.any()
+	.refine((data) => {
+		// Ensure it's a non-null json object
+		return typeof data === "object" && data !== null && !Array.isArray(data)
+	})
+	.openapi({
+		description: "作成するレコードのデータ",
+		example: {
+			name: "株式会社 XXX", // string
+			account_number: "ACC-XXXXX",
+			main_phone_number: "03-1234-5678",
+			sub_phone_number: null,
+			web_site: "https://www.example.com",
+			industry: "agriculture", // single optional
+			number_of_employees: 1000, // numeric
+			revenue: 10000000,
+			address_zipcode: "123-4567",
+			address_prefecture: "東京都",
+			address_municipality: "新宿区",
+			address_street: "西新宿2丁目8-1",
+			latitude: 35.6895,
+			longitude: 139.6917,
+			parent: "fe604faa-0731-4424-a22f-737d60047f39", // reference
+			is_deleted: true, // boolean
+		},
+	})
+
+export const CreateRecordMutationSchema = z.object({
+	entity_name: z.string().openapi({
+		description: "作成対象のエンティティ名",
+		examples: ["account", "lead"],
+	}),
+	data: CreateRecordDataSchema,
+})
+
+export const CreateRecordResponseSchema = z
+	.object({
+		entity_name: z.string().openapi({
+			description: "作成されたレコードのエンティティ名",
+			examples: ["account", "lead"],
+		}),
+		id: z.string().uuid().openapi({
+			description: "作成されたレコードのID",
+			example: "fe604faa-0731-4424-a22f-737d60047f39",
+		}),
+	})
+	.openapi({
+		description: "作成されたレコードデータ",
+	})
+
 export type Record = z.infer<typeof RecordSchema>
 export type RecordList = z.infer<typeof RecordListSchema>
 export type GetRecordListQuery = z.infer<typeof GetRecordListQuerySchema>
 export type GetRecordListResponse = z.infer<typeof GetRecordListResponseSchema>
+export type CreateRecordMutation = z.infer<typeof CreateRecordMutationSchema>
+export type CreateRecordResponse = z.infer<typeof CreateRecordResponseSchema>
