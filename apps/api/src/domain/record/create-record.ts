@@ -1,19 +1,12 @@
-import { format } from "@formkit/tempo"
 import { HTTPException } from "hono/http-exception"
 import { prisma } from "../../libs/prisma"
 import type { JsonValue } from "../../schema/common"
-import type { EntityItem } from "../../schema/entity-item"
 import type {
 	CreateRecordMutation,
 	CreateRecordResponse,
 } from "../../schema/record"
 import { getEntity, getEntityItemList } from "../entity"
 import { validateFieldValue } from "./validate-field-value"
-
-type DBRecord = Record<
-	string,
-	string | number | boolean | Date | JsonValue | null
->
 
 export const createRecord = async (
 	userId: string,

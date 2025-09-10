@@ -1,5 +1,4 @@
 import type { user } from "@prisma/client"
-import { Decimal } from "@prisma/client/runtime/library"
 import { afterAll, beforeAll, describe, expect, it } from "vitest"
 import { seedEntities } from "../../../seed/entity"
 import { seedEntityItems } from "../../../seed/entity-item"

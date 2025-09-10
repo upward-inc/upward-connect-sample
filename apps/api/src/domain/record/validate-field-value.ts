@@ -3,9 +3,6 @@ import { HTTPException } from "hono/http-exception"
 import { prisma } from "../../libs/prisma"
 import type { JsonValue } from "../../schema/common"
 import type { EntityItem } from "../../schema/entity-item"
-import { GetRecordListQuerySchema } from "../../schema/record"
-import { WhereClauseSchema } from "../../schema/sql"
-import { getRecordList } from "./get-record-list"
 type Reference = {
 	entity: string
 	id: string
