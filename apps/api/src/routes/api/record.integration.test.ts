@@ -56,6 +56,9 @@ describe("Record Integration Tests", () => {
 	})
 
 	afterAll(async () => {
+		// Clean up entity-related data
+		await cleanupTestEntities()
+
 		// Clean up all test data
 		await cleanupTestData()
 	})
@@ -67,6 +70,18 @@ describe("Record Integration Tests", () => {
 			await seedEntityItemOptions(testPrisma)
 		} catch (error) {
 			console.error("Error seeding entities:", error)
+			throw error
+		}
+	}
+
+	async function cleanupTestEntities() {
+		try {
+			// Clean up entity-related data
+			await testPrisma.entity_item_option.deleteMany()
+			await testPrisma.entity_item.deleteMany()
+			await testPrisma.entity.deleteMany()
+		} catch (error) {
+			console.error("Error cleaning up entities:", error)
 			throw error
 		}
 	}
