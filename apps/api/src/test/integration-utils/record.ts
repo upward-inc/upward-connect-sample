@@ -46,7 +46,7 @@ export async function createIntegrationTestLead(
 		company: string
 		first_name: string
 		last_name: string
-		status: "New" | "Contacted" | "Qualified" | "Lost" | "Converted"
+		status: "new" | "contacted" | "nurturing" | "qualified" | "unqualified"
 	},
 	userId: string,
 ) {
@@ -56,7 +56,7 @@ export async function createIntegrationTestLead(
 				company: leadData.company,
 				first_name: leadData.first_name,
 				last_name: leadData.last_name,
-				status: leadData.status,
+				status: JSON.stringify([leadData.status]),
 				owner: JSON.stringify({
 					entity: "user",
 					id: userId,

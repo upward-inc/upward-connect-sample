@@ -37,7 +37,7 @@ describe("Record Integration Tests", () => {
 				company: "Test Company",
 				first_name: "Test",
 				last_name: "Lead",
-				status: "New",
+				status: "new",
 			},
 			testUser.id,
 		)
