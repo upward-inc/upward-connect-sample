@@ -138,9 +138,24 @@ describe("Record Integration Tests", () => {
 			expect(createdAccount?.originating_lead).toBeNull()
 			expect(createdAccount?.parent).toBeNull()
 			// Additional checks for ownership fields
-			expect(createdAccount?.owner).toBe(testUser.id)
-			expect(createdAccount?.created_by).toBe(testUser.id)
-			expect(createdAccount?.modified_by).toBe(testUser.id)
+			expect(createdAccount?.owner).toBe(
+				JSON.stringify({
+					entity: "user",
+					id: testUser.id,
+				}),
+			)
+			expect(createdAccount?.created_by).toBe(
+				JSON.stringify({
+					entity: "user",
+					id: testUser.id,
+				}),
+			)
+			expect(createdAccount?.modified_by).toBe(
+				JSON.stringify({
+					entity: "user",
+					id: testUser.id,
+				}),
+			)
 		})
 
 		it("should create a record with all assignable fields", async () => {
@@ -219,9 +234,24 @@ describe("Record Integration Tests", () => {
 				JSON.stringify({ entity: "account", id: testAccount.id }),
 			)
 			// Additional checks for ownership fields
-			expect(createdAccount?.owner).toBe(testUser.id)
-			expect(createdAccount?.created_by).toBe(testUser.id)
-			expect(createdAccount?.modified_by).toBe(testUser.id)
+			expect(createdAccount?.owner).toBe(
+				JSON.stringify({
+					entity: "user",
+					id: testUser.id,
+				}),
+			)
+			expect(createdAccount?.created_by).toBe(
+				JSON.stringify({
+					entity: "user",
+					id: testUser.id,
+				}),
+			)
+			expect(createdAccount?.modified_by).toBe(
+				JSON.stringify({
+					entity: "user",
+					id: testUser.id,
+				}),
+			)
 		})
 
 		it("should ignore not creatable field in data", async () => {

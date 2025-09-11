@@ -13,9 +13,18 @@ export async function createIntegrationTestAccount(
 		const account = await testPrisma.account.create({
 			data: {
 				name: accountData.name,
-				owner: userId,
-				created_by: userId,
-				modified_by: userId,
+				owner: JSON.stringify({
+					entity: "user",
+					id: userId,
+				}),
+				created_by: JSON.stringify({
+					entity: "user",
+					id: userId,
+				}),
+				modified_by: JSON.stringify({
+					entity: "user",
+					id: userId,
+				}),
 			},
 			select: {
 				id: true,
@@ -48,9 +57,18 @@ export async function createIntegrationTestLead(
 				first_name: leadData.first_name,
 				last_name: leadData.last_name,
 				status: leadData.status,
-				owner: userId,
-				created_by: userId,
-				modified_by: userId,
+				owner: JSON.stringify({
+					entity: "user",
+					id: userId,
+				}),
+				created_by: JSON.stringify({
+					entity: "user",
+					id: userId,
+				}),
+				modified_by: JSON.stringify({
+					entity: "user",
+					id: userId,
+				}),
 			},
 			select: {
 				id: true,
