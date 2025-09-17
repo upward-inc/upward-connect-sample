@@ -22,8 +22,28 @@ import type {
 } from "./operator"
 import { LimitSchema, OffsetSchema, OrderBySchema } from "./paging"
 
+const safeFiledName = (field: string) => {
+	// Common SQL Server reserved keywords that might be used as column names
+	const reservedKeywords = [
+		"user",
+		"order",
+		"key",
+		"table",
+		"index",
+		"view",
+		"database",
+		"schema",
+	]
+	if (reservedKeywords.includes(field.toLowerCase())) {
+		return `[${field}]`
+	}
+	return field
+}
+
 export const SelectClauseSchema = z.array(z.string()).transform((fields) => {
-	return `SELECT ${fields.join(", ")}`
+	// Handle SQL Server reserved keywords by wrapping them in brackets
+	const safeFields = fields.map((field) => safeFiledName(field))
+	return `SELECT ${safeFields.join(", ")}`
 })
 
 export const WhereClauseSchema = z
