@@ -1,4 +1,6 @@
 import { execSync } from "node:child_process"
+import { readFileSync, readdirSync } from "node:fs"
+import { extname, join } from "node:path"
 import { PrismaClient } from "@prisma/client"
 import { MSSQLServerContainer } from "@testcontainers/mssqlserver"
 import type { StartedMSSQLServerContainer } from "@testcontainers/mssqlserver"
@@ -7,6 +9,37 @@ import { prisma } from "../libs/prisma"
 
 let mssqlContainer: StartedMSSQLServerContainer
 let testPrisma: PrismaClient
+
+async function executeViewSqlFiles() {
+	try {
+		// Get all SQL files in the views/dbo directory
+		const viewsPath = join(process.cwd(), "prisma", "views", "dbo")
+		const allFiles = readdirSync(viewsPath)
+		const sqlFiles = allFiles.filter((file) => extname(file) === ".sql")
+
+		console.log(`Found ${sqlFiles.length} view files to execute`)
+
+		// Execute each SQL file using Prisma's executeRaw with dynamic SQL
+		for (const sqlFile of sqlFiles.sort()) {
+			const filePath = join(viewsPath, sqlFile)
+			const sqlContent = readFileSync(filePath, "utf-8").trim()
+
+			try {
+				// Use executeRaw with template literal to execute DDL
+				await testPrisma.$executeRaw`EXEC(${sqlContent})`
+				console.log(`  ✅ Successfully executed ${sqlFile}`)
+			} catch (prismaError) {
+				console.error(`  ❌ Failed to execute ${sqlFile}:`, prismaError)
+				throw prismaError
+			}
+		}
+
+		console.log("✅ Database views execution completed")
+	} catch (error) {
+		console.error("❌ Failed to execute view SQL files:", error)
+		throw error
+	}
+}
 
 beforeAll(async () => {
 	console.log("🚀 Starting MSSQL container for integration tests...")
@@ -55,6 +88,14 @@ beforeAll(async () => {
 		console.log("✅ Database migrations completed")
 	} catch (error) {
 		console.error("❌ Migration failed:", error)
+		throw error
+	}
+
+	// Execute database views
+	try {
+		await executeViewSqlFiles()
+	} catch (error) {
+		console.error("❌ View execution failed:", error)
 		throw error
 	}
 

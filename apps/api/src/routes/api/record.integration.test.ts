@@ -12,7 +12,15 @@ import {
 } from "../../test/integration-utils/common"
 import {
 	createIntegrationTestAccount,
+	createIntegrationTestActivity,
+	createIntegrationTestCampaign,
+	createIntegrationTestCase,
+	createIntegrationTestContact,
 	createIntegrationTestLead,
+	createIntegrationTestOpportunity,
+	createIntegrationTestPhoneCall,
+	createIntegrationTestProduct,
+	createIntegrationTestSample,
 } from "../../test/integration-utils/record"
 
 describe("Record Integration Tests", () => {
@@ -549,6 +557,1254 @@ describe("Record Integration Tests", () => {
 			expect(data.message).toBe(
 				"Field 'revenue' must be an integer for 'account'",
 			)
+		})
+	})
+
+	describe("GET /api/records - Get Record List", () => {
+		it("should return record list with only entity name", async () => {
+			const testUser = await createIntegrationTestUser({
+				user_name: "list_user",
+				first_name: "List",
+				last_name: "User",
+				email: "list_user@example.com",
+			})
+			const token = createValidToken(testUser.id)
+
+			const testCreatedAccount = await createIntegrationTestAccount({
+				name: "List Test Account",
+			})
+
+			const response = await app.request("/api/records?entity_name=account", {
+				method: "GET",
+				headers: {
+					Authorization: `Bearer ${token}`,
+				},
+			})
+
+			const data = await response.json()
+			expect(response.status).toBe(200)
+			expect(data).toHaveProperty("has_next_page")
+			expect(data).toHaveProperty("total_size")
+			expect(data).toHaveProperty("data")
+			expect(Array.isArray(data.data)).toBe(true)
+			expect(
+				data.data.some(
+					(record: { id: string }) => record.id === testCreatedAccount.id,
+				),
+			).toBe(true)
+		})
+
+		it("should return record list with specified field", async () => {
+			const testUser = await createIntegrationTestUser({
+				user_name: "fields_test_user",
+				first_name: "Fields",
+				last_name: "Test",
+				email: "fields_test@example.com",
+			})
+			const token = createValidToken(testUser.id)
+
+			const testCreatedAccount = await createIntegrationTestAccount({
+				name: "Fields Test Account",
+				account_number: "FIELD-123",
+				main_phone_number: "03-1234-5678",
+			})
+
+			const response = await app.request(
+				"/api/records?entity_name=account&fields=id,name,account_number",
+				{
+					method: "GET",
+					headers: {
+						Authorization: `Bearer ${token}`,
+					},
+				},
+			)
+
+			const data = await response.json()
+			expect(response.status).toBe(200)
+			expect(data).toHaveProperty("has_next_page")
+			expect(data).toHaveProperty("total_size")
+			expect(data).toHaveProperty("data")
+			expect(Array.isArray(data.data)).toBe(true)
+
+			// Find the test account in the results
+			const testAccount = data.data.find(
+				(record: { id: string }) => record.id === testCreatedAccount.id,
+			)
+			expect(testAccount).toBeTruthy()
+			expect(testAccount).toHaveProperty("id")
+			expect(testAccount).toHaveProperty("name", "test_Fields Test Account")
+			expect(testAccount).toHaveProperty("account_number", "FIELD-123")
+			// Verify that other fields are not included when not specified
+			expect(testAccount).not.toHaveProperty("main_phone_number")
+			expect(testAccount).not.toHaveProperty("website")
+		})
+
+		it("should return record list with base filter", async () => {
+			const testUser = await createIntegrationTestUser({
+				user_name: "base_filter_user",
+				first_name: "Base",
+				last_name: "Filter",
+				email: "base_filter@example.com",
+			})
+			const token = createValidToken(testUser.id)
+
+			// Create test accounts with different names
+			const activeAccount = await createIntegrationTestAccount({
+				name: "Active Test Account",
+			})
+
+			await createIntegrationTestAccount({
+				name: "Inactive Test Account",
+			})
+
+			// Test filtering by name using "eq" operator
+			const filterQuery = encodeURIComponent(
+				JSON.stringify({
+					field: "name",
+					operator: "eq",
+					value: "test_Active Test Account",
+					is_not: false,
+				}),
+			)
+
+			const response = await app.request(
+				`/api/records?entity_name=account&filter=${filterQuery}`,
+				{
+					method: "GET",
+					headers: {
+						Authorization: `Bearer ${token}`,
+					},
+				},
+			)
+
+			const data = await response.json()
+			expect(response.status).toBe(200)
+			expect(data).toHaveProperty("has_next_page")
+			expect(data).toHaveProperty("total_size")
+			expect(data).toHaveProperty("data")
+			expect(Array.isArray(data.data)).toBe(true)
+
+			// Should only return the active account
+			const foundActiveAccount = data.data.find(
+				(record: { id: string }) => record.id === activeAccount.id,
+			)
+			expect(foundActiveAccount).toBeTruthy()
+			expect(foundActiveAccount.name).toBe("test_Active Test Account")
+
+			// Should not contain accounts with different names
+			const shouldNotExist = data.data.find(
+				(record: { name: string }) =>
+					record.name === "test_Inactive Test Account",
+			)
+			expect(shouldNotExist).toBeUndefined()
+		})
+
+		it("should return record list with nest and filter", async () => {
+			const testUser = await createIntegrationTestUser({
+				user_name: "nest_and_filter_user",
+				first_name: "Nest",
+				last_name: "AndFilter",
+				email: "nest_and_filter@example.com",
+			})
+			const token = createValidToken(testUser.id)
+
+			// Create test accounts with different attributes
+			const targetAccount = await createIntegrationTestAccount({
+				name: "Target Company",
+				number_of_employees: 100,
+			})
+
+			await createIntegrationTestAccount({
+				name: "Target Company",
+				number_of_employees: 200,
+			})
+
+			await createIntegrationTestAccount({
+				name: "Other Company",
+				number_of_employees: 100,
+			})
+
+			// Test nested AND filter: name = "Target Company" AND number_of_employees = 100
+			const filterQuery = encodeURIComponent(
+				JSON.stringify({
+					and: [
+						{
+							field: "name",
+							operator: "eq",
+							value: "test_Target Company",
+							is_not: false,
+						},
+						{
+							field: "number_of_employees",
+							operator: "eq",
+							value: 100,
+							is_not: false,
+						},
+					],
+				}),
+			)
+
+			const response = await app.request(
+				`/api/records?entity_name=account&filter=${filterQuery}`,
+				{
+					method: "GET",
+					headers: {
+						Authorization: `Bearer ${token}`,
+					},
+				},
+			)
+
+			const data = await response.json()
+			expect(response.status).toBe(200)
+			expect(data).toHaveProperty("data")
+			expect(Array.isArray(data.data)).toBe(true)
+
+			// Should only return the account that matches both conditions
+			expect(data.data).toHaveLength(1)
+			const foundAccount = data.data[0]
+			expect(foundAccount.id).toBe(targetAccount.id)
+			expect(foundAccount.name).toBe("test_Target Company")
+			expect(foundAccount.number_of_employees).toBe(100)
+		})
+
+		it("should return record list with nest or filter", async () => {
+			const testUser = await createIntegrationTestUser({
+				user_name: "nest_or_filter_user",
+				first_name: "Nest",
+				last_name: "OrFilter",
+				email: "nest_or_filter@example.com",
+			})
+			const token = createValidToken(testUser.id)
+
+			// Create test accounts with different attributes
+			const account1 = await createIntegrationTestAccount({
+				name: "Company A",
+				number_of_employees: 50,
+			})
+
+			const account2 = await createIntegrationTestAccount({
+				name: "Company B",
+				number_of_employees: 150,
+			})
+
+			await createIntegrationTestAccount({
+				name: "Company C",
+				number_of_employees: 75,
+			})
+
+			// Test nested OR filter: name = "Company A" OR number_of_employees = 150
+			const filterQuery = encodeURIComponent(
+				JSON.stringify({
+					or: [
+						{
+							field: "name",
+							operator: "eq",
+							value: "test_Company A",
+							is_not: false,
+						},
+						{
+							field: "number_of_employees",
+							operator: "eq",
+							value: 150,
+							is_not: false,
+						},
+					],
+				}),
+			)
+
+			const response = await app.request(
+				`/api/records?entity_name=account&filter=${filterQuery}`,
+				{
+					method: "GET",
+					headers: {
+						Authorization: `Bearer ${token}`,
+					},
+				},
+			)
+
+			const data = await response.json()
+			expect(response.status).toBe(200)
+			expect(data).toHaveProperty("data")
+			expect(Array.isArray(data.data)).toBe(true)
+
+			// Should return accounts that match either condition
+			expect(data.data).toHaveLength(2)
+			const foundIds = data.data.map((record: { id: string }) => record.id)
+			expect(foundIds).toContain(account1.id)
+			expect(foundIds).toContain(account2.id)
+
+			// Verify the correct accounts are returned
+			const foundAccount1 = data.data.find(
+				(record: { id: string }) => record.id === account1.id,
+			)
+			expect(foundAccount1.name).toBe("test_Company A")
+
+			const foundAccount2 = data.data.find(
+				(record: { id: string }) => record.id === account2.id,
+			)
+			expect(foundAccount2.name).toBe("test_Company B")
+			expect(foundAccount2.number_of_employees).toBe(150)
+		})
+
+		it("should return record list with order_by parameter", async () => {
+			const testUser = await createIntegrationTestUser({
+				user_name: "order_by_user",
+				first_name: "Order",
+				last_name: "By",
+				email: "order_by@example.com",
+			})
+			const token = createValidToken(testUser.id)
+
+			// Create test accounts with specific naming pattern for sorting
+			const accounts = []
+			accounts.push(
+				await createIntegrationTestAccount({
+					name: "OrderBy_Zebra_Company",
+				}),
+			)
+
+			accounts.push(
+				await createIntegrationTestAccount({
+					name: "OrderBy_Alpha_Company",
+				}),
+			)
+
+			accounts.push(
+				await createIntegrationTestAccount({
+					name: "OrderBy_Beta_Company",
+				}),
+			)
+
+			// Test ordering by name in ascending order with a specific filter to isolate our test data
+			const orderByQuery = encodeURIComponent(
+				JSON.stringify([{ field: "name", direction: "asc" }]),
+			)
+
+			const filterQuery = encodeURIComponent(
+				JSON.stringify({
+					field: "name",
+					operator: "starts_with",
+					value: "test_OrderBy_",
+					is_not: false,
+				}),
+			)
+
+			const response = await app.request(
+				`/api/records?entity_name=account&order_by=${orderByQuery}&filter=${filterQuery}`,
+				{
+					method: "GET",
+					headers: {
+						Authorization: `Bearer ${token}`,
+					},
+				},
+			)
+
+			const data = await response.json()
+			expect(response.status).toBe(200)
+			expect(data).toHaveProperty("data")
+			expect(Array.isArray(data.data)).toBe(true)
+			expect(data.data.length).toBe(3)
+
+			// Check if records are sorted by name in ascending order
+			const names = data.data.map((record: { name: string }) => record.name)
+			expect(names).toEqual([
+				"test_OrderBy_Alpha_Company",
+				"test_OrderBy_Beta_Company",
+				"test_OrderBy_Zebra_Company",
+			])
+		})
+
+		it("should return record list with pagination (limit and offset)", async () => {
+			const testUser = await createIntegrationTestUser({
+				user_name: "pagination_user",
+				first_name: "Pagination",
+				last_name: "Test",
+				email: "pagination@example.com",
+			})
+			const token = createValidToken(testUser.id)
+
+			// Create multiple test accounts for pagination testing
+			const createdAccounts = []
+			for (let i = 1; i <= 5; i++) {
+				const account = await createIntegrationTestAccount({
+					name: `Pagination Test Account ${i.toString().padStart(2, "0")}`,
+				})
+				createdAccounts.push(account)
+			}
+
+			// Test pagination with limit=2, offset=1
+			const response = await app.request(
+				"/api/records?entity_name=account&limit=2&offset=1",
+				{
+					method: "GET",
+					headers: {
+						Authorization: `Bearer ${token}`,
+					},
+				},
+			)
+
+			const data = await response.json()
+			expect(response.status).toBe(200)
+			expect(data).toHaveProperty("has_next_page")
+			expect(data).toHaveProperty("total_size")
+			expect(data).toHaveProperty("data")
+			expect(Array.isArray(data.data)).toBe(true)
+
+			// Should return exactly 2 records due to limit
+			expect(data.data.length).toBeLessThanOrEqual(2)
+			// Should have next page since we have more records
+			expect(data.has_next_page).toBe(true)
+			// Total size should be at least 5 (our created accounts)
+			expect(data.total_size).toBeGreaterThanOrEqual(5)
+		})
+
+		it("should return record list with grouping", async () => {
+			const testUser = await createIntegrationTestUser({
+				user_name: "group_by_user",
+				first_name: "Group",
+				last_name: "By",
+				email: "group_by@example.com",
+			})
+			const token = createValidToken(testUser.id)
+
+			// Create test accounts with different industries for grouping
+			await createIntegrationTestAccount({
+				name: "Tech Company 1",
+				industry: "it",
+			})
+
+			await createIntegrationTestAccount({
+				name: "Tech Company 2",
+				industry: "it",
+			})
+
+			await createIntegrationTestAccount({
+				name: "Finance Company",
+				industry: "finance",
+			})
+
+			// Test grouping by industry
+			const groupByQuery = encodeURIComponent("industry")
+
+			const orderByQuery = encodeURIComponent(
+				JSON.stringify([{ field: "industry", direction: "asc" }]),
+			)
+
+			const response = await app.request(
+				`/api/records?entity_name=account&fields=industry&group_by=${groupByQuery}&order_by=${orderByQuery}`,
+				{
+					method: "GET",
+					headers: {
+						Authorization: `Bearer ${token}`,
+					},
+				},
+			)
+
+			const data = await response.json()
+
+			expect(response.status).toBe(200)
+			expect(data).toHaveProperty("data")
+			expect(Array.isArray(data.data)).toBe(true)
+
+			// Should return grouped results by industry
+			const industries = data.data.map(
+				(record: { industry: string }) => record.industry,
+			)
+			// Should contain unique industries
+			const uniqueIndustries = Array.from(new Set(industries))
+			expect(industries.length).toBe(uniqueIndustries.length)
+			expect(uniqueIndustries).toContain("it")
+			expect(uniqueIndustries).toContain("finance")
+		})
+
+		it("should return record list with numeric filter (greater than)", async () => {
+			const testUser = await createIntegrationTestUser({
+				user_name: "numeric_filter_user",
+				first_name: "Numeric",
+				last_name: "Filter",
+				email: "numeric_filter@example.com",
+			})
+			const token = createValidToken(testUser.id)
+
+			// Create test accounts with different employee counts
+			const largeAccount = await createIntegrationTestAccount({
+				name: "Large Company",
+				number_of_employees: 500,
+			})
+
+			await createIntegrationTestAccount({
+				name: "Small Company",
+				number_of_employees: 50,
+			})
+
+			// Test filtering by number_of_employees > 100
+			const filterQuery = encodeURIComponent(
+				JSON.stringify({
+					field: "number_of_employees",
+					operator: "gt",
+					value: 100,
+					is_not: false,
+				}),
+			)
+
+			const response = await app.request(
+				`/api/records?entity_name=account&filter=${filterQuery}`,
+				{
+					method: "GET",
+					headers: {
+						Authorization: `Bearer ${token}`,
+					},
+				},
+			)
+
+			const data = await response.json()
+			expect(response.status).toBe(200)
+			expect(data).toHaveProperty("data")
+			expect(Array.isArray(data.data)).toBe(true)
+
+			// Should only return the large company
+			const foundLargeAccount = data.data.find(
+				(record: { id: string }) => record.id === largeAccount.id,
+			)
+			expect(foundLargeAccount).toBeTruthy()
+			expect(foundLargeAccount.name).toBe("test_Large Company")
+			expect(foundLargeAccount.number_of_employees).toBe(500)
+
+			// Should not contain companies with 100 or fewer employees
+			const shouldNotExist = data.data.find(
+				(record: { name: string }) => record.name === "Small Company",
+			)
+			expect(shouldNotExist).toBeUndefined()
+		})
+
+		it("should return record list with text filter (contains)", async () => {
+			const testUser = await createIntegrationTestUser({
+				user_name: "text_filter_user",
+				first_name: "Text",
+				last_name: "Filter",
+				email: "text_filter@example.com",
+			})
+			const token = createValidToken(testUser.id)
+
+			// Create test accounts with different names
+			const techAccount = await createIntegrationTestAccount({
+				name: "Advanced Technology Solutions",
+			})
+
+			await createIntegrationTestAccount({
+				name: "Basic Services Company",
+			})
+
+			// Test filtering by name containing "Technology"
+			const filterQuery = encodeURIComponent(
+				JSON.stringify({
+					field: "name",
+					operator: "match",
+					value: "Technology",
+					is_not: false,
+				}),
+			)
+
+			const response = await app.request(
+				`/api/records?entity_name=account&filter=${filterQuery}`,
+				{
+					method: "GET",
+					headers: {
+						Authorization: `Bearer ${token}`,
+					},
+				},
+			)
+
+			const data = await response.json()
+			expect(response.status).toBe(200)
+			expect(data).toHaveProperty("data")
+			expect(Array.isArray(data.data)).toBe(true)
+
+			// Should only return the tech account
+			const foundTechAccount = data.data.find(
+				(record: { id: string }) => record.id === techAccount.id,
+			)
+			expect(foundTechAccount).toBeTruthy()
+			expect(foundTechAccount.name).toBe("test_Advanced Technology Solutions")
+
+			// Should not contain companies without "Technology" in name
+			const shouldNotExist = data.data.find(
+				(record: { name: string }) => record.name === "Basic Services Company",
+			)
+			expect(shouldNotExist).toBeUndefined()
+		})
+
+		it("should return record list with negated filter (is_not: true)", async () => {
+			const testUser = await createIntegrationTestUser({
+				user_name: "negated_filter_user",
+				first_name: "Negated",
+				last_name: "Filter",
+				email: "negated_filter@example.com",
+			})
+			const token = createValidToken(testUser.id)
+
+			// Create test accounts with different names
+			const excludedAccount = await createIntegrationTestAccount({
+				name: "Excluded Company",
+			})
+
+			const includedAccount = await createIntegrationTestAccount({
+				name: "Included Company",
+			})
+
+			// Test filtering to exclude "Excluded Company" (NOT name = "Excluded Company")
+			const filterQuery = encodeURIComponent(
+				JSON.stringify({
+					field: "name",
+					operator: "eq",
+					value: "test_Excluded Company",
+					is_not: true,
+				}),
+			)
+
+			const response = await app.request(
+				`/api/records?entity_name=account&filter=${filterQuery}`,
+				{
+					method: "GET",
+					headers: {
+						Authorization: `Bearer ${token}`,
+					},
+				},
+			)
+
+			const data = await response.json()
+			expect(response.status).toBe(200)
+			expect(data).toHaveProperty("data")
+			expect(Array.isArray(data.data)).toBe(true)
+
+			// Should contain the included account
+			const foundIncludedAccount = data.data.find(
+				(record: { id: string }) => record.id === includedAccount.id,
+			)
+			expect(foundIncludedAccount).toBeTruthy()
+			expect(foundIncludedAccount.name).toBe("test_Included Company")
+
+			// Should not contain the excluded account
+			const shouldNotExist = data.data.find(
+				(record: { id: string }) => record.id === excludedAccount.id,
+			)
+			expect(shouldNotExist).toBeUndefined()
+		})
+
+		it("should return record list with is_set filter", async () => {
+			const testUser = await createIntegrationTestUser({
+				user_name: "is_set_filter_user",
+				first_name: "IsSet",
+				last_name: "Filter",
+				email: "is_set_filter@example.com",
+			})
+			const token = createValidToken(testUser.id)
+
+			// Create test accounts - one with website, one without
+			const accountWithWebsite = await createIntegrationTestAccount({
+				name: "Company With Website",
+				website: "https://www.example.com",
+			})
+
+			const accountWithoutWebsite = await createIntegrationTestAccount({
+				name: "Company Without Website",
+				// website is not set (null)
+			})
+
+			// Test filtering for records where website IS SET (not null)
+			const filterQuery = encodeURIComponent(
+				JSON.stringify({
+					field: "website",
+					operator: "is_set",
+					is_not: false,
+				}),
+			)
+
+			const response = await app.request(
+				`/api/records?entity_name=account&filter=${filterQuery}`,
+				{
+					method: "GET",
+					headers: {
+						Authorization: `Bearer ${token}`,
+					},
+				},
+			)
+
+			const data = await response.json()
+			expect(response.status).toBe(200)
+			expect(data).toHaveProperty("data")
+			expect(Array.isArray(data.data)).toBe(true)
+
+			// Should contain the account with website
+			const foundAccountWithWebsite = data.data.find(
+				(record: { id: string }) => record.id === accountWithWebsite.id,
+			)
+			expect(foundAccountWithWebsite).toBeTruthy()
+			expect(foundAccountWithWebsite.name).toBe("test_Company With Website")
+			expect(foundAccountWithWebsite.website).toBe("https://www.example.com")
+
+			// Should not contain the account without website
+			const shouldNotExist = data.data.find(
+				(record: { id: string }) => record.id === accountWithoutWebsite.id,
+			)
+			expect(shouldNotExist).toBeUndefined()
+		})
+
+		it("should return record list for user entity", async () => {
+			const testUser = await createIntegrationTestUser({
+				user_name: "user_entity_test",
+				first_name: "User",
+				last_name: "Entity",
+				email: "user_entity@example.com",
+			})
+			const token = createValidToken(testUser.id)
+
+			const response = await app.request("/api/records?entity_name=user", {
+				method: "GET",
+				headers: {
+					Authorization: `Bearer ${token}`,
+				},
+			})
+
+			const data = await response.json()
+			expect(response.status).toBe(200)
+			expect(data).toHaveProperty("has_next_page")
+			expect(data).toHaveProperty("total_size")
+			expect(data).toHaveProperty("data")
+			expect(Array.isArray(data.data)).toBe(true)
+
+			// Should find test user
+			const foundTestUser = data.data.find(
+				(record: { id: string }) => record.id === testUser.id,
+			)
+			expect(foundTestUser).toBeTruthy()
+			expect(foundTestUser.user_name).toBe("test_user_entity_test")
+			expect(foundTestUser.first_name).toBe("User")
+			expect(foundTestUser.last_name).toBe("Entity")
+		})
+
+		it("should return record list for lead entity", async () => {
+			const testUser = await createIntegrationTestUser({
+				user_name: "lead_entity_test",
+				first_name: "Lead",
+				last_name: "Entity",
+				email: "lead_entity@example.com",
+			})
+			const token = createValidToken(testUser.id)
+
+			// Create test lead
+			const lead = await createIntegrationTestLead({
+				company: "Qualified Lead Company",
+				first_name: "John",
+				last_name: "Qualified",
+				status: "qualified",
+			})
+
+			const response = await app.request("/api/records?entity_name=lead", {
+				method: "GET",
+				headers: {
+					Authorization: `Bearer ${token}`,
+				},
+			})
+
+			const data = await response.json()
+			expect(response.status).toBe(200)
+			expect(data).toHaveProperty("has_next_page")
+			expect(data).toHaveProperty("total_size")
+			expect(data).toHaveProperty("data")
+			expect(Array.isArray(data.data)).toBe(true)
+
+			// Should find test lead
+			const foundLead = data.data.find(
+				(record: { id: string }) => record.id === lead.id,
+			)
+			expect(foundLead).toBeTruthy()
+			expect(foundLead.company).toBe("test_Qualified Lead Company")
+			expect(foundLead.first_name).toBe("John")
+			expect(foundLead.last_name).toBe("Qualified")
+		})
+
+		it("should return record list for activity entity", async () => {
+			const testUser = await createIntegrationTestUser({
+				user_name: "activity_entity_test",
+				first_name: "Activity",
+				last_name: "Entity",
+				email: "activity_entity@example.com",
+			})
+			const token = createValidToken(testUser.id)
+
+			// Create test activities
+			const activity = await createIntegrationTestActivity({
+				subject: "Activity",
+				is_all_day_event: true,
+				is_archived: false,
+			})
+
+			const response = await app.request("/api/records?entity_name=activity", {
+				method: "GET",
+				headers: {
+					Authorization: `Bearer ${token}`,
+				},
+			})
+
+			const data = await response.json()
+			expect(response.status).toBe(200)
+			expect(data).toHaveProperty("has_next_page")
+			expect(data).toHaveProperty("total_size")
+			expect(data).toHaveProperty("data")
+			expect(Array.isArray(data.data)).toBe(true)
+
+			// Should find test activity
+			const foundMeetingActivity = data.data.find(
+				(record: { id: string }) => record.id === activity.id,
+			)
+			expect(foundMeetingActivity).toBeTruthy()
+			expect(foundMeetingActivity.subject).toBe("test_Activity")
+			expect(foundMeetingActivity.is_all_day_event).toBe(true)
+			expect(foundMeetingActivity.is_archived).toBe(false)
+		})
+
+		it("should return record list for phone_call entity", async () => {
+			const testUser = await createIntegrationTestUser({
+				user_name: "phone_call_entity_test",
+				first_name: "PhoneCall",
+				last_name: "Entity",
+				email: "phone_call_entity@example.com",
+			})
+			const token = createValidToken(testUser.id)
+
+			// Create a test account for the call
+			const testAccount = await createIntegrationTestAccount({
+				name: "Call Test Company",
+			})
+
+			// Create test phone call
+			const phoneCall = await createIntegrationTestPhoneCall({
+				subject: "Customer Inquiry",
+				user: { entity: "user", id: testUser.id },
+				their: { entity: "account", id: testAccount.id },
+				direction: "inbound",
+			})
+
+			const response = await app.request(
+				"/api/records?entity_name=phone_call",
+				{
+					method: "GET",
+					headers: {
+						Authorization: `Bearer ${token}`,
+					},
+				},
+			)
+
+			const data = await response.json()
+			expect(response.status).toBe(200)
+			expect(data).toHaveProperty("has_next_page")
+			expect(data).toHaveProperty("total_size")
+			expect(data).toHaveProperty("data")
+			expect(Array.isArray(data.data)).toBe(true)
+
+			// Should find test phone call
+			const foundCall = data.data.find(
+				(record: { id: string }) => record.id === phoneCall.id,
+			)
+			expect(foundCall).toBeTruthy()
+			expect(foundCall.subject).toBe("test_Customer Inquiry")
+			expect(foundCall.user).toEqual({
+				entity: "user",
+				id: testUser.id,
+				title: "EntityPhoneCall",
+			})
+			expect(foundCall.their).toEqual({
+				entity: "account",
+				id: testAccount.id,
+				title: "test_Call Test Company",
+			})
+			expect(foundCall.direction).toBe("inbound")
+		})
+
+		it("should return record list with SQL reserved keyword (user)", async () => {
+			const targetUser = await createIntegrationTestUser({
+				user_name: "phone_call_user_test",
+				first_name: "PhoneCall",
+				last_name: "User",
+				email: "phone_call_user@example.com",
+			})
+			const anotherUser = await createIntegrationTestUser({
+				user_name: "another_user",
+				first_name: "Another",
+				last_name: "User",
+				email: "another_user@example.com",
+			})
+			const token = createValidToken(targetUser.id)
+
+			// Create a test account for the call
+			const testAccount = await createIntegrationTestAccount({
+				name: "Call Test Company",
+			})
+
+			// Create test phone calls
+			await createIntegrationTestPhoneCall({
+				subject: "Target Call",
+				user: { entity: "user", id: targetUser.id },
+				their: { entity: "account", id: testAccount.id },
+				direction: "inbound",
+			})
+			await createIntegrationTestPhoneCall({
+				subject: "Another Call",
+				user: { entity: "user", id: anotherUser.id },
+				their: { entity: "account", id: testAccount.id },
+				direction: "inbound",
+			})
+
+			// Create clauses with reserved keyword "user"
+			const whereClause = encodeURIComponent(
+				JSON.stringify({
+					field: "user",
+					operator: "eq",
+					value: targetUser.id,
+					is_not: false,
+				}),
+			)
+			const orderByClause = encodeURIComponent(
+				JSON.stringify([{ field: "user", direction: "desc" }]),
+			)
+
+			const response = await app.request(
+				`/api/records?entity_name=phone_call&fields=user&filter=${whereClause}&order_by=${orderByClause}`,
+				{
+					method: "GET",
+					headers: {
+						Authorization: `Bearer ${token}`,
+					},
+				},
+			)
+
+			const data = await response.json()
+			expect(response.status).toBe(200)
+			expect(data).toHaveProperty("has_next_page")
+			expect(data).toHaveProperty("total_size")
+			expect(data).toHaveProperty("data")
+			expect(Array.isArray(data.data)).toBe(true)
+
+			// Should find target phone call
+			const foundCall = data.data.find(
+				(record: { user: { entity: string; id: string } }) =>
+					record.user.id === targetUser.id,
+			)
+			expect(foundCall).toBeTruthy()
+			expect(foundCall.user).toEqual({
+				entity: "user",
+				id: targetUser.id,
+				title: "UserPhoneCall",
+			})
+
+			// Should not find another phone call
+			const shouldNotExist = data.data.find(
+				(record: { user: { entity: string; id: string } }) =>
+					record.user.id === anotherUser.id,
+			)
+			expect(shouldNotExist).toBeUndefined()
+		})
+
+		it("should return record list for contact entity", async () => {
+			const testUser = await createIntegrationTestUser({
+				user_name: "contact_entity_test",
+				first_name: "Contact",
+				last_name: "Entity",
+				email: "contact_entity@example.com",
+			})
+			const token = createValidToken(testUser.id)
+
+			// Create test contact
+			const contact = await createIntegrationTestContact({
+				last_name: "Primary Contact",
+			})
+
+			const response = await app.request("/api/records?entity_name=contact", {
+				method: "GET",
+				headers: {
+					Authorization: `Bearer ${token}`,
+				},
+			})
+
+			const data = await response.json()
+			expect(response.status).toBe(200)
+			expect(data).toHaveProperty("has_next_page")
+			expect(data).toHaveProperty("total_size")
+			expect(data).toHaveProperty("data")
+			expect(Array.isArray(data.data)).toBe(true)
+
+			// Should find test contact
+			const foundContact = data.data.find(
+				(record: { id: string }) => record.id === contact.id,
+			)
+			expect(foundContact).toBeTruthy()
+			expect(foundContact.last_name).toBe("test_Primary Contact")
+		})
+
+		it("should return record list for opportunity entity", async () => {
+			const testUser = await createIntegrationTestUser({
+				user_name: "opportunity_entity_test",
+				first_name: "Opportunity",
+				last_name: "Entity",
+				email: "opportunity_entity@example.com",
+			})
+			const token = createValidToken(testUser.id)
+
+			// Create a test account for the opportunities
+			const testAccount = await createIntegrationTestAccount({
+				name: "Opportunity Test Company",
+			})
+
+			// Create test opportunity
+			const opportunity = await createIntegrationTestOpportunity({
+				name: "Deal",
+				account: testAccount.id,
+				phase: "proposal",
+				close_date: new Date("2024-03-31"),
+				is_closed: false,
+			})
+
+			const response = await app.request(
+				"/api/records?entity_name=opportunity",
+				{
+					method: "GET",
+					headers: {
+						Authorization: `Bearer ${token}`,
+					},
+				},
+			)
+
+			const data = await response.json()
+			expect(response.status).toBe(200)
+			expect(data).toHaveProperty("has_next_page")
+			expect(data).toHaveProperty("total_size")
+			expect(data).toHaveProperty("data")
+			expect(Array.isArray(data.data)).toBe(true)
+
+			// Should find test opportunity
+			const foundOpportunity = data.data.find(
+				(record: { id: string }) => record.id === opportunity.id,
+			)
+			expect(foundOpportunity).toBeTruthy()
+			expect(foundOpportunity.name).toBe("test_Deal")
+			expect(foundOpportunity.account).toEqual({
+				entity: "account",
+				id: testAccount.id,
+				title: "test_Opportunity Test Company",
+			})
+			expect(foundOpportunity.phase).toBe("proposal")
+			expect(new Date(foundOpportunity.close_date)).toEqual(
+				new Date("2024-03-31"),
+			)
+			expect(foundOpportunity.is_closed).toBe(false)
+		})
+
+		it("should return record list for case entity", async () => {
+			const testUser = await createIntegrationTestUser({
+				user_name: "case_entity_test",
+				first_name: "Case",
+				last_name: "Entity",
+				email: "case_entity@example.com",
+			})
+			const token = createValidToken(testUser.id)
+
+			// Create test case
+			const testCase = await createIntegrationTestCase({
+				case_number: "CASE-001",
+				subject: "Case",
+			})
+
+			const response = await app.request("/api/records?entity_name=case", {
+				method: "GET",
+				headers: {
+					Authorization: `Bearer ${token}`,
+				},
+			})
+
+			const data = await response.json()
+			expect(response.status).toBe(200)
+			expect(data).toHaveProperty("has_next_page")
+			expect(data).toHaveProperty("total_size")
+			expect(data).toHaveProperty("data")
+			expect(Array.isArray(data.data)).toBe(true)
+
+			// Should find test case
+			const foundHighPriorityCase = data.data.find(
+				(record: { id: string }) => record.id === testCase.id,
+			)
+			expect(foundHighPriorityCase).toBeTruthy()
+			expect(foundHighPriorityCase.case_number).toBe("test_CASE-001")
+			expect(foundHighPriorityCase.subject).toBe("test_Case")
+		})
+
+		it("should return record list for product entity", async () => {
+			const testUser = await createIntegrationTestUser({
+				user_name: "product_entity_test",
+				first_name: "Product",
+				last_name: "Entity",
+				email: "product_entity@example.com",
+			})
+			const token = createValidToken(testUser.id)
+
+			// Create test product
+			const product = await createIntegrationTestProduct({
+				name: "Product",
+			})
+
+			const response = await app.request("/api/records?entity_name=product", {
+				method: "GET",
+				headers: {
+					Authorization: `Bearer ${token}`,
+				},
+			})
+
+			const data = await response.json()
+			expect(response.status).toBe(200)
+			expect(data).toHaveProperty("has_next_page")
+			expect(data).toHaveProperty("total_size")
+			expect(data).toHaveProperty("data")
+			expect(Array.isArray(data.data)).toBe(true)
+
+			// Should find test product
+			const foundProduct = data.data.find(
+				(record: { id: string }) => record.id === product.id,
+			)
+			expect(foundProduct).toBeTruthy()
+			expect(foundProduct.name).toBe("test_Product")
+		})
+
+		it("should return record list for campaign entity", async () => {
+			const testUser = await createIntegrationTestUser({
+				user_name: "campaign_entity_test",
+				first_name: "Campaign",
+				last_name: "Entity",
+				email: "campaign_entity@example.com",
+			})
+			const token = createValidToken(testUser.id)
+
+			// Create test campaign
+			const campaign = await createIntegrationTestCampaign({
+				name: "Campaign",
+			})
+
+			const response = await app.request("/api/records?entity_name=campaign", {
+				method: "GET",
+				headers: {
+					Authorization: `Bearer ${token}`,
+				},
+			})
+
+			const data = await response.json()
+			expect(response.status).toBe(200)
+			expect(data).toHaveProperty("has_next_page")
+			expect(data).toHaveProperty("total_size")
+			expect(data).toHaveProperty("data")
+			expect(Array.isArray(data.data)).toBe(true)
+
+			// Should find test campaign
+			const foundCampaign = data.data.find(
+				(record: { id: string }) => record.id === campaign.id,
+			)
+			expect(foundCampaign).toBeTruthy()
+			expect(foundCampaign.name).toBe("test_Campaign")
+		})
+
+		it("should return record list for sample entity", async () => {
+			const testUser = await createIntegrationTestUser({
+				user_name: "sample_entity_test",
+				first_name: "Sample",
+				last_name: "Entity",
+				email: "sample_entity@example.com",
+			})
+			const token = createValidToken(testUser.id)
+
+			// Create test sample
+			const sample = await createIntegrationTestSample({
+				name: "Sample",
+			})
+
+			const response = await app.request("/api/records?entity_name=sample", {
+				method: "GET",
+				headers: {
+					Authorization: `Bearer ${token}`,
+				},
+			})
+
+			const data = await response.json()
+			expect(response.status).toBe(200)
+			expect(data).toHaveProperty("has_next_page")
+			expect(data).toHaveProperty("total_size")
+			expect(data).toHaveProperty("data")
+			expect(Array.isArray(data.data)).toBe(true)
+
+			// Should find test sample
+			const foundSample = data.data.find(
+				(record: { id: string }) => record.id === sample.id,
+			)
+			expect(foundSample).toBeTruthy()
+			expect(foundSample.name).toBe("test_Sample")
+		})
+
+		it("should return 401 for missing authorization header", async () => {
+			const response = await app.request("/api/records?entity_name=account", {
+				method: "GET",
+			})
+
+			const data = await response.json()
+			expect(response.status).toBe(401)
+			expect(data).toEqual({
+				message: "No authentication header",
+			})
+		})
+
+		it("should return 400 for missing entity_name query parameter", async () => {
+			const testUser = await createIntegrationTestUser({
+				user_name: "missing_query_user",
+				first_name: "Missing",
+				last_name: "Query",
+				email: "missing_query@example.com",
+			})
+			const token = createValidToken(testUser.id)
+
+			const response = await app.request("/api/records", {
+				method: "GET",
+				headers: {
+					Authorization: `Bearer ${token}`,
+				},
+			})
+
+			const data = await response.json()
+			expect(response.status).toBe(400)
+			expect(data.success).toBe(false)
+			expect(data.error).toHaveProperty("issues")
+			expect(data.error.issues[0].path).toContainEqual("entity_name")
+		})
+
+		it("should return 400 for invalid entity_name", async () => {
+			const testUser = await createIntegrationTestUser({
+				user_name: "invalid_query_user",
+				first_name: "Invalid",
+				last_name: "Query",
+				email: "invalid_query@example.com",
+			})
+			const token = createValidToken(testUser.id)
+
+			const response = await app.request(
+				"/api/records?entity_name=nonexistent_entity",
+				{
+					method: "GET",
+					headers: {
+						Authorization: `Bearer ${token}`,
+					},
+				},
+			)
+
+			const data = await response.json()
+			expect(response.status).toBe(400)
+			expect(data).toEqual({
+				message: "Entity 'nonexistent_entity' does not exist",
+			})
 		})
 	})
 })
