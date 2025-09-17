@@ -65,7 +65,7 @@ export const CreateRecordDataSchema = z
 			account_number: "ACC-XXXXX",
 			main_phone_number: "03-1234-5678",
 			sub_phone_number: null,
-			web_site: "https://www.example.com",
+			website: "https://www.example.com",
 			industry: "agriculture", // single optional
 			number_of_employees: 1000, // numeric
 			revenue: 10000000,
