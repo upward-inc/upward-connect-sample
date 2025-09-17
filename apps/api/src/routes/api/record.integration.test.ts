@@ -32,23 +32,17 @@ describe("Record Integration Tests", () => {
 		})
 
 		// Create a test lead for the test user
-		testLead = await createIntegrationTestLead(
-			{
-				company: "Test Company",
-				first_name: "Test",
-				last_name: "Lead",
-				status: "new",
-			},
-			testUser.id,
-		)
+		testLead = await createIntegrationTestLead({
+			company: "Test Company",
+			first_name: "Test",
+			last_name: "Lead",
+			status: "new",
+		})
 
 		// Create a test account for the test user
-		testAccount = await createIntegrationTestAccount(
-			{
-				name: "Test Account",
-			},
-			testUser.id,
-		)
+		testAccount = await createIntegrationTestAccount({
+			name: "Test Account",
+		})
 
 		// Seed the required entities for testing
 		await seedTestEntities(testUser as user)

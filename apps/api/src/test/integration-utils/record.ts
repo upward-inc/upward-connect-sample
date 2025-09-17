@@ -1,36 +1,23 @@
 import { testPrisma } from "../integration-setup"
 
-const COMMON_FIELD_VALUES = (userId: string) => {
-	return {
-		owner: JSON.stringify({
-			entity: "user",
-			id: userId,
-		}),
-		created_by: JSON.stringify({
-			entity: "user",
-			id: userId,
-		}),
-		modified_by: JSON.stringify({
-			entity: "user",
-			id: userId,
-		}),
-	}
-}
+const testUserReference = JSON.stringify({
+	entity: "user",
+	id: crypto.randomUUID(),
+})
 
 /**
  * Create a test account for integration tests
  */
-export async function createIntegrationTestAccount(
-	accountData: {
-		name: string
-	},
-	userId: string,
-) {
+export async function createIntegrationTestAccount(accountData: {
+	name: string
+}) {
 	try {
 		const account = await testPrisma.account.create({
 			data: {
 				name: accountData.name,
-				...COMMON_FIELD_VALUES(userId),
+				owner: testUserReference,
+				created_by: testUserReference,
+				modified_by: testUserReference,
 			},
 			select: {
 				id: true,
@@ -47,15 +34,12 @@ export async function createIntegrationTestAccount(
 /**
  * Create a test lead for integration tests
  */
-export async function createIntegrationTestLead(
-	leadData: {
-		company: string
-		first_name: string
-		last_name: string
-		status: "new" | "contacted" | "nurturing" | "qualified" | "unqualified"
-	},
-	userId: string,
-) {
+export async function createIntegrationTestLead(leadData: {
+	company: string
+	first_name: string
+	last_name: string
+	status: "new" | "contacted" | "nurturing" | "qualified" | "unqualified"
+}) {
 	try {
 		const lead = await testPrisma.lead.create({
 			data: {
@@ -63,7 +47,9 @@ export async function createIntegrationTestLead(
 				first_name: leadData.first_name,
 				last_name: leadData.last_name,
 				status: JSON.stringify([leadData.status]),
-				...COMMON_FIELD_VALUES(userId),
+				owner: testUserReference,
+				created_by: testUserReference,
+				modified_by: testUserReference,
 			},
 			select: {
 				id: true,
