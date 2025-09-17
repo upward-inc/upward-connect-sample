@@ -57,26 +57,16 @@ describe("Record Integration Tests", () => {
 	})
 
 	async function seedTestEntities(user: user) {
-		try {
-			await seedEntities(testPrisma, [user])
-			await seedEntityItems(testPrisma)
-			await seedEntityItemOptions(testPrisma)
-		} catch (error) {
-			console.error("Error seeding entities:", error)
-			throw error
-		}
+		await seedEntities(testPrisma, [user])
+		await seedEntityItems(testPrisma)
+		await seedEntityItemOptions(testPrisma)
 	}
 
 	async function cleanupTestEntities() {
-		try {
-			// Clean up entity-related data
-			await testPrisma.entity_item_option.deleteMany()
-			await testPrisma.entity_item.deleteMany()
-			await testPrisma.entity.deleteMany()
-		} catch (error) {
-			console.error("Error cleaning up entities:", error)
-			throw error
-		}
+		// Clean up entity-related data
+		await testPrisma.entity_item_option.deleteMany()
+		await testPrisma.entity_item.deleteMany()
+		await testPrisma.entity.deleteMany()
 	}
 
 	describe("POST /api/records - Create Record", () => {
