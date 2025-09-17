@@ -1,3 +1,4 @@
+CREATE VIEW phone_call_view AS
 SELECT
   *,
   DATEDIFF(MINUTE, start_date_time, end_date_time) AS duration_in_minutes
