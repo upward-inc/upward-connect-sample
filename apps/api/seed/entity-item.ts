@@ -526,7 +526,7 @@ export async function seedEntityItems(prisma: Prisma.TransactionClient) {
 		},
 		{ name: "location", display_name: "場所", type: "text", max_length: 256 },
 		{
-			name: "requiredattendees",
+			name: "required_attendees",
 			display_name: "必須出席者",
 			type: "reference",
 			reference_entities: JSON.stringify(["user", "contact"]),
