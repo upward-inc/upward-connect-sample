@@ -1,17 +1,14 @@
 import { HTTPException } from "hono/http-exception"
 import { prisma } from "../../libs/prisma"
 import type { JsonValue } from "../../schema/common"
-import type {
-	CreateRecordMutation,
-	CreateRecordResponse,
-} from "../../schema/record"
+import type { PostRecordBody, PostRecordResponse } from "../../schema/record"
 import { getEntity, getEntityItemList } from "../entity"
 import { validateFieldValue } from "./validate-field-value"
 
 export const createRecord = async (
 	userId: string,
-	{ entity_name, data }: CreateRecordMutation,
-): Promise<CreateRecordResponse> => {
+	{ entity_name, data }: PostRecordBody,
+): Promise<PostRecordResponse> => {
 	// Check if entity exists
 	const entity = await getEntity(entity_name)
 	if (!entity) {

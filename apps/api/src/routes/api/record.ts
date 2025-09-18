@@ -4,10 +4,10 @@ import { createRecord } from "../../domain/record/create-record"
 import { describeRoute, validator } from "../../libs/hono-openapi"
 import type { AuthContexts } from "../../schema/auth"
 import {
-	CreateRecordMutationSchema,
-	CreateRecordResponseSchema,
 	GetRecordListQuerySchema,
 	GetRecordListResponseSchema,
+	PostRecordBodySchema,
+	PostRecordResponseSchema,
 } from "../../schema/record"
 
 export const recordRouter = new Hono<{ Variables: AuthContexts }>()
@@ -34,9 +34,9 @@ export const recordRouter = new Hono<{ Variables: AuthContexts }>()
 		"/",
 		describeRoute({
 			description: "レコードを一件作成する",
-			schema: CreateRecordResponseSchema,
+			schema: PostRecordResponseSchema,
 		}),
-		validator("json", CreateRecordMutationSchema),
+		validator("json", PostRecordBodySchema),
 		async (c) => {
 			const { entity_name, data } = c.req.valid("json")
 
