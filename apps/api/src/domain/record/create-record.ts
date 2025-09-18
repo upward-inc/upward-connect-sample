@@ -80,9 +80,10 @@ export const createRecord = async (
 			validatedData.case_number = Math.floor(Math.random() * 1000000)
 		}
 		// For other entities, set owner, created_by and modified_by
-		validatedData.owner = JSON.stringify({ entity: "user", id: userId })
-		validatedData.created_by = JSON.stringify({ entity: "user", id: userId })
-		validatedData.modified_by = JSON.stringify({ entity: "user", id: userId })
+		const userReference = JSON.stringify({ entity: "user", id: userId })
+		validatedData.owner = userReference
+		validatedData.created_by = userReference
+		validatedData.modified_by = userReference
 	}
 
 	// Create record in database
