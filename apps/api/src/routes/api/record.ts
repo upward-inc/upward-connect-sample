@@ -33,7 +33,7 @@ export const recordRouter = new Hono<{ Variables: AuthContexts }>()
 	.post(
 		"/",
 		describeRoute({
-			description: "レコードを一件作成する",
+			description: "レコードを作成する",
 			schema: PostRecordResponseSchema,
 		}),
 		validator("json", PostRecordBodySchema),
