@@ -1,8 +1,15 @@
 import { format } from "@formkit/tempo"
-import { HTTPException } from "hono/http-exception"
 import { prisma } from "../../libs/prisma"
 import type { JsonValue } from "../../schema/common"
 import type { EntityItem } from "../../schema/entity-item"
+
+type RecordValidationResult = {
+	success: boolean
+	validatedValue?: JsonValue
+	error?: string
+	error_description?: string
+}
+
 type Reference = {
 	entity: string
 	id: string
@@ -13,39 +20,47 @@ const validateTextValue = (
 	name: string,
 	sub_type: string | null | undefined,
 	entityName: string,
-): string => {
+): RecordValidationResult => {
 	if (typeof value !== "string") {
-		throw new HTTPException(400, {
-			message: `Field '${name}' must be a string for ${entityName}`,
-		})
+		return {
+			success: false,
+			error: "invalid_field_type",
+			error_description: `Field '${name}' must be a string for ${entityName}`,
+		}
 	}
 
 	if (sub_type === "email") {
 		// Simple email regex validation
 		const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 		if (!emailRegex.test(value)) {
-			throw new HTTPException(400, {
-				message: `Field '${name}' must be a valid email address for '${entityName}'`,
-			})
+			return {
+				success: false,
+				error: "invalid_field_value",
+				error_description: `Field '${name}' must be a valid email address for '${entityName}'`,
+			}
 		}
 	} else if (sub_type === "phone") {
 		// Simple phone number validation (digits, spaces, dashes, parentheses)
 		const phoneRegex = /^[0-9\s\-()+]+$/
 		if (!phoneRegex.test(value)) {
-			throw new HTTPException(400, {
-				message: `Field '${name}' must be a valid phone number for '${entityName}'`,
-			})
+			return {
+				success: false,
+				error: "invalid_field_value",
+				error_description: `Field '${name}' must be a valid phone number for '${entityName}'`,
+			}
 		}
 	} else if (sub_type === "url") {
 		try {
 			new URL(value)
 		} catch {
-			throw new HTTPException(400, {
-				message: `Field '${name}' must be a valid URL for '${entityName}'`,
-			})
+			return {
+				success: false,
+				error: "invalid_field_value",
+				error_description: `Field '${name}' must be a valid URL for '${entityName}'`,
+			}
 		}
 	}
-	return value
+	return { success: true, validatedValue: value }
 }
 
 const validateNumericValue = (
@@ -53,31 +68,37 @@ const validateNumericValue = (
 	name: string,
 	sub_type: string | null | undefined,
 	entityName: string,
-): number => {
+): RecordValidationResult => {
 	if (typeof value !== "number" && !Number.isFinite(Number(value))) {
-		throw new HTTPException(400, {
-			message: `Field '${name}' must be a number for '${entityName}'`,
-		})
+		return {
+			success: false,
+			error: "invalid_field_type",
+			error_description: `Field '${name}' must be a number for '${entityName}'`,
+		}
 	}
 	if (sub_type === "integer" && !Number.isInteger(value)) {
-		throw new HTTPException(400, {
-			message: `Field '${name}' must be an integer for '${entityName}'`,
-		})
+		return {
+			success: false,
+			error: "invalid_field_type",
+			error_description: `Field '${name}' must be an integer for '${entityName}'`,
+		}
 	}
-	return Number(value)
+	return { success: true, validatedValue: Number(value) }
 }
 
 const validateBooleanValue = (
 	value: JsonValue,
 	name: string,
 	entityName: string,
-): boolean => {
+): RecordValidationResult => {
 	if (typeof value !== "boolean") {
-		throw new HTTPException(400, {
-			message: `Field '${name}' must be a boolean for '${entityName}'`,
-		})
+		return {
+			success: false,
+			error: "invalid_field_type",
+			error_description: `Field '${name}' must be a boolean for '${entityName}'`,
+		}
 	}
-	return value
+	return { success: true, validatedValue: value }
 }
 
 const validateDateValue = (
@@ -85,34 +106,43 @@ const validateDateValue = (
 	name: string,
 	sub_type: string | null | undefined,
 	entityName: string,
-): string => {
+): RecordValidationResult => {
 	if (typeof value === "string") {
 		if (sub_type === "date") {
 			// Expecting date only (YYYY-MM-DD)
 			const dateOnlyRegex = /^\d{4}-\d{2}-\d{2}$/
 			if (!dateOnlyRegex.test(value)) {
-				throw new HTTPException(400, {
-					message: `Field '${name}' must be a valid date string (YYYY-MM-DD) for '${entityName}'`,
-				})
+				return {
+					success: false,
+					error: "invalid_field_value",
+					error_description: `Field '${name}' must be a valid date string (YYYY-MM-DD) for '${entityName}'`,
+				}
 			}
-			return value
+			return { success: true, validatedValue: value }
 		}
 		// Expecting full datetime
 		const parsedDate = new Date(value)
 		if (Number.isNaN(parsedDate.getTime())) {
-			throw new HTTPException(400, {
-				message: `Field '${name}' must be a valid datetime string for '${entityName}'`,
-			})
+			return {
+				success: false,
+				error: "invalid_field_value",
+				error_description: `Field '${name}' must be a valid datetime string for '${entityName}'`,
+			}
 		}
-		return format({
-			date: parsedDate,
-			format: "YYYY-MM-DDTHH:mm:ssZ",
-			tz: "Asia/Tokyo",
-		})
+		return {
+			success: true,
+			validatedValue: format({
+				date: parsedDate,
+				format: "YYYY-MM-DDTHH:mm:ssZ",
+				tz: "Asia/Tokyo",
+			}),
+		}
 	}
-	throw new HTTPException(400, {
-		message: `Field '${name}' must be a date for '${entityName}'`,
-	})
+	return {
+		success: false,
+		error: "invalid_field_type",
+		error_description: `Field '${name}' must be a date for '${entityName}'`,
+	}
 }
 
 const validateOptionValue = (
@@ -121,39 +151,47 @@ const validateOptionValue = (
 	sub_type: string | null | undefined,
 	options: { name: string }[] | null | undefined,
 	entityName: string,
-): string => {
+): RecordValidationResult => {
 	if (!options || options.length === 0) {
-		throw new HTTPException(400, {
-			message: `Field '${name}' has no available options for '${entityName}'`,
-		})
+		return {
+			success: false,
+			error: "invalid_field_value",
+			error_description: `Field '${name}' has no available options for '${entityName}'`,
+		}
 	}
 
 	const optionNames = options.map((opt) => opt.name)
 
 	if (sub_type === "single") {
 		if (typeof value !== "string" || !optionNames.includes(value)) {
-			throw new HTTPException(400, {
-				message: `Field '${name}' must be one of: '${optionNames.join("', '")}' for '${entityName}'`,
-			})
+			return {
+				success: false,
+				error: "invalid_field_value",
+				error_description: `Field '${name}' must be one of: '${optionNames.join("', '")}' for '${entityName}'`,
+			}
 		}
-		return JSON.stringify([value])
+		return { success: true, validatedValue: JSON.stringify([value]) }
 	}
 
 	// multi-select
 	if (!Array.isArray(value)) {
-		throw new HTTPException(400, {
-			message: `Field '${name}' must be an array for '${entityName}'`,
-		})
+		return {
+			success: false,
+			error: "invalid_field_type",
+			error_description: `Field '${name}' must be an array for '${entityName}'`,
+		}
 	}
 	const invalidOptions = value.filter(
 		(v) => typeof v !== "string" || !optionNames.includes(v),
 	)
 	if (invalidOptions.length > 0) {
-		throw new HTTPException(400, {
-			message: `Field '${name}' contains invalid options: '${invalidOptions.join("', '")}' for '${entityName}'`,
-		})
+		return {
+			success: false,
+			error: "invalid_field_value",
+			error_description: `Field '${name}' contains invalid options: '${invalidOptions.join("', '")}' for '${entityName}'`,
+		}
 	}
-	return JSON.stringify(value)
+	return { success: true, validatedValue: JSON.stringify(value) }
 }
 
 const validateReferenceValue = async (
@@ -162,22 +200,28 @@ const validateReferenceValue = async (
 	sub_type: string | null | undefined,
 	reference_entities: string[] | null | undefined,
 	entityName: string,
-): Promise<string> => {
+): Promise<RecordValidationResult> => {
 	if (!reference_entities || reference_entities.length === 0) {
-		throw new HTTPException(400, {
-			message: `Field '${name}' has no available reference entities for '${entityName}'`,
-		})
+		return {
+			success: false,
+			error: "invalid_field_value",
+			error_description: `Field '${name}' has no available reference entities for '${entityName}'`,
+		}
 	}
 	if (sub_type === "single" && typeof value !== "string") {
-		throw new HTTPException(400, {
-			message: `Field '${name}' must be a string ID for '${entityName}'`,
-		})
+		return {
+			success: false,
+			error: "invalid_field_type",
+			error_description: `Field '${name}' must be a string ID for '${entityName}'`,
+		}
 	}
 	if (sub_type === "multi") {
 		if (!Array.isArray(value) || value.some((v) => typeof v !== "string")) {
-			throw new HTTPException(400, {
-				message: `Field '${name}' must be an array of IDs for '${entityName}'`,
-			})
+			return {
+				success: false,
+				error: "invalid_field_type",
+				error_description: `Field '${name}' must be an array of IDs for '${entityName}'`,
+			}
 		}
 	}
 
@@ -200,34 +244,41 @@ const validateReferenceValue = async (
 			}
 
 			if (!foundEntity) {
-				throw new HTTPException(400, {
-					message: `Referenced record '${referenceId}' does not exist in any of: '${reference_entities.join("', '")}' for '${entityName}'`,
-				})
+				return {
+					success: false,
+					error: "invalid_field_value",
+					error_description: `Referenced record '${referenceId}' does not exist in any of: '${reference_entities.join("', '")}' for '${entityName}'`,
+				}
 			}
 			validatedReferences.push({ entity: foundEntity, id: referenceId })
 		} else {
 			// 辿りつかないはずだが、念のため
-			throw new HTTPException(400, {
-				message: `Field '${name}' reference must be a string ID for '${entityName}'`,
-			})
+			return {
+				success: false,
+				error: "invalid_field_type",
+				error_description: `Field '${name}' reference must be a string ID for '${entityName}'`,
+			}
 		}
 	}
 
-	return JSON.stringify(
-		Array.isArray(value) ? validatedReferences : validatedReferences[0],
-	)
+	return {
+		success: true,
+		validatedValue: JSON.stringify(
+			Array.isArray(value) ? validatedReferences : validatedReferences[0],
+		),
+	}
 }
 
 export const validateFieldValue = async (
 	entityItem: EntityItem,
 	value: JsonValue,
 	entityName: string,
-): Promise<string | number | boolean | JsonValue | null> => {
+): Promise<RecordValidationResult> => {
 	const { name, type, sub_type, options, reference_entities } = entityItem
 
 	// Handle null values
 	if (value === null || value === undefined) {
-		return null
+		return { success: true, validatedValue: null }
 	}
 
 	// Validate based on type
@@ -262,7 +313,7 @@ export const validateFieldValue = async (
 	}
 
 	// Default case
-	return value
+	return { success: true, validatedValue: value }
 }
 
 // TODO: getRecordList() を使う

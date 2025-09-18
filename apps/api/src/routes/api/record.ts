@@ -1,6 +1,7 @@
 import { Hono } from "hono"
 import { getRecordList } from "../../domain/record"
 import { createRecord } from "../../domain/record/create-record"
+import { validateCreateRecordParams } from "../../domain/record/validate-create-record-params"
 import { describeRoute, validator } from "../../libs/hono-openapi"
 import type { AuthContexts } from "../../schema/auth"
 import {
@@ -42,11 +43,25 @@ export const recordRouter = new Hono<{ Variables: AuthContexts }>()
 
 			const user = c.get("user")
 
-			const result = await createRecord(user.id, {
+			const validateResult = await validateCreateRecordParams(user.id, {
 				entity_name,
-				data: data,
+				data,
 			})
+			if (!validateResult.success) {
+				return c.json(
+					{
+						error: validateResult.error,
+						error_description: validateResult.error_description,
+					},
+					400,
+				)
+			}
 
-			return c.json(result, 201)
+			const createResult = await createRecord(
+				entity_name,
+				validateResult.validatedData ?? {},
+			)
+
+			return c.json(createResult, 201)
 		},
 	)
