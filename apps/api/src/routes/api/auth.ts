@@ -22,7 +22,8 @@ import {
 	PostLoginResultSchema,
 	GetOAuthClientResultSchema,
 	GetUserInfoResultSchema,
-	TokenRequestSchema,
+	PostTokenParamSchema,
+	PostTokenResultSchema,
 } from "../../schema/auth"
 
 export const authRouter = new Hono<{ Variables: AuthContexts }>()
@@ -112,82 +113,91 @@ export const authRouter = new Hono<{ Variables: AuthContexts }>()
 			})
 		},
 	)
-	.post("/token", validator("form", TokenRequestSchema), async (c) => {
-		const params = c.req.valid("form")
+	.post(
+		"/token",
+		describeRoute({
+			description:
+				"OAuth2.0/OIDC1.0準拠のトークンエンドポイント、認可コードをアクセストークン/リフレッシュトークン/IDトークンと交換する",
+			schema: PostTokenResultSchema,
+		}),
+		validator("form", PostTokenParamSchema),
+		async (c) => {
+			const params = c.req.valid("form")
 
-		if (params.grant_type === "authorization_code") {
-			// パラメータの検証
-			const validateResult = await validateTokenParams(params)
+			if (params.grant_type === "authorization_code") {
+				// パラメータの検証
+				const validateResult = await validateTokenParams(params)
 
-			if (!validateResult.success) {
-				return c.json(
-					{
-						error: "invalid_grant",
-						error_description: validateResult.error_message,
-					},
-					400,
-				)
+				if (!validateResult.success) {
+					return c.json(
+						{
+							error: "invalid_grant",
+							error_description: validateResult.error_message,
+						},
+						400,
+					)
+				}
+				const { user_id, user_name } = validateResult
+
+				// 認可コードを使用済みにする（データベースから削除する）
+				await deleteAuthorizationCode(params.code)
+
+				// アクセストークン、IDトークンを生成
+				const { accessToken, idToken } = generateToken({
+					userId: user_id,
+					userName: user_name,
+				})
+
+				// リフレッシュトークンを生成
+				const { refreshToken } = generateRefreshToken({
+					userId: user_id,
+				})
+
+				return c.json({
+					token_type: "Bearer",
+					access_token: accessToken,
+					id_token: idToken,
+					refresh_token: refreshToken,
+					expires_in: env.OIDC_TOKEN_EXPIRES_IN_MINUTE * 60,
+				})
 			}
-			const { user_id, user_name } = validateResult
 
-			// 認可コードを使用済みにする（データベースから削除する）
-			await deleteAuthorizationCode(params.code)
+			if (params.grant_type === "refresh_token") {
+				// リフレッシュトークンパラメータの検証
+				const validateResult = await validateRefreshTokenParams(params)
 
-			// アクセストークン、IDトークンを生成
-			const { accessToken, idToken } = generateToken({
-				userId: user_id,
-				userName: user_name,
-			})
+				if (!validateResult.success) {
+					return c.json(
+						{
+							error: "invalid_grant",
+							error_description: validateResult.error_message,
+						},
+						400,
+					)
+				}
+				const { user_id, user_name } = validateResult
 
-			// リフレッシュトークンを生成
-			const { refreshToken } = generateRefreshToken({
-				userId: user_id,
-			})
+				// アクセストークン、IDトークンを生成
+				const { accessToken, idToken } = generateToken({
+					userId: user_id,
+					userName: user_name,
+				})
 
-			return c.json({
-				token_type: "Bearer",
-				access_token: accessToken,
-				id_token: idToken,
-				refresh_token: refreshToken,
-				expires_in: env.OIDC_TOKEN_EXPIRES_IN_MINUTE * 60,
-			})
-		}
+				// リフレッシュトークンを生成
+				const { refreshToken } = generateRefreshToken({
+					userId: user_id,
+				})
 
-		if (params.grant_type === "refresh_token") {
-			// リフレッシュトークンパラメータの検証
-			const validateResult = await validateRefreshTokenParams(params)
-
-			if (!validateResult.success) {
-				return c.json(
-					{
-						error: "invalid_grant",
-						error_description: validateResult.error_message,
-					},
-					400,
-				)
+				return c.json({
+					token_type: "Bearer",
+					access_token: accessToken,
+					id_token: idToken,
+					refresh_token: refreshToken,
+					expires_in: env.OIDC_TOKEN_EXPIRES_IN_MINUTE * 60,
+				})
 			}
-			const { user_id, user_name } = validateResult
-
-			// アクセストークン、IDトークンを生成
-			const { accessToken, idToken } = generateToken({
-				userId: user_id,
-				userName: user_name,
-			})
-
-			// リフレッシュトークンを生成
-			const { refreshToken } = generateRefreshToken({
-				userId: user_id,
-			})
-
-			return c.json({
-				token_type: "Bearer",
-				access_token: accessToken,
-				id_token: idToken,
-				refresh_token: refreshToken,
-				expires_in: env.OIDC_TOKEN_EXPIRES_IN_MINUTE * 60,
-			})
-		}
-	})
+		},
+	)
 	.get(
 		"/userinfo",
 		describeRoute({

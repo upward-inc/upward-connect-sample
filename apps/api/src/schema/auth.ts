@@ -121,7 +121,7 @@ export const PostAuthorizeResultSchema = z.object({
 })
 
 // トークンリクエスト用のスキーマ
-export const TokenRequestSchema = z.discriminatedUnion("grant_type", [
+export const PostTokenParamSchema = z.discriminatedUnion("grant_type", [
 	z.object({
 		grant_type: z.literal("authorization_code"),
 		code: z.string().min(1),
@@ -137,6 +137,26 @@ export const TokenRequestSchema = z.discriminatedUnion("grant_type", [
 	}),
 ])
 
+export const PostTokenResultSchema = z.object({
+	token_type: z.literal("Bearer"),
+	access_token: z.string().min(1).openapi({
+		description: "アクセストークン",
+		example: "sample_access_token",
+	}),
+	id_token: z.string().min(1).openapi({
+		description: "IDトークン",
+		example: "sample_id_token",
+	}),
+	refresh_token: z.string().min(1).openapi({
+		description: "リフレッシュトークン",
+		example: "sample_refresh_token",
+	}),
+	expires_in: z.number().min(1).openapi({
+		description: "有効期限（秒）",
+		example: 600,
+	}),
+})
+
 export type OAuthClient = z.infer<typeof OAuthClientSchema>
 export type LoggedInUser = z.infer<typeof LoggedInUserSchema>
 export type PostLoginParam = z.infer<typeof PostLoginParamSchema>
@@ -145,7 +165,8 @@ export type GetOAuthClientResult = z.infer<typeof GetOAuthClientResultSchema>
 export type GetUserInfoResult = z.infer<typeof GetUserInfoResultSchema>
 export type PostAuthorizeParam = z.infer<typeof PostAuthorizeParamSchema>
 export type PostAuthorizeResult = z.infer<typeof PostAuthorizeResultSchema>
-export type TokenRequest = z.infer<typeof TokenRequestSchema>
+export type PostTokenParam = z.infer<typeof PostTokenParamSchema>
+export type PostTokenResult = z.infer<typeof PostTokenResultSchema>
 
 // 認証ルート用コンテキスト（認証済みユーザー情報）
 export type AuthContexts = {
