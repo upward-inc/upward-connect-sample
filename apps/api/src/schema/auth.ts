@@ -74,6 +74,36 @@ export const GetOAuthClientResultSchema = OAuthClientSchema.pick({
 	name: true,
 })
 
+/**
+ * see: https://openid-foundation-japan.github.io/openid-connect-core-1_0.ja.html#StandardClaims
+ */
+export const GetUserInfoResultSchema = z.object({
+	sub: z.string().openapi({
+		description: "subjectクレーム（ユーザー識別子）",
+		example: "00000001",
+	}),
+	unique_name: z.string().openapi({
+		description: "ユニーク名",
+		example: "dsmail0@example.com",
+	}),
+	name: z.string().openapi({
+		description: "表示用のフルネーム",
+		example: "Dorey Smail",
+	}),
+	given_name: z.string().openapi({
+		description: "名",
+		example: "Dorey",
+	}),
+	family_name: z.string().openapi({
+		description: "姓",
+		example: "Smail",
+	}),
+	email: z.string().email().openapi({
+		description: "メールアドレス",
+		example: "dsmail0@example.com",
+	}),
+})
+
 // 認可コードリクエスト用のスキーマ
 export const PostAuthorizeParamSchema = z.object({
 	response_type: z.literal("code"),
@@ -105,6 +135,7 @@ export type LoggedInUser = z.infer<typeof LoggedInUserSchema>
 export type PostLoginParam = z.infer<typeof PostLoginParamSchema>
 export type PostLoginResult = z.infer<typeof PostLoginResultSchema>
 export type GetOAuthClientResult = z.infer<typeof GetOAuthClientResultSchema>
+export type GetUserInfoResult = z.infer<typeof GetUserInfoResultSchema>
 export type PostAuthorizeParam = z.infer<typeof PostAuthorizeParamSchema>
 export type TokenRequest = z.infer<typeof TokenRequestSchema>
 

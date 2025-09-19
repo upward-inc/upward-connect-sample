@@ -45,7 +45,8 @@ describe("Auth Integration Tests", () => {
 			expect(response.status).toBe(200)
 			expect(data).toEqual({
 				sub: testUser.id,
-				name: testUser.user_name,
+				unique_name: testUser.user_name,
+				name: `${testUser.last_name} ${testUser.first_name}`,
 				given_name: testUser.first_name,
 				family_name: testUser.last_name,
 				email: testUser.email,

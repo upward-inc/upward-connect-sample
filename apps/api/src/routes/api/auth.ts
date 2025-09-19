@@ -20,6 +20,7 @@ import {
 	PostLoginParamSchema,
 	PostLoginResultSchema,
 	GetOAuthClientResultSchema,
+	GetUserInfoResultSchema,
 	TokenRequestSchema,
 } from "../../schema/auth"
 
@@ -182,30 +183,38 @@ export const authRouter = new Hono<{ Variables: AuthContexts }>()
 			})
 		}
 	})
-	.get("/userinfo", async (c) => {
-		const user = c.get("user")
+	.get(
+		"/userinfo",
+		describeRoute({
+			description: "OIDC1.0準拠のuserinfoエンドポイント、ユーザー情報を返却する",
+			schema: GetUserInfoResultSchema,
+		}),
+		async (c) => {
+			const user = c.get("user")
 
-		const loggedInUser = await getUserById(user.id)
+			const loggedInUser = await getUserById(user.id)
 
-		if (!loggedInUser) {
-			return c.json(
-				{
-					error: "User not found",
-					error_description:
-						"The user associated with the provided token does not exist.",
-				},
-				404,
-			)
-		}
+			if (!loggedInUser) {
+				return c.json(
+					{
+						error: "User not found",
+						error_description:
+							"The user associated with the provided token does not exist.",
+					},
+					404,
+				)
+			}
 
-		return c.json({
-			sub: loggedInUser.id,
-			name: loggedInUser.user_name,
-			given_name: loggedInUser.first_name,
-			family_name: loggedInUser.last_name,
-			email: loggedInUser.email,
-		})
-	})
+			return c.json({
+				sub: loggedInUser.id,
+				unique_name: loggedInUser.user_name,
+				name: `${loggedInUser.last_name} ${loggedInUser.first_name}`,
+				given_name: loggedInUser.first_name,
+				family_name: loggedInUser.last_name,
+				email: loggedInUser.email,
+			})
+		},
+	)
 // .get("/.well-known/openid-configuration", async (c) => {
 // 	// OpenID Connect Discoveryドキュメントを返す
 // 	// https://openid.net/specs/openid-connect-discovery-1_0.html
