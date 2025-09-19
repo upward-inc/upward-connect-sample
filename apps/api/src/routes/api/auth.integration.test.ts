@@ -464,7 +464,7 @@ describe("Auth Integration Tests", () => {
 		})
 	})
 
-	describe("Authorize Endpoint - State Validation", () => {
+	describe("Authorize Endpoint", () => {
 		it("should preserve state parameter in successful authorization", async () => {
 			// Create a test user and client
 			const testUser = await createIntegrationTestUser({
