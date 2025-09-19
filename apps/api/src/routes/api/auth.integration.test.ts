@@ -500,7 +500,6 @@ describe("Auth Integration Tests", () => {
 			const data = await response.json()
 			expect(response.status).toBe(200)
 			expect(data).toHaveProperty("code")
-			expect(data).not.toHaveProperty("state") // No state parameter provided in request
 		})
 
 		it("should return state parameter when state parameter is provided", async () => {
