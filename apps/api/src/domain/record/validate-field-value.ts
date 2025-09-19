@@ -3,11 +3,18 @@ import { prisma } from "../../libs/prisma"
 import type { JsonValue } from "../../schema/common"
 import type { EntityItem } from "../../schema/entity-item"
 
-type RecordValidationResult = {
-	success: boolean
-	validatedValue?: JsonValue
-	error?: string
-	error_description?: string
+type RecordValidationResult =
+	| RecordValidationResultSuccess
+	| RecordValidationResultFailure
+
+interface RecordValidationResultSuccess {
+	success: true
+	validatedValue: JsonValue
+}
+
+interface RecordValidationResultFailure {
+	success: false
+	message: string
 }
 
 type Reference = {
@@ -24,8 +31,7 @@ const validateTextValue = (
 	if (typeof value !== "string") {
 		return {
 			success: false,
-			error: "invalid_field_type",
-			error_description: `Field '${name}' must be a string for ${entityName}`,
+			message: `Field '${name}' must be a string for ${entityName}`,
 		}
 	}
 
@@ -35,8 +41,7 @@ const validateTextValue = (
 		if (!emailRegex.test(value)) {
 			return {
 				success: false,
-				error: "invalid_field_value",
-				error_description: `Field '${name}' must be a valid email address for '${entityName}'`,
+				message: `Field '${name}' must be a valid email address for '${entityName}'`,
 			}
 		}
 	} else if (sub_type === "phone") {
@@ -45,8 +50,7 @@ const validateTextValue = (
 		if (!phoneRegex.test(value)) {
 			return {
 				success: false,
-				error: "invalid_field_value",
-				error_description: `Field '${name}' must be a valid phone number for '${entityName}'`,
+				message: `Field '${name}' must be a valid phone number for '${entityName}'`,
 			}
 		}
 	} else if (sub_type === "url") {
@@ -55,8 +59,7 @@ const validateTextValue = (
 		} catch {
 			return {
 				success: false,
-				error: "invalid_field_value",
-				error_description: `Field '${name}' must be a valid URL for '${entityName}'`,
+				message: `Field '${name}' must be a valid URL for '${entityName}'`,
 			}
 		}
 	}
@@ -72,15 +75,13 @@ const validateNumericValue = (
 	if (typeof value !== "number" && !Number.isFinite(Number(value))) {
 		return {
 			success: false,
-			error: "invalid_field_type",
-			error_description: `Field '${name}' must be a number for '${entityName}'`,
+			message: `Field '${name}' must be a number for '${entityName}'`,
 		}
 	}
 	if (sub_type === "integer" && !Number.isInteger(value)) {
 		return {
 			success: false,
-			error: "invalid_field_type",
-			error_description: `Field '${name}' must be an integer for '${entityName}'`,
+			message: `Field '${name}' must be an integer for '${entityName}'`,
 		}
 	}
 	return { success: true, validatedValue: Number(value) }
@@ -94,8 +95,7 @@ const validateBooleanValue = (
 	if (typeof value !== "boolean") {
 		return {
 			success: false,
-			error: "invalid_field_type",
-			error_description: `Field '${name}' must be a boolean for '${entityName}'`,
+			message: `Field '${name}' must be a boolean for '${entityName}'`,
 		}
 	}
 	return { success: true, validatedValue: value }
@@ -114,8 +114,7 @@ const validateDateValue = (
 			if (!dateOnlyRegex.test(value)) {
 				return {
 					success: false,
-					error: "invalid_field_value",
-					error_description: `Field '${name}' must be a valid date string (YYYY-MM-DD) for '${entityName}'`,
+					message: `Field '${name}' must be a valid date string (YYYY-MM-DD) for '${entityName}'`,
 				}
 			}
 			return { success: true, validatedValue: value }
@@ -125,8 +124,7 @@ const validateDateValue = (
 		if (Number.isNaN(parsedDate.getTime())) {
 			return {
 				success: false,
-				error: "invalid_field_value",
-				error_description: `Field '${name}' must be a valid datetime string for '${entityName}'`,
+				message: `Field '${name}' must be a valid datetime string for '${entityName}'`,
 			}
 		}
 		return {
@@ -140,8 +138,7 @@ const validateDateValue = (
 	}
 	return {
 		success: false,
-		error: "invalid_field_type",
-		error_description: `Field '${name}' must be a date for '${entityName}'`,
+		message: `Field '${name}' must be a date for '${entityName}'`,
 	}
 }
 
@@ -155,8 +152,7 @@ const validateOptionValue = (
 	if (!options || options.length === 0) {
 		return {
 			success: false,
-			error: "invalid_field_value",
-			error_description: `Field '${name}' has no available options for '${entityName}'`,
+			message: `Field '${name}' has no available options for '${entityName}'`,
 		}
 	}
 
@@ -166,8 +162,7 @@ const validateOptionValue = (
 		if (typeof value !== "string" || !optionNames.includes(value)) {
 			return {
 				success: false,
-				error: "invalid_field_value",
-				error_description: `Field '${name}' must be one of: '${optionNames.join("', '")}' for '${entityName}'`,
+				message: `Field '${name}' must be one of: '${optionNames.join("', '")}' for '${entityName}'`,
 			}
 		}
 		return { success: true, validatedValue: JSON.stringify([value]) }
@@ -177,8 +172,7 @@ const validateOptionValue = (
 	if (!Array.isArray(value)) {
 		return {
 			success: false,
-			error: "invalid_field_type",
-			error_description: `Field '${name}' must be an array for '${entityName}'`,
+			message: `Field '${name}' must be an array for '${entityName}'`,
 		}
 	}
 	const invalidOptions = value.filter(
@@ -187,8 +181,7 @@ const validateOptionValue = (
 	if (invalidOptions.length > 0) {
 		return {
 			success: false,
-			error: "invalid_field_value",
-			error_description: `Field '${name}' contains invalid options: '${invalidOptions.join("', '")}' for '${entityName}'`,
+			message: `Field '${name}' contains invalid options: '${invalidOptions.join("', '")}' for '${entityName}'`,
 		}
 	}
 	return { success: true, validatedValue: JSON.stringify(value) }
@@ -204,23 +197,20 @@ const validateReferenceValue = async (
 	if (!reference_entities || reference_entities.length === 0) {
 		return {
 			success: false,
-			error: "invalid_field_value",
-			error_description: `Field '${name}' has no available reference entities for '${entityName}'`,
+			message: `Field '${name}' has no available reference entities for '${entityName}'`,
 		}
 	}
 	if (sub_type === "single" && typeof value !== "string") {
 		return {
 			success: false,
-			error: "invalid_field_type",
-			error_description: `Field '${name}' must be a string ID for '${entityName}'`,
+			message: `Field '${name}' must be a string ID for '${entityName}'`,
 		}
 	}
 	if (sub_type === "multi") {
 		if (!Array.isArray(value) || value.some((v) => typeof v !== "string")) {
 			return {
 				success: false,
-				error: "invalid_field_type",
-				error_description: `Field '${name}' must be an array of IDs for '${entityName}'`,
+				message: `Field '${name}' must be an array of IDs for '${entityName}'`,
 			}
 		}
 	}
@@ -246,8 +236,7 @@ const validateReferenceValue = async (
 			if (!foundEntity) {
 				return {
 					success: false,
-					error: "invalid_field_value",
-					error_description: `Referenced record '${referenceId}' does not exist in any of: '${reference_entities.join("', '")}' for '${entityName}'`,
+					message: `Referenced record '${referenceId}' does not exist in any of: '${reference_entities.join("', '")}' for '${entityName}'`,
 				}
 			}
 			validatedReferences.push({ entity: foundEntity, id: referenceId })
@@ -255,8 +244,7 @@ const validateReferenceValue = async (
 			// 辿りつかないはずだが、念のため
 			return {
 				success: false,
-				error: "invalid_field_type",
-				error_description: `Field '${name}' reference must be a string ID for '${entityName}'`,
+				message: `Field '${name}' reference must be a string ID for '${entityName}'`,
 			}
 		}
 	}

@@ -3,11 +3,16 @@ import type { PostRecordBody } from "../../schema/record"
 import { getEntity, getEntityItemList } from "../entity"
 import { validateFieldValue } from "./validate-field-value"
 
-type ValidateCreateRecordResult = {
-	success: boolean
-	validatedData?: Record<string, JsonValue>
-	error?: string
-	error_description?: string
+type ValidateCreateRecordResult =
+	| ValidateCreateRecordParamsSuccess
+	| ValidateCreateRecordParamsFailure
+interface ValidateCreateRecordParamsSuccess {
+	success: true
+	validatedData: Record<string, JsonValue>
+}
+interface ValidateCreateRecordParamsFailure {
+	success: false
+	message: string
 }
 
 export const validateCreateRecordParams = async (
@@ -18,8 +23,7 @@ export const validateCreateRecordParams = async (
 	if (!(await getEntity(entity_name))) {
 		return {
 			success: false,
-			error: "invalid_request",
-			error_description: `Entity '${entity_name}' does not exist`,
+			message: `Entity '${entity_name}' does not exist`,
 		}
 	}
 
@@ -42,8 +46,7 @@ export const validateCreateRecordParams = async (
 		const fieldNames = missingRequiredFields.map((f) => f.name).join("', '")
 		return {
 			success: false,
-			error: "invalid_request",
-			error_description: `Field '${fieldNames}' ${missingRequiredFields.length === 1 ? "is" : "are"} required for '${entity_name}'`,
+			message: `Field '${fieldNames}' ${missingRequiredFields.length === 1 ? "is" : "are"} required for '${entity_name}'`,
 		}
 	}
 
@@ -62,18 +65,15 @@ export const validateCreateRecordParams = async (
 		}
 
 		// Validate field value
-		const { success, validatedValue, error, error_description } =
-			await validateFieldValue(entityItem, value as JsonValue, entity_name)
-		if (!success) {
-			return {
-				success: false,
-				error,
-				error_description,
-			}
+		const validateResult = await validateFieldValue(
+			entityItem,
+			value as JsonValue,
+			entity_name,
+		)
+		if (!validateResult.success) {
+			return { success: false, message: validateResult.message }
 		}
-		if (validatedValue !== undefined) {
-			validatedData[fieldName] = validatedValue
-		}
+		validatedData[fieldName] = validateResult.validatedValue
 	}
 
 	// Special handling for user entity to set user_name

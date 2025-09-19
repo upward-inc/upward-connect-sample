@@ -432,8 +432,7 @@ describe("Record Integration Tests", () => {
 			const data = await response.json()
 			expect(response.status).toBe(400)
 			expect(data).toEqual({
-				error: "invalid_request",
-				error_description: "Entity 'nonexistent_entity' does not exist",
+				message: "Entity 'nonexistent_entity' does not exist",
 			})
 		})
 
@@ -463,8 +462,7 @@ describe("Record Integration Tests", () => {
 			const data = await response.json()
 			expect(response.status).toBe(400)
 			expect(data).toEqual({
-				error: "invalid_request",
-				error_description: "Field 'name' is required for 'account'",
+				message: "Field 'name' is required for 'account'",
 			})
 		})
 
@@ -494,8 +492,7 @@ describe("Record Integration Tests", () => {
 
 			const data = await response.json()
 			expect(response.status).toBe(400)
-			expect(data.error).toBe("invalid_field_value")
-			expect(data.error_description).toContain(
+			expect(data.message).toContain(
 				"does not exist in any of: 'lead' for 'account'",
 			)
 		})
@@ -526,10 +523,7 @@ describe("Record Integration Tests", () => {
 
 			const data = await response.json()
 			expect(response.status).toBe(400)
-			expect(data.error).toBe("invalid_field_value")
-			expect(data.error_description).toContain(
-				"Field 'industry' must be one of: ",
-			)
+			expect(data.message).toContain("Field 'industry' must be one of: ")
 		})
 
 		it("should return 400 for invalid data type", async () => {
@@ -559,8 +553,7 @@ describe("Record Integration Tests", () => {
 			const data = await response.json()
 			expect(response.status).toBe(400)
 			expect(data).toEqual({
-				error: "invalid_field_type",
-				error_description: "Field 'revenue' must be an integer for 'account'",
+				message: "Field 'revenue' must be an integer for 'account'",
 			})
 		})
 	})

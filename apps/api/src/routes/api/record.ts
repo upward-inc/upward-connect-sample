@@ -48,13 +48,7 @@ export const recordRouter = new Hono<{ Variables: AuthContexts }>()
 				data,
 			})
 			if (!validateResult.success) {
-				return c.json(
-					{
-						error: validateResult.error,
-						error_description: validateResult.error_description,
-					},
-					400,
-				)
+				return c.json({ message: validateResult.message }, 400)
 			}
 
 			const createResult = await createRecord(
