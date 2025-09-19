@@ -118,6 +118,10 @@ export const PostAuthorizeResultSchema = z.object({
 		description: "認可コード",
 		example: "sample_code",
 	}),
+	state: z.string().optional().openapi({
+		description: "リクエストで渡されたstate",
+		example: "sample_state",
+	}),
 })
 
 // トークンリクエスト用のスキーマ
