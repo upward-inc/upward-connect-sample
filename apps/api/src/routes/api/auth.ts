@@ -87,6 +87,7 @@ export const authRouter = new Hono<{ Variables: AuthContexts }>()
 					{
 						error: validateResult.error,
 						error_description: validateResult.error_description,
+						state: params.state,
 					},
 					400,
 				)
@@ -100,7 +101,7 @@ export const authRouter = new Hono<{ Variables: AuthContexts }>()
 				client_secret: validateResult.client_secret,
 				redirect_uri: validateResult.redirect_uri,
 				scope: validateResult.scope ?? null,
-				state: validateResult.state ?? null,
+				state: params.state ?? null,
 				nonce: null, // TODO nonceの実装
 				published_at: new Date(),
 				expire_at: new Date(
@@ -110,6 +111,7 @@ export const authRouter = new Hono<{ Variables: AuthContexts }>()
 
 			return c.json({
 				code: authorizationCode,
+				state: params.state,
 			})
 		},
 	)
