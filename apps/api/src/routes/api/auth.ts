@@ -86,7 +86,7 @@ export const authRouter = new Hono<{ Variables: AuthContexts }>()
 
 			return c.json({
 				code: authorizationCode,
-				state: validateResult.state ?? null,
+				state: validateResult.state,
 			})
 		},
 	)

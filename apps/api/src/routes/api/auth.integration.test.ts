@@ -505,7 +505,7 @@ describe("Auth Integration Tests", () => {
 			expect(data).toHaveProperty("state", stateValue)
 		})
 
-		it("should return null state when state parameter is not provided", async () => {
+		it("should not return state when state parameter is not provided", async () => {
 			// Create a test user and client
 			const testUser = await createIntegrationTestUser({
 				user_name: "no_state_user",
@@ -540,7 +540,7 @@ describe("Auth Integration Tests", () => {
 			const data = await response.json()
 			expect(response.status).toBe(200)
 			expect(data).toHaveProperty("code")
-			expect(data).toHaveProperty("state", null)
+			expect(data).not.toHaveProperty("state")
 		})
 
 		it("should preserve state parameter in error responses - invalid client_id", async () => {
