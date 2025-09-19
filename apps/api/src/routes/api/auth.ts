@@ -13,29 +13,32 @@ import {
 	validateTokenParams,
 } from "../../domain/auth"
 import { env } from "../../env"
-import { validator } from "../../libs/hono-openapi"
+import { describeRoute, validator } from "../../libs/hono-openapi"
 import {
 	type AuthContexts,
 	PostAuthorizeParamSchema,
 	PostLoginParamSchema,
+	PostLoginResultSchema,
 	TokenRequestSchema,
 } from "../../schema/auth"
 
 export const authRouter = new Hono<{ Variables: AuthContexts }>()
-	.post("/login", validator("form", PostLoginParamSchema), async (c) => {
-		const { username, password } = c.req.valid("form")
+	.post(
+		"/login",
+		describeRoute({
+			description:
+				"ユーザー名 + パスワードでユーザー認証を行う（アクセストークンを返却する）",
+			schema: PostLoginResultSchema,
+		}),
+		validator("form", PostLoginParamSchema),
+		async (c) => {
+			const { username, password } = c.req.valid("form")
 
-		const user = await getUserByUsernameAndPassword(username, password)
-		if (!user) {
-			return c.json({ message: "Invalid username or password" }, 401)
-		}
+			const user = await getUserByUsernameAndPassword(username, password)
+			if (!user) {
+				return c.json({ message: "Invalid username or password" }, 401)
+			}
 
-		const { accessToken } = generateToken({
-			userId: user.id,
-			userName: user.user_name,
-		})
-		return c.json({ ...user, access_token: accessToken })
-	})
 	.get("/clients/:id", async (c) => {
 		const clientId = c.req.param("id")
 
