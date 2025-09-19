@@ -1,10 +1,6 @@
 import { Hono } from "hono"
 import { createFile, getFile } from "../../domain/file"
-import {
-	describeRoute,
-	describeRouteWithoutResponseValidation,
-	validator,
-} from "../../libs/hono-openapi"
+import { describeRoute, validator } from "../../libs/hono-openapi"
 import type { AuthContexts } from "../../schema/auth"
 import {
 	GetFileParamSchema,
@@ -16,7 +12,7 @@ export const fileRouter = new Hono<{ Variables: AuthContexts }>()
 	.get(
 		"/:id",
 		// Response は json ではないので schema validation は行わない
-		describeRouteWithoutResponseValidation({
+		describeRoute({
 			description: "単一のファイルを返却する",
 		}),
 		validator("param", GetFileParamSchema),
