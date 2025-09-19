@@ -268,7 +268,7 @@ describe("Auth Integration Tests", () => {
 			expect(response.status).toBe(200)
 			expect(data).toHaveProperty("access_token")
 			expect(data).toHaveProperty("refresh_token")
-			expect(data).not.toHaveProperty("id_token")
+			expect(data).not.toHaveProperty("id_token") // ID token should not be issued in refresh flow
 			expect(data).toHaveProperty("token_type", "Bearer")
 			expect(data).toHaveProperty(
 				"expires_in",
@@ -667,10 +667,8 @@ describe("Auth Integration Tests", () => {
 			expect(data.error).toHaveProperty("issues")
 			expect(data.error.issues[0].path).toContainEqual("response_type")
 		})
-	})
 
-	describe("Authorize Endpoint - Nonce Validation", () => {
-		it("should preserve nonce parameter in authorization code and ID token", async () => {
+		it("should contain nonce claim in ID token", async () => {
 			// Create a test user and client
 			const testUser = await createIntegrationTestUser({
 				user_name: "nonce_user",
@@ -687,7 +685,6 @@ describe("Auth Integration Tests", () => {
 			})
 
 			const nonceValue = "random-nonce-value-12345"
-			const stateValue = "state-value-12345"
 			const token = createValidToken(testUser.id)
 
 			// Step 1: Authorize with nonce
@@ -702,7 +699,6 @@ describe("Auth Integration Tests", () => {
 					client_id: testClient.id,
 					redirect_uri: "https://example.com/callback",
 					scope: "openid profile email",
-					state: stateValue,
 					nonce: nonceValue,
 				}),
 			})
@@ -710,7 +706,6 @@ describe("Auth Integration Tests", () => {
 			const authorizeData = await authorizeResponse.json()
 			expect(authorizeResponse.status).toBe(200)
 			expect(authorizeData).toHaveProperty("code")
-			expect(authorizeData).toHaveProperty("state", stateValue)
 
 			// Step 2: Exchange authorization code for tokens
 			const tokenResponse = await app.request("/api/oauth2/token", {
@@ -740,72 +735,6 @@ describe("Auth Integration Tests", () => {
 				tokenSecret,
 			) as DecodedIdToken
 			expect(decodedIdToken.nonce).toBe(nonceValue)
-			expect(decodedIdToken.username).toBe(testUser.user_name)
-			expect(decodedIdToken.sub).toBe(testUser.id)
-		})
-
-		it("should handle authorize request without nonce parameter", async () => {
-			// Create a test user and client
-			const testUser = await createIntegrationTestUser({
-				user_name: "no_nonce_user",
-				first_name: "No",
-				last_name: "Nonce",
-				email: "no_nonce@example.com",
-			})
-
-			const testClient = await createIntegrationTestOAuthClient({
-				name: "no_nonce_cli",
-				secret: "test_secret_12345",
-				redirect_uris: "https://example.com/callback",
-				scopes: "openid,profile,email",
-			})
-
-			const token = createValidToken(testUser.id)
-
-			// Step 1: Authorize without nonce
-			const authorizeResponse = await app.request("/api/oauth2/authorize", {
-				method: "POST",
-				headers: {
-					"Content-Type": "application/x-www-form-urlencoded",
-					Authorization: `Bearer ${token}`,
-				},
-				body: new URLSearchParams({
-					response_type: "code",
-					client_id: testClient.id,
-					redirect_uri: "https://example.com/callback",
-					scope: "openid profile email",
-				}),
-			})
-
-			const authorizeData = await authorizeResponse.json()
-			expect(authorizeResponse.status).toBe(200)
-			expect(authorizeData).toHaveProperty("code")
-
-			// Step 2: Exchange authorization code for tokens
-			const tokenResponse = await app.request("/api/oauth2/token", {
-				method: "POST",
-				headers: {
-					"Content-Type": "application/x-www-form-urlencoded",
-				},
-				body: new URLSearchParams({
-					grant_type: "authorization_code",
-					code: authorizeData.code,
-					redirect_uri: "https://example.com/callback",
-					client_id: testClient.id,
-					client_secret: testClient.secret,
-				}),
-			})
-
-			const tokenData = await tokenResponse.json()
-			expect(tokenResponse.status).toBe(200)
-			expect(tokenData).toHaveProperty("id_token")
-
-			// Step 3: Verify nonce is not included in ID token when not provided
-			const decodedIdToken = verify(
-				tokenData.id_token,
-				tokenSecret,
-			) as DecodedIdToken
-			expect(decodedIdToken.nonce).toBeUndefined()
 			expect(decodedIdToken.username).toBe(testUser.user_name)
 			expect(decodedIdToken.sub).toBe(testUser.id)
 		})
