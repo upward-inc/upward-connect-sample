@@ -113,6 +113,13 @@ export const PostAuthorizeParamSchema = z.object({
 	state: z.string().optional(),
 })
 
+export const PostAuthorizeResultSchema = z.object({
+	code: z.string().openapi({
+		description: "認可コード",
+		example: "sample_code",
+	}),
+})
+
 // トークンリクエスト用のスキーマ
 export const TokenRequestSchema = z.discriminatedUnion("grant_type", [
 	z.object({
@@ -137,6 +144,7 @@ export type PostLoginResult = z.infer<typeof PostLoginResultSchema>
 export type GetOAuthClientResult = z.infer<typeof GetOAuthClientResultSchema>
 export type GetUserInfoResult = z.infer<typeof GetUserInfoResultSchema>
 export type PostAuthorizeParam = z.infer<typeof PostAuthorizeParamSchema>
+export type PostAuthorizeResult = z.infer<typeof PostAuthorizeResultSchema>
 export type TokenRequest = z.infer<typeof TokenRequestSchema>
 
 // 認証ルート用コンテキスト（認証済みユーザー情報）

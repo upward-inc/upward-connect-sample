@@ -17,6 +17,7 @@ import { describeRoute, validator } from "../../libs/hono-openapi"
 import {
 	type AuthContexts,
 	PostAuthorizeParamSchema,
+	PostAuthorizeResultSchema,
 	PostLoginParamSchema,
 	PostLoginResultSchema,
 	GetOAuthClientResultSchema,
@@ -68,6 +69,10 @@ export const authRouter = new Hono<{ Variables: AuthContexts }>()
 	)
 	.post(
 		"/authorize",
+		describeRoute({
+			description: "OAuth2.0準拠の認可エンドポイント、認可コードを返却する",
+			schema: PostAuthorizeResultSchema,
+		}),
 		validator("form", PostAuthorizeParamSchema),
 		async (c) => {
 			const user = c.get("user")
@@ -186,7 +191,8 @@ export const authRouter = new Hono<{ Variables: AuthContexts }>()
 	.get(
 		"/userinfo",
 		describeRoute({
-			description: "OIDC1.0準拠のuserinfoエンドポイント、ユーザー情報を返却する",
+			description:
+				"OIDC1.0準拠のuserinfoエンドポイント、ユーザー情報を返却する",
 			schema: GetUserInfoResultSchema,
 		}),
 		async (c) => {
