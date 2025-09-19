@@ -500,6 +500,7 @@ describe("Auth Integration Tests", () => {
 			const data = await response.json()
 			expect(response.status).toBe(200)
 			expect(data).toHaveProperty("code")
+			expect(data).not.toHaveProperty("state") // No state parameter provided in request
 		})
 
 		it("should return state parameter when state parameter is provided", async () => {
@@ -539,43 +540,6 @@ describe("Auth Integration Tests", () => {
 			const data = await response.json()
 			expect(response.status).toBe(200)
 			expect(data).toHaveProperty("state", stateValue)
-		})
-
-		it("should not return state parameter when state parameter is not provided", async () => {
-			// Create a test user and client
-			const testUser = await createIntegrationTestUser({
-				user_name: "no_state_user",
-				first_name: "No",
-				last_name: "State",
-				email: "no_state@example.com",
-			})
-
-			const testClient = await createIntegrationTestOAuthClient({
-				name: "no_state",
-				secret: "test_secret_12345",
-				redirect_uris: "https://example.com/callback",
-				scopes: "openid,profile,email",
-			})
-
-			const token = createValidToken(testUser.id)
-
-			const response = await app.request("/api/oauth2/authorize", {
-				method: "POST",
-				headers: {
-					"Content-Type": "application/x-www-form-urlencoded",
-					Authorization: `Bearer ${token}`,
-				},
-				body: new URLSearchParams({
-					response_type: "code",
-					client_id: testClient.id,
-					redirect_uri: "https://example.com/callback",
-					scope: "openid profile email",
-				}),
-			})
-
-			const data = await response.json()
-			expect(response.status).toBe(200)
-			expect(data).not.toHaveProperty("state")
 		})
 
 		it("should return state parameter in error responses - invalid client_id", async () => {
