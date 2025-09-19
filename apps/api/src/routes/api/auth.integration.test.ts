@@ -465,6 +465,43 @@ describe("Auth Integration Tests", () => {
 	})
 
 	describe("Authorize Endpoint", () => {
+		it("should return code for valid authorization request", async () => {
+			// Create a test user and client
+			const testUser = await createIntegrationTestUser({
+				user_name: "auth_user",
+				first_name: "Auth",
+				last_name: "User",
+				email: "auth_user@example.com",
+			})
+
+			const testClient = await createIntegrationTestOAuthClient({
+				name: "auth_cli",
+				secret: "test_secret_12345",
+				redirect_uris: "https://example.com/callback",
+				scopes: "openid,profile,email",
+			})
+
+			const token = createValidToken(testUser.id)
+
+			const response = await app.request("/api/oauth2/authorize", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/x-www-form-urlencoded",
+					Authorization: `Bearer ${token}`,
+				},
+				body: new URLSearchParams({
+					response_type: "code",
+					client_id: testClient.id,
+					redirect_uri: "https://example.com/callback",
+					scope: "openid profile email",
+				}),
+			})
+
+			const data = await response.json()
+			expect(response.status).toBe(200)
+			expect(data).toHaveProperty("code")
+		})
+
 		it("should return state parameter when state parameter is provided", async () => {
 			// Create a test user and client
 			const testUser = await createIntegrationTestUser({
@@ -501,7 +538,6 @@ describe("Auth Integration Tests", () => {
 
 			const data = await response.json()
 			expect(response.status).toBe(200)
-			expect(data).toHaveProperty("code")
 			expect(data).toHaveProperty("state", stateValue)
 		})
 
@@ -539,7 +575,6 @@ describe("Auth Integration Tests", () => {
 
 			const data = await response.json()
 			expect(response.status).toBe(200)
-			expect(data).toHaveProperty("code")
 			expect(data).not.toHaveProperty("state")
 		})
 
