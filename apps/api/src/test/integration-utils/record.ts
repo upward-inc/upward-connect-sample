@@ -9,14 +9,13 @@ export async function createIntegrationTestAccount(
 	},
 	userId: string,
 ) {
-	const userReference = (userId: string) =>
-		JSON.stringify({ entity: "user", id: userId })
+	const userReference = JSON.stringify({ entity: "user", id: userId })
 	const account = await testPrisma.account.create({
 		data: {
 			name: accountData.name,
-			owner: userReference(userId),
-			created_by: userReference(userId),
-			modified_by: userReference(userId),
+			owner: userReference,
+			created_by: userReference,
+			modified_by: userReference,
 		},
 		select: {
 			id: true,
@@ -38,17 +37,16 @@ export async function createIntegrationTestLead(
 	},
 	userId: string,
 ) {
-	const userReference = (userId: string) =>
-		JSON.stringify({ entity: "user", id: userId })
+	const userReference = JSON.stringify({ entity: "user", id: userId })
 	const lead = await testPrisma.lead.create({
 		data: {
 			company: leadData.company,
 			first_name: leadData.first_name,
 			last_name: leadData.last_name,
 			status: JSON.stringify([leadData.status]),
-			owner: userReference(userId),
-			created_by: userReference(userId),
-			modified_by: userReference(userId),
+			owner: userReference,
+			created_by: userReference,
+			modified_by: userReference,
 		},
 		select: {
 			id: true,
