@@ -68,6 +68,12 @@ export const PostLoginResultSchema = LoggedInUserSchema.extend({
 		example: "sample_access_token",
 	}),
 })
+
+export const GetOAuthClientResultSchema = OAuthClientSchema.pick({
+	id: true,
+	name: true,
+})
+
 // 認可コードリクエスト用のスキーマ
 export const PostAuthorizeParamSchema = z.object({
 	response_type: z.literal("code"),
@@ -98,6 +104,7 @@ export type OAuthClient = z.infer<typeof OAuthClientSchema>
 export type LoggedInUser = z.infer<typeof LoggedInUserSchema>
 export type PostLoginParam = z.infer<typeof PostLoginParamSchema>
 export type PostLoginResult = z.infer<typeof PostLoginResultSchema>
+export type GetOAuthClientResult = z.infer<typeof GetOAuthClientResultSchema>
 export type PostAuthorizeParam = z.infer<typeof PostAuthorizeParamSchema>
 export type TokenRequest = z.infer<typeof TokenRequestSchema>
 
