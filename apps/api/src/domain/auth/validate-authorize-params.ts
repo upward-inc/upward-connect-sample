@@ -26,7 +26,6 @@ interface AuthorizeParams {
 	client_id: string | null
 	redirect_uri: string | null
 	scope?: string | undefined
-	state?: string | undefined
 }
 
 type AuthorizeResult = AuthorizeResultSuccess | AuthorizeResultFailure
@@ -38,7 +37,6 @@ interface AuthorizeResultSuccess {
 	client_secret: string
 	redirect_uri: string
 	scope: string | undefined
-	state: string | undefined
 }
 
 interface AuthorizeResultFailure {
@@ -59,7 +57,6 @@ export const validateAuthorizeParams = async (
 ): Promise<AuthorizeResult> => {
 	try {
 		// TODO: scopeの検証
-		// TODO: stateの検証
 
 		if (params.response_type !== "code") {
 			return { success: false, error: "invalid_request" }
@@ -90,7 +87,6 @@ export const validateAuthorizeParams = async (
 			client_secret: oauthClient.secret,
 			redirect_uri: params.redirect_uri,
 			scope: params.scope,
-			state: params.state,
 		}
 	} catch {
 		return { success: false, error: "server_error" }

@@ -463,4 +463,199 @@ describe("Auth Integration Tests", () => {
 			expect(data.error.issues[0].path).toContainEqual("grant_type")
 		})
 	})
+
+	describe("Authorize Endpoint", () => {
+		it("should return code for valid authorization request", async () => {
+			// Create a test user and client
+			const testUser = await createIntegrationTestUser({
+				user_name: "auth_user",
+				first_name: "Auth",
+				last_name: "User",
+				email: "auth_user@example.com",
+			})
+
+			const testClient = await createIntegrationTestOAuthClient({
+				name: "auth_cli",
+				secret: "test_secret_12345",
+				redirect_uris: "https://example.com/callback",
+				scopes: "openid,profile,email",
+			})
+
+			const token = createValidToken(testUser.id)
+
+			const response = await app.request("/api/oauth2/authorize", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/x-www-form-urlencoded",
+					Authorization: `Bearer ${token}`,
+				},
+				body: new URLSearchParams({
+					response_type: "code",
+					client_id: testClient.id,
+					redirect_uri: "https://example.com/callback",
+					scope: "openid profile email",
+				}),
+			})
+
+			const data = await response.json()
+			expect(response.status).toBe(200)
+			expect(data).toHaveProperty("code")
+		})
+
+		it("should return state parameter when state parameter is provided", async () => {
+			// Create a test user and client
+			const testUser = await createIntegrationTestUser({
+				user_name: "state_user",
+				first_name: "State",
+				last_name: "User",
+				email: "state_user@example.com",
+			})
+
+			const testClient = await createIntegrationTestOAuthClient({
+				name: "state_cli",
+				secret: "test_secret_12345",
+				redirect_uris: "https://example.com/callback",
+				scopes: "openid,profile,email",
+			})
+
+			const stateValue = "random-state-value-12345"
+			const token = createValidToken(testUser.id)
+
+			const response = await app.request("/api/oauth2/authorize", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/x-www-form-urlencoded",
+					Authorization: `Bearer ${token}`,
+				},
+				body: new URLSearchParams({
+					response_type: "code",
+					client_id: testClient.id,
+					redirect_uri: "https://example.com/callback",
+					scope: "openid profile email",
+					state: stateValue,
+				}),
+			})
+
+			const data = await response.json()
+			expect(response.status).toBe(200)
+			expect(data).toHaveProperty("state", stateValue)
+		})
+
+		it("should return state parameter in error responses - invalid client_id", async () => {
+			const testUser = await createIntegrationTestUser({
+				user_name: "invalid_client_user",
+				first_name: "Invalid",
+				last_name: "Client",
+				email: "invalid_client@example.com",
+			})
+
+			const stateValue = "state-for-error-test"
+			const token = createValidToken(testUser.id)
+
+			const response = await app.request("/api/oauth2/authorize", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/x-www-form-urlencoded",
+					Authorization: `Bearer ${token}`,
+				},
+				body: new URLSearchParams({
+					response_type: "code",
+					client_id: crypto.randomUUID(), // Nonexistent client ID
+					redirect_uri: "https://example.com/callback",
+					scope: "openid profile email",
+					state: stateValue,
+				}),
+			})
+
+			const data = await response.json()
+			expect(response.status).toBe(400)
+			expect(data).toHaveProperty("error")
+			expect(data).toEqual({
+				error: "invalid_request",
+				state: stateValue,
+			})
+		})
+
+		it("should return state parameter in error responses - invalid redirect_uri", async () => {
+			const testUser = await createIntegrationTestUser({
+				user_name: "invalid_redirect_user",
+				first_name: "Invalid",
+				last_name: "Redirect",
+				email: "invalid_redirect@example.com",
+			})
+
+			const testClient = await createIntegrationTestOAuthClient({
+				name: "inv_red",
+				secret: "test_secret_12345",
+				redirect_uris: "https://example.com/callback",
+				scopes: "openid,profile,email",
+			})
+
+			const stateValue = "state-for-redirect-error"
+			const token = createValidToken(testUser.id)
+
+			const response = await app.request("/api/oauth2/authorize", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/x-www-form-urlencoded",
+					Authorization: `Bearer ${token}`,
+				},
+				body: new URLSearchParams({
+					response_type: "code",
+					client_id: testClient.id,
+					redirect_uri: "https://malicious-site.com/callback", // Different from registered URI
+					scope: "openid profile email",
+					state: stateValue,
+				}),
+			})
+
+			const data = await response.json()
+			expect(response.status).toBe(400)
+			expect(data).toEqual({
+				error: "invalid_request",
+				state: stateValue,
+			})
+		})
+
+		it("should return state parameter in error responses - invalid response_type", async () => {
+			const testUser = await createIntegrationTestUser({
+				user_name: "invalid_response_type_user",
+				first_name: "Invalid",
+				last_name: "ResponseType",
+				email: "invalid_response_type@example.com",
+			})
+
+			const testClient = await createIntegrationTestOAuthClient({
+				name: "inv_resp",
+				secret: "test_secret_12345",
+				redirect_uris: "https://example.com/callback",
+				scopes: "openid,profile,email",
+			})
+
+			const stateValue = "state-for-response-type-error"
+			const token = createValidToken(testUser.id)
+
+			const response = await app.request("/api/oauth2/authorize", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/x-www-form-urlencoded",
+					Authorization: `Bearer ${token}`,
+				},
+				body: new URLSearchParams({
+					response_type: "token", // Invalid response type (should be "code")
+					client_id: testClient.id,
+					redirect_uri: "https://example.com/callback",
+					scope: "openid profile email",
+					state: stateValue,
+				}),
+			})
+
+			const data = await response.json()
+			expect(response.status).toBe(400)
+			// Zod validation error for invalid response_type comes before OAuth validation
+			expect(data.success).toBe(false)
+			expect(data.error).toHaveProperty("issues")
+			expect(data.error.issues[0].path).toContainEqual("response_type")
+		})
+	})
 })
