@@ -465,7 +465,7 @@ describe("Auth Integration Tests", () => {
 	})
 
 	describe("Authorize Endpoint", () => {
-		it("should preserve state parameter in successful authorization", async () => {
+		it("should return state parameter when state parameter is provided", async () => {
 			// Create a test user and client
 			const testUser = await createIntegrationTestUser({
 				user_name: "state_user",
@@ -505,7 +505,7 @@ describe("Auth Integration Tests", () => {
 			expect(data).toHaveProperty("state", stateValue)
 		})
 
-		it("should not return state when state parameter is not provided", async () => {
+		it("should not return state parameter when state parameter is not provided", async () => {
 			// Create a test user and client
 			const testUser = await createIntegrationTestUser({
 				user_name: "no_state_user",
@@ -543,7 +543,7 @@ describe("Auth Integration Tests", () => {
 			expect(data).not.toHaveProperty("state")
 		})
 
-		it("should preserve state parameter in error responses - invalid client_id", async () => {
+		it("should return state parameter in error responses - invalid client_id", async () => {
 			const testUser = await createIntegrationTestUser({
 				user_name: "invalid_client_user",
 				first_name: "Invalid",
@@ -578,7 +578,7 @@ describe("Auth Integration Tests", () => {
 			})
 		})
 
-		it("should preserve state parameter in error responses - invalid redirect_uri", async () => {
+		it("should return state parameter in error responses - invalid redirect_uri", async () => {
 			const testUser = await createIntegrationTestUser({
 				user_name: "invalid_redirect_user",
 				first_name: "Invalid",
@@ -619,7 +619,7 @@ describe("Auth Integration Tests", () => {
 			})
 		})
 
-		it("should preserve state parameter in error responses - invalid response_type", async () => {
+		it("should return state parameter in error responses - invalid response_type", async () => {
 			const testUser = await createIntegrationTestUser({
 				user_name: "invalid_response_type_user",
 				first_name: "Invalid",
