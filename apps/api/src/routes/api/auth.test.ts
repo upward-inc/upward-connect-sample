@@ -7,11 +7,11 @@ import {
 	createIntegrationTestOAuthClient,
 	createRefreshToken,
 	createValidToken,
-} from "../../test/integration-utils/auth"
+} from "../../test/utils/auth"
 import {
 	cleanupTestData,
 	createIntegrationTestUser,
-} from "../../test/integration-utils/common"
+} from "../../test/utils/common"
 
 describe("Auth Integration Tests", () => {
 	beforeAll(async () => {

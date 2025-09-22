@@ -1,4 +1,4 @@
-import { testPrisma } from "../integration-setup"
+import { testPrisma } from "../setup"
 
 /**
  * Clean up all test data from the database

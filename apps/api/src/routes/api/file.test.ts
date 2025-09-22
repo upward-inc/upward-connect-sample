@@ -1,15 +1,12 @@
 import { afterAll, beforeAll, describe, expect, it } from "vitest"
 import { app } from "../../index"
-import { testPrisma } from "../../test/integration-setup"
-import {
-	createExpiredToken,
-	createValidToken,
-} from "../../test/integration-utils/auth"
+import { testPrisma } from "../../test/setup"
+import { createExpiredToken, createValidToken } from "../../test/utils/auth"
 import {
 	cleanupTestData,
 	createIntegrationTestUser,
-} from "../../test/integration-utils/common"
-import { createTestFile } from "../../test/integration-utils/file"
+} from "../../test/utils/common"
+import { createTestFile } from "../../test/utils/file"
 
 describe("File Integration Tests", () => {
 	beforeAll(async () => {

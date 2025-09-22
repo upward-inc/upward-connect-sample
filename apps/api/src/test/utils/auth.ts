@@ -1,6 +1,6 @@
 import { sign } from "jsonwebtoken"
 import type * as ms from "ms"
-import { testPrisma } from "../integration-setup"
+import { testPrisma } from "../setup"
 
 function createToken(userId: string, expiresIn?: ms.StringValue) {
 	const secret = process.env.OIDC_TOKEN_SECRET
