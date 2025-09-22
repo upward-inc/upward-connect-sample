@@ -225,7 +225,6 @@ export const authRouter = new Hono<{ Variables: AuthContexts }>()
 
 			return c.json({
 				sub: loggedInUser.id,
-				unique_name: loggedInUser.user_name,
 				name: `${loggedInUser.last_name} ${loggedInUser.first_name}`,
 				given_name: loggedInUser.first_name,
 				family_name: loggedInUser.last_name,

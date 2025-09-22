@@ -82,10 +82,6 @@ export const GetUserInfoResultSchema = z.object({
 		description: "subjectクレーム（ユーザー識別子）",
 		example: "00000001",
 	}),
-	unique_name: z.string().openapi({
-		description: "ユニーク名",
-		example: "dsmail0@example.com",
-	}),
 	name: z.string().openapi({
 		description: "表示用のフルネーム",
 		example: "Dorey Smail",
