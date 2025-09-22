@@ -48,6 +48,14 @@ export async function cleanupTestData() {
 			},
 		})
 
+		await testPrisma.profile.deleteMany({
+			where: {
+				name: {
+					contains: "test_",
+				},
+			},
+		})
+
 		await testPrisma.oauth_client.deleteMany({
 			where: {
 				name: {
@@ -88,7 +96,7 @@ export async function createIntegrationTestUser(userData: {
 				hashed_password: "test-password-123", // Use a fixed password for testing purposes
 				is_active: true,
 				timezone: "Asia/Tokyo",
-				language: "ja",
+				locale: "ja-JP",
 			},
 			select: {
 				id: true,
@@ -97,6 +105,27 @@ export async function createIntegrationTestUser(userData: {
 				last_name: true,
 				email: true,
 				is_active: true,
+			},
+		})
+
+		// Create a test profile for the user
+		const profile = await testPrisma.profile.create({
+			data: {
+				name: "test_profile",
+				display_name: "Test Profile",
+				order: 999,
+				created_by: user.id,
+				modified_by: user.id,
+			},
+		})
+
+		// Create user access control to link user with profile
+		await testPrisma.user_access_control.create({
+			data: {
+				user_id: user.id,
+				profile_id: profile.id,
+				created_by: user.id,
+				modified_by: user.id,
 			},
 		})
 
