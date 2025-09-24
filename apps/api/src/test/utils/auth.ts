@@ -36,21 +36,16 @@ export async function createIntegrationTestOAuthClient(clientData: {
 	redirect_uris: string
 	scopes: string
 }) {
-	try {
-		const client = await testPrisma.oauth_client.create({
-			data: {
-				name: `test_${clientData.name}`,
-				secret: clientData.secret,
-				redirect_uris: clientData.redirect_uris,
-				scopes: clientData.scopes,
-			},
-		})
+	const client = await testPrisma.oauth_client.create({
+		data: {
+			name: `test_${clientData.name}`,
+			secret: clientData.secret,
+			redirect_uris: clientData.redirect_uris,
+			scopes: clientData.scopes,
+		},
+	})
 
-		return client
-	} catch (error) {
-		console.error("Error creating test OAuth client:", error)
-		throw error
-	}
+	return client
 }
 
 /**
