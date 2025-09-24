@@ -5,9 +5,9 @@ export default defineConfig({
 		environment: "node",
 		include: ["src/**/*.test.ts"],
 		setupFiles: ["./src/test/setup.ts"],
-		testTimeout: 60000, // 60 seconds for integration tests with container startup
+		testTimeout: 60000, // 60 seconds for tests with container startup
 		hookTimeout: 60000, // 60 seconds for setup/teardown (container operations)
-		// Run integration tests sequentially to avoid container conflicts
+		// Run tests sequentially to avoid container conflicts
 		sequence: {
 			concurrent: false,
 		},

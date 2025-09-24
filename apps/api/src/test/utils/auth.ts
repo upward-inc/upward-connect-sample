@@ -28,9 +28,9 @@ export function createExpiredToken(userId: string) {
 }
 
 /**
- * Create a test OAuth client for integration tests
+ * Create a test OAuth client for tests
  */
-export async function createIntegrationTestOAuthClient(clientData: {
+export async function createTestOAuthClient(clientData: {
 	name: string
 	secret: string
 	redirect_uris: string

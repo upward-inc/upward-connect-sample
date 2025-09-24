@@ -4,16 +4,13 @@ import { app } from "../../index"
 import {
 	createExpiredRefreshToken,
 	createExpiredToken,
-	createIntegrationTestOAuthClient,
 	createRefreshToken,
+	createTestOAuthClient,
 	createValidToken,
 } from "../../test/utils/auth"
-import {
-	cleanupTestData,
-	createIntegrationTestUser,
-} from "../../test/utils/common"
+import { cleanupTestData, createTestUser } from "../../test/utils/common"
 
-describe("Auth Integration Tests", () => {
+describe("Auth Tests", () => {
 	beforeAll(async () => {
 		// Clean up any existing test data
 		await cleanupTestData()
@@ -27,7 +24,7 @@ describe("Auth Integration Tests", () => {
 	describe("Userinfo Endpoint", () => {
 		it("should return user info for valid token", async () => {
 			// Create a test user
-			const testUser = await createIntegrationTestUser({
+			const testUser = await createTestUser({
 				user_name: "test_user",
 				first_name: "Test",
 				last_name: "User",
@@ -80,7 +77,7 @@ describe("Auth Integration Tests", () => {
 		})
 
 		it("should return 401 for expired token", async () => {
-			const testUser = await createIntegrationTestUser({
+			const testUser = await createTestUser({
 				user_name: "expired_user",
 				first_name: "Expired",
 				last_name: "User",
@@ -119,7 +116,7 @@ describe("Auth Integration Tests", () => {
 
 		it("should return 401 for token with invalid signature", async () => {
 			// Create a token with a different secret to simulate invalid signature
-			const testUser = await createIntegrationTestUser({
+			const testUser = await createTestUser({
 				user_name: "invalid_sig_user",
 				first_name: "Invalid",
 				last_name: "Signature",
@@ -223,7 +220,7 @@ describe("Auth Integration Tests", () => {
 	describe("Token Endpoint - Refresh Token", () => {
 		it("should return new tokens for valid refresh token", async () => {
 			// Create a test user
-			const testUser = await createIntegrationTestUser({
+			const testUser = await createTestUser({
 				user_name: "refresh_user",
 				first_name: "Refresh",
 				last_name: "User",
@@ -231,7 +228,7 @@ describe("Auth Integration Tests", () => {
 			})
 
 			// Create a test OAuth client
-			const testClient = await createIntegrationTestOAuthClient({
+			const testClient = await createTestOAuthClient({
 				name: "refresh_cli",
 				secret: "test_secret_12345",
 				redirect_uris: "https://localhost:3000/callback",
@@ -267,7 +264,7 @@ describe("Auth Integration Tests", () => {
 		})
 
 		it("should return 400 for invalid client_id", async () => {
-			const testUser = await createIntegrationTestUser({
+			const testUser = await createTestUser({
 				user_name: "refresh_user_invalid_client",
 				first_name: "Refresh",
 				last_name: "User",
@@ -299,14 +296,14 @@ describe("Auth Integration Tests", () => {
 		})
 
 		it("should return 400 for invalid client_secret", async () => {
-			const testUser = await createIntegrationTestUser({
+			const testUser = await createTestUser({
 				user_name: "refresh_user_invalid_secret",
 				first_name: "Refresh",
 				last_name: "User",
 				email: "refresh_user_invalid_secret@example.com",
 			})
 
-			const testClient = await createIntegrationTestOAuthClient({
+			const testClient = await createTestOAuthClient({
 				name: "inv_secret",
 				secret: "test_secret_12345",
 				redirect_uris: "https://localhost:3000/callback",
@@ -337,14 +334,14 @@ describe("Auth Integration Tests", () => {
 		})
 
 		it("should return 400 for expired refresh token", async () => {
-			const testUser = await createIntegrationTestUser({
+			const testUser = await createTestUser({
 				user_name: "refresh_user_expired",
 				first_name: "Refresh",
 				last_name: "User",
 				email: "refresh_user_expired@example.com",
 			})
 
-			const testClient = await createIntegrationTestOAuthClient({
+			const testClient = await createTestOAuthClient({
 				name: "exp_token",
 				secret: "test_secret_12345",
 				redirect_uris: "https://localhost:3000/callback",
@@ -375,7 +372,7 @@ describe("Auth Integration Tests", () => {
 		})
 
 		it("should return 400 for malformed refresh token", async () => {
-			const testClient = await createIntegrationTestOAuthClient({
+			const testClient = await createTestOAuthClient({
 				name: "malformed",
 				secret: "test_secret_12345",
 				redirect_uris: "https://localhost:3000/callback",
@@ -404,7 +401,7 @@ describe("Auth Integration Tests", () => {
 		})
 
 		it("should return 400 for non-existent user in refresh token", async () => {
-			const testClient = await createIntegrationTestOAuthClient({
+			const testClient = await createTestOAuthClient({
 				name: "unknown_user",
 				secret: "test_secret_12345",
 				redirect_uris: "https://localhost:3000/callback",
@@ -436,7 +433,7 @@ describe("Auth Integration Tests", () => {
 		})
 
 		it("should return 400 for unsupported grant type", async () => {
-			const testClient = await createIntegrationTestOAuthClient({
+			const testClient = await createTestOAuthClient({
 				name: "unsupported",
 				secret: "test_secret_12345",
 				redirect_uris: "https://localhost:3000/callback",
@@ -467,14 +464,14 @@ describe("Auth Integration Tests", () => {
 	describe("Authorize Endpoint", () => {
 		it("should return code for valid authorization request", async () => {
 			// Create a test user and client
-			const testUser = await createIntegrationTestUser({
+			const testUser = await createTestUser({
 				user_name: "auth_user",
 				first_name: "Auth",
 				last_name: "User",
 				email: "auth_user@example.com",
 			})
 
-			const testClient = await createIntegrationTestOAuthClient({
+			const testClient = await createTestOAuthClient({
 				name: "auth_cli",
 				secret: "test_secret_12345",
 				redirect_uris: "https://example.com/callback",
@@ -504,14 +501,14 @@ describe("Auth Integration Tests", () => {
 
 		it("should return state parameter when state parameter is provided", async () => {
 			// Create a test user and client
-			const testUser = await createIntegrationTestUser({
+			const testUser = await createTestUser({
 				user_name: "state_user",
 				first_name: "State",
 				last_name: "User",
 				email: "state_user@example.com",
 			})
 
-			const testClient = await createIntegrationTestOAuthClient({
+			const testClient = await createTestOAuthClient({
 				name: "state_cli",
 				secret: "test_secret_12345",
 				redirect_uris: "https://example.com/callback",
@@ -542,7 +539,7 @@ describe("Auth Integration Tests", () => {
 		})
 
 		it("should return state parameter in error responses - invalid client_id", async () => {
-			const testUser = await createIntegrationTestUser({
+			const testUser = await createTestUser({
 				user_name: "invalid_client_user",
 				first_name: "Invalid",
 				last_name: "Client",
@@ -577,14 +574,14 @@ describe("Auth Integration Tests", () => {
 		})
 
 		it("should return state parameter in error responses - invalid redirect_uri", async () => {
-			const testUser = await createIntegrationTestUser({
+			const testUser = await createTestUser({
 				user_name: "invalid_redirect_user",
 				first_name: "Invalid",
 				last_name: "Redirect",
 				email: "invalid_redirect@example.com",
 			})
 
-			const testClient = await createIntegrationTestOAuthClient({
+			const testClient = await createTestOAuthClient({
 				name: "inv_red",
 				secret: "test_secret_12345",
 				redirect_uris: "https://example.com/callback",
@@ -618,14 +615,14 @@ describe("Auth Integration Tests", () => {
 		})
 
 		it("should return state parameter in error responses - invalid response_type", async () => {
-			const testUser = await createIntegrationTestUser({
+			const testUser = await createTestUser({
 				user_name: "invalid_response_type_user",
 				first_name: "Invalid",
 				last_name: "ResponseType",
 				email: "invalid_response_type@example.com",
 			})
 
-			const testClient = await createIntegrationTestOAuthClient({
+			const testClient = await createTestOAuthClient({
 				name: "inv_resp",
 				secret: "test_secret_12345",
 				redirect_uris: "https://example.com/callback",

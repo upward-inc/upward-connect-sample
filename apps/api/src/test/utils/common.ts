@@ -81,9 +81,9 @@ export async function cleanupTestData() {
 }
 
 /**
- * Create a test user for integration tests
+ * Create a test user for tests
  */
-export async function createIntegrationTestUser(userData: {
+export async function createTestUser(userData: {
 	user_name: string
 	first_name: string
 	last_name: string

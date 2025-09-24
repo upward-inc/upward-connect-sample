@@ -2,13 +2,10 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest"
 import { app } from "../../index"
 import { testPrisma } from "../../test/setup"
 import { createExpiredToken, createValidToken } from "../../test/utils/auth"
-import {
-	cleanupTestData,
-	createIntegrationTestUser,
-} from "../../test/utils/common"
+import { cleanupTestData, createTestUser } from "../../test/utils/common"
 import { createTestFile } from "../../test/utils/file"
 
-describe("File Integration Tests", () => {
+describe("File Tests", () => {
 	beforeAll(async () => {
 		// Clean up any existing test data
 		await cleanupTestData()
@@ -22,7 +19,7 @@ describe("File Integration Tests", () => {
 	describe("POST /api/files - Create File", () => {
 		it("should create a file with valid authentication and form data", async () => {
 			// Create a test user
-			const testUser = await createIntegrationTestUser({
+			const testUser = await createTestUser({
 				user_name: "file_upload_user",
 				first_name: "File",
 				last_name: "Upload",
@@ -60,7 +57,7 @@ describe("File Integration Tests", () => {
 		})
 
 		it("should create a json file", async () => {
-			const testUser = await createIntegrationTestUser({
+			const testUser = await createTestUser({
 				user_name: "json_file_user",
 				first_name: "Json",
 				last_name: "File",
@@ -101,7 +98,7 @@ describe("File Integration Tests", () => {
 		})
 
 		it("should create a binary file", async () => {
-			const testUser = await createIntegrationTestUser({
+			const testUser = await createTestUser({
 				user_name: "binary_file_user",
 				first_name: "Binary",
 				last_name: "File",
@@ -176,7 +173,7 @@ describe("File Integration Tests", () => {
 		})
 
 		it("should return 401 for expired token", async () => {
-			const testUser = await createIntegrationTestUser({
+			const testUser = await createTestUser({
 				user_name: "expired_token_user",
 				first_name: "Expired",
 				last_name: "Token",
@@ -224,7 +221,7 @@ describe("File Integration Tests", () => {
 		})
 
 		it("should return 400 for missing file in form data", async () => {
-			const testUser = await createIntegrationTestUser({
+			const testUser = await createTestUser({
 				user_name: "no_file_user",
 				first_name: "No",
 				last_name: "File",
@@ -256,7 +253,7 @@ describe("File Integration Tests", () => {
 		})
 
 		it("should return 400 for empty form data", async () => {
-			const testUser = await createIntegrationTestUser({
+			const testUser = await createTestUser({
 				user_name: "empty_form_user",
 				first_name: "Empty",
 				last_name: "Form",
@@ -290,7 +287,7 @@ describe("File Integration Tests", () => {
 	describe("GET /api/files/:id - Get File", () => {
 		it("should return file content for valid file ID with authentication", async () => {
 			// Create a test user and file
-			const testUser = await createIntegrationTestUser({
+			const testUser = await createTestUser({
 				user_name: "get_file_user",
 				first_name: "Get",
 				last_name: "File",
@@ -330,7 +327,7 @@ describe("File Integration Tests", () => {
 		})
 
 		it("should return file content with correct headers for json", async () => {
-			const testUser = await createIntegrationTestUser({
+			const testUser = await createTestUser({
 				user_name: "mime_type_user",
 				first_name: "Mime",
 				last_name: "Type",
@@ -377,7 +374,7 @@ describe("File Integration Tests", () => {
 		})
 
 		it("should handle binary file downloads correctly", async () => {
-			const testUser = await createIntegrationTestUser({
+			const testUser = await createTestUser({
 				user_name: "binary_download_user",
 				first_name: "Binary",
 				last_name: "Download",
@@ -422,7 +419,7 @@ describe("File Integration Tests", () => {
 		})
 
 		it("should return 404 for non-existent file ID", async () => {
-			const testUser = await createIntegrationTestUser({
+			const testUser = await createTestUser({
 				user_name: "not_found_user",
 				first_name: "Not",
 				last_name: "Found",
@@ -458,7 +455,7 @@ describe("File Integration Tests", () => {
 		})
 
 		it("should return 401 for expired token", async () => {
-			const testUser = await createIntegrationTestUser({
+			const testUser = await createTestUser({
 				user_name: "expired_get_user",
 				first_name: "Expired",
 				last_name: "Get",
