@@ -40,17 +40,23 @@ describe("Record Integration Tests", () => {
 		})
 
 		// Create a test lead for the test user
-		testLead = await createIntegrationTestLead({
-			company: "Test Company",
-			first_name: "Test",
-			last_name: "Lead",
-			status: "new",
-		})
+		testLead = await createIntegrationTestLead(
+			{
+				company: "Test Company",
+				first_name: "Test",
+				last_name: "Lead",
+				status: "new",
+			},
+			testUser.id,
+		)
 
 		// Create a test account for the test user
-		testAccount = await createIntegrationTestAccount({
-			name: "Test Account",
-		})
+		testAccount = await createIntegrationTestAccount(
+			{
+				name: "Test Account",
+			},
+			testUser.id,
+		)
 
 		// Seed the required entities for testing
 		await seedTestEntities(testUser as user)
@@ -464,7 +470,7 @@ describe("Record Integration Tests", () => {
 			const data = await response.json()
 			expect(response.status).toBe(400)
 			expect(data).toEqual({
-				message: "'name' is required for 'account'",
+				message: "Field 'name' is required for 'account'",
 			})
 		})
 
@@ -554,9 +560,9 @@ describe("Record Integration Tests", () => {
 
 			const data = await response.json()
 			expect(response.status).toBe(400)
-			expect(data.message).toBe(
-				"Field 'revenue' must be an integer for 'account'",
-			)
+			expect(data).toEqual({
+				message: "Field 'revenue' must be an integer for 'account'",
+			})
 		})
 	})
 
@@ -570,9 +576,12 @@ describe("Record Integration Tests", () => {
 			})
 			const token = createValidToken(testUser.id)
 
-			const testCreatedAccount = await createIntegrationTestAccount({
-				name: "List Test Account",
-			})
+			const testCreatedAccount = await createIntegrationTestAccount(
+				{
+					name: "List Test Account",
+				},
+				testUser.id,
+			)
 
 			const response = await app.request("/api/records?entity_name=account", {
 				method: "GET",
@@ -603,11 +612,14 @@ describe("Record Integration Tests", () => {
 			})
 			const token = createValidToken(testUser.id)
 
-			const testCreatedAccount = await createIntegrationTestAccount({
-				name: "Fields Test Account",
-				account_number: "FIELD-123",
-				main_phone_number: "03-1234-5678",
-			})
+			const testCreatedAccount = await createIntegrationTestAccount(
+				{
+					name: "Fields Test Account",
+					account_number: "FIELD-123",
+					main_phone_number: "03-1234-5678",
+				},
+				testUser.id,
+			)
 
 			const response = await app.request(
 				"/api/records?entity_name=account&fields=id,name,account_number",
@@ -649,13 +661,19 @@ describe("Record Integration Tests", () => {
 			const token = createValidToken(testUser.id)
 
 			// Create test accounts with different names
-			const activeAccount = await createIntegrationTestAccount({
-				name: "Active Test Account",
-			})
+			const activeAccount = await createIntegrationTestAccount(
+				{
+					name: "Active Test Account",
+				},
+				testUser.id,
+			)
 
-			await createIntegrationTestAccount({
-				name: "Inactive Test Account",
-			})
+			await createIntegrationTestAccount(
+				{
+					name: "Inactive Test Account",
+				},
+				testUser.id,
+			)
 
 			// Test filtering by name using "eq" operator
 			const filterQuery = encodeURIComponent(
@@ -709,20 +727,29 @@ describe("Record Integration Tests", () => {
 			const token = createValidToken(testUser.id)
 
 			// Create test accounts with different attributes
-			const targetAccount = await createIntegrationTestAccount({
-				name: "Target Company",
-				number_of_employees: 100,
-			})
+			const targetAccount = await createIntegrationTestAccount(
+				{
+					name: "Target Company",
+					number_of_employees: 100,
+				},
+				testUser.id,
+			)
 
-			await createIntegrationTestAccount({
-				name: "Target Company",
-				number_of_employees: 200,
-			})
+			await createIntegrationTestAccount(
+				{
+					name: "Target Company",
+					number_of_employees: 200,
+				},
+				testUser.id,
+			)
 
-			await createIntegrationTestAccount({
-				name: "Other Company",
-				number_of_employees: 100,
-			})
+			await createIntegrationTestAccount(
+				{
+					name: "Other Company",
+					number_of_employees: 100,
+				},
+				testUser.id,
+			)
 
 			// Test nested AND filter: name = "Target Company" AND number_of_employees = 100
 			const filterQuery = encodeURIComponent(
@@ -777,20 +804,29 @@ describe("Record Integration Tests", () => {
 			const token = createValidToken(testUser.id)
 
 			// Create test accounts with different attributes
-			const account1 = await createIntegrationTestAccount({
-				name: "Company A",
-				number_of_employees: 50,
-			})
+			const account1 = await createIntegrationTestAccount(
+				{
+					name: "Company A",
+					number_of_employees: 50,
+				},
+				testUser.id,
+			)
 
-			const account2 = await createIntegrationTestAccount({
-				name: "Company B",
-				number_of_employees: 150,
-			})
+			const account2 = await createIntegrationTestAccount(
+				{
+					name: "Company B",
+					number_of_employees: 150,
+				},
+				testUser.id,
+			)
 
-			await createIntegrationTestAccount({
-				name: "Company C",
-				number_of_employees: 75,
-			})
+			await createIntegrationTestAccount(
+				{
+					name: "Company C",
+					number_of_employees: 75,
+				},
+				testUser.id,
+			)
 
 			// Test nested OR filter: name = "Company A" OR number_of_employees = 150
 			const filterQuery = encodeURIComponent(
@@ -858,21 +894,30 @@ describe("Record Integration Tests", () => {
 			// Create test accounts with specific naming pattern for sorting
 			const accounts = []
 			accounts.push(
-				await createIntegrationTestAccount({
-					name: "OrderBy_Zebra_Company",
-				}),
+				await createIntegrationTestAccount(
+					{
+						name: "OrderBy_Zebra_Company",
+					},
+					testUser.id,
+				),
 			)
 
 			accounts.push(
-				await createIntegrationTestAccount({
-					name: "OrderBy_Alpha_Company",
-				}),
+				await createIntegrationTestAccount(
+					{
+						name: "OrderBy_Alpha_Company",
+					},
+					testUser.id,
+				),
 			)
 
 			accounts.push(
-				await createIntegrationTestAccount({
-					name: "OrderBy_Beta_Company",
-				}),
+				await createIntegrationTestAccount(
+					{
+						name: "OrderBy_Beta_Company",
+					},
+					testUser.id,
+				),
 			)
 
 			// Test ordering by name in ascending order with a specific filter to isolate our test data
@@ -926,9 +971,12 @@ describe("Record Integration Tests", () => {
 			// Create multiple test accounts for pagination testing
 			const createdAccounts = []
 			for (let i = 1; i <= 5; i++) {
-				const account = await createIntegrationTestAccount({
-					name: `Pagination Test Account ${i.toString().padStart(2, "0")}`,
-				})
+				const account = await createIntegrationTestAccount(
+					{
+						name: `Pagination Test Account ${i.toString().padStart(2, "0")}`,
+					},
+					testUser.id,
+				)
 				createdAccounts.push(account)
 			}
 
@@ -968,20 +1016,29 @@ describe("Record Integration Tests", () => {
 			const token = createValidToken(testUser.id)
 
 			// Create test accounts with different industries for grouping
-			await createIntegrationTestAccount({
-				name: "Tech Company 1",
-				industry: "it",
-			})
+			await createIntegrationTestAccount(
+				{
+					name: "Tech Company 1",
+					industry: "it",
+				},
+				testUser.id,
+			)
 
-			await createIntegrationTestAccount({
-				name: "Tech Company 2",
-				industry: "it",
-			})
+			await createIntegrationTestAccount(
+				{
+					name: "Tech Company 2",
+					industry: "it",
+				},
+				testUser.id,
+			)
 
-			await createIntegrationTestAccount({
-				name: "Finance Company",
-				industry: "finance",
-			})
+			await createIntegrationTestAccount(
+				{
+					name: "Finance Company",
+					industry: "finance",
+				},
+				testUser.id,
+			)
 
 			// Test grouping by industry
 			const groupByQuery = encodeURIComponent("industry")
@@ -1027,15 +1084,21 @@ describe("Record Integration Tests", () => {
 			const token = createValidToken(testUser.id)
 
 			// Create test accounts with different employee counts
-			const largeAccount = await createIntegrationTestAccount({
-				name: "Large Company",
-				number_of_employees: 500,
-			})
+			const largeAccount = await createIntegrationTestAccount(
+				{
+					name: "Large Company",
+					number_of_employees: 500,
+				},
+				testUser.id,
+			)
 
-			await createIntegrationTestAccount({
-				name: "Small Company",
-				number_of_employees: 50,
-			})
+			await createIntegrationTestAccount(
+				{
+					name: "Small Company",
+					number_of_employees: 50,
+				},
+				testUser.id,
+			)
 
 			// Test filtering by number_of_employees > 100
 			const filterQuery = encodeURIComponent(
@@ -1087,13 +1150,19 @@ describe("Record Integration Tests", () => {
 			const token = createValidToken(testUser.id)
 
 			// Create test accounts with different names
-			const techAccount = await createIntegrationTestAccount({
-				name: "Advanced Technology Solutions",
-			})
+			const techAccount = await createIntegrationTestAccount(
+				{
+					name: "Advanced Technology Solutions",
+				},
+				testUser.id,
+			)
 
-			await createIntegrationTestAccount({
-				name: "Basic Services Company",
-			})
+			await createIntegrationTestAccount(
+				{
+					name: "Basic Services Company",
+				},
+				testUser.id,
+			)
 
 			// Test filtering by name containing "Technology"
 			const filterQuery = encodeURIComponent(
@@ -1144,13 +1213,19 @@ describe("Record Integration Tests", () => {
 			const token = createValidToken(testUser.id)
 
 			// Create test accounts with different names
-			const excludedAccount = await createIntegrationTestAccount({
-				name: "Excluded Company",
-			})
+			const excludedAccount = await createIntegrationTestAccount(
+				{
+					name: "Excluded Company",
+				},
+				testUser.id,
+			)
 
-			const includedAccount = await createIntegrationTestAccount({
-				name: "Included Company",
-			})
+			const includedAccount = await createIntegrationTestAccount(
+				{
+					name: "Included Company",
+				},
+				testUser.id,
+			)
 
 			// Test filtering to exclude "Excluded Company" (NOT name = "Excluded Company")
 			const filterQuery = encodeURIComponent(
@@ -1201,15 +1276,21 @@ describe("Record Integration Tests", () => {
 			const token = createValidToken(testUser.id)
 
 			// Create test accounts - one with website, one without
-			const accountWithWebsite = await createIntegrationTestAccount({
-				name: "Company With Website",
-				website: "https://www.example.com",
-			})
+			const accountWithWebsite = await createIntegrationTestAccount(
+				{
+					name: "Company With Website",
+					website: "https://www.example.com",
+				},
+				testUser.id,
+			)
 
-			const accountWithoutWebsite = await createIntegrationTestAccount({
-				name: "Company Without Website",
-				// website is not set (null)
-			})
+			const accountWithoutWebsite = await createIntegrationTestAccount(
+				{
+					name: "Company Without Website",
+					// website is not set (null)
+				},
+				testUser.id,
+			)
 
 			// Test filtering for records where website IS SET (not null)
 			const filterQuery = encodeURIComponent(
@@ -1293,19 +1374,26 @@ describe("Record Integration Tests", () => {
 			const token = createValidToken(testUser.id)
 
 			// Create test lead
-			const lead = await createIntegrationTestLead({
-				company: "Qualified Lead Company",
-				first_name: "John",
-				last_name: "Qualified",
-				status: "qualified",
-			})
-
-			const response = await app.request("/api/records?entity_name=lead", {
-				method: "GET",
-				headers: {
-					Authorization: `Bearer ${token}`,
+			const lead = await createIntegrationTestLead(
+				{
+					company: "Qualified Lead Company",
+					first_name: "John",
+					last_name: "Qualified",
+					status: "qualified",
 				},
-			})
+				testUser.id,
+			)
+
+			const response = await app.request(
+				"/api/records?entity_name=lead",
+				{
+					method: "GET",
+					headers: {
+						Authorization: `Bearer ${token}`,
+					},
+				},
+				testUser.id,
+			)
 
 			const data = await response.json()
 			expect(response.status).toBe(200)
@@ -1334,11 +1422,14 @@ describe("Record Integration Tests", () => {
 			const token = createValidToken(testUser.id)
 
 			// Create test activities
-			const activity = await createIntegrationTestActivity({
-				subject: "Activity",
-				is_all_day_event: true,
-				is_archived: false,
-			})
+			const activity = await createIntegrationTestActivity(
+				{
+					subject: "Activity",
+					is_all_day_event: true,
+					is_archived: false,
+				},
+				testUser.id,
+			)
 
 			const response = await app.request("/api/records?entity_name=activity", {
 				method: "GET",
@@ -1374,17 +1465,23 @@ describe("Record Integration Tests", () => {
 			const token = createValidToken(testUser.id)
 
 			// Create a test account for the call
-			const testAccount = await createIntegrationTestAccount({
-				name: "Call Test Company",
-			})
+			const testAccount = await createIntegrationTestAccount(
+				{
+					name: "Call Test Company",
+				},
+				testUser.id,
+			)
 
 			// Create test phone call
-			const phoneCall = await createIntegrationTestPhoneCall({
-				subject: "Customer Inquiry",
-				user: { entity: "user", id: testUser.id },
-				their: { entity: "account", id: testAccount.id },
-				direction: "inbound",
-			})
+			const phoneCall = await createIntegrationTestPhoneCall(
+				{
+					subject: "Customer Inquiry",
+					user: { entity: "user", id: testUser.id },
+					their: { entity: "account", id: testAccount.id },
+					direction: "inbound",
+				},
+				testUser.id,
+			)
 
 			const response = await app.request(
 				"/api/records?entity_name=phone_call",
@@ -1438,23 +1535,32 @@ describe("Record Integration Tests", () => {
 			const token = createValidToken(targetUser.id)
 
 			// Create a test account for the call
-			const testAccount = await createIntegrationTestAccount({
-				name: "Call Test Company",
-			})
+			const testAccount = await createIntegrationTestAccount(
+				{
+					name: "Call Test Company",
+				},
+				targetUser.id,
+			)
 
 			// Create test phone calls
-			await createIntegrationTestPhoneCall({
-				subject: "Target Call",
-				user: { entity: "user", id: targetUser.id },
-				their: { entity: "account", id: testAccount.id },
-				direction: "inbound",
-			})
-			await createIntegrationTestPhoneCall({
-				subject: "Another Call",
-				user: { entity: "user", id: anotherUser.id },
-				their: { entity: "account", id: testAccount.id },
-				direction: "inbound",
-			})
+			await createIntegrationTestPhoneCall(
+				{
+					subject: "Target Call",
+					user: { entity: "user", id: targetUser.id },
+					their: { entity: "account", id: testAccount.id },
+					direction: "inbound",
+				},
+				targetUser.id,
+			)
+			await createIntegrationTestPhoneCall(
+				{
+					subject: "Another Call",
+					user: { entity: "user", id: anotherUser.id },
+					their: { entity: "account", id: testAccount.id },
+					direction: "inbound",
+				},
+				targetUser.id,
+			)
 
 			// Create clauses with reserved keyword "user"
 			const whereClause = encodeURIComponent(
@@ -1516,9 +1622,12 @@ describe("Record Integration Tests", () => {
 			const token = createValidToken(testUser.id)
 
 			// Create test contact
-			const contact = await createIntegrationTestContact({
-				last_name: "Primary Contact",
-			})
+			const contact = await createIntegrationTestContact(
+				{
+					last_name: "Primary Contact",
+				},
+				testUser.id,
+			)
 
 			const response = await app.request("/api/records?entity_name=contact", {
 				method: "GET",
@@ -1552,18 +1661,24 @@ describe("Record Integration Tests", () => {
 			const token = createValidToken(testUser.id)
 
 			// Create a test account for the opportunities
-			const testAccount = await createIntegrationTestAccount({
-				name: "Opportunity Test Company",
-			})
+			const testAccount = await createIntegrationTestAccount(
+				{
+					name: "Opportunity Test Company",
+				},
+				testUser.id,
+			)
 
 			// Create test opportunity
-			const opportunity = await createIntegrationTestOpportunity({
-				name: "Deal",
-				account: testAccount.id,
-				phase: "proposal",
-				close_date: new Date("2024-03-31"),
-				is_closed: false,
-			})
+			const opportunity = await createIntegrationTestOpportunity(
+				{
+					name: "Deal",
+					account: testAccount.id,
+					phase: "proposal",
+					close_date: new Date("2024-03-31"),
+					is_closed: false,
+				},
+				testUser.id,
+			)
 
 			const response = await app.request(
 				"/api/records?entity_name=opportunity",
@@ -1610,10 +1725,13 @@ describe("Record Integration Tests", () => {
 			const token = createValidToken(testUser.id)
 
 			// Create test case
-			const testCase = await createIntegrationTestCase({
-				case_number: "CASE-001",
-				subject: "Case",
-			})
+			const testCase = await createIntegrationTestCase(
+				{
+					case_number: "CASE-001",
+					subject: "Case",
+				},
+				testUser.id,
+			)
 
 			const response = await app.request("/api/records?entity_name=case", {
 				method: "GET",
@@ -1648,9 +1766,12 @@ describe("Record Integration Tests", () => {
 			const token = createValidToken(testUser.id)
 
 			// Create test product
-			const product = await createIntegrationTestProduct({
-				name: "Product",
-			})
+			const product = await createIntegrationTestProduct(
+				{
+					name: "Product",
+				},
+				testUser.id,
+			)
 
 			const response = await app.request("/api/records?entity_name=product", {
 				method: "GET",
@@ -1684,9 +1805,12 @@ describe("Record Integration Tests", () => {
 			const token = createValidToken(testUser.id)
 
 			// Create test campaign
-			const campaign = await createIntegrationTestCampaign({
-				name: "Campaign",
-			})
+			const campaign = await createIntegrationTestCampaign(
+				{
+					name: "Campaign",
+				},
+				testUser.id,
+			)
 
 			const response = await app.request("/api/records?entity_name=campaign", {
 				method: "GET",
@@ -1720,9 +1844,12 @@ describe("Record Integration Tests", () => {
 			const token = createValidToken(testUser.id)
 
 			// Create test sample
-			const sample = await createIntegrationTestSample({
-				name: "Sample",
-			})
+			const sample = await createIntegrationTestSample(
+				{
+					name: "Sample",
+				},
+				testUser.id,
+			)
 
 			const response = await app.request("/api/records?entity_name=sample", {
 				method: "GET",

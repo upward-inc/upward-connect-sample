@@ -1,13 +1,14 @@
 import { Hono } from "hono"
 import { getRecordList } from "../../domain/record"
 import { createRecord } from "../../domain/record/create-record"
+import { validateCreateRecordParams } from "../../domain/record/validate-create-record-params"
 import { describeRoute, validator } from "../../libs/hono-openapi"
 import type { AuthContexts } from "../../schema/auth"
 import {
-	CreateRecordMutationSchema,
-	CreateRecordResponseSchema,
 	GetRecordListQuerySchema,
 	GetRecordListResponseSchema,
+	PostRecordBodySchema,
+	PostRecordResponseSchema,
 } from "../../schema/record"
 
 export const recordRouter = new Hono<{ Variables: AuthContexts }>()
@@ -33,20 +34,28 @@ export const recordRouter = new Hono<{ Variables: AuthContexts }>()
 	.post(
 		"/",
 		describeRoute({
-			description: "レコードを一件作成する",
-			schema: CreateRecordResponseSchema,
+			description: "レコードを作成する",
+			schema: PostRecordResponseSchema,
 		}),
-		validator("json", CreateRecordMutationSchema),
+		validator("json", PostRecordBodySchema),
 		async (c) => {
 			const { entity_name, data } = c.req.valid("json")
 
 			const user = c.get("user")
 
-			const result = await createRecord(user.id, {
+			const validateResult = await validateCreateRecordParams(user.id, {
 				entity_name,
-				data: data,
+				data,
 			})
+			if (!validateResult.success) {
+				return c.json({ message: validateResult.message }, 400)
+			}
 
-			return c.json(result, 201)
+			const createResult = await createRecord(
+				entity_name,
+				validateResult.validatedData ?? {},
+			)
+
+			return c.json(createResult, 201)
 		},
 	)
