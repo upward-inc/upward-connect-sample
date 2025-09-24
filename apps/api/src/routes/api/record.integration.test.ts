@@ -1384,16 +1384,12 @@ describe("Record Integration Tests", () => {
 				testUser.id,
 			)
 
-			const response = await app.request(
-				"/api/records?entity_name=lead",
-				{
-					method: "GET",
-					headers: {
-						Authorization: `Bearer ${token}`,
-					},
+			const response = await app.request("/api/records?entity_name=lead", {
+				method: "GET",
+				headers: {
+					Authorization: `Bearer ${token}`,
 				},
-				testUser.id,
-			)
+			})
 
 			const data = await response.json()
 			expect(response.status).toBe(200)

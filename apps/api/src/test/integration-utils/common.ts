@@ -36,25 +36,6 @@ export async function cleanupTestData() {
 			},
 		},
 	})
-	// Clean up files created by test users
-	await testPrisma.file.deleteMany({
-		where: {
-			created_by: {
-				in: await testPrisma.user
-					.findMany({
-						where: {
-							user_name: {
-								contains: "test_",
-							},
-						},
-						select: {
-							id: true,
-						},
-					})
-					.then((users) => users.map((u) => u.id)),
-			},
-		},
-	})
 
 	await testPrisma.user_access_control.deleteMany({
 		where: {
@@ -65,23 +46,7 @@ export async function cleanupTestData() {
 			},
 		},
 	})
-	await testPrisma.user_access_control.deleteMany({
-		where: {
-			user_user_access_control_user_idTouser: {
-				user_name: {
-					contains: "test_",
-				},
-			},
-		},
-	})
 
-	await testPrisma.oauth_client.deleteMany({
-		where: {
-			name: {
-				contains: "test_",
-			},
-		},
-	})
 	await testPrisma.oauth_client.deleteMany({
 		where: {
 			name: {
@@ -121,7 +86,7 @@ export async function cleanupTestData() {
 	})
 	await testPrisma.contact.deleteMany({
 		where: {
-			first_name: {
+			last_name: {
 				contains: "test_",
 			},
 		},
