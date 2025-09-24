@@ -1,5 +1,4 @@
 import { format } from "@formkit/tempo"
-import { HTTPException } from "hono/http-exception"
 import { prisma } from "../../libs/prisma"
 import type { JsonValue } from "../../schema/common"
 import type { EntityItem } from "../../schema/entity-item"
@@ -37,12 +36,6 @@ export const getRecordList = async ({
 	offset,
 }: GetRecordListQuery): Promise<GetRecordListResponse> => {
 	const entityItems = await getEntityItemList(entity_name)
-	// Check if entity exists by verifying we got entity items
-	if (entityItems.length === 0) {
-		throw new HTTPException(400, {
-			message: `Entity '${entity_name}' does not exist`,
-		})
-	}
 	const entityItemMap = new Map(entityItems.map((item) => [item.name, item]))
 
 	const collectFilterFields = (
