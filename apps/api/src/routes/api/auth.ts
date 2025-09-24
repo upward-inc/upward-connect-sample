@@ -13,42 +13,66 @@ import {
 	validateTokenParams,
 } from "../../domain/auth"
 import { env } from "../../env"
-import { validator } from "../../libs/hono-openapi"
+import { describeRoute, validator } from "../../libs/hono-openapi"
 import {
 	type AuthContexts,
+	GetOAuthClientResultSchema,
 	PostAuthorizeParamSchema,
+	PostAuthorizeResultSchema,
 	PostLoginParamSchema,
-	TokenRequestSchema,
+	PostLoginResultSchema,
+	PostTokenParamSchema,
+	PostTokenResultSchema,
 } from "../../schema/auth"
 
 export const authRouter = new Hono<{ Variables: AuthContexts }>()
-	.post("/login", validator("form", PostLoginParamSchema), async (c) => {
-		const { username, password } = c.req.valid("form")
+	.post(
+		"/login",
+		describeRoute({
+			description:
+				"ユーザー名 + パスワードでユーザー認証を行う（アクセストークンを返却する）",
+			schema: PostLoginResultSchema,
+		}),
+		validator("form", PostLoginParamSchema),
+		async (c) => {
+			const { username, password } = c.req.valid("form")
 
-		const user = await getUserByUsernameAndPassword(username, password)
-		if (!user) {
-			return c.json({ message: "Invalid username or password" }, 401)
-		}
+			const user = await getUserByUsernameAndPassword(username, password)
+			if (!user) {
+				return c.json({ message: "Invalid username or password" }, 401)
+			}
 
-		const { accessToken } = generateToken({
-			userId: user.id,
-			userName: user.user_name,
-		})
-		return c.json({ ...user, access_token: accessToken })
-	})
-	.get("/clients/:id", async (c) => {
-		const clientId = c.req.param("id")
+			const { accessToken } = generateToken({
+				userId: user.id,
+				userName: user.user_name,
+			})
+			return c.json({ ...user, access_token: accessToken })
+		},
+	)
+	.get(
+		"/clients/:id",
+		describeRoute({
+			description: "OAuthクライアントアプリケーション名を返却する",
+			schema: GetOAuthClientResultSchema,
+		}),
+		async (c) => {
+			const clientId = c.req.param("id")
 
-		const client = await getOAuthClientById(clientId)
-		if (!client) {
-			return c.json({ message: "Client not found" }, 404)
-		}
+			const client = await getOAuthClientById(clientId)
+			if (!client) {
+				return c.json({ message: "Client not found" }, 404)
+			}
 
-		// 必要最低限のフィールドのみ返却
-		return c.json({ id: client.id, name: client.name })
-	})
+			// 必要最低限のフィールドのみ返却
+			return c.json({ id: client.id, name: client.name })
+		},
+	)
 	.post(
 		"/authorize",
+		describeRoute({
+			description: "OAuth2.0準拠の認可エンドポイント、認可コードを返却する",
+			schema: PostAuthorizeResultSchema,
+		}),
 		validator("form", PostAuthorizeParamSchema),
 		async (c) => {
 			const user = c.get("user")
@@ -90,84 +114,93 @@ export const authRouter = new Hono<{ Variables: AuthContexts }>()
 			})
 		},
 	)
-	.post("/token", validator("form", TokenRequestSchema), async (c) => {
-		const params = c.req.valid("form")
+	.post(
+		"/token",
+		describeRoute({
+			description:
+				"OAuth2.0/OIDC1.0準拠のトークンエンドポイント、認可コードをアクセストークン/リフレッシュトークン/IDトークンと交換する",
+			schema: PostTokenResultSchema,
+		}),
+		validator("form", PostTokenParamSchema),
+		async (c) => {
+			const params = c.req.valid("form")
 
-		if (params.grant_type === "authorization_code") {
-			// パラメータの検証
-			const validateResult = await validateTokenParams(params)
+			if (params.grant_type === "authorization_code") {
+				// パラメータの検証
+				const validateResult = await validateTokenParams(params)
 
-			if (!validateResult.success) {
-				return c.json(
-					{
-						error: "invalid_grant",
-						error_description: validateResult.error_message,
-					},
-					400,
-				)
+				if (!validateResult.success) {
+					return c.json(
+						{
+							error: "invalid_grant",
+							error_description: validateResult.error_message,
+						},
+						400,
+					)
+				}
+				const { user_id, user_name, nonce } = validateResult
+
+				// 認可コードを使用済みにする（データベースから削除する）
+				await deleteAuthorizationCode(params.code)
+
+				// アクセストークン、IDトークンを生成
+				const { accessToken, idToken } = generateToken({
+					userId: user_id,
+					userName: user_name,
+					nonce: nonce,
+				})
+
+				// リフレッシュトークンを生成
+				const { refreshToken } = generateRefreshToken({
+					userId: user_id,
+				})
+
+				return c.json({
+					token_type: "Bearer",
+					access_token: accessToken,
+					id_token: idToken,
+					refresh_token: refreshToken,
+					expires_in: env.OIDC_TOKEN_EXPIRES_IN_MINUTE * 60,
+				})
 			}
-			const { user_id, user_name, nonce } = validateResult
 
-			// 認可コードを使用済みにする（データベースから削除する）
-			await deleteAuthorizationCode(params.code)
+			if (params.grant_type === "refresh_token") {
+				// リフレッシュトークンパラメータの検証
+				const validateResult = await validateRefreshTokenParams(params)
 
-			// アクセストークン、IDトークンを生成
-			const { accessToken, idToken } = generateToken({
-				userId: user_id,
-				userName: user_name,
-				nonce: nonce,
-			})
+				if (!validateResult.success) {
+					return c.json(
+						{
+							error: "invalid_grant",
+							error_description: validateResult.error_message,
+						},
+						400,
+					)
+				}
+				const { user_id, user_name } = validateResult
 
-			// リフレッシュトークンを生成
-			const { refreshToken } = generateRefreshToken({
-				userId: user_id,
-			})
+				// アクセストークンを生成
+				const { accessToken } = generateToken({
+					userId: user_id,
+					userName: user_name,
+				})
 
-			return c.json({
-				token_type: "Bearer",
-				access_token: accessToken,
-				id_token: idToken,
-				refresh_token: refreshToken,
-				expires_in: env.OIDC_TOKEN_EXPIRES_IN_MINUTE * 60,
-			})
-		}
+				// リフレッシュトークンを生成
+				const { refreshToken } = generateRefreshToken({
+					userId: user_id,
+				})
 
-		if (params.grant_type === "refresh_token") {
-			// リフレッシュトークンパラメータの検証
-			const validateResult = await validateRefreshTokenParams(params)
-
-			if (!validateResult.success) {
-				return c.json(
-					{
-						error: "invalid_grant",
-						error_description: validateResult.error_message,
-					},
-					400,
-				)
+				// `Upon successful validation of the Refresh Token, the response body is the Token Response of Section 3.1.3.3 except that it might not contain an id_token.`
+				// see: [Successful Refresh Response](https://openid.net/specs/openid-connect-core-1_0.html#RefreshTokenResponse)
+				return c.json({
+					token_type: "Bearer",
+					access_token: accessToken,
+					refresh_token: refreshToken,
+					expires_in: env.OIDC_TOKEN_EXPIRES_IN_MINUTE * 60,
+				})
 			}
-			const { user_id, user_name } = validateResult
-
-			// アクセストークンを生成
-			const { accessToken } = generateToken({
-				userId: user_id,
-				userName: user_name,
-			})
-
-			// リフレッシュトークンを生成
-			const { refreshToken } = generateRefreshToken({
-				userId: user_id,
-			})
-
-			// `Upon successful validation of the Refresh Token, the response body is the Token Response of Section 3.1.3.3 except that it might not contain an id_token.`
-			// see: [Successful Refresh Response](https://openid.net/specs/openid-connect-core-1_0.html#RefreshTokenResponse)
-			return c.json({
-				token_type: "Bearer",
-				access_token: accessToken,
-				refresh_token: refreshToken,
-				expires_in: env.OIDC_TOKEN_EXPIRES_IN_MINUTE * 60,
-			})
-		}
-	})
+		},
+	)
 	.get("/userinfo", async (c) => {
 		const user = c.get("user")
 
@@ -186,7 +219,7 @@ export const authRouter = new Hono<{ Variables: AuthContexts }>()
 
 		return c.json({
 			sub: loggedInUser.id,
-			name: loggedInUser.user_name,
+			name: `${loggedInUser.last_name} ${loggedInUser.first_name}`,
 			given_name: loggedInUser.first_name,
 			family_name: loggedInUser.last_name,
 			email: loggedInUser.email,
