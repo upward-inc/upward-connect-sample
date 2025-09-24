@@ -3,7 +3,7 @@
 	"version": "1.0.0",
 	"scripts": {
 		"api#dev": "bun run --filter api dev",
-		"api#integrationTest": "bun run --filter api test#integration",
+		"api#test": "bun run --filter api test",
 		"login#dev": "bun run --filter login-app dev",
 		"db#up": "bun run --filter api db#up",
 		"db#down": "bun run --filter api db#down",

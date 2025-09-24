@@ -1,9 +1,9 @@
-import { testPrisma } from "../integration-setup"
+import { testPrisma } from "../setup"
 
 /**
- * Create a test account for integration tests
+ * Create a test account for tests
  */
-export async function createIntegrationTestAccount(
+export async function createTestAccount(
 	accountData: {
 		name: string
 	},
@@ -26,9 +26,9 @@ export async function createIntegrationTestAccount(
 }
 
 /**
- * Create a test lead for integration tests
+ * Create a test lead for tests
  */
-export async function createIntegrationTestLead(
+export async function createTestLead(
 	leadData: {
 		company: string
 		first_name: string

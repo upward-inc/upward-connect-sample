@@ -1,5 +1,5 @@
 /**
- * Create a test file for integration tests
+ * Create a test file for tests
  * @param name - The name of the file
  * @param content - The content of the file
  * @param type - The MIME type of the file
