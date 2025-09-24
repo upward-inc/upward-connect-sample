@@ -38,7 +38,7 @@ interface AuthorizeResultSuccess {
 	client_secret: string
 	redirect_uri: string
 	scope: string | undefined
-	nonce?: string | undefined
+	nonce: string | undefined
 }
 
 interface AuthorizeResultFailure {
