@@ -12,6 +12,7 @@ const SearchParamsSchema = z.object({
 	redirect_uri: z.string().optional(),
 	scope: z.string().optional(),
 	state: z.string().optional(),
+	nonce: z.string().optional(),
 })
 
 const AuthorizeParamsRedirectUriSchema = z.string().url().startsWith("https://")
@@ -21,6 +22,7 @@ const AuthorizeParamsWithoutRedirectUriSchema = z.object({
 	client_id: z.string(),
 	scope: z.string().optional(),
 	state: z.string().optional(),
+	nonce: z.string().optional(),
 })
 
 const AuthorizeParamsSchema = AuthorizeParamsWithoutRedirectUriSchema.extend({
@@ -240,6 +242,9 @@ function AuthorizePage() {
 		}
 		if (strictQueryParams.state) {
 			formData.append("state", strictQueryParams.state)
+		}
+		if (strictQueryParams.nonce) {
+			formData.append("nonce", strictQueryParams.nonce)
 		}
 
 		// サーバーサイドで検証

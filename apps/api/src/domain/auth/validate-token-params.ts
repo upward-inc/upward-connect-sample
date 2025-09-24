@@ -16,6 +16,7 @@ interface ValidateResultSuccess {
 	success: true
 	user_id: string
 	user_name: string
+	nonce?: string
 }
 
 interface ValidateResultFailure {
@@ -67,5 +68,6 @@ export const validateTokenParams = async (
 		success: true,
 		user_id: user.id,
 		user_name: user.user_name,
+		nonce: publishedAuthCode.nonce ?? undefined,
 	}
 }
