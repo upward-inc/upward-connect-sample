@@ -14,6 +14,7 @@ import { systemUserRouter } from "./system-user"
 
 const v1Router = new Hono<{ Variables: AuthContexts }>()
 const version = "v1" as const
+const documentTitle = "Custom API for UPWARD CONNECT" as const
 
 v1Router
 	.use("/*", cors())
@@ -38,7 +39,7 @@ v1Router
 		openAPISpecs(v1Router, {
 			documentation: {
 				info: {
-					title: "Custom API for UPWARD CONNECT",
+					title: documentTitle,
 					version: version,
 					description: "",
 				},
@@ -56,7 +57,7 @@ v1Router
 		"/docs",
 		Scalar({
 			theme: "saturn",
-			pageTitle: "API Doc | Custom API for UPWARD CONNECT",
+			pageTitle: `API Doc | ${documentTitle}`,
 			spec: { url: `/api/${version}/openapi` },
 		}),
 	)
