@@ -1,9 +1,9 @@
-import { testPrisma } from "../integration-setup"
+import { testPrisma } from "../setup"
 
 /**
- * Create a test account for integration tests
+ * Create a test account for tests
  */
-export async function createIntegrationTestAccount(
+export async function createTestAccount(
 	accountData: {
 		name: string
 		account_number?: string
@@ -38,9 +38,9 @@ export async function createIntegrationTestAccount(
 }
 
 /**
- * Create a test lead for integration tests
+ * Create a test lead for tests
  */
-export async function createIntegrationTestLead(
+export async function createTestLead(
 	leadData: {
 		company: string
 		first_name: string
@@ -69,9 +69,9 @@ export async function createIntegrationTestLead(
 }
 
 /**
- * Create a test activity for integration tests
+ * Create a test activity for tests
  */
-export async function createIntegrationTestActivity(
+export async function createTestActivity(
 	activityData: {
 		subject: string
 		is_all_day_event: boolean
@@ -98,9 +98,9 @@ export async function createIntegrationTestActivity(
 }
 
 /**
- * Create a test phone call for integration tests
+ * Create a test phone call for tests
  */
-export async function createIntegrationTestPhoneCall(
+export async function createTestPhoneCall(
 	phoneCallData: {
 		subject: string
 		user: { entity: string; id: string }
@@ -130,9 +130,9 @@ export async function createIntegrationTestPhoneCall(
 }
 
 /**
- * Create a test contact for integration tests
+ * Create a test contact for tests
  */
-export async function createIntegrationTestContact(
+export async function createTestContact(
 	contactData: {
 		last_name: string
 	},
@@ -155,9 +155,9 @@ export async function createIntegrationTestContact(
 }
 
 /**
- * Create a test opportunity for integration tests
+ * Create a test opportunity for tests
  */
-export async function createIntegrationTestOpportunity(
+export async function createTestOpportunity(
 	opportunityData: {
 		name: string
 		account: string
@@ -201,9 +201,9 @@ export async function createIntegrationTestOpportunity(
 }
 
 /**
- * Create a test case for integration tests
+ * Create a test case for tests
  */
-export async function createIntegrationTestCase(
+export async function createTestCase(
 	caseData: {
 		case_number: string
 		subject: string
@@ -228,9 +228,9 @@ export async function createIntegrationTestCase(
 }
 
 /**
- * Create a test product for integration tests
+ * Create a test product for tests
  */
-export async function createIntegrationTestProduct(
+export async function createTestProduct(
 	productData: {
 		name: string
 	},
@@ -253,9 +253,9 @@ export async function createIntegrationTestProduct(
 }
 
 /**
- * Create a test campaign for integration tests
+ * Create a test campaign for tests
  */
-export async function createIntegrationTestCampaign(
+export async function createTestCampaign(
 	campaignData: {
 		name: string
 	},
@@ -278,9 +278,9 @@ export async function createIntegrationTestCampaign(
 }
 
 /**
- * Create a test sample for integration tests
+ * Create a test sample for tests
  */
-export async function createIntegrationTestSample(
+export async function createTestSample(
 	sampleData: {
 		name: string
 	},

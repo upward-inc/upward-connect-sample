@@ -2,7 +2,7 @@
 	"name": "api",
 	"scripts": {
 		"dev": "bun run --hot src/index.ts",
-		"test#integration": "vitest run --config vitest.integration.config.ts",
+		"test": "vitest run --config vitest.config.ts",
 		"db#up": "docker compose -f compose-db.yml up -d",
 		"db#down": "docker compose -f compose-db.yml down",
 		"db#migrate": "prisma migrate dev",

@@ -1,19 +1,29 @@
+import { type JwtPayload, sign, verify } from "jsonwebtoken"
 import { afterAll, beforeAll, describe, expect, it } from "vitest"
 import { env } from "../../env"
 import { app } from "../../index"
 import {
 	createExpiredRefreshToken,
 	createExpiredToken,
-	createIntegrationTestOAuthClient,
 	createRefreshToken,
+	createTestOAuthClient,
 	createValidToken,
-} from "../../test/integration-utils/auth"
-import {
-	cleanupTestData,
-	createIntegrationTestUser,
-} from "../../test/integration-utils/common"
+} from "../../test/utils/auth"
+import { cleanupTestData, createTestUser } from "../../test/utils/common"
 
-describe("Auth Integration Tests", () => {
+describe("Auth Tests", () => {
+	const tokenSecret = env.OIDC_TOKEN_SECRET
+	interface DecodedIdToken extends JwtPayload {
+		nonce?: string
+		username?: string
+		preferred_username?: string
+		given_name?: string
+		family_name?: string
+		email?: string
+		email_verified?: string
+		name?: string
+	}
+
 	beforeAll(async () => {
 		// Clean up any existing test data
 		await cleanupTestData()
@@ -27,7 +37,7 @@ describe("Auth Integration Tests", () => {
 	describe("Userinfo Endpoint", () => {
 		it("should return user info for valid token", async () => {
 			// Create a test user
-			const testUser = await createIntegrationTestUser({
+			const testUser = await createTestUser({
 				user_name: "test_user",
 				first_name: "Test",
 				last_name: "User",
@@ -80,7 +90,7 @@ describe("Auth Integration Tests", () => {
 		})
 
 		it("should return 401 for expired token", async () => {
-			const testUser = await createIntegrationTestUser({
+			const testUser = await createTestUser({
 				user_name: "expired_user",
 				first_name: "Expired",
 				last_name: "User",
@@ -119,7 +129,7 @@ describe("Auth Integration Tests", () => {
 
 		it("should return 401 for token with invalid signature", async () => {
 			// Create a token with a different secret to simulate invalid signature
-			const testUser = await createIntegrationTestUser({
+			const testUser = await createTestUser({
 				user_name: "invalid_sig_user",
 				first_name: "Invalid",
 				last_name: "Signature",
@@ -127,7 +137,6 @@ describe("Auth Integration Tests", () => {
 			})
 
 			// Create a token with wrong secret (simulating token signed with different key)
-			const { sign } = require("jsonwebtoken")
 			const wrongSecretToken = sign({}, "wrong-secret-key", {
 				algorithm: "HS256",
 				issuer: process.env.OIDC_ISSUER,
@@ -152,8 +161,7 @@ describe("Auth Integration Tests", () => {
 
 		it("should return 401 for token with missing subject", async () => {
 			// Create a token without subject
-			const { sign } = require("jsonwebtoken")
-			const noSubjectToken = sign({}, process.env.OIDC_TOKEN_SECRET, {
+			const noSubjectToken = sign({}, tokenSecret, {
 				algorithm: "HS256",
 				issuer: process.env.OIDC_ISSUER,
 				audience: process.env.OIDC_AUDIENCE,
@@ -177,8 +185,7 @@ describe("Auth Integration Tests", () => {
 
 		it("should return 401 for token with empty subject", async () => {
 			// Create a token with empty subject
-			const { sign } = require("jsonwebtoken")
-			const emptySubjectToken = sign({}, process.env.OIDC_TOKEN_SECRET, {
+			const emptySubjectToken = sign({}, tokenSecret, {
 				algorithm: "HS256",
 				issuer: process.env.OIDC_ISSUER,
 				subject: "", // Empty subject
@@ -223,7 +230,7 @@ describe("Auth Integration Tests", () => {
 	describe("Token Endpoint - Refresh Token", () => {
 		it("should return new tokens for valid refresh token", async () => {
 			// Create a test user
-			const testUser = await createIntegrationTestUser({
+			const testUser = await createTestUser({
 				user_name: "refresh_user",
 				first_name: "Refresh",
 				last_name: "User",
@@ -231,7 +238,7 @@ describe("Auth Integration Tests", () => {
 			})
 
 			// Create a test OAuth client
-			const testClient = await createIntegrationTestOAuthClient({
+			const testClient = await createTestOAuthClient({
 				name: "refresh_cli",
 				secret: "test_secret_12345",
 				redirect_uris: "https://localhost:3000/callback",
@@ -257,8 +264,8 @@ describe("Auth Integration Tests", () => {
 			const data = await response.json()
 			expect(response.status).toBe(200)
 			expect(data).toHaveProperty("access_token")
-			expect(data).toHaveProperty("id_token")
 			expect(data).toHaveProperty("refresh_token")
+			expect(data).not.toHaveProperty("id_token") // ID token should not be issued in refresh flow
 			expect(data).toHaveProperty("token_type", "Bearer")
 			expect(data).toHaveProperty(
 				"expires_in",
@@ -267,7 +274,7 @@ describe("Auth Integration Tests", () => {
 		})
 
 		it("should return 400 for invalid client_id", async () => {
-			const testUser = await createIntegrationTestUser({
+			const testUser = await createTestUser({
 				user_name: "refresh_user_invalid_client",
 				first_name: "Refresh",
 				last_name: "User",
@@ -299,14 +306,14 @@ describe("Auth Integration Tests", () => {
 		})
 
 		it("should return 400 for invalid client_secret", async () => {
-			const testUser = await createIntegrationTestUser({
+			const testUser = await createTestUser({
 				user_name: "refresh_user_invalid_secret",
 				first_name: "Refresh",
 				last_name: "User",
 				email: "refresh_user_invalid_secret@example.com",
 			})
 
-			const testClient = await createIntegrationTestOAuthClient({
+			const testClient = await createTestOAuthClient({
 				name: "inv_secret",
 				secret: "test_secret_12345",
 				redirect_uris: "https://localhost:3000/callback",
@@ -337,14 +344,14 @@ describe("Auth Integration Tests", () => {
 		})
 
 		it("should return 400 for expired refresh token", async () => {
-			const testUser = await createIntegrationTestUser({
+			const testUser = await createTestUser({
 				user_name: "refresh_user_expired",
 				first_name: "Refresh",
 				last_name: "User",
 				email: "refresh_user_expired@example.com",
 			})
 
-			const testClient = await createIntegrationTestOAuthClient({
+			const testClient = await createTestOAuthClient({
 				name: "exp_token",
 				secret: "test_secret_12345",
 				redirect_uris: "https://localhost:3000/callback",
@@ -375,7 +382,7 @@ describe("Auth Integration Tests", () => {
 		})
 
 		it("should return 400 for malformed refresh token", async () => {
-			const testClient = await createIntegrationTestOAuthClient({
+			const testClient = await createTestOAuthClient({
 				name: "malformed",
 				secret: "test_secret_12345",
 				redirect_uris: "https://localhost:3000/callback",
@@ -404,7 +411,7 @@ describe("Auth Integration Tests", () => {
 		})
 
 		it("should return 400 for non-existent user in refresh token", async () => {
-			const testClient = await createIntegrationTestOAuthClient({
+			const testClient = await createTestOAuthClient({
 				name: "unknown_user",
 				secret: "test_secret_12345",
 				redirect_uris: "https://localhost:3000/callback",
@@ -436,7 +443,7 @@ describe("Auth Integration Tests", () => {
 		})
 
 		it("should return 400 for unsupported grant type", async () => {
-			const testClient = await createIntegrationTestOAuthClient({
+			const testClient = await createTestOAuthClient({
 				name: "unsupported",
 				secret: "test_secret_12345",
 				redirect_uris: "https://localhost:3000/callback",
@@ -467,14 +474,14 @@ describe("Auth Integration Tests", () => {
 	describe("Authorize Endpoint", () => {
 		it("should return code for valid authorization request", async () => {
 			// Create a test user and client
-			const testUser = await createIntegrationTestUser({
+			const testUser = await createTestUser({
 				user_name: "auth_user",
 				first_name: "Auth",
 				last_name: "User",
 				email: "auth_user@example.com",
 			})
 
-			const testClient = await createIntegrationTestOAuthClient({
+			const testClient = await createTestOAuthClient({
 				name: "auth_cli",
 				secret: "test_secret_12345",
 				redirect_uris: "https://example.com/callback",
@@ -504,14 +511,14 @@ describe("Auth Integration Tests", () => {
 
 		it("should return state parameter when state parameter is provided", async () => {
 			// Create a test user and client
-			const testUser = await createIntegrationTestUser({
+			const testUser = await createTestUser({
 				user_name: "state_user",
 				first_name: "State",
 				last_name: "User",
 				email: "state_user@example.com",
 			})
 
-			const testClient = await createIntegrationTestOAuthClient({
+			const testClient = await createTestOAuthClient({
 				name: "state_cli",
 				secret: "test_secret_12345",
 				redirect_uris: "https://example.com/callback",
@@ -542,7 +549,7 @@ describe("Auth Integration Tests", () => {
 		})
 
 		it("should return state parameter in error responses - invalid client_id", async () => {
-			const testUser = await createIntegrationTestUser({
+			const testUser = await createTestUser({
 				user_name: "invalid_client_user",
 				first_name: "Invalid",
 				last_name: "Client",
@@ -577,14 +584,14 @@ describe("Auth Integration Tests", () => {
 		})
 
 		it("should return state parameter in error responses - invalid redirect_uri", async () => {
-			const testUser = await createIntegrationTestUser({
+			const testUser = await createTestUser({
 				user_name: "invalid_redirect_user",
 				first_name: "Invalid",
 				last_name: "Redirect",
 				email: "invalid_redirect@example.com",
 			})
 
-			const testClient = await createIntegrationTestOAuthClient({
+			const testClient = await createTestOAuthClient({
 				name: "inv_red",
 				secret: "test_secret_12345",
 				redirect_uris: "https://example.com/callback",
@@ -618,14 +625,14 @@ describe("Auth Integration Tests", () => {
 		})
 
 		it("should return state parameter in error responses - invalid response_type", async () => {
-			const testUser = await createIntegrationTestUser({
+			const testUser = await createTestUser({
 				user_name: "invalid_response_type_user",
 				first_name: "Invalid",
 				last_name: "ResponseType",
 				email: "invalid_response_type@example.com",
 			})
 
-			const testClient = await createIntegrationTestOAuthClient({
+			const testClient = await createTestOAuthClient({
 				name: "inv_resp",
 				secret: "test_secret_12345",
 				redirect_uris: "https://example.com/callback",
@@ -656,6 +663,208 @@ describe("Auth Integration Tests", () => {
 			expect(data.success).toBe(false)
 			expect(data.error).toHaveProperty("issues")
 			expect(data.error.issues[0].path).toContainEqual("response_type")
+		})
+
+		it("should contain nonce claim in ID token", async () => {
+			// Create a test user and client
+			const testUser = await createTestUser({
+				user_name: "nonce_user",
+				first_name: "Nonce",
+				last_name: "User",
+				email: "nonce_user@example.com",
+			})
+
+			const testClient = await createTestOAuthClient({
+				name: "nonce_cli",
+				secret: "test_secret_12345",
+				redirect_uris: "https://example.com/callback",
+				scopes: "openid,profile,email",
+			})
+
+			const nonceValue = "random-nonce-value-12345"
+			const token = createValidToken(testUser.id)
+
+			// Step 1: Authorize with nonce
+			const authorizeResponse = await app.request("/api/oauth2/authorize", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/x-www-form-urlencoded",
+					Authorization: `Bearer ${token}`,
+				},
+				body: new URLSearchParams({
+					response_type: "code",
+					client_id: testClient.id,
+					redirect_uri: "https://example.com/callback",
+					scope: "openid profile email",
+					nonce: nonceValue,
+				}),
+			})
+
+			const authorizeData = await authorizeResponse.json()
+			expect(authorizeResponse.status).toBe(200)
+			expect(authorizeData).toHaveProperty("code")
+
+			// Step 2: Exchange authorization code for tokens
+			const tokenResponse = await app.request("/api/oauth2/token", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/x-www-form-urlencoded",
+				},
+				body: new URLSearchParams({
+					grant_type: "authorization_code",
+					code: authorizeData.code,
+					redirect_uri: "https://example.com/callback",
+					client_id: testClient.id,
+					client_secret: testClient.secret,
+				}),
+			})
+
+			const tokenData = await tokenResponse.json()
+			expect(tokenResponse.status).toBe(200)
+			expect(tokenData).toHaveProperty("access_token")
+			expect(tokenData).toHaveProperty("id_token")
+			expect(tokenData).toHaveProperty("refresh_token")
+			expect(tokenData).toHaveProperty("token_type", "Bearer")
+
+			// Step 3: Verify nonce is included in ID token
+			const decodedIdToken = verify(
+				tokenData.id_token,
+				tokenSecret,
+			) as DecodedIdToken
+			expect(decodedIdToken.nonce).toBe(nonceValue)
+			expect(decodedIdToken.username).toBe(testUser.user_name)
+			expect(decodedIdToken.sub).toBe(testUser.id)
+		})
+
+		it("should handle empty string as nonce parameter correctly", async () => {
+			// Create a test user and client
+			const testUser = await createTestUser({
+				user_name: "empty_nonce_user",
+				first_name: "Empty",
+				last_name: "Nonce",
+				email: "empty_nonce@example.com",
+			})
+
+			const testClient = await createTestOAuthClient({
+				name: "empty_nonce_cli",
+				secret: "test_secret_12345",
+				redirect_uris: "https://example.com/callback",
+				scopes: "openid,profile,email",
+			})
+
+			const token = createValidToken(testUser.id)
+
+			// Authorize with empty nonce
+			const authorizeResponse = await app.request("/api/oauth2/authorize", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/x-www-form-urlencoded",
+					Authorization: `Bearer ${token}`,
+				},
+				body: new URLSearchParams({
+					response_type: "code",
+					client_id: testClient.id,
+					redirect_uri: "https://example.com/callback",
+					scope: "openid profile email",
+					nonce: "", // Empty nonce
+				}),
+			})
+
+			const authorizeData = await authorizeResponse.json()
+			expect(authorizeResponse.status).toBe(200)
+			expect(authorizeData).toHaveProperty("code")
+
+			// Exchange authorization code for tokens
+			const tokenResponse = await app.request("/api/oauth2/token", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/x-www-form-urlencoded",
+				},
+				body: new URLSearchParams({
+					grant_type: "authorization_code",
+					code: authorizeData.code,
+					redirect_uri: "https://example.com/callback",
+					client_id: testClient.id,
+					client_secret: testClient.secret,
+				}),
+			})
+
+			const tokenData = await tokenResponse.json()
+			expect(tokenResponse.status).toBe(200)
+
+			// Verify empty nonce is handled (should be treated as empty string)
+			const decodedIdToken = verify(
+				tokenData.id_token,
+				tokenSecret,
+			) as DecodedIdToken
+			// Nonce should be empty string
+			expect(decodedIdToken.nonce).toBe("")
+		})
+
+		it("should handle special characters in nonce values", async () => {
+			// Create a test user and client
+			const testUser = await createTestUser({
+				user_name: "special_nonce_user",
+				first_name: "Special",
+				last_name: "Nonce",
+				email: "special_nonce@example.com",
+			})
+
+			const testClient = await createTestOAuthClient({
+				name: "sp_nonce",
+				secret: "test_secret_12345",
+				redirect_uris: "https://example.com/callback",
+				scopes: "openid,profile,email",
+			})
+
+			// Create a nonce with special characters (URL-safe)
+			const specialNonce = "nonce-123_ABC.xyz~!@#$%^&*()+=[]{}|;':\",./<>?"
+			const token = createValidToken(testUser.id)
+
+			// Authorize with special character nonce
+			const authorizeResponse = await app.request("/api/oauth2/authorize", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/x-www-form-urlencoded",
+					Authorization: `Bearer ${token}`,
+				},
+				body: new URLSearchParams({
+					response_type: "code",
+					client_id: testClient.id,
+					redirect_uri: "https://example.com/callback",
+					scope: "openid profile email",
+					nonce: specialNonce,
+				}),
+			})
+
+			const authorizeData = await authorizeResponse.json()
+			expect(authorizeResponse.status).toBe(200)
+			expect(authorizeData).toHaveProperty("code")
+
+			// Exchange authorization code for tokens
+			const tokenResponse = await app.request("/api/oauth2/token", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/x-www-form-urlencoded",
+				},
+				body: new URLSearchParams({
+					grant_type: "authorization_code",
+					code: authorizeData.code,
+					redirect_uri: "https://example.com/callback",
+					client_id: testClient.id,
+					client_secret: testClient.secret,
+				}),
+			})
+
+			const tokenData = await tokenResponse.json()
+			expect(tokenResponse.status).toBe(200)
+
+			// Verify special character nonce is preserved
+			const decodedIdToken = verify(
+				tokenData.id_token,
+				tokenSecret,
+			) as DecodedIdToken
+			expect(decodedIdToken.nonce).toBe(specialNonce)
 		})
 	})
 })

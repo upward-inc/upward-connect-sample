@@ -42,7 +42,7 @@ async function executeViewSqlFiles() {
 }
 
 beforeAll(async () => {
-	console.log("🚀 Starting MSSQL container for integration tests...")
+	console.log("🚀 Starting MSSQL container for tests...")
 
 	// Start MSSQL Server container
 	mssqlContainer = await new MSSQLServerContainer(

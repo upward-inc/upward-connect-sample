@@ -4,26 +4,23 @@ import { seedEntities } from "../../../seed/entity"
 import { seedEntityItems } from "../../../seed/entity-item"
 import { seedEntityItemOptions } from "../../../seed/entity-item-option"
 import { app } from "../../index"
-import { testPrisma } from "../../test/integration-setup"
-import { createValidToken } from "../../test/integration-utils/auth"
+import { testPrisma } from "../../test/setup"
+import { createValidToken } from "../../test/utils/auth"
+import { cleanupTestData, createTestUser } from "../../test/utils/common"
 import {
-	cleanupTestData,
-	createIntegrationTestUser,
-} from "../../test/integration-utils/common"
-import {
-	createIntegrationTestAccount,
-	createIntegrationTestActivity,
-	createIntegrationTestCampaign,
-	createIntegrationTestCase,
-	createIntegrationTestContact,
-	createIntegrationTestLead,
-	createIntegrationTestOpportunity,
-	createIntegrationTestPhoneCall,
-	createIntegrationTestProduct,
-	createIntegrationTestSample,
-} from "../../test/integration-utils/record"
+	createTestAccount,
+	createTestActivity,
+	createTestCampaign,
+	createTestCase,
+	createTestContact,
+	createTestLead,
+	createTestOpportunity,
+	createTestPhoneCall,
+	createTestProduct,
+	createTestSample,
+} from "../../test/utils/record"
 
-describe("Record Integration Tests", () => {
+describe("Record Tests", () => {
 	let testLead: { id: string }
 	let testAccount: { id: string }
 
@@ -32,7 +29,7 @@ describe("Record Integration Tests", () => {
 		await cleanupTestData()
 
 		// Create a test user for entity ownership
-		const testUser = await createIntegrationTestUser({
+		const testUser = await createTestUser({
 			user_name: "record_test_user",
 			first_name: "Record",
 			last_name: "Test",
@@ -40,7 +37,7 @@ describe("Record Integration Tests", () => {
 		})
 
 		// Create a test lead for the test user
-		testLead = await createIntegrationTestLead(
+		testLead = await createTestLead(
 			{
 				company: "Test Company",
 				first_name: "Test",
@@ -51,7 +48,7 @@ describe("Record Integration Tests", () => {
 		)
 
 		// Create a test account for the test user
-		testAccount = await createIntegrationTestAccount(
+		testAccount = await createTestAccount(
 			{
 				name: "Test Account",
 			},
@@ -85,7 +82,7 @@ describe("Record Integration Tests", () => {
 
 	describe("POST /api/records - Create Record", () => {
 		it("should create a record with only required fields", async () => {
-			const testUser = await createIntegrationTestUser({
+			const testUser = await createTestUser({
 				user_name: "only_required_user",
 				first_name: "Only",
 				last_name: "Required",
@@ -157,7 +154,7 @@ describe("Record Integration Tests", () => {
 		})
 
 		it("should create a record with all assignable fields", async () => {
-			const testUser = await createIntegrationTestUser({
+			const testUser = await createTestUser({
 				user_name: "assignable_fields_user",
 				first_name: "Assignable",
 				last_name: "Fields",
@@ -189,8 +186,7 @@ describe("Record Integration Tests", () => {
 						latitude: 35.6895,
 						longitude: 139.6917,
 						market_cap: 1000000000,
-						description:
-							"This is a test account created during integration testing.",
+						description: "This is a test account created during testing.",
 						originating_lead: testLead.id,
 						parent: testAccount.id,
 					},
@@ -223,7 +219,7 @@ describe("Record Integration Tests", () => {
 			expect(createdAccount?.longitude?.toNumber()).toBe(139.6917)
 			expect(createdAccount?.market_cap?.toNumber()).toBe(1000000000)
 			expect(createdAccount?.description).toBe(
-				"This is a test account created during integration testing.",
+				"This is a test account created during testing.",
 			)
 			expect(createdAccount?.originating_lead).toBe(
 				JSON.stringify({ entity: "lead", id: testLead.id }),
@@ -253,7 +249,7 @@ describe("Record Integration Tests", () => {
 		})
 
 		it("should ignore not creatable field in data", async () => {
-			const testUser = await createIntegrationTestUser({
+			const testUser = await createTestUser({
 				user_name: "ignore_id_user",
 				first_name: "Ignore",
 				last_name: "ID",
@@ -284,7 +280,7 @@ describe("Record Integration Tests", () => {
 		})
 
 		it("should ignore unknown field in data", async () => {
-			const testUser = await createIntegrationTestUser({
+			const testUser = await createTestUser({
 				user_name: "ignore_unknown_user",
 				first_name: "Ignore",
 				last_name: "Unknown",
@@ -334,7 +330,7 @@ describe("Record Integration Tests", () => {
 		})
 
 		it("should return 400 for invalid request body", async () => {
-			const testUser = await createIntegrationTestUser({
+			const testUser = await createTestUser({
 				user_name: "invalid_body_user",
 				first_name: "Invalid",
 				last_name: "Body",
@@ -359,7 +355,7 @@ describe("Record Integration Tests", () => {
 		})
 
 		it("should return 400 for missing entity_name", async () => {
-			const testUser = await createIntegrationTestUser({
+			const testUser = await createTestUser({
 				user_name: "invalid_entity_user",
 				first_name: "Invalid",
 				last_name: "User",
@@ -388,7 +384,7 @@ describe("Record Integration Tests", () => {
 		})
 
 		it("should return 400 for missing data field", async () => {
-			const testUser = await createIntegrationTestUser({
+			const testUser = await createTestUser({
 				user_name: "missing_data_user",
 				first_name: "Missing",
 				last_name: "User",
@@ -415,7 +411,7 @@ describe("Record Integration Tests", () => {
 		})
 
 		it("should return 400 for nonexistent entity", async () => {
-			const testUser = await createIntegrationTestUser({
+			const testUser = await createTestUser({
 				user_name: "nonexistent_entity_user",
 				first_name: "Nonexistent",
 				last_name: "User",
@@ -445,7 +441,7 @@ describe("Record Integration Tests", () => {
 		})
 
 		it("should return 400 for missing required fields", async () => {
-			const testUser = await createIntegrationTestUser({
+			const testUser = await createTestUser({
 				user_name: "missing_required_user",
 				first_name: "Missing",
 				last_name: "Required",
@@ -475,7 +471,7 @@ describe("Record Integration Tests", () => {
 		})
 
 		it("should return 400 for nonexistent reference", async () => {
-			const testUser = await createIntegrationTestUser({
+			const testUser = await createTestUser({
 				user_name: "nonexistent_reference_user",
 				first_name: "Nonexistent",
 				last_name: "Reference",
@@ -506,7 +502,7 @@ describe("Record Integration Tests", () => {
 		})
 
 		it("should return 400 for invalid option", async () => {
-			const testUser = await createIntegrationTestUser({
+			const testUser = await createTestUser({
 				user_name: "invalid_option_user",
 				first_name: "Invalid",
 				last_name: "Option",
@@ -535,7 +531,7 @@ describe("Record Integration Tests", () => {
 		})
 
 		it("should return 400 for invalid data type", async () => {
-			const testUser = await createIntegrationTestUser({
+			const testUser = await createTestUser({
 				user_name: "invalid_type_user",
 				first_name: "Invalid",
 				last_name: "Type",
@@ -568,7 +564,7 @@ describe("Record Integration Tests", () => {
 
 	describe("GET /api/records - Get Record List", () => {
 		it("should return record list with only entity name", async () => {
-			const testUser = await createIntegrationTestUser({
+			const testUser = await createTestUser({
 				user_name: "list_user",
 				first_name: "List",
 				last_name: "User",
@@ -576,7 +572,7 @@ describe("Record Integration Tests", () => {
 			})
 			const token = createValidToken(testUser.id)
 
-			const testCreatedAccount = await createIntegrationTestAccount(
+			const testCreatedAccount = await createTestAccount(
 				{
 					name: "List Test Account",
 				},
@@ -604,7 +600,7 @@ describe("Record Integration Tests", () => {
 		})
 
 		it("should return record list with specified field", async () => {
-			const testUser = await createIntegrationTestUser({
+			const testUser = await createTestUser({
 				user_name: "fields_test_user",
 				first_name: "Fields",
 				last_name: "Test",
@@ -612,7 +608,7 @@ describe("Record Integration Tests", () => {
 			})
 			const token = createValidToken(testUser.id)
 
-			const testCreatedAccount = await createIntegrationTestAccount(
+			const testCreatedAccount = await createTestAccount(
 				{
 					name: "Fields Test Account",
 					account_number: "FIELD-123",
@@ -652,7 +648,7 @@ describe("Record Integration Tests", () => {
 		})
 
 		it("should return record list with base filter", async () => {
-			const testUser = await createIntegrationTestUser({
+			const testUser = await createTestUser({
 				user_name: "base_filter_user",
 				first_name: "Base",
 				last_name: "Filter",
@@ -661,14 +657,14 @@ describe("Record Integration Tests", () => {
 			const token = createValidToken(testUser.id)
 
 			// Create test accounts with different names
-			const activeAccount = await createIntegrationTestAccount(
+			const activeAccount = await createTestAccount(
 				{
 					name: "Active Test Account",
 				},
 				testUser.id,
 			)
 
-			await createIntegrationTestAccount(
+			await createTestAccount(
 				{
 					name: "Inactive Test Account",
 				},
@@ -718,7 +714,7 @@ describe("Record Integration Tests", () => {
 		})
 
 		it("should return record list with nest and filter", async () => {
-			const testUser = await createIntegrationTestUser({
+			const testUser = await createTestUser({
 				user_name: "nest_and_filter_user",
 				first_name: "Nest",
 				last_name: "AndFilter",
@@ -727,7 +723,7 @@ describe("Record Integration Tests", () => {
 			const token = createValidToken(testUser.id)
 
 			// Create test accounts with different attributes
-			const targetAccount = await createIntegrationTestAccount(
+			const targetAccount = await createTestAccount(
 				{
 					name: "Target Company",
 					number_of_employees: 100,
@@ -735,7 +731,7 @@ describe("Record Integration Tests", () => {
 				testUser.id,
 			)
 
-			await createIntegrationTestAccount(
+			await createTestAccount(
 				{
 					name: "Target Company",
 					number_of_employees: 200,
@@ -743,7 +739,7 @@ describe("Record Integration Tests", () => {
 				testUser.id,
 			)
 
-			await createIntegrationTestAccount(
+			await createTestAccount(
 				{
 					name: "Other Company",
 					number_of_employees: 100,
@@ -795,7 +791,7 @@ describe("Record Integration Tests", () => {
 		})
 
 		it("should return record list with nest or filter", async () => {
-			const testUser = await createIntegrationTestUser({
+			const testUser = await createTestUser({
 				user_name: "nest_or_filter_user",
 				first_name: "Nest",
 				last_name: "OrFilter",
@@ -804,7 +800,7 @@ describe("Record Integration Tests", () => {
 			const token = createValidToken(testUser.id)
 
 			// Create test accounts with different attributes
-			const account1 = await createIntegrationTestAccount(
+			const account1 = await createTestAccount(
 				{
 					name: "Company A",
 					number_of_employees: 50,
@@ -812,7 +808,7 @@ describe("Record Integration Tests", () => {
 				testUser.id,
 			)
 
-			const account2 = await createIntegrationTestAccount(
+			const account2 = await createTestAccount(
 				{
 					name: "Company B",
 					number_of_employees: 150,
@@ -820,7 +816,7 @@ describe("Record Integration Tests", () => {
 				testUser.id,
 			)
 
-			await createIntegrationTestAccount(
+			await createTestAccount(
 				{
 					name: "Company C",
 					number_of_employees: 75,
@@ -883,7 +879,7 @@ describe("Record Integration Tests", () => {
 		})
 
 		it("should return record list with order_by parameter", async () => {
-			const testUser = await createIntegrationTestUser({
+			const testUser = await createTestUser({
 				user_name: "order_by_user",
 				first_name: "Order",
 				last_name: "By",
@@ -894,7 +890,7 @@ describe("Record Integration Tests", () => {
 			// Create test accounts with specific naming pattern for sorting
 			const accounts = []
 			accounts.push(
-				await createIntegrationTestAccount(
+				await createTestAccount(
 					{
 						name: "OrderBy_Zebra_Company",
 					},
@@ -903,7 +899,7 @@ describe("Record Integration Tests", () => {
 			)
 
 			accounts.push(
-				await createIntegrationTestAccount(
+				await createTestAccount(
 					{
 						name: "OrderBy_Alpha_Company",
 					},
@@ -912,7 +908,7 @@ describe("Record Integration Tests", () => {
 			)
 
 			accounts.push(
-				await createIntegrationTestAccount(
+				await createTestAccount(
 					{
 						name: "OrderBy_Beta_Company",
 					},
@@ -960,7 +956,7 @@ describe("Record Integration Tests", () => {
 		})
 
 		it("should return record list with pagination (limit and offset)", async () => {
-			const testUser = await createIntegrationTestUser({
+			const testUser = await createTestUser({
 				user_name: "pagination_user",
 				first_name: "Pagination",
 				last_name: "Test",
@@ -971,7 +967,7 @@ describe("Record Integration Tests", () => {
 			// Create multiple test accounts for pagination testing
 			const createdAccounts = []
 			for (let i = 1; i <= 5; i++) {
-				const account = await createIntegrationTestAccount(
+				const account = await createTestAccount(
 					{
 						name: `Pagination Test Account ${i.toString().padStart(2, "0")}`,
 					},
@@ -1007,7 +1003,7 @@ describe("Record Integration Tests", () => {
 		})
 
 		it("should return record list with grouping", async () => {
-			const testUser = await createIntegrationTestUser({
+			const testUser = await createTestUser({
 				user_name: "group_by_user",
 				first_name: "Group",
 				last_name: "By",
@@ -1016,7 +1012,7 @@ describe("Record Integration Tests", () => {
 			const token = createValidToken(testUser.id)
 
 			// Create test accounts with different industries for grouping
-			await createIntegrationTestAccount(
+			await createTestAccount(
 				{
 					name: "Tech Company 1",
 					industry: "it",
@@ -1024,7 +1020,7 @@ describe("Record Integration Tests", () => {
 				testUser.id,
 			)
 
-			await createIntegrationTestAccount(
+			await createTestAccount(
 				{
 					name: "Tech Company 2",
 					industry: "it",
@@ -1032,7 +1028,7 @@ describe("Record Integration Tests", () => {
 				testUser.id,
 			)
 
-			await createIntegrationTestAccount(
+			await createTestAccount(
 				{
 					name: "Finance Company",
 					industry: "finance",
@@ -1075,7 +1071,7 @@ describe("Record Integration Tests", () => {
 		})
 
 		it("should return record list with numeric filter (greater than)", async () => {
-			const testUser = await createIntegrationTestUser({
+			const testUser = await createTestUser({
 				user_name: "numeric_filter_user",
 				first_name: "Numeric",
 				last_name: "Filter",
@@ -1084,7 +1080,7 @@ describe("Record Integration Tests", () => {
 			const token = createValidToken(testUser.id)
 
 			// Create test accounts with different employee counts
-			const largeAccount = await createIntegrationTestAccount(
+			const largeAccount = await createTestAccount(
 				{
 					name: "Large Company",
 					number_of_employees: 500,
@@ -1092,7 +1088,7 @@ describe("Record Integration Tests", () => {
 				testUser.id,
 			)
 
-			await createIntegrationTestAccount(
+			await createTestAccount(
 				{
 					name: "Small Company",
 					number_of_employees: 50,
@@ -1141,7 +1137,7 @@ describe("Record Integration Tests", () => {
 		})
 
 		it("should return record list with text filter (contains)", async () => {
-			const testUser = await createIntegrationTestUser({
+			const testUser = await createTestUser({
 				user_name: "text_filter_user",
 				first_name: "Text",
 				last_name: "Filter",
@@ -1150,14 +1146,14 @@ describe("Record Integration Tests", () => {
 			const token = createValidToken(testUser.id)
 
 			// Create test accounts with different names
-			const techAccount = await createIntegrationTestAccount(
+			const techAccount = await createTestAccount(
 				{
 					name: "Advanced Technology Solutions",
 				},
 				testUser.id,
 			)
 
-			await createIntegrationTestAccount(
+			await createTestAccount(
 				{
 					name: "Basic Services Company",
 				},
@@ -1204,7 +1200,7 @@ describe("Record Integration Tests", () => {
 		})
 
 		it("should return record list with negated filter (is_not: true)", async () => {
-			const testUser = await createIntegrationTestUser({
+			const testUser = await createTestUser({
 				user_name: "negated_filter_user",
 				first_name: "Negated",
 				last_name: "Filter",
@@ -1213,14 +1209,14 @@ describe("Record Integration Tests", () => {
 			const token = createValidToken(testUser.id)
 
 			// Create test accounts with different names
-			const excludedAccount = await createIntegrationTestAccount(
+			const excludedAccount = await createTestAccount(
 				{
 					name: "Excluded Company",
 				},
 				testUser.id,
 			)
 
-			const includedAccount = await createIntegrationTestAccount(
+			const includedAccount = await createTestAccount(
 				{
 					name: "Included Company",
 				},
@@ -1267,7 +1263,7 @@ describe("Record Integration Tests", () => {
 		})
 
 		it("should return record list with is_set filter", async () => {
-			const testUser = await createIntegrationTestUser({
+			const testUser = await createTestUser({
 				user_name: "is_set_filter_user",
 				first_name: "IsSet",
 				last_name: "Filter",
@@ -1276,7 +1272,7 @@ describe("Record Integration Tests", () => {
 			const token = createValidToken(testUser.id)
 
 			// Create test accounts - one with website, one without
-			const accountWithWebsite = await createIntegrationTestAccount(
+			const accountWithWebsite = await createTestAccount(
 				{
 					name: "Company With Website",
 					website: "https://www.example.com",
@@ -1284,7 +1280,7 @@ describe("Record Integration Tests", () => {
 				testUser.id,
 			)
 
-			const accountWithoutWebsite = await createIntegrationTestAccount(
+			const accountWithoutWebsite = await createTestAccount(
 				{
 					name: "Company Without Website",
 					// website is not set (null)
@@ -1332,7 +1328,7 @@ describe("Record Integration Tests", () => {
 		})
 
 		it("should return record list for user entity", async () => {
-			const testUser = await createIntegrationTestUser({
+			const testUser = await createTestUser({
 				user_name: "user_entity_test",
 				first_name: "User",
 				last_name: "Entity",
@@ -1365,7 +1361,7 @@ describe("Record Integration Tests", () => {
 		})
 
 		it("should return record list for lead entity", async () => {
-			const testUser = await createIntegrationTestUser({
+			const testUser = await createTestUser({
 				user_name: "lead_entity_test",
 				first_name: "Lead",
 				last_name: "Entity",
@@ -1374,7 +1370,7 @@ describe("Record Integration Tests", () => {
 			const token = createValidToken(testUser.id)
 
 			// Create test lead
-			const lead = await createIntegrationTestLead(
+			const lead = await createTestLead(
 				{
 					company: "Qualified Lead Company",
 					first_name: "John",
@@ -1409,7 +1405,7 @@ describe("Record Integration Tests", () => {
 		})
 
 		it("should return record list for activity entity", async () => {
-			const testUser = await createIntegrationTestUser({
+			const testUser = await createTestUser({
 				user_name: "activity_entity_test",
 				first_name: "Activity",
 				last_name: "Entity",
@@ -1418,7 +1414,7 @@ describe("Record Integration Tests", () => {
 			const token = createValidToken(testUser.id)
 
 			// Create test activities
-			const activity = await createIntegrationTestActivity(
+			const activity = await createTestActivity(
 				{
 					subject: "Activity",
 					is_all_day_event: true,
@@ -1452,7 +1448,7 @@ describe("Record Integration Tests", () => {
 		})
 
 		it("should return record list for phone_call entity", async () => {
-			const testUser = await createIntegrationTestUser({
+			const testUser = await createTestUser({
 				user_name: "phone_call_entity_test",
 				first_name: "PhoneCall",
 				last_name: "Entity",
@@ -1461,7 +1457,7 @@ describe("Record Integration Tests", () => {
 			const token = createValidToken(testUser.id)
 
 			// Create a test account for the call
-			const testAccount = await createIntegrationTestAccount(
+			const testAccount = await createTestAccount(
 				{
 					name: "Call Test Company",
 				},
@@ -1469,7 +1465,7 @@ describe("Record Integration Tests", () => {
 			)
 
 			// Create test phone call
-			const phoneCall = await createIntegrationTestPhoneCall(
+			const phoneCall = await createTestPhoneCall(
 				{
 					subject: "Customer Inquiry",
 					user: { entity: "user", id: testUser.id },
@@ -1516,13 +1512,13 @@ describe("Record Integration Tests", () => {
 		})
 
 		it("should return record list with SQL reserved keyword (user)", async () => {
-			const targetUser = await createIntegrationTestUser({
+			const targetUser = await createTestUser({
 				user_name: "phone_call_user_test",
 				first_name: "PhoneCall",
 				last_name: "User",
 				email: "phone_call_user@example.com",
 			})
-			const anotherUser = await createIntegrationTestUser({
+			const anotherUser = await createTestUser({
 				user_name: "another_user",
 				first_name: "Another",
 				last_name: "User",
@@ -1531,7 +1527,7 @@ describe("Record Integration Tests", () => {
 			const token = createValidToken(targetUser.id)
 
 			// Create a test account for the call
-			const testAccount = await createIntegrationTestAccount(
+			const testAccount = await createTestAccount(
 				{
 					name: "Call Test Company",
 				},
@@ -1539,7 +1535,7 @@ describe("Record Integration Tests", () => {
 			)
 
 			// Create test phone calls
-			await createIntegrationTestPhoneCall(
+			await createTestPhoneCall(
 				{
 					subject: "Target Call",
 					user: { entity: "user", id: targetUser.id },
@@ -1548,7 +1544,7 @@ describe("Record Integration Tests", () => {
 				},
 				targetUser.id,
 			)
-			await createIntegrationTestPhoneCall(
+			await createTestPhoneCall(
 				{
 					subject: "Another Call",
 					user: { entity: "user", id: anotherUser.id },
@@ -1609,7 +1605,7 @@ describe("Record Integration Tests", () => {
 		})
 
 		it("should return record list for contact entity", async () => {
-			const testUser = await createIntegrationTestUser({
+			const testUser = await createTestUser({
 				user_name: "contact_entity_test",
 				first_name: "Contact",
 				last_name: "Entity",
@@ -1618,7 +1614,7 @@ describe("Record Integration Tests", () => {
 			const token = createValidToken(testUser.id)
 
 			// Create test contact
-			const contact = await createIntegrationTestContact(
+			const contact = await createTestContact(
 				{
 					last_name: "Primary Contact",
 				},
@@ -1648,7 +1644,7 @@ describe("Record Integration Tests", () => {
 		})
 
 		it("should return record list for opportunity entity", async () => {
-			const testUser = await createIntegrationTestUser({
+			const testUser = await createTestUser({
 				user_name: "opportunity_entity_test",
 				first_name: "Opportunity",
 				last_name: "Entity",
@@ -1657,7 +1653,7 @@ describe("Record Integration Tests", () => {
 			const token = createValidToken(testUser.id)
 
 			// Create a test account for the opportunities
-			const testAccount = await createIntegrationTestAccount(
+			const testAccount = await createTestAccount(
 				{
 					name: "Opportunity Test Company",
 				},
@@ -1665,7 +1661,7 @@ describe("Record Integration Tests", () => {
 			)
 
 			// Create test opportunity
-			const opportunity = await createIntegrationTestOpportunity(
+			const opportunity = await createTestOpportunity(
 				{
 					name: "Deal",
 					account: testAccount.id,
@@ -1712,7 +1708,7 @@ describe("Record Integration Tests", () => {
 		})
 
 		it("should return record list for case entity", async () => {
-			const testUser = await createIntegrationTestUser({
+			const testUser = await createTestUser({
 				user_name: "case_entity_test",
 				first_name: "Case",
 				last_name: "Entity",
@@ -1721,7 +1717,7 @@ describe("Record Integration Tests", () => {
 			const token = createValidToken(testUser.id)
 
 			// Create test case
-			const testCase = await createIntegrationTestCase(
+			const testCase = await createTestCase(
 				{
 					case_number: "CASE-001",
 					subject: "Case",
@@ -1753,7 +1749,7 @@ describe("Record Integration Tests", () => {
 		})
 
 		it("should return record list for product entity", async () => {
-			const testUser = await createIntegrationTestUser({
+			const testUser = await createTestUser({
 				user_name: "product_entity_test",
 				first_name: "Product",
 				last_name: "Entity",
@@ -1762,7 +1758,7 @@ describe("Record Integration Tests", () => {
 			const token = createValidToken(testUser.id)
 
 			// Create test product
-			const product = await createIntegrationTestProduct(
+			const product = await createTestProduct(
 				{
 					name: "Product",
 				},
@@ -1792,7 +1788,7 @@ describe("Record Integration Tests", () => {
 		})
 
 		it("should return record list for campaign entity", async () => {
-			const testUser = await createIntegrationTestUser({
+			const testUser = await createTestUser({
 				user_name: "campaign_entity_test",
 				first_name: "Campaign",
 				last_name: "Entity",
@@ -1801,7 +1797,7 @@ describe("Record Integration Tests", () => {
 			const token = createValidToken(testUser.id)
 
 			// Create test campaign
-			const campaign = await createIntegrationTestCampaign(
+			const campaign = await createTestCampaign(
 				{
 					name: "Campaign",
 				},
@@ -1831,7 +1827,7 @@ describe("Record Integration Tests", () => {
 		})
 
 		it("should return record list for sample entity", async () => {
-			const testUser = await createIntegrationTestUser({
+			const testUser = await createTestUser({
 				user_name: "sample_entity_test",
 				first_name: "Sample",
 				last_name: "Entity",
@@ -1840,7 +1836,7 @@ describe("Record Integration Tests", () => {
 			const token = createValidToken(testUser.id)
 
 			// Create test sample
-			const sample = await createIntegrationTestSample(
+			const sample = await createTestSample(
 				{
 					name: "Sample",
 				},
@@ -1882,7 +1878,7 @@ describe("Record Integration Tests", () => {
 		})
 
 		it("should return 400 for missing entity_name query parameter", async () => {
-			const testUser = await createIntegrationTestUser({
+			const testUser = await createTestUser({
 				user_name: "missing_query_user",
 				first_name: "Missing",
 				last_name: "Query",
@@ -1905,7 +1901,7 @@ describe("Record Integration Tests", () => {
 		})
 
 		it("should return 400 for invalid entity_name", async () => {
-			const testUser = await createIntegrationTestUser({
+			const testUser = await createTestUser({
 				user_name: "invalid_query_user",
 				first_name: "Invalid",
 				last_name: "Query",
