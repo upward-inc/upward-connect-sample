@@ -1,13 +1,13 @@
 import type { user } from "@prisma/client"
 import { afterAll, beforeAll, describe, expect, it } from "vitest"
-import { seedEntities } from "../../../seed/entity"
-import { seedEntityItems } from "../../../seed/entity-item"
-import { seedEntityItemOptions } from "../../../seed/entity-item-option"
-import { app } from "../../index"
-import { testPrisma } from "../../test/setup"
-import { createValidToken } from "../../test/utils/auth"
-import { cleanupTestData, createTestUser } from "../../test/utils/common"
-import { createTestAccount, createTestLead } from "../../test/utils/record"
+import { seedEntities } from "../../../../seed/entity"
+import { seedEntityItems } from "../../../../seed/entity-item"
+import { seedEntityItemOptions } from "../../../../seed/entity-item-option"
+import { app } from "../../../index"
+import { testPrisma } from "../../../test/setup"
+import { createValidToken } from "../../../test/utils/auth"
+import { cleanupTestData, createTestUser } from "../../../test/utils/common"
+import { createTestAccount, createTestLead } from "../../../test/utils/record"
 
 describe("Record Tests", () => {
 	let testLead: { id: string }
@@ -69,7 +69,7 @@ describe("Record Tests", () => {
 		await testPrisma.entity.deleteMany()
 	}
 
-	describe("POST /api/records - Create Record", () => {
+	describe("POST /api/v1/records - Create Record", () => {
 		it("should create a record with only required fields", async () => {
 			const testUser = await createTestUser({
 				user_name: "only_required_user",
@@ -79,7 +79,7 @@ describe("Record Tests", () => {
 			})
 			const token = createValidToken(testUser.id)
 
-			const response = await app.request("/api/records/account", {
+			const response = await app.request("/api/v1/records/account", {
 				method: "POST",
 				headers: {
 					"Content-Type": "application/json",
@@ -148,7 +148,7 @@ describe("Record Tests", () => {
 			})
 			const token = createValidToken(testUser.id)
 
-			const response = await app.request("/api/records/account", {
+			const response = await app.request("/api/v1/records/account", {
 				method: "POST",
 				headers: {
 					"Content-Type": "application/json",
@@ -240,7 +240,7 @@ describe("Record Tests", () => {
 			})
 			const token = createValidToken(testUser.id)
 
-			const response = await app.request("/api/records/account", {
+			const response = await app.request("/api/v1/records/account", {
 				method: "POST",
 				headers: {
 					"Content-Type": "application/json",
@@ -268,7 +268,7 @@ describe("Record Tests", () => {
 			})
 			const token = createValidToken(testUser.id)
 
-			const response = await app.request("/api/records/account", {
+			const response = await app.request("/api/v1/records/account", {
 				method: "POST",
 				headers: {
 					"Content-Type": "application/json",
@@ -286,7 +286,7 @@ describe("Record Tests", () => {
 		})
 
 		it("should return 401 for missing authorization header", async () => {
-			const response = await app.request("/api/records/account", {
+			const response = await app.request("/api/v1/records/account", {
 				method: "POST",
 				headers: {
 					"Content-Type": "application/json",
@@ -312,7 +312,7 @@ describe("Record Tests", () => {
 			})
 			const token = createValidToken(testUser.id)
 
-			const response = await app.request("/api/records/account", {
+			const response = await app.request("/api/v1/records/account", {
 				method: "POST",
 				headers: {
 					"Content-Type": "application/json",
@@ -337,7 +337,7 @@ describe("Record Tests", () => {
 			})
 			const token = createValidToken(testUser.id)
 
-			const response = await app.request("/api/records/nonexistent_entity", {
+			const response = await app.request("/api/v1/records/nonexistent_entity", {
 				method: "POST",
 				headers: {
 					"Content-Type": "application/json",
@@ -361,7 +361,7 @@ describe("Record Tests", () => {
 			})
 			const token = createValidToken(testUser.id)
 
-			const response = await app.request("/api/records/account", {
+			const response = await app.request("/api/v1/records/account", {
 				method: "POST",
 				headers: {
 					"Content-Type": "application/json",
@@ -386,7 +386,7 @@ describe("Record Tests", () => {
 			})
 			const token = createValidToken(testUser.id)
 
-			const response = await app.request("/api/records/nonexistent_entity", {
+			const response = await app.request("/api/v1/records/nonexistent_entity", {
 				method: "POST",
 				headers: {
 					"Content-Type": "application/json",
@@ -413,7 +413,7 @@ describe("Record Tests", () => {
 			})
 			const token = createValidToken(testUser.id)
 
-			const response = await app.request("/api/records/account", {
+			const response = await app.request("/api/v1/records/account", {
 				method: "POST",
 				headers: {
 					"Content-Type": "application/json",
@@ -440,7 +440,7 @@ describe("Record Tests", () => {
 			})
 			const token = createValidToken(testUser.id)
 
-			const response = await app.request("/api/records/account", {
+			const response = await app.request("/api/v1/records/account", {
 				method: "POST",
 				headers: {
 					"Content-Type": "application/json",
@@ -468,7 +468,7 @@ describe("Record Tests", () => {
 			})
 			const token = createValidToken(testUser.id)
 
-			const response = await app.request("/api/records/account", {
+			const response = await app.request("/api/v1/records/account", {
 				method: "POST",
 				headers: {
 					"Content-Type": "application/json",
@@ -494,7 +494,7 @@ describe("Record Tests", () => {
 			})
 			const token = createValidToken(testUser.id)
 
-			const response = await app.request("/api/records/account", {
+			const response = await app.request("/api/v1/records/account", {
 				method: "POST",
 				headers: {
 					"Content-Type": "application/json",

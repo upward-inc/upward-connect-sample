@@ -1,15 +1,15 @@
 import { type JwtPayload, sign, verify } from "jsonwebtoken"
 import { afterAll, beforeAll, describe, expect, it } from "vitest"
-import { env } from "../../env"
-import { app } from "../../index"
+import { env } from "../../../env"
+import { app } from "../../../index"
 import {
 	createExpiredRefreshToken,
 	createExpiredToken,
 	createRefreshToken,
 	createTestOAuthClient,
 	createValidToken,
-} from "../../test/utils/auth"
-import { cleanupTestData, createTestUser } from "../../test/utils/common"
+} from "../../../test/utils/auth"
+import { cleanupTestData, createTestUser } from "../../../test/utils/common"
 
 describe("Auth Tests", () => {
 	const tokenSecret = env.OIDC_TOKEN_SECRET
@@ -44,7 +44,7 @@ describe("Auth Tests", () => {
 				email: "test_user@example.com",
 			})
 			const token = createValidToken(testUser.id)
-			const response = await app.request("/api/oauth2/userinfo", {
+			const response = await app.request("/api/v1/oauth2/userinfo", {
 				method: "GET",
 				headers: {
 					Authorization: `Bearer ${token}`,
@@ -63,7 +63,7 @@ describe("Auth Tests", () => {
 		})
 
 		it("should return 400 for invalid authorization header format", async () => {
-			const response = await app.request("/api/oauth2/userinfo", {
+			const response = await app.request("/api/v1/oauth2/userinfo", {
 				method: "GET",
 				headers: {
 					Authorization: "InvalidFormat token_here",
@@ -78,7 +78,7 @@ describe("Auth Tests", () => {
 		})
 
 		it("should return 401 for missing authorization header", async () => {
-			const response = await app.request("/api/oauth2/userinfo", {
+			const response = await app.request("/api/v1/oauth2/userinfo", {
 				method: "GET",
 			})
 
@@ -98,7 +98,7 @@ describe("Auth Tests", () => {
 			})
 			const expiredToken = createExpiredToken(testUser.id)
 
-			const response = await app.request("/api/oauth2/userinfo", {
+			const response = await app.request("/api/v1/oauth2/userinfo", {
 				method: "GET",
 				headers: {
 					Authorization: `Bearer ${expiredToken}`,
@@ -113,7 +113,7 @@ describe("Auth Tests", () => {
 		})
 
 		it("should return 401 for malformed token", async () => {
-			const response = await app.request("/api/oauth2/userinfo", {
+			const response = await app.request("/api/v1/oauth2/userinfo", {
 				method: "GET",
 				headers: {
 					Authorization: "Bearer invalid.malformed.token",
@@ -145,7 +145,7 @@ describe("Auth Tests", () => {
 				expiresIn: "1h",
 			})
 
-			const response = await app.request("/api/oauth2/userinfo", {
+			const response = await app.request("/api/v1/oauth2/userinfo", {
 				method: "GET",
 				headers: {
 					Authorization: `Bearer ${wrongSecretToken}`,
@@ -169,7 +169,7 @@ describe("Auth Tests", () => {
 				// No subject specified
 			})
 
-			const response = await app.request("/api/oauth2/userinfo", {
+			const response = await app.request("/api/v1/oauth2/userinfo", {
 				method: "GET",
 				headers: {
 					Authorization: `Bearer ${noSubjectToken}`,
@@ -193,7 +193,7 @@ describe("Auth Tests", () => {
 				expiresIn: "1h",
 			})
 
-			const response = await app.request("/api/oauth2/userinfo", {
+			const response = await app.request("/api/v1/oauth2/userinfo", {
 				method: "GET",
 				headers: {
 					Authorization: `Bearer ${emptySubjectToken}`,
@@ -210,7 +210,7 @@ describe("Auth Tests", () => {
 		it("should return 404 for non-existent user", async () => {
 			const nonExistentUserId = crypto.randomUUID()
 			const token = createValidToken(nonExistentUserId)
-			const response = await app.request("/api/oauth2/userinfo", {
+			const response = await app.request("/api/v1/oauth2/userinfo", {
 				method: "GET",
 				headers: {
 					Authorization: `Bearer ${token}`,
@@ -248,7 +248,7 @@ describe("Auth Tests", () => {
 			// Create a refresh token
 			const refreshToken = createRefreshToken(testUser.id)
 
-			const response = await app.request("/api/oauth2/token", {
+			const response = await app.request("/api/v1/oauth2/token", {
 				method: "POST",
 				headers: {
 					"Content-Type": "application/x-www-form-urlencoded",
@@ -284,7 +284,7 @@ describe("Auth Tests", () => {
 			const refreshToken = createRefreshToken(testUser.id)
 			const nonExistentClientId = crypto.randomUUID()
 
-			const response = await app.request("/api/oauth2/token", {
+			const response = await app.request("/api/v1/oauth2/token", {
 				method: "POST",
 				headers: {
 					"Content-Type": "application/x-www-form-urlencoded",
@@ -322,7 +322,7 @@ describe("Auth Tests", () => {
 
 			const refreshToken = createRefreshToken(testUser.id)
 
-			const response = await app.request("/api/oauth2/token", {
+			const response = await app.request("/api/v1/oauth2/token", {
 				method: "POST",
 				headers: {
 					"Content-Type": "application/x-www-form-urlencoded",
@@ -360,7 +360,7 @@ describe("Auth Tests", () => {
 
 			const expiredRefreshToken = createExpiredRefreshToken(testUser.id)
 
-			const response = await app.request("/api/oauth2/token", {
+			const response = await app.request("/api/v1/oauth2/token", {
 				method: "POST",
 				headers: {
 					"Content-Type": "application/x-www-form-urlencoded",
@@ -389,7 +389,7 @@ describe("Auth Tests", () => {
 				scopes: "openid,profile,email",
 			})
 
-			const response = await app.request("/api/oauth2/token", {
+			const response = await app.request("/api/v1/oauth2/token", {
 				method: "POST",
 				headers: {
 					"Content-Type": "application/x-www-form-urlencoded",
@@ -421,7 +421,7 @@ describe("Auth Tests", () => {
 			const nonExistentUserId = crypto.randomUUID()
 			const refreshToken = createRefreshToken(nonExistentUserId)
 
-			const response = await app.request("/api/oauth2/token", {
+			const response = await app.request("/api/v1/oauth2/token", {
 				method: "POST",
 				headers: {
 					"Content-Type": "application/x-www-form-urlencoded",
@@ -450,7 +450,7 @@ describe("Auth Tests", () => {
 				scopes: "openid,profile,email",
 			})
 
-			const response = await app.request("/api/oauth2/token", {
+			const response = await app.request("/api/v1/oauth2/token", {
 				method: "POST",
 				headers: {
 					"Content-Type": "application/x-www-form-urlencoded",
@@ -490,7 +490,7 @@ describe("Auth Tests", () => {
 
 			const token = createValidToken(testUser.id)
 
-			const response = await app.request("/api/oauth2/authorize", {
+			const response = await app.request("/api/v1/oauth2/authorize", {
 				method: "POST",
 				headers: {
 					"Content-Type": "application/x-www-form-urlencoded",
@@ -528,7 +528,7 @@ describe("Auth Tests", () => {
 			const stateValue = "random-state-value-12345"
 			const token = createValidToken(testUser.id)
 
-			const response = await app.request("/api/oauth2/authorize", {
+			const response = await app.request("/api/v1/oauth2/authorize", {
 				method: "POST",
 				headers: {
 					"Content-Type": "application/x-www-form-urlencoded",
@@ -559,7 +559,7 @@ describe("Auth Tests", () => {
 			const stateValue = "state-for-error-test"
 			const token = createValidToken(testUser.id)
 
-			const response = await app.request("/api/oauth2/authorize", {
+			const response = await app.request("/api/v1/oauth2/authorize", {
 				method: "POST",
 				headers: {
 					"Content-Type": "application/x-www-form-urlencoded",
@@ -601,7 +601,7 @@ describe("Auth Tests", () => {
 			const stateValue = "state-for-redirect-error"
 			const token = createValidToken(testUser.id)
 
-			const response = await app.request("/api/oauth2/authorize", {
+			const response = await app.request("/api/v1/oauth2/authorize", {
 				method: "POST",
 				headers: {
 					"Content-Type": "application/x-www-form-urlencoded",
@@ -642,7 +642,7 @@ describe("Auth Tests", () => {
 			const stateValue = "state-for-response-type-error"
 			const token = createValidToken(testUser.id)
 
-			const response = await app.request("/api/oauth2/authorize", {
+			const response = await app.request("/api/v1/oauth2/authorize", {
 				method: "POST",
 				headers: {
 					"Content-Type": "application/x-www-form-urlencoded",
@@ -685,7 +685,7 @@ describe("Auth Tests", () => {
 			const token = createValidToken(testUser.id)
 
 			// Step 1: Authorize with nonce
-			const authorizeResponse = await app.request("/api/oauth2/authorize", {
+			const authorizeResponse = await app.request("/api/v1/oauth2/authorize", {
 				method: "POST",
 				headers: {
 					"Content-Type": "application/x-www-form-urlencoded",
@@ -705,7 +705,7 @@ describe("Auth Tests", () => {
 			expect(authorizeData).toHaveProperty("code")
 
 			// Step 2: Exchange authorization code for tokens
-			const tokenResponse = await app.request("/api/oauth2/token", {
+			const tokenResponse = await app.request("/api/v1/oauth2/token", {
 				method: "POST",
 				headers: {
 					"Content-Type": "application/x-www-form-urlencoded",
@@ -755,7 +755,7 @@ describe("Auth Tests", () => {
 			const token = createValidToken(testUser.id)
 
 			// Authorize with empty nonce
-			const authorizeResponse = await app.request("/api/oauth2/authorize", {
+			const authorizeResponse = await app.request("/api/v1/oauth2/authorize", {
 				method: "POST",
 				headers: {
 					"Content-Type": "application/x-www-form-urlencoded",
@@ -775,7 +775,7 @@ describe("Auth Tests", () => {
 			expect(authorizeData).toHaveProperty("code")
 
 			// Exchange authorization code for tokens
-			const tokenResponse = await app.request("/api/oauth2/token", {
+			const tokenResponse = await app.request("/api/v1/oauth2/token", {
 				method: "POST",
 				headers: {
 					"Content-Type": "application/x-www-form-urlencoded",
@@ -822,7 +822,7 @@ describe("Auth Tests", () => {
 			const token = createValidToken(testUser.id)
 
 			// Authorize with special character nonce
-			const authorizeResponse = await app.request("/api/oauth2/authorize", {
+			const authorizeResponse = await app.request("/api/v1/oauth2/authorize", {
 				method: "POST",
 				headers: {
 					"Content-Type": "application/x-www-form-urlencoded",
@@ -842,7 +842,7 @@ describe("Auth Tests", () => {
 			expect(authorizeData).toHaveProperty("code")
 
 			// Exchange authorization code for tokens
-			const tokenResponse = await app.request("/api/oauth2/token", {
+			const tokenResponse = await app.request("/api/v1/oauth2/token", {
 				method: "POST",
 				headers: {
 					"Content-Type": "application/x-www-form-urlencoded",

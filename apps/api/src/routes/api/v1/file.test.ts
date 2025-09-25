@@ -1,9 +1,9 @@
 import { afterAll, beforeAll, describe, expect, it } from "vitest"
-import { app } from "../../index"
-import { testPrisma } from "../../test/setup"
-import { createExpiredToken, createValidToken } from "../../test/utils/auth"
-import { cleanupTestData, createTestUser } from "../../test/utils/common"
-import { createTestFile } from "../../test/utils/file"
+import { app } from "../../../index"
+import { testPrisma } from "../../../test/setup"
+import { createExpiredToken, createValidToken } from "../../../test/utils/auth"
+import { cleanupTestData, createTestUser } from "../../../test/utils/common"
+import { createTestFile } from "../../../test/utils/file"
 
 describe("File Tests", () => {
 	beforeAll(async () => {
@@ -16,7 +16,7 @@ describe("File Tests", () => {
 		await cleanupTestData()
 	})
 
-	describe("POST /api/files - Create File", () => {
+	describe("POST /api/v1/files - Create File", () => {
 		it("should create a file with valid authentication and form data", async () => {
 			// Create a test user
 			const testUser = await createTestUser({
@@ -32,7 +32,7 @@ describe("File Tests", () => {
 			const formData = new FormData()
 			formData.append("file", testFile)
 
-			const response = await app.request("/api/files", {
+			const response = await app.request("/api/v1/files", {
 				method: "POST",
 				headers: {
 					Authorization: `Bearer ${token}`,
@@ -74,7 +74,7 @@ describe("File Tests", () => {
 			const formData = new FormData()
 			formData.append("file", jsonFile)
 
-			const response = await app.request("/api/files", {
+			const response = await app.request("/api/v1/files", {
 				method: "POST",
 				headers: {
 					Authorization: `Bearer ${token}`,
@@ -114,7 +114,7 @@ describe("File Tests", () => {
 			const formData = new FormData()
 			formData.append("file", binaryFile)
 
-			const response = await app.request("/api/files", {
+			const response = await app.request("/api/v1/files", {
 				method: "POST",
 				headers: {
 					Authorization: `Bearer ${token}`,
@@ -140,7 +140,7 @@ describe("File Tests", () => {
 			const formData = new FormData()
 			formData.append("file", testFile)
 
-			const response = await app.request("/api/files", {
+			const response = await app.request("/api/v1/files", {
 				method: "POST",
 				body: formData,
 			})
@@ -157,7 +157,7 @@ describe("File Tests", () => {
 			const formData = new FormData()
 			formData.append("file", testFile)
 
-			const response = await app.request("/api/files", {
+			const response = await app.request("/api/v1/files", {
 				method: "POST",
 				headers: {
 					Authorization: "InvalidFormat token_here",
@@ -185,7 +185,7 @@ describe("File Tests", () => {
 			const formData = new FormData()
 			formData.append("file", testFile)
 
-			const response = await app.request("/api/files", {
+			const response = await app.request("/api/v1/files", {
 				method: "POST",
 				headers: {
 					Authorization: `Bearer ${expiredToken}`,
@@ -205,7 +205,7 @@ describe("File Tests", () => {
 			const formData = new FormData()
 			formData.append("file", testFile)
 
-			const response = await app.request("/api/files", {
+			const response = await app.request("/api/v1/files", {
 				method: "POST",
 				headers: {
 					Authorization: "Bearer invalid.malformed.token",
@@ -233,7 +233,7 @@ describe("File Tests", () => {
 			const formData = new FormData()
 			formData.append("other_field", "not a file")
 
-			const response = await app.request("/api/files", {
+			const response = await app.request("/api/v1/files", {
 				method: "POST",
 				headers: {
 					Authorization: `Bearer ${token}`,
@@ -264,7 +264,7 @@ describe("File Tests", () => {
 			// Send empty form data
 			const formData = new FormData()
 
-			const response = await app.request("/api/files", {
+			const response = await app.request("/api/v1/files", {
 				method: "POST",
 				headers: {
 					Authorization: `Bearer ${token}`,
@@ -284,7 +284,7 @@ describe("File Tests", () => {
 		})
 	})
 
-	describe("GET /api/files/:id - Get File", () => {
+	describe("GET /api/v1/files/:id - Get File", () => {
 		it("should return file content for valid file ID with authentication", async () => {
 			// Create a test user and file
 			const testUser = await createTestUser({
@@ -301,7 +301,7 @@ describe("File Tests", () => {
 			const formData = new FormData()
 			formData.append("file", testFile)
 
-			const createResponse = await app.request("/api/files", {
+			const createResponse = await app.request("/api/v1/files", {
 				method: "POST",
 				headers: {
 					Authorization: `Bearer ${token}`,
@@ -313,7 +313,7 @@ describe("File Tests", () => {
 			expect(createResponse.status).toBe(200)
 
 			// Now get the file
-			const getResponse = await app.request(`/api/files/${createData.id}`, {
+			const getResponse = await app.request(`/api/v1/files/${createData.id}`, {
 				method: "GET",
 				headers: {
 					Authorization: `Bearer ${token}`,
@@ -345,7 +345,7 @@ describe("File Tests", () => {
 			const formData = new FormData()
 			formData.append("file", jsonFile)
 
-			const createResponse = await app.request("/api/files", {
+			const createResponse = await app.request("/api/v1/files", {
 				method: "POST",
 				headers: {
 					Authorization: `Bearer ${token}`,
@@ -357,7 +357,7 @@ describe("File Tests", () => {
 			expect(createResponse.status).toBe(200)
 
 			// Get the JSON file
-			const getResponse = await app.request(`/api/files/${createData.id}`, {
+			const getResponse = await app.request(`/api/v1/files/${createData.id}`, {
 				method: "GET",
 				headers: {
 					Authorization: `Bearer ${token}`,
@@ -392,7 +392,7 @@ describe("File Tests", () => {
 			const formData = new FormData()
 			formData.append("file", binaryFile)
 
-			const createResponse = await app.request("/api/files", {
+			const createResponse = await app.request("/api/v1/files", {
 				method: "POST",
 				headers: {
 					Authorization: `Bearer ${token}`,
@@ -404,7 +404,7 @@ describe("File Tests", () => {
 			expect(createResponse.status).toBe(200)
 
 			// Download the binary file
-			const getResponse = await app.request(`/api/files/${createData.id}`, {
+			const getResponse = await app.request(`/api/v1/files/${createData.id}`, {
 				method: "GET",
 				headers: {
 					Authorization: `Bearer ${token}`,
@@ -428,7 +428,7 @@ describe("File Tests", () => {
 			const token = createValidToken(testUser.id)
 			const nonExistentId = crypto.randomUUID()
 
-			const response = await app.request(`/api/files/${nonExistentId}`, {
+			const response = await app.request(`/api/v1/files/${nonExistentId}`, {
 				method: "GET",
 				headers: {
 					Authorization: `Bearer ${token}`,
@@ -443,7 +443,7 @@ describe("File Tests", () => {
 		})
 
 		it("should return 401 for missing authorization header", async () => {
-			const response = await app.request("/api/files/some-id", {
+			const response = await app.request("/api/v1/files/some-id", {
 				method: "GET",
 			})
 
@@ -463,7 +463,7 @@ describe("File Tests", () => {
 			})
 			const expiredToken = createExpiredToken(testUser.id)
 
-			const response = await app.request("/api/files/some-id", {
+			const response = await app.request("/api/v1/files/some-id", {
 				method: "GET",
 				headers: {
 					Authorization: `Bearer ${expiredToken}`,
@@ -478,7 +478,7 @@ describe("File Tests", () => {
 		})
 
 		it("should return 401 for malformed token", async () => {
-			const response = await app.request("/api/files/some-id", {
+			const response = await app.request("/api/v1/files/some-id", {
 				method: "GET",
 				headers: {
 					Authorization: "Bearer invalid.malformed.token",

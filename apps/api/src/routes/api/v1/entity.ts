@@ -4,19 +4,19 @@ import {
 	getEntityItem,
 	getEntityItemList,
 	getEntityList,
-} from "../../domain/entity"
-import { describeRoute, validator } from "../../libs/hono-openapi"
+} from "../../../domain/entity"
+import { describeRoute, validator } from "../../../libs/hono-openapi"
 import {
 	EntityListSchema,
 	EntitySchema,
 	GetEntityParamSchema,
-} from "../../schema/entity"
+} from "../../../schema/entity"
 import {
 	EntityItemListSchema,
 	EntityItemSchema,
 	GetEntityItemListParamSchema,
 	GetEntityItemParamSchema,
-} from "../../schema/entity-item"
+} from "../../../schema/entity-item"
 
 export const entityRouter = new Hono()
 	.get(

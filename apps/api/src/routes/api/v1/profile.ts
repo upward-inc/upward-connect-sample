@@ -1,11 +1,11 @@
 import { Hono } from "hono"
-import { getProfile, getProfileList } from "../../domain/profile"
-import { describeRoute, validator } from "../../libs/hono-openapi"
+import { getProfile, getProfileList } from "../../../domain/profile"
+import { describeRoute, validator } from "../../../libs/hono-openapi"
 import {
 	GetProfileParamSchema,
 	ProfileListSchema,
 	ProfileSchema,
-} from "../../schema/profile"
+} from "../../../schema/profile"
 
 export const profileRouter = new Hono()
 	.get(

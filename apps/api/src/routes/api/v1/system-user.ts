@@ -1,11 +1,11 @@
 import { Hono } from "hono"
-import { getSystemUser, getSystemUserList } from "../../domain/system-user"
-import { describeRoute, validator } from "../../libs/hono-openapi"
+import { getSystemUser, getSystemUserList } from "../../../domain/system-user"
+import { describeRoute, validator } from "../../../libs/hono-openapi"
 import {
 	GetSystemUserParamSchema,
 	SystemUserListSchema,
 	SystemUserSchema,
-} from "../../schema/system-user"
+} from "../../../schema/system-user"
 
 export const systemUserRouter = new Hono()
 	.get(
