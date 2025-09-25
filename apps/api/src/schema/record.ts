@@ -28,7 +28,7 @@ const GroupByQuerySchema = StringToArraySchema().openapi({
 export const GetRecordListQuerySchema = z.object({
 	// TODO: パラメータで受け取るべきか、URLディレクトリで表現すべきかを検討する
 	entity_name: z.string().openapi({
-		description: "検索対象のエンティティ名",
+		description: "レコード検索対象のエンティティ名",
 		examples: ["account", "lead"],
 	}),
 	// TODO: 参照先オブジェクトのフィールドを取得可能な形式を検討する
@@ -54,7 +54,7 @@ export const GetRecordListResponseSchema = z.object({
 
 export const PostRecordParamSchema = z.object({
 	entity_name: z.string().openapi({
-		description: "作成対象のエンティティ名",
+		description: "レコード作成対象のエンティティ名",
 		examples: ["account", "lead"],
 	}),
 })
