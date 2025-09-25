@@ -125,19 +125,14 @@ export async function createTestUser(userData: {
 	}
 
 	// Create user access control to link user with profile
-	await testPrisma.user_access_control
-		.create({
-			data: {
-				user_id: user.id,
-				profile_id: testProfile.id,
-				created_by: user.id,
-				modified_by: user.id,
-			},
-		})
-		.catch((error) => {
-			console.error("Error creating user access control:", error)
-			throw error
-		})
+	await testPrisma.user_access_control.create({
+		data: {
+			user_id: user.id,
+			profile_id: testProfile.id,
+			created_by: user.id,
+			modified_by: user.id,
+		},
+	})
 
 	return user
 }
