@@ -13,15 +13,15 @@ export async function seedUsers(prisma: Prisma.TransactionClient) {
 			})
 			.map(async ({ userName, firstName, lastName }) => {
 				const email = `${userName}@example.com`
-				const hashedPassowrd = await Bun.password.hash(userName)
+				const hashedPassword = await Bun.password.hash(userName)
 				return {
 					user_name: email,
-					hashed_password: hashedPassowrd,
+					hashed_password: hashedPassword,
 					first_name: firstName,
 					last_name: lastName,
 					email,
 					timezone: "Asia/Tokyo",
-					language: "ja",
+					locale: "ja-JP",
 					is_active: getRandomBoolean(0.9),
 				}
 			}),
