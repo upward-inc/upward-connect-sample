@@ -11,9 +11,9 @@ import {
 	validateAuthorizeParams,
 	validateRefreshTokenParams,
 	validateTokenParams,
-} from "../../domain/auth"
-import { env } from "../../env"
-import { describeRoute, validator } from "../../libs/hono-openapi"
+} from "../../../domain/auth"
+import { env } from "../../../env"
+import { describeRoute, validator } from "../../../libs/hono-openapi"
 import {
 	type AuthContexts,
 	GetOAuthClientResultSchema,
@@ -23,7 +23,7 @@ import {
 	PostLoginResultSchema,
 	PostTokenParamSchema,
 	PostTokenResultSchema,
-} from "../../schema/auth"
+} from "../../../schema/auth"
 
 export const authRouter = new Hono<{ Variables: AuthContexts }>()
 	.post(

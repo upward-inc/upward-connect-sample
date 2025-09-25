@@ -364,7 +364,7 @@ model user {
   last_name                                                 String                @db.NVarChar(256)
   email                                                     String?               @db.NVarChar(Max)
   timezone                                                  String?               @db.NVarChar(Max)
-  language                                                  String?               @db.NVarChar(Max)
+  locale                                                    String?               @db.NVarChar(Max) @map("language")
   is_active                                                 Boolean               @default(false, map: "DF__user__is_active__4A6E022D")
   created_at                                                DateTime              @default(dbgenerated("getutcdate()"), map: "DF__user__created_at__4B622666") @db.DateTime
   modified_at                                               DateTime              @default(dbgenerated("getutcdate()"), map: "DF__user__modified_a__4C564A9F") @db.DateTime
@@ -434,7 +434,7 @@ view user_view {
   last_name       String   @db.NVarChar(256)
   email           String?  @db.NVarChar(Max)
   timezone        String?  @db.NVarChar(Max)
-  language        String?  @db.NVarChar(Max)
+  locale          String?  @db.NVarChar(Max) @map("language")
   is_active       Boolean
   created_at      DateTime @db.DateTime
   modified_at     DateTime @db.DateTime

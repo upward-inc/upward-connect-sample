@@ -28,9 +28,9 @@ export const SystemUserSchema = z
 			description: "タイムゾーン",
 			example: "Asia/Tokyo",
 		}),
-		language: z.string().openapi({
-			description: "言語",
-			example: "ja",
+		locale: z.string().openapi({
+			description: "ロケール",
+			example: "ja-JP",
 		}),
 		profile_name: z.string().openapi({
 			description: "プロファイル名",
