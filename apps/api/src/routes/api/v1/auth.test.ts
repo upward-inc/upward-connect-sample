@@ -1,15 +1,15 @@
 import { type JwtPayload, sign, verify } from "jsonwebtoken"
 import { afterAll, beforeAll, describe, expect, it } from "vitest"
-import { env } from "../../env"
-import { app } from "../../index"
+import { env } from "../../../env"
+import { app } from "../../../index"
 import {
 	createExpiredRefreshToken,
 	createExpiredToken,
 	createRefreshToken,
 	createTestOAuthClient,
 	createValidToken,
-} from "../../test/utils/auth"
-import { cleanupTestData, createTestUser } from "../../test/utils/common"
+} from "../../../test/utils/auth"
+import { cleanupTestData, createTestUser } from "../../../test/utils/common"
 
 describe("Auth Tests", () => {
 	const tokenSecret = env.OIDC_TOKEN_SECRET

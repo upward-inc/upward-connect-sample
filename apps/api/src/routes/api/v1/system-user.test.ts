@@ -1,8 +1,8 @@
 import { afterAll, beforeAll, describe, expect, it } from "vitest"
-import { app } from "../.."
-import type { SystemUser } from "../../schema/system-user"
-import { createValidToken } from "../../test/utils/auth"
-import { cleanupTestData, createTestUser } from "../../test/utils/common"
+import { app } from "../../.."
+import type { SystemUser } from "../../../schema/system-user"
+import { createValidToken } from "../../../test/utils/auth"
+import { cleanupTestData, createTestUser } from "../../../test/utils/common"
 
 describe("System User Tests", () => {
 	beforeAll(async () => {

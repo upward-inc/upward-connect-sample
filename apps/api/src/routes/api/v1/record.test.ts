@@ -1,13 +1,13 @@
 import type { user } from "@prisma/client"
 import { afterAll, beforeAll, describe, expect, it } from "vitest"
-import { seedEntities } from "../../../seed/entity"
-import { seedEntityItems } from "../../../seed/entity-item"
-import { seedEntityItemOptions } from "../../../seed/entity-item-option"
-import { app } from "../../index"
-import { testPrisma } from "../../test/setup"
-import { createValidToken } from "../../test/utils/auth"
-import { cleanupTestData, createTestUser } from "../../test/utils/common"
-import { createTestAccount, createTestLead } from "../../test/utils/record"
+import { seedEntities } from "../../../../seed/entity"
+import { seedEntityItems } from "../../../../seed/entity-item"
+import { seedEntityItemOptions } from "../../../../seed/entity-item-option"
+import { app } from "../../../index"
+import { testPrisma } from "../../../test/setup"
+import { createValidToken } from "../../../test/utils/auth"
+import { cleanupTestData, createTestUser } from "../../../test/utils/common"
+import { createTestAccount, createTestLead } from "../../../test/utils/record"
 
 describe("Record Tests", () => {
 	let testLead: { id: string }
