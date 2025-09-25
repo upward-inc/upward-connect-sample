@@ -1,11 +1,8 @@
 import { afterAll, beforeAll, describe, expect, it } from "vitest"
 import { app } from "../.."
 import type { SystemUser } from "../../schema/system-user"
-import { createValidToken } from "../../test/integration-utils/auth"
-import {
-	cleanupTestData,
-	createIntegrationTestUser,
-} from "../../test/integration-utils/common"
+import { createValidToken } from "../../test/utils/auth"
+import { cleanupTestData, createTestUser } from "../../test/utils/common"
 
 describe("System User Tests", () => {
 	beforeAll(async () => {
@@ -21,7 +18,7 @@ describe("System User Tests", () => {
 	describe("GET /api/system-users", () => {
 		it("should fetch system user list successfully", async () => {
 			// Create a test user with profile and access control
-			const testUser = await createIntegrationTestUser({
+			const testUser = await createTestUser({
 				user_name: "system_user_test",
 				first_name: "System",
 				last_name: "UserTest",

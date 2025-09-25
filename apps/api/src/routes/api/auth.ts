@@ -16,12 +16,11 @@ import { env } from "../../env"
 import { describeRoute, validator } from "../../libs/hono-openapi"
 import {
 	type AuthContexts,
+	GetOAuthClientResultSchema,
 	PostAuthorizeParamSchema,
 	PostAuthorizeResultSchema,
 	PostLoginParamSchema,
 	PostLoginResultSchema,
-	GetOAuthClientResultSchema,
-	GetUserInfoResultSchema,
 	PostTokenParamSchema,
 	PostTokenResultSchema,
 } from "../../schema/auth"
@@ -102,7 +101,7 @@ export const authRouter = new Hono<{ Variables: AuthContexts }>()
 				redirect_uri: validateResult.redirect_uri,
 				scope: validateResult.scope ?? null,
 				state: params.state ?? null,
-				nonce: null, // TODO nonceの実装
+				nonce: validateResult.nonce ?? null,
 				published_at: new Date(),
 				expire_at: new Date(
 					Date.now() + 1000 * 60 * env.OAUTH2_AUTH_CODE_EXPIRES_IN_MINUTE,
@@ -139,7 +138,7 @@ export const authRouter = new Hono<{ Variables: AuthContexts }>()
 						400,
 					)
 				}
-				const { user_id, user_name } = validateResult
+				const { user_id, user_name, nonce } = validateResult
 
 				// 認可コードを使用済みにする（データベースから削除する）
 				await deleteAuthorizationCode(params.code)
@@ -148,6 +147,7 @@ export const authRouter = new Hono<{ Variables: AuthContexts }>()
 				const { accessToken, idToken } = generateToken({
 					userId: user_id,
 					userName: user_name,
+					nonce: nonce,
 				})
 
 				// リフレッシュトークンを生成
@@ -179,8 +179,8 @@ export const authRouter = new Hono<{ Variables: AuthContexts }>()
 				}
 				const { user_id, user_name } = validateResult
 
-				// アクセストークン、IDトークンを生成
-				const { accessToken, idToken } = generateToken({
+				// アクセストークンを生成
+				const { accessToken } = generateToken({
 					userId: user_id,
 					userName: user_name,
 				})
@@ -190,48 +190,41 @@ export const authRouter = new Hono<{ Variables: AuthContexts }>()
 					userId: user_id,
 				})
 
+				// `Upon successful validation of the Refresh Token, the response body is the Token Response of Section 3.1.3.3 except that it might not contain an id_token.`
+				// see: [Successful Refresh Response](https://openid.net/specs/openid-connect-core-1_0.html#RefreshTokenResponse)
 				return c.json({
 					token_type: "Bearer",
 					access_token: accessToken,
-					id_token: idToken,
 					refresh_token: refreshToken,
 					expires_in: env.OIDC_TOKEN_EXPIRES_IN_MINUTE * 60,
 				})
 			}
 		},
 	)
-	.get(
-		"/userinfo",
-		describeRoute({
-			description:
-				"OIDC1.0準拠のuserinfoエンドポイント、ユーザー情報を返却する",
-			schema: GetUserInfoResultSchema,
-		}),
-		async (c) => {
-			const user = c.get("user")
+	.get("/userinfo", async (c) => {
+		const user = c.get("user")
 
-			const loggedInUser = await getUserById(user.id)
+		const loggedInUser = await getUserById(user.id)
 
-			if (!loggedInUser) {
-				return c.json(
-					{
-						error: "User not found",
-						error_description:
-							"The user associated with the provided token does not exist.",
-					},
-					404,
-				)
-			}
+		if (!loggedInUser) {
+			return c.json(
+				{
+					error: "User not found",
+					error_description:
+						"The user associated with the provided token does not exist.",
+				},
+				404,
+			)
+		}
 
-			return c.json({
-				sub: loggedInUser.id,
-				name: `${loggedInUser.last_name} ${loggedInUser.first_name}`,
-				given_name: loggedInUser.first_name,
-				family_name: loggedInUser.last_name,
-				email: loggedInUser.email,
-			})
-		},
-	)
+		return c.json({
+			sub: loggedInUser.id,
+			name: `${loggedInUser.last_name} ${loggedInUser.first_name}`,
+			given_name: loggedInUser.first_name,
+			family_name: loggedInUser.last_name,
+			email: loggedInUser.email,
+		})
+	})
 // .get("/.well-known/openid-configuration", async (c) => {
 // 	// OpenID Connect Discoveryドキュメントを返す
 // 	// https://openid.net/specs/openid-connect-discovery-1_0.html

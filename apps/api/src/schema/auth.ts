@@ -107,6 +107,7 @@ export const PostAuthorizeParamSchema = z.object({
 	redirect_uri: z.string().url(),
 	scope: z.string().optional(),
 	state: z.string().optional(),
+	nonce: z.string().optional(),
 })
 
 export const PostAuthorizeResultSchema = z.object({
@@ -143,7 +144,7 @@ export const PostTokenResultSchema = z.object({
 		description: "アクセストークン",
 		example: "sample_access_token",
 	}),
-	id_token: z.string().min(1).openapi({
+	id_token: z.string().min(1).optional().openapi({
 		description: "IDトークン",
 		example: "sample_id_token",
 	}),

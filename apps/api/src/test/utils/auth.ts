@@ -1,6 +1,6 @@
 import { sign } from "jsonwebtoken"
 import type * as ms from "ms"
-import { testPrisma } from "../integration-setup"
+import { testPrisma } from "../setup"
 
 function createToken(userId: string, expiresIn?: ms.StringValue) {
 	const secret = process.env.OIDC_TOKEN_SECRET
@@ -28,29 +28,24 @@ export function createExpiredToken(userId: string) {
 }
 
 /**
- * Create a test OAuth client for integration tests
+ * Create a test OAuth client for tests
  */
-export async function createIntegrationTestOAuthClient(clientData: {
+export async function createTestOAuthClient(clientData: {
 	name: string
 	secret: string
 	redirect_uris: string
 	scopes: string
 }) {
-	try {
-		const client = await testPrisma.oauth_client.create({
-			data: {
-				name: `test_${clientData.name}`,
-				secret: clientData.secret,
-				redirect_uris: clientData.redirect_uris,
-				scopes: clientData.scopes,
-			},
-		})
+	const client = await testPrisma.oauth_client.create({
+		data: {
+			name: `test_${clientData.name}`,
+			secret: clientData.secret,
+			redirect_uris: clientData.redirect_uris,
+			scopes: clientData.scopes,
+		},
+	})
 
-		return client
-	} catch (error) {
-		console.error("Error creating test OAuth client:", error)
-		throw error
-	}
+	return client
 }
 
 /**
