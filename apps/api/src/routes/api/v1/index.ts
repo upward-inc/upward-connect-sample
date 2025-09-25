@@ -38,7 +38,7 @@ v1Router
 		openAPISpecs(v1Router, {
 			documentation: {
 				info: {
-					title: "Sample API",
+					title: "Custom API for UPWARD CONNECT",
 					version: version,
 					description: "",
 				},
@@ -56,7 +56,7 @@ v1Router
 		"/docs",
 		Scalar({
 			theme: "saturn",
-			pageTitle: "Sample API Reference",
+			pageTitle: "API Doc | Custom API for UPWARD CONNECT",
 			spec: { url: `/api/${version}/openapi` },
 		}),
 	)
