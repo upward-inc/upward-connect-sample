@@ -183,8 +183,8 @@ export async function seedEntityItems(prisma: Prisma.TransactionClient) {
 			type: "text",
 		},
 		{
-			name: "language",
-			display_name: "言語",
+			name: "locale",
+			display_name: "ロケール",
 			type: "text",
 		},
 		{

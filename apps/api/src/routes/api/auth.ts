@@ -14,35 +14,48 @@ import {
 	validateTokenParams,
 } from "../../domain/auth"
 import { env } from "../../env"
-import { validator } from "../../libs/hono-openapi"
+import { describeRoute, validator } from "../../libs/hono-openapi"
 import {
 	type AuthContexts,
+	GetOAuthClientResultSchema,
 	PostAuthorizeParamSchema,
+	PostAuthorizeResultSchema,
 	PostLoginParamSchema,
-	TokenRequestSchema,
+	PostLoginResultSchema,
+	PostTokenParamSchema,
+	PostTokenResultSchema,
 } from "../../schema/auth"
 
 export const authRouter = new Hono<{ Variables: AuthContexts }>()
-	.post("/login", validator("form", PostLoginParamSchema), async (c) => {
-		const { username, password } = c.req.valid("form")
+	.post(
+		"/login",
+		describeRoute({
+			description:
+				"ユーザー名 + パスワードでユーザー認証を行う（アクセストークンを返却する）",
+			schema: PostLoginResultSchema,
+		}),
+		validator("form", PostLoginParamSchema),
+		async (c) => {
+			const { username, password } = c.req.valid("form")
 
-		const user = await getUserByUsernameAndPassword(username, password)
-		if (!user) {
-			return c.json({ message: "Invalid username or password" }, 401)
-		}
+			const user = await getUserByUsernameAndPassword(username, password)
+			if (!user) {
+				return c.json({ message: "Invalid username or password" }, 401)
+			}
 
-		const client = await getFirstOAuthClientByName(env.OIDC_CLIENT_NAME)
-		if (!client) {
-			throw new Error("no default oauth2 client")
-		}
+			const client = await getFirstOAuthClientByName(env.OIDC_CLIENT_NAME)
+			if (!client) {
+				throw new Error("no default oauth2 client")
+			}
 
-		const { accessToken } = generateToken({
-			userId: user.id,
-			userName: user.user_name,
-			clientId: client.id,
-		})
-		return c.json({ ...user, access_token: accessToken })
-	})
+			const { accessToken } = generateToken({
+				userId: user.id,
+				userName: user.user_name,
+				clientId: client.id,
+			})
+			return c.json({ ...user, access_token: accessToken })
+		},
+	)
 	.get("/clients/:id", async (c) => {
 		const clientId = c.req.param("id")
 
@@ -56,6 +69,10 @@ export const authRouter = new Hono<{ Variables: AuthContexts }>()
 	})
 	.post(
 		"/authorize",
+		describeRoute({
+			description: "OAuth2.0準拠の認可エンドポイント、認可コードを返却する",
+			schema: PostAuthorizeResultSchema,
+		}),
 		validator("form", PostAuthorizeParamSchema),
 		async (c) => {
 			const user = c.get("user")
@@ -69,7 +86,7 @@ export const authRouter = new Hono<{ Variables: AuthContexts }>()
 					{
 						error: validateResult.error,
 						error_description: validateResult.error_description,
-						state: params.state ?? null,
+						state: params.state,
 					},
 					400,
 				)
@@ -83,7 +100,7 @@ export const authRouter = new Hono<{ Variables: AuthContexts }>()
 				client_secret: validateResult.client_secret,
 				redirect_uri: validateResult.redirect_uri,
 				scope: validateResult.scope ?? null,
-				state: validateResult.state ?? null,
+				state: params.state ?? null,
 				nonce: validateResult.nonce ?? null,
 				published_at: new Date(),
 				expire_at: new Date(
@@ -93,92 +110,101 @@ export const authRouter = new Hono<{ Variables: AuthContexts }>()
 
 			return c.json({
 				code: authorizationCode,
-				state: validateResult.state ?? null,
+				state: params.state,
 			})
 		},
 	)
-	.post("/token", validator("form", TokenRequestSchema), async (c) => {
-		const params = c.req.valid("form")
+	.post(
+		"/token",
+		describeRoute({
+			description:
+				"OAuth2.0/OIDC1.0準拠のトークンエンドポイント、認可コードをアクセストークン/リフレッシュトークン/IDトークンと交換する",
+			schema: PostTokenResultSchema,
+		}),
+		validator("form", PostTokenParamSchema),
+		async (c) => {
+			const params = c.req.valid("form")
 
-		if (params.grant_type === "authorization_code") {
-			// パラメータの検証
-			const validateResult = await validateTokenParams(params)
+			if (params.grant_type === "authorization_code") {
+				// パラメータの検証
+				const validateResult = await validateTokenParams(params)
 
-			if (!validateResult.success) {
-				return c.json(
-					{
-						error: "invalid_grant",
-						error_description: validateResult.error_message,
-					},
-					400,
-				)
+				if (!validateResult.success) {
+					return c.json(
+						{
+							error: "invalid_grant",
+							error_description: validateResult.error_message,
+						},
+						400,
+					)
+				}
+				const { user_id, user_name, client_id, nonce } = validateResult
+
+				// 認可コードを使用済みにする（データベースから削除する）
+				await deleteAuthorizationCode(params.code)
+
+				// アクセストークン、IDトークンを生成
+				const { accessToken, idToken } = generateToken({
+					userId: user_id,
+					userName: user_name,
+					clientId: client_id,
+					nonce: nonce,
+				})
+
+				// リフレッシュトークンを生成
+				const { refreshToken } = generateRefreshToken({
+					userId: user_id,
+					clientId: client_id,
+				})
+
+				return c.json({
+					token_type: "Bearer",
+					access_token: accessToken,
+					id_token: idToken,
+					refresh_token: refreshToken,
+					expires_in: env.OIDC_TOKEN_EXPIRES_IN_MINUTE * 60,
+				})
 			}
-			const { user_id, user_name, client_id, nonce } = validateResult
 
-			// 認可コードを使用済みにする（データベースから削除する）
-			await deleteAuthorizationCode(params.code)
+			if (params.grant_type === "refresh_token") {
+				// リフレッシュトークンパラメータの検証
+				const validateResult = await validateRefreshTokenParams(params)
 
-			// アクセストークン、IDトークンを生成
-			const { accessToken, idToken } = generateToken({
-				userId: user_id,
-				userName: user_name,
-				clientId: client_id,
-				nonce: nonce,
-			})
+				if (!validateResult.success) {
+					return c.json(
+						{
+							error: "invalid_grant",
+							error_description: validateResult.error_message,
+						},
+						400,
+					)
+				}
+				const { user_id, user_name, client_id } = validateResult
 
-			// リフレッシュトークンを生成
-			const { refreshToken } = generateRefreshToken({
-				userId: user_id,
-				clientId: client_id,
-			})
+				// アクセストークンを生成
+				const { accessToken } = generateToken({
+					userId: user_id,
+					userName: user_name,
+					clientId: client_id,
+				})
 
-			return c.json({
-				token_type: "Bearer",
-				access_token: accessToken,
-				id_token: idToken,
-				refresh_token: refreshToken,
-				expires_in: env.OIDC_TOKEN_EXPIRES_IN_MINUTE * 60,
-			})
-		}
+				// リフレッシュトークンを生成
+				const { refreshToken } = generateRefreshToken({
+					userId: user_id,
+					clientId: client_id,
+				})
 
-		if (params.grant_type === "refresh_token") {
-			// リフレッシュトークンパラメータの検証
-			const validateResult = await validateRefreshTokenParams(params)
-
-			if (!validateResult.success) {
-				return c.json(
-					{
-						error: "invalid_grant",
-						error_description: validateResult.error_message,
-					},
-					400,
-				)
+				// `Upon successful validation of the Refresh Token, the response body is the Token Response of Section 3.1.3.3 except that it might not contain an id_token.`
+				// see: [Successful Refresh Response](https://openid.net/specs/openid-connect-core-1_0.html#RefreshTokenResponse)
+				return c.json({
+					token_type: "Bearer",
+					access_token: accessToken,
+					refresh_token: refreshToken,
+					expires_in: env.OIDC_TOKEN_EXPIRES_IN_MINUTE * 60,
+				})
 			}
-			const { user_id, user_name, client_id } = validateResult
-
-			// アクセストークンを生成
-			const { accessToken } = generateToken({
-				userId: user_id,
-				userName: user_name,
-				clientId: client_id,
-			})
-
-			// リフレッシュトークンを生成
-			const { refreshToken } = generateRefreshToken({
-				userId: user_id,
-				clientId: client_id,
-			})
-
-			// `Upon successful validation of the Refresh Token, the response body is the Token Response of Section 3.1.3.3 except that it might not contain an id_token.`
-			// see: [Successful Refresh Response](https://openid.net/specs/openid-connect-core-1_0.html#RefreshTokenResponse)
-			return c.json({
-				token_type: "Bearer",
-				access_token: accessToken,
-				refresh_token: refreshToken,
-				expires_in: env.OIDC_TOKEN_EXPIRES_IN_MINUTE * 60,
-			})
-		}
-	})
+		},
+	)
 	.get("/userinfo", async (c) => {
 		const user = c.get("user")
 
@@ -197,7 +223,7 @@ export const authRouter = new Hono<{ Variables: AuthContexts }>()
 
 		return c.json({
 			sub: loggedInUser.id,
-			name: loggedInUser.user_name,
+			name: `${loggedInUser.last_name} ${loggedInUser.first_name}`,
 			given_name: loggedInUser.first_name,
 			family_name: loggedInUser.last_name,
 			email: loggedInUser.email,
