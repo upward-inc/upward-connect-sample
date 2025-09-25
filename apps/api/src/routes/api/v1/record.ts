@@ -1,15 +1,15 @@
 import { Hono } from "hono"
-import { getRecordList } from "../../domain/record"
-import { createRecord } from "../../domain/record/create-record"
-import { validateCreateRecordParams } from "../../domain/record/validate-create-record-params"
-import { describeRoute, validator } from "../../libs/hono-openapi"
-import type { AuthContexts } from "../../schema/auth"
+import { getRecordList } from "../../../domain/record"
+import { createRecord } from "../../../domain/record/create-record"
+import { validateCreateRecordParams } from "../../../domain/record/validate-create-record-params"
+import { describeRoute, validator } from "../../../libs/hono-openapi"
+import type { AuthContexts } from "../../../schema/auth"
 import {
 	GetRecordListQuerySchema,
 	GetRecordListResponseSchema,
 	PostRecordBodySchema,
 	PostRecordResponseSchema,
-} from "../../schema/record"
+} from "../../../schema/record"
 
 export const recordRouter = new Hono<{ Variables: AuthContexts }>()
 	.get(
