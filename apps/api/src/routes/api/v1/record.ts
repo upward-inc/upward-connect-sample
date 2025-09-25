@@ -8,6 +8,7 @@ import {
 	GetRecordListQuerySchema,
 	GetRecordListResponseSchema,
 	PostRecordBodySchema,
+	PostRecordParamSchema,
 	PostRecordResponseSchema,
 } from "../../../schema/record"
 
@@ -32,14 +33,16 @@ export const recordRouter = new Hono<{ Variables: AuthContexts }>()
 		},
 	)
 	.post(
-		"/",
+		"/:entity_name",
 		describeRoute({
 			description: "レコードを作成する",
 			schema: PostRecordResponseSchema,
 		}),
+		validator("param", PostRecordParamSchema),
 		validator("json", PostRecordBodySchema),
 		async (c) => {
-			const { entity_name, data } = c.req.valid("json")
+			const { entity_name } = c.req.valid("param")
+			const data = c.req.valid("json")
 
 			const user = c.get("user")
 
