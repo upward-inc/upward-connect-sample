@@ -12,18 +12,19 @@ import { recordRouter } from "./record"
 import { roleRouter } from "./role"
 import { systemUserRouter } from "./system-user"
 
-const apiRouter = new Hono<{ Variables: AuthContexts }>()
+const v1Router = new Hono<{ Variables: AuthContexts }>()
+const version = "v1" as const
 
-apiRouter
+v1Router
 	.use("/*", cors())
 	// bearer auth
 	.use("/*", async (c, next) => {
 		const normalizedPath = c.req.path.replace(/\/$/, "")
 		const publicPaths = [
-			"/api/openapi",
-			"/api/docs",
-			"/api/oauth2/login",
-			"/api/oauth2/token",
+			`/api/${version}/openapi`,
+			`/api/${version}/docs`,
+			`/api/${version}/oauth2/login`,
+			`/api/${version}/oauth2/token`,
 		]
 
 		if (publicPaths.includes(normalizedPath)) {
@@ -34,11 +35,11 @@ apiRouter
 	// generate OpenAPI specification
 	.get(
 		"/openapi",
-		openAPISpecs(apiRouter, {
+		openAPISpecs(v1Router, {
 			documentation: {
 				info: {
 					title: "Sample API",
-					version: "",
+					version: version,
 					description: "",
 				},
 				servers: [
@@ -56,7 +57,7 @@ apiRouter
 		Scalar({
 			theme: "saturn",
 			pageTitle: "Sample API Reference",
-			spec: { url: "/api/openapi" },
+			spec: { url: `/api/${version}/openapi` },
 		}),
 	)
 	.route("/oauth2", authRouter)
@@ -67,4 +68,4 @@ apiRouter
 	.route("/records", recordRouter)
 	.route("/files", fileRouter)
 
-export { apiRouter }
+export { v1Router }

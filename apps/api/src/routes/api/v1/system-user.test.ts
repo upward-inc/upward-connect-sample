@@ -15,7 +15,7 @@ describe("System User Tests", () => {
 		await cleanupTestData()
 	})
 
-	describe("GET /api/system-users", () => {
+	describe("GET /api/v1/system-users", () => {
 		it("should fetch system user list successfully", async () => {
 			// Create a test user with profile and access control
 			const testUser = await createTestUser({
@@ -26,7 +26,7 @@ describe("System User Tests", () => {
 			})
 
 			const token = createValidToken(testUser.id)
-			const response = await app.request("/api/system-users", {
+			const response = await app.request("/api/v1/system-users", {
 				method: "GET",
 				headers: {
 					Authorization: `Bearer ${token}`,
