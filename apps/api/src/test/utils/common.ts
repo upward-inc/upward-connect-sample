@@ -63,6 +63,22 @@ export async function cleanupTestData() {
 		},
 	})
 
+	// Clean up record data
+	await testPrisma.lead.deleteMany({
+		where: {
+			company: {
+				contains: "Test Company",
+			},
+		},
+	})
+	await testPrisma.account.deleteMany({
+		where: {
+			name: {
+				contains: "Test Account",
+			},
+		},
+	})
+
 	await testPrisma.user.deleteMany({
 		where: {
 			user_name: {
