@@ -1,7 +1,8 @@
 name: Feature development
 description: 機能開発用テンプレート
 title: "[Feature]: "
-labels: []
+labels: ["draft"]
+type: "Feature"
 body:
   - type: textarea
     id: description

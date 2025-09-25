@@ -1,7 +1,8 @@
 name: Bugfix
 description: 不具合修正用テンプレート
 title: "[Bug]: "
-labels: ["bug"]
+labels: ["draft"]
+type: "Bug"
 body:
   - type: textarea
     id: what-happened
