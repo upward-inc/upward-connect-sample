@@ -4,7 +4,6 @@ import {
 	deleteAuthorizationCode,
 	generateRefreshToken,
 	generateToken,
-	getFirstOAuthClientByName,
 	getOAuthClientById,
 	getUserById,
 	getUserByUsernameAndPassword,
@@ -17,7 +16,6 @@ import { env } from "../../../env"
 import { describeRoute, validator } from "../../../libs/hono-openapi"
 import {
 	type AuthContexts,
-	GetOAuthClientResultSchema,
 	PostAuthorizeParamSchema,
 	PostAuthorizeResultSchema,
 	PostLoginParamSchema,
@@ -43,15 +41,9 @@ export const authRouter = new Hono<{ Variables: AuthContexts }>()
 				return c.json({ message: "Invalid username or password" }, 401)
 			}
 
-			const client = await getFirstOAuthClientByName(env.OIDC_CLIENT_NAME)
-			if (!client) {
-				throw new Error("no default oauth2 client")
-			}
-
 			const { accessToken } = generateToken({
 				userId: user.id,
 				userName: user.user_name,
-				clientId: client.id,
 			})
 			return c.json({ ...user, access_token: accessToken })
 		},

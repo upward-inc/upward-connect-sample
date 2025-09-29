@@ -7,7 +7,7 @@ import { env } from "../../env"
 export const generateToken = (payload: {
 	userId: string
 	userName: string
-	clientId: string
+	clientId?: string
 	nonce?: string
 }) => {
 	const accessToken = sign({}, env.OIDC_TOKEN_SECRET, {
@@ -41,7 +41,7 @@ export const generateToken = (payload: {
  */
 export const generateRefreshToken = (payload: {
 	userId: string
-	clientId: string
+	clientId?: string
 }) => {
 	const refreshToken = sign({}, env.OIDC_REFRESH_TOKEN_SECRET, {
 		algorithm: "HS256",
