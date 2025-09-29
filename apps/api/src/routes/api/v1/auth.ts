@@ -5,10 +5,10 @@ import {
 	generateAccessToken,
 	generateIdToken,
 	generateRefreshToken,
+	getActiveUserById,
+	getActiveUserByUsernameAndPassword,
 	getAuthorizationCode,
 	getOAuthClientById,
-	getUserById,
-	getUserByUsernameAndPassword,
 	saveAuthorizationCode,
 	validateAuthorizeParams,
 	validateRefreshTokenParams,
@@ -40,7 +40,7 @@ export const authRouter = new Hono<{ Variables: AuthContexts }>()
 		async (c) => {
 			const { username, password } = c.req.valid("form")
 
-			const user = await getUserByUsernameAndPassword(username, password)
+			const user = await getActiveUserByUsernameAndPassword(username, password)
 			if (!user) {
 				return c.json({ message: "Invalid username or password" }, 401)
 			}
@@ -152,7 +152,7 @@ export const authRouter = new Hono<{ Variables: AuthContexts }>()
 				await deleteAuthorizationCode(publishedAuthCode.auth_code)
 
 				// ユーザーの存在確認
-				const user = await getUserById(publishedAuthCode.user_id)
+				const user = await getActiveUserById(publishedAuthCode.user_id)
 				if (!user) {
 					return c.json(
 						{
@@ -262,7 +262,7 @@ export const authRouter = new Hono<{ Variables: AuthContexts }>()
 		async (c) => {
 			const user = c.get("user")
 
-			const loggedInUser = await getUserById(user.id)
+			const loggedInUser = await getActiveUserById(user.id)
 
 			if (!loggedInUser) {
 				return c.json(

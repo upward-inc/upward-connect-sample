@@ -2,14 +2,15 @@ import { prisma } from "../../libs/prisma"
 import { type LoggedInUser, LoggedInUserSchema } from "../../schema/auth"
 
 /**
- * IDでユーザーを取得する
+ * IDでアクティブなユーザーを取得する
  */
-export const getUserById = async (
+export const getActiveUserById = async (
 	userId: string,
 ): Promise<LoggedInUser | null> => {
 	const user = await prisma.user.findUnique({
 		where: {
 			id: userId,
+			is_active: true,
 		},
 		select: {
 			id: true,
@@ -31,15 +32,16 @@ export const getUserById = async (
 }
 
 /**
- * ユーザー名とパスワードでユーザーを取得する
+ * ユーザー名とパスワードでアクティブなユーザーを取得する
  */
-export const getUserByUsernameAndPassword = async (
+export const getActiveUserByUsernameAndPassword = async (
 	username: string,
 	password: string,
 ): Promise<LoggedInUser | null> => {
 	const user = await prisma.user.findUnique({
 		where: {
 			user_name: username,
+			is_active: true,
 		},
 		select: {
 			id: true,
