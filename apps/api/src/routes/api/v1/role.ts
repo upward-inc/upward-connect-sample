@@ -1,11 +1,11 @@
 import { Hono } from "hono"
-import { getRole, getRoleList } from "../../domain/role"
-import { describeRoute, validator } from "../../libs/hono-openapi"
+import { getRole, getRoleList } from "../../../domain/role"
+import { describeRoute, validator } from "../../../libs/hono-openapi"
 import {
 	GetRoleParamSchema,
 	RoleListSchema,
 	RoleSchema,
-} from "../../schema/role"
+} from "../../../schema/role"
 
 export const roleRouter = new Hono()
 	.get(

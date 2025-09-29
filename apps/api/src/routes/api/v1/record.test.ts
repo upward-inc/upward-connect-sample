@@ -1,13 +1,13 @@
 import type { user } from "@prisma/client"
 import { afterAll, beforeAll, describe, expect, it } from "vitest"
-import { seedEntities } from "../../../seed/entity"
-import { seedEntityItems } from "../../../seed/entity-item"
-import { seedEntityItemOptions } from "../../../seed/entity-item-option"
-import { app } from "../../index"
-import { testPrisma } from "../../test/setup"
-import { createValidToken } from "../../test/utils/auth"
-import { cleanupTestData, createTestUser } from "../../test/utils/common"
-import { createTestAccount, createTestLead } from "../../test/utils/record"
+import { seedEntities } from "../../../../seed/entity"
+import { seedEntityItems } from "../../../../seed/entity-item"
+import { seedEntityItemOptions } from "../../../../seed/entity-item-option"
+import { app } from "../../../index"
+import { testPrisma } from "../../../test/setup"
+import { createValidToken } from "../../../test/utils/auth"
+import { cleanupTestData, createTestUser } from "../../../test/utils/common"
+import { createTestAccount, createTestLead } from "../../../test/utils/record"
 
 describe("Record Tests", () => {
 	let testLead: { id: string }
@@ -69,7 +69,7 @@ describe("Record Tests", () => {
 		await testPrisma.entity.deleteMany()
 	}
 
-	describe("POST /api/records - Create Record", () => {
+	describe("POST /api/v1/records - Create Record", () => {
 		it("should create a record with only required fields", async () => {
 			const testUser = await createTestUser({
 				user_name: "only_required_user",
@@ -79,17 +79,14 @@ describe("Record Tests", () => {
 			})
 			const token = createValidToken(testUser.id)
 
-			const response = await app.request("/api/records", {
+			const response = await app.request("/api/v1/records/account", {
 				method: "POST",
 				headers: {
 					"Content-Type": "application/json",
 					Authorization: `Bearer ${token}`,
 				},
 				body: JSON.stringify({
-					entity_name: "account",
-					data: {
-						name: "Test Account with Required Fields",
-					},
+					name: "Test Account with Required Fields",
 				}),
 			})
 
@@ -151,34 +148,31 @@ describe("Record Tests", () => {
 			})
 			const token = createValidToken(testUser.id)
 
-			const response = await app.request("/api/records", {
+			const response = await app.request("/api/v1/records/account", {
 				method: "POST",
 				headers: {
 					"Content-Type": "application/json",
 					Authorization: `Bearer ${token}`,
 				},
 				body: JSON.stringify({
-					entity_name: "account",
-					data: {
-						name: "Test Account with All Fields",
-						account_number: "ABCD-1234",
-						main_phone_number: "03-1234-5678",
-						sub_phone_number: "03-9876-5432",
-						website: "https://www.example.com",
-						industry: "it",
-						number_of_employees: 100,
-						revenue: 9999999,
-						address_zipcode: "123-4567",
-						address_prefecture: "東京都",
-						address_municipality: "新宿区",
-						address_street: "西新宿2-8-1",
-						latitude: 35.6895,
-						longitude: 139.6917,
-						market_cap: 1000000000,
-						description: "This is a test account created during testing.",
-						originating_lead: testLead.id,
-						parent: testAccount.id,
-					},
+					name: "Test Account with All Fields",
+					account_number: "ABCD-1234",
+					main_phone_number: "03-1234-5678",
+					sub_phone_number: "03-9876-5432",
+					website: "https://www.example.com",
+					industry: "it",
+					number_of_employees: 100,
+					revenue: 9999999,
+					address_zipcode: "123-4567",
+					address_prefecture: "東京都",
+					address_municipality: "新宿区",
+					address_street: "西新宿2-8-1",
+					latitude: 35.6895,
+					longitude: 139.6917,
+					market_cap: 1000000000,
+					description: "This is a test account created during testing.",
+					originating_lead: testLead.id,
+					parent: testAccount.id,
 				}),
 			})
 
@@ -246,18 +240,15 @@ describe("Record Tests", () => {
 			})
 			const token = createValidToken(testUser.id)
 
-			const response = await app.request("/api/records", {
+			const response = await app.request("/api/v1/records/account", {
 				method: "POST",
 				headers: {
 					"Content-Type": "application/json",
 					Authorization: `Bearer ${token}`,
 				},
 				body: JSON.stringify({
-					entity_name: "account",
-					data: {
-						id: "some-custom-id",
-						name: "Test Account with ID",
-					},
+					id: "some-custom-id",
+					name: "Test Account with ID",
 				}),
 			})
 
@@ -277,18 +268,15 @@ describe("Record Tests", () => {
 			})
 			const token = createValidToken(testUser.id)
 
-			const response = await app.request("/api/records", {
+			const response = await app.request("/api/v1/records/account", {
 				method: "POST",
 				headers: {
 					"Content-Type": "application/json",
 					Authorization: `Bearer ${token}`,
 				},
 				body: JSON.stringify({
-					entity_name: "account",
-					data: {
-						unknown: "some value",
-						name: "Test Account with ID",
-					},
+					unknown: "some value",
+					name: "Test Account with ID",
 				}),
 			})
 
@@ -298,16 +286,13 @@ describe("Record Tests", () => {
 		})
 
 		it("should return 401 for missing authorization header", async () => {
-			const response = await app.request("/api/records", {
+			const response = await app.request("/api/v1/records/account", {
 				method: "POST",
 				headers: {
 					"Content-Type": "application/json",
 				},
 				body: JSON.stringify({
-					entity_name: "account",
-					data: {
-						name: "Test Account",
-					},
+					name: "Test Account",
 				}),
 			})
 
@@ -327,7 +312,7 @@ describe("Record Tests", () => {
 			})
 			const token = createValidToken(testUser.id)
 
-			const response = await app.request("/api/records", {
+			const response = await app.request("/api/v1/records/account", {
 				method: "POST",
 				headers: {
 					"Content-Type": "application/json",
@@ -343,7 +328,7 @@ describe("Record Tests", () => {
 			})
 		})
 
-		it("should return 400 for missing entity_name", async () => {
+		it("should return 400 for nonexistent entity endpoint", async () => {
 			const testUser = await createTestUser({
 				user_name: "invalid_entity_user",
 				first_name: "Invalid",
@@ -352,27 +337,22 @@ describe("Record Tests", () => {
 			})
 			const token = createValidToken(testUser.id)
 
-			const response = await app.request("/api/records", {
+			const response = await app.request("/api/v1/records/nonexistent_entity", {
 				method: "POST",
 				headers: {
 					"Content-Type": "application/json",
 					Authorization: `Bearer ${token}`,
 				},
 				body: JSON.stringify({
-					data: {
-						name: "Test Account",
-					},
+					name: "Test Account",
 				}),
 			})
 
 			const data = await response.json()
 			expect(response.status).toBe(400)
-			expect(data.success).toBe(false)
-			expect(data.error).toHaveProperty("issues")
-			expect(data.error.issues[0].path).toContainEqual("entity_name")
 		})
 
-		it("should return 400 for missing data field", async () => {
+		it("should return 400 for empty request body", async () => {
 			const testUser = await createTestUser({
 				user_name: "missing_data_user",
 				first_name: "Missing",
@@ -381,22 +361,20 @@ describe("Record Tests", () => {
 			})
 			const token = createValidToken(testUser.id)
 
-			const response = await app.request("/api/records", {
+			const response = await app.request("/api/v1/records/account", {
 				method: "POST",
 				headers: {
 					"Content-Type": "application/json",
 					Authorization: `Bearer ${token}`,
 				},
-				body: JSON.stringify({
-					entity_name: "account",
-				}),
+				body: JSON.stringify({}),
 			})
 
 			const data = await response.json()
 			expect(response.status).toBe(400)
-			expect(data.success).toBe(false)
-			expect(data.error).toHaveProperty("issues")
-			expect(data.error.issues[0].path).toContainEqual("data")
+			expect(data).toEqual({
+				message: "Field 'name' is required for 'account'",
+			})
 		})
 
 		it("should return 400 for nonexistent entity", async () => {
@@ -408,17 +386,14 @@ describe("Record Tests", () => {
 			})
 			const token = createValidToken(testUser.id)
 
-			const response = await app.request("/api/records", {
+			const response = await app.request("/api/v1/records/nonexistent_entity", {
 				method: "POST",
 				headers: {
 					"Content-Type": "application/json",
 					Authorization: `Bearer ${token}`,
 				},
 				body: JSON.stringify({
-					entity_name: "nonexistent_entity",
-					data: {
-						name: "Test",
-					},
+					name: "Test",
 				}),
 			})
 
@@ -438,17 +413,14 @@ describe("Record Tests", () => {
 			})
 			const token = createValidToken(testUser.id)
 
-			const response = await app.request("/api/records", {
+			const response = await app.request("/api/v1/records/account", {
 				method: "POST",
 				headers: {
 					"Content-Type": "application/json",
 					Authorization: `Bearer ${token}`,
 				},
 				body: JSON.stringify({
-					entity_name: "account",
-					data: {
-						// Missing required 'name' field
-					},
+					// Missing required 'name' field
 				}),
 			})
 
@@ -468,18 +440,15 @@ describe("Record Tests", () => {
 			})
 			const token = createValidToken(testUser.id)
 
-			const response = await app.request("/api/records", {
+			const response = await app.request("/api/v1/records/account", {
 				method: "POST",
 				headers: {
 					"Content-Type": "application/json",
 					Authorization: `Bearer ${token}`,
 				},
 				body: JSON.stringify({
-					entity_name: "account",
-					data: {
-						name: "Test Account with Bad Reference",
-						originating_lead: crypto.randomUUID(), // Nonexistent lead ID
-					},
+					name: "Test Account with Bad Reference",
+					originating_lead: crypto.randomUUID(), // Nonexistent lead ID
 				}),
 			})
 
@@ -499,18 +468,15 @@ describe("Record Tests", () => {
 			})
 			const token = createValidToken(testUser.id)
 
-			const response = await app.request("/api/records", {
+			const response = await app.request("/api/v1/records/account", {
 				method: "POST",
 				headers: {
 					"Content-Type": "application/json",
 					Authorization: `Bearer ${token}`,
 				},
 				body: JSON.stringify({
-					entity_name: "account",
-					data: {
-						name: "Test Account with Invalid Option",
-						industry: "nonexistent_option",
-					},
+					name: "Test Account with Invalid Option",
+					industry: "nonexistent_option",
 				}),
 			})
 
@@ -528,18 +494,15 @@ describe("Record Tests", () => {
 			})
 			const token = createValidToken(testUser.id)
 
-			const response = await app.request("/api/records", {
+			const response = await app.request("/api/v1/records/account", {
 				method: "POST",
 				headers: {
 					"Content-Type": "application/json",
 					Authorization: `Bearer ${token}`,
 				},
 				body: JSON.stringify({
-					entity_name: "account",
-					data: {
-						name: "Test Account with Invalid Type",
-						revenue: "123456", // Invalid type
-					},
+					name: "Test Account with Invalid Type",
+					revenue: "123456", // Invalid type
 				}),
 			})
 

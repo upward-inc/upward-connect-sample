@@ -1,15 +1,16 @@
 import { Hono } from "hono"
-import { getRecordList } from "../../domain/record"
-import { createRecord } from "../../domain/record/create-record"
-import { validateCreateRecordParams } from "../../domain/record/validate-create-record-params"
-import { describeRoute, validator } from "../../libs/hono-openapi"
-import type { AuthContexts } from "../../schema/auth"
+import { getRecordList } from "../../../domain/record"
+import { createRecord } from "../../../domain/record/create-record"
+import { validateCreateRecordParams } from "../../../domain/record/validate-create-record-params"
+import { describeRoute, validator } from "../../../libs/hono-openapi"
+import type { AuthContexts } from "../../../schema/auth"
 import {
 	GetRecordListQuerySchema,
 	GetRecordListResponseSchema,
 	PostRecordBodySchema,
+	PostRecordParamSchema,
 	PostRecordResponseSchema,
-} from "../../schema/record"
+} from "../../../schema/record"
 
 export const recordRouter = new Hono<{ Variables: AuthContexts }>()
 	.get(
@@ -32,14 +33,16 @@ export const recordRouter = new Hono<{ Variables: AuthContexts }>()
 		},
 	)
 	.post(
-		"/",
+		"/:entity_name",
 		describeRoute({
 			description: "レコードを作成する",
 			schema: PostRecordResponseSchema,
 		}),
+		validator("param", PostRecordParamSchema),
 		validator("json", PostRecordBodySchema),
 		async (c) => {
-			const { entity_name, data } = c.req.valid("json")
+			const { entity_name } = c.req.valid("param")
+			const data = c.req.valid("json")
 
 			const user = c.get("user")
 

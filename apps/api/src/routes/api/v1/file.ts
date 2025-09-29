@@ -1,12 +1,12 @@
 import { Hono } from "hono"
-import { createFile, getFile } from "../../domain/file"
-import { describeRoute, validator } from "../../libs/hono-openapi"
-import type { AuthContexts } from "../../schema/auth"
+import { createFile, getFile } from "../../../domain/file"
+import { describeRoute, validator } from "../../../libs/hono-openapi"
+import type { AuthContexts } from "../../../schema/auth"
 import {
 	GetFileParamSchema,
 	PostFileFormSchema,
 	PostFileResultSchema,
-} from "../../schema/file"
+} from "../../../schema/file"
 
 export const fileRouter = new Hono<{ Variables: AuthContexts }>()
 	.get(
