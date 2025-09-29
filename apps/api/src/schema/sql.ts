@@ -22,9 +22,23 @@ import type {
 } from "./operator"
 import { LimitSchema, OffsetSchema, OrderBySchema } from "./paging"
 
+const renameField = (field: string): string => {
+	const fieldLower = field.toLowerCase()
+	// 下記の issue でテーブルのカラムを rename されたので、raw SQL を使用する際に元の値にマッピングする
+	// @see https://github.com/upward-inc/multi-platform-api/issues/47
+	const renamedFields: Record<string, string> = {
+		locale: "language",
+	}
+
+	if (Object.keys(renamedFields).includes(fieldLower)) {
+		return `[${renamedFields[fieldLower]}]`
+	}
+	return `[${field}]`
+}
+
 export const SelectClauseSchema = z.array(z.string()).transform((fields) => {
 	// Handle SQL Server reserved keywords by wrapping them in brackets
-	const safeFields = fields.map((field) => `[${field}]`)
+	const safeFields = fields.map((field) => renameField(field))
 	return `SELECT ${safeFields.join(", ")}`
 })
 
