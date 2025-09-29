@@ -26,11 +26,6 @@ const GroupByQuerySchema = StringToArraySchema().openapi({
 })
 
 export const GetRecordListQuerySchema = z.object({
-	// TODO: パラメータで受け取るべきか、URLディレクトリで表現すべきかを検討する
-	entity_name: z.string().openapi({
-		description: "レコード検索対象のエンティティ名",
-		examples: ["account", "lead"],
-	}),
 	// TODO: 参照先オブジェクトのフィールドを取得可能な形式を検討する
 	fields: FieldsQuerySchema.optional(),
 	filter: NestableFilterQuerySchema.optional(),
@@ -50,6 +45,13 @@ export const GetRecordListResponseSchema = z.object({
 		example: 1234,
 	}),
 	data: RecordListSchema.openapi({ description: "クエリの結果を表す配列" }),
+})
+
+export const GetRecordParamSchema = z.object({
+	entity_name: z.string().openapi({
+		description: "レコード検索対象のエンティティ名",
+		examples: ["account", "lead"],
+	}),
 })
 
 export const PostRecordParamSchema = z.object({
@@ -103,6 +105,8 @@ export const PostRecordResponseSchema = z
 
 export type Record = z.infer<typeof RecordSchema>
 export type RecordList = z.infer<typeof RecordListSchema>
+export type GetRecordParam = z.infer<typeof GetRecordParamSchema>
+export type PostRecordParam = z.infer<typeof PostRecordParamSchema>
 export type GetRecordListQuery = z.infer<typeof GetRecordListQuerySchema>
 export type GetRecordListResponse = z.infer<typeof GetRecordListResponseSchema>
 export type PostRecordBody = z.infer<typeof PostRecordBodySchema>
