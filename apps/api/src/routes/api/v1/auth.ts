@@ -16,6 +16,7 @@ import { env } from "../../../env"
 import { describeRoute, validator } from "../../../libs/hono-openapi"
 import {
 	type AuthContexts,
+	GetOAuthClientResultSchema,
 	PostAuthorizeParamSchema,
 	PostAuthorizeResultSchema,
 	PostLoginParamSchema,
@@ -48,17 +49,24 @@ export const authRouter = new Hono<{ Variables: AuthContexts }>()
 			return c.json({ ...user, access_token: accessToken })
 		},
 	)
-	.get("/clients/:id", async (c) => {
-		const clientId = c.req.param("id")
+	.get(
+		"/clients/:id",
+		describeRoute({
+			description: "OAuthクライアントアプリケーション名を返却する",
+			schema: GetOAuthClientResultSchema,
+		}),
+		async (c) => {
+			const clientId = c.req.param("id")
 
-		const client = await getOAuthClientById(clientId)
-		if (!client) {
-			return c.json({ message: "Client not found" }, 404)
-		}
+			const client = await getOAuthClientById(clientId)
+			if (!client) {
+				return c.json({ message: "Client not found" }, 404)
+			}
 
-		// 必要最低限のフィールドのみ返却
-		return c.json({ id: client.id, name: client.name })
-	})
+			// 必要最低限のフィールドのみ返却
+			return c.json({ id: client.id, name: client.name })
+		},
+	)
 	.post(
 		"/authorize",
 		describeRoute({
