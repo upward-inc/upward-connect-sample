@@ -207,7 +207,7 @@ describe("Auth Tests", () => {
 			})
 		})
 
-		it("should return 404 for non-existent user", async () => {
+		it("401 Unauthorized - 非アクティブなユーザ", async () => {
 			const nonExistentUserId = crypto.randomUUID()
 			const token = createValidToken(nonExistentUserId)
 			const response = await app.request("/api/v1/oauth2/userinfo", {
@@ -218,12 +218,8 @@ describe("Auth Tests", () => {
 			})
 
 			const data = await response.json()
-			expect(response.status).toBe(404)
-			expect(data).toEqual({
-				error: "User not found",
-				error_description:
-					"The user associated with the provided token does not exist.",
-			})
+			expect(response.status).toBe(401)
+			expect(data.error).toBe("invalid_token")
 		})
 	})
 

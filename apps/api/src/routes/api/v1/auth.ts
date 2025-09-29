@@ -264,11 +264,11 @@ export const authRouter = new Hono<{ Variables: AuthContexts }>()
 			if (!loggedInUser) {
 				return c.json(
 					{
-						error: "User not found",
+						error: "invalid_token",
 						error_description:
 							"The user associated with the provided token does not exist.",
 					},
-					404,
+					401,
 				)
 			}
 
