@@ -31,13 +31,16 @@ interface ValidateResultFailure {
  */
 export const validateTokenParams = async (
 	params: TokenParams,
+	publishedAuthCode: {
+		auth_code: string
+		expire_at: Date
+		client_id: string
+		client_secret: string
+		redirect_uri: string
+		user_id: string
+		nonce: string | null
+	},
 ): Promise<ValidateResult> => {
-	// 発行済み認可コードの存在確認
-	const publishedAuthCode = await getAuthorizationCode(params.code)
-	if (!publishedAuthCode) {
-		return { success: false, error_message: "Invalid authorization code" }
-	}
-
 	// 有効期限の検証
 	if (isBefore(publishedAuthCode.expire_at, new Date())) {
 		return { success: false, error_message: "expired authorization code" }
