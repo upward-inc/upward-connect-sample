@@ -126,6 +126,10 @@ export const authRouter = new Hono<{ Variables: AuthContexts }>()
 			const params = c.req.valid("form")
 
 			if (params.grant_type === "authorization_code") {
+				// 認可コードを使用済みにする（データベースから削除する）
+				// タイミング攻撃対策のため、パラメータ検証より前に実行
+				await deleteAuthorizationCode(params.code)
+
 				// パラメータの検証
 				const validateResult = await validateTokenParams(params)
 
@@ -139,9 +143,6 @@ export const authRouter = new Hono<{ Variables: AuthContexts }>()
 					)
 				}
 				const { user_id, user_name, nonce } = validateResult
-
-				// 認可コードを使用済みにする（データベースから削除する）
-				await deleteAuthorizationCode(params.code)
 
 				// アクセストークン、IDトークンを生成
 				const { accessToken, idToken } = generateToken({
