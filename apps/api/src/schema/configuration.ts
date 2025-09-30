@@ -9,7 +9,7 @@ export const ConfigurationSchema = z
 				example: "user",
 			}),
 			account: z.string().openapi({
-				description: "アカウントエンティティの名称",
+				description: "取引先エンティティの名称",
 				example: "account",
 			}),
 			lead: z.string().openapi({
@@ -17,15 +17,15 @@ export const ConfigurationSchema = z
 				example: "lead",
 			}),
 			contact: z.string().openapi({
-				description: "コンタクトエンティティの名称",
+				description: "取引先責任者エンティティの名称",
 				example: "contact",
 			}),
 			activity: z.string().openapi({
-				description: "アクティビティエンティティの名称",
+				description: "活動エンティティの名称",
 				example: "activity",
 			}),
 			phone_call: z.string().openapi({
-				description: "電話エンティティの名称",
+				description: "通話エンティティの名称",
 				example: "phone_call",
 			}),
 		}),
