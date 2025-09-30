@@ -5,6 +5,7 @@ import { cors } from "hono/cors"
 import { bearerAuth } from "../../../middleware/bearer-auth"
 import type { AuthContexts } from "../../../schema/auth"
 import { authRouter } from "./auth"
+import { configurationRouter } from "./configuration"
 import { entityRouter } from "./entity"
 import { fileRouter } from "./file"
 import { profileRouter } from "./profile"
@@ -68,5 +69,6 @@ v1Router
 	.route("/entities", entityRouter)
 	.route("/records", recordRouter)
 	.route("/files", fileRouter)
+	.route("/configuration", configurationRouter)
 
 export { v1Router }
