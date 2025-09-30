@@ -105,8 +105,6 @@ export const PostRecordResponseSchema = z
 
 export type Record = z.infer<typeof RecordSchema>
 export type RecordList = z.infer<typeof RecordListSchema>
-export type GetRecordParam = z.infer<typeof GetRecordParamSchema>
-export type PostRecordParam = z.infer<typeof PostRecordParamSchema>
 export type GetRecordListQuery = z.infer<typeof GetRecordListQuerySchema>
 export type GetRecordListResponse = z.infer<typeof GetRecordListResponseSchema>
 export type PostRecordBody = z.infer<typeof PostRecordBodySchema>
