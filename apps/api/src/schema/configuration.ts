@@ -31,7 +31,7 @@ export const ConfigurationSchema = z
 		}),
 	})
 	.openapi({
-		description: "構成データの説明",
+		description: "UPWARDとの連携のために必要な構成データ（静的情報）",
 	})
 
 export type Configuration = z.infer<typeof ConfigurationSchema>
