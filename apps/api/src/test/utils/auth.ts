@@ -8,7 +8,7 @@ function createToken(userId: string, expiresIn?: ms.StringValue) {
 		throw new Error("OIDC_TOKEN_SECRET environment variable is not set")
 	}
 	const issuer = process.env.OIDC_ISSUER
-	const audience = process.env.OIDC_AUDIENCE
+	const audience = "test-audience"
 
 	return sign({}, secret, {
 		algorithm: "HS256",
@@ -57,7 +57,7 @@ export function createRefreshToken(userId: string) {
 		throw new Error("OIDC_REFRESH_TOKEN_SECRET environment variable is not set")
 	}
 	const issuer = process.env.OIDC_ISSUER
-	const audience = process.env.OIDC_AUDIENCE
+	const audience = "test-audience"
 
 	return sign({}, secret, {
 		algorithm: "HS256",
@@ -77,7 +77,7 @@ export function createExpiredRefreshToken(userId: string) {
 		throw new Error("OIDC_REFRESH_TOKEN_SECRET environment variable is not set")
 	}
 	const issuer = process.env.OIDC_ISSUER
-	const audience = process.env.OIDC_AUDIENCE
+	const audience = "test-audience"
 
 	return sign({}, secret, {
 		algorithm: "HS256",
