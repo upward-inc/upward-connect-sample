@@ -67,18 +67,78 @@ export async function cleanupTestData() {
 	await testPrisma.lead.deleteMany({
 		where: {
 			company: {
-				contains: "Test Company",
+				contains: "test_",
 			},
 		},
 	})
 	await testPrisma.account.deleteMany({
 		where: {
 			name: {
-				contains: "Test Account",
+				contains: "test_",
+			},
+		},
+	})
+	await testPrisma.activity.deleteMany({
+		where: {
+			subject: {
+				contains: "test_",
+			},
+		},
+	})
+	await testPrisma.phone_call.deleteMany({
+		where: {
+			subject: {
+				contains: "test_",
+			},
+		},
+	})
+	await testPrisma.contact.deleteMany({
+		where: {
+			last_name: {
+				contains: "test_",
+			},
+		},
+	})
+	await testPrisma.opportunity.deleteMany({
+		where: {
+			name: {
+				contains: "test_",
+			},
+		},
+	})
+	await testPrisma.renamedcase.deleteMany({
+		where: {
+			case_number: {
+				contains: "test_",
+			},
+			subject: {
+				contains: "test_",
+			},
+		},
+	})
+	await testPrisma.product.deleteMany({
+		where: {
+			name: {
+				contains: "test_",
+			},
+		},
+	})
+	await testPrisma.campaign.deleteMany({
+		where: {
+			name: {
+				contains: "test_",
+			},
+		},
+	})
+	await testPrisma.sample.deleteMany({
+		where: {
+			name: {
+				contains: "test_",
 			},
 		},
 	})
 
+	// Finally, clean up test users
 	await testPrisma.user.deleteMany({
 		where: {
 			user_name: {

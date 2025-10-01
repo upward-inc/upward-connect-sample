@@ -1,7 +1,10 @@
 import { Hono } from "hono"
-import { getRecordList } from "../../../domain/record"
-import { createRecord } from "../../../domain/record/create-record"
-import { validateCreateRecordParams } from "../../../domain/record/validate-create-record-params"
+import { getEntity } from "../../../domain/entity"
+import {
+	createRecord,
+	getRecordList,
+	validateCreateRecordParams,
+} from "../../../domain/record"
 import { describeRoute, validator } from "../../../libs/hono-openapi"
 import type { AuthContexts } from "../../../schema/auth"
 import {
@@ -25,6 +28,14 @@ export const recordRouter = new Hono<{ Variables: AuthContexts }>()
 		async (c) => {
 			const { entity_name } = c.req.valid("param")
 			const query = c.req.valid("query")
+
+			const entity = await getEntity(entity_name)
+			if (!entity) {
+				return c.json(
+					{ message: `Entity '${entity_name}' does not exist` },
+					400,
+				)
+			}
 
 			const { data, has_next_page, total_size } = await getRecordList(
 				entity_name,
