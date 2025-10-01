@@ -1,5 +1,5 @@
 import { type JwtPayload, sign, verify } from "jsonwebtoken"
-import { afterAll, beforeAll, describe, expect, it, test } from "vitest"
+import { afterAll, beforeAll, describe, expect, it } from "vitest"
 import { env } from "../../../env"
 import { app } from "../../../index"
 import {
@@ -1087,7 +1087,7 @@ describe("Auth Tests", () => {
 		//
 		// `testcontainers` is not compatible with `bun test` because it uses `nan` (V8 C++ APIs)
 		// see: https://github.com/oven-sh/bun/issues/7810#issuecomment-2276549353
-		test.skip("should set aud claim in access_token equal to default client_id for /login", async () => {
+		it.skip("should set aud claim in access_token equal to default client_id for /login", async () => {
 			// Create a test user
 			const testUser = await createTestUser({
 				user_name: "aud_login_test_user",
