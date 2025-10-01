@@ -7,6 +7,7 @@ import type { AuthContexts } from "../../../schema/auth"
 import {
 	GetRecordListQuerySchema,
 	GetRecordListResponseSchema,
+	GetRecordParamSchema,
 	PostRecordBodySchema,
 	PostRecordParamSchema,
 	PostRecordResponseSchema,
@@ -14,16 +15,21 @@ import {
 
 export const recordRouter = new Hono<{ Variables: AuthContexts }>()
 	.get(
-		"/",
+		"/:entity_name",
 		describeRoute({
 			description: "レコードの一覧を返却する",
 			schema: GetRecordListResponseSchema,
 		}),
+		validator("param", GetRecordParamSchema),
 		validator("query", GetRecordListQuerySchema),
 		async (c) => {
+			const { entity_name } = c.req.valid("param")
 			const query = c.req.valid("query")
 
-			const { data, has_next_page, total_size } = await getRecordList(query)
+			const { data, has_next_page, total_size } = await getRecordList(
+				entity_name,
+				query,
+			)
 
 			return c.json({
 				has_next_page,
