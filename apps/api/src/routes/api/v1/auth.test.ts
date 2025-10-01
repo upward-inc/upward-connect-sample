@@ -91,7 +91,6 @@ describe("Auth Tests", () => {
 				email: "expired_user@example.com",
 			})
 			const expiredToken = createExpiredToken(testUser.id)
-			console.log("Expired Token:", expiredToken) // Debug log
 
 			const response = await app.request("/api/v1/oauth2/userinfo", {
 				method: "GET",
