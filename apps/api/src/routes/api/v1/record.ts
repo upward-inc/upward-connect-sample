@@ -1,5 +1,5 @@
 import { Hono } from "hono"
-import { getEntity } from "../../../domain/entity/get-entity"
+import { getEntity } from "../../../domain/entity"
 import {
 	createRecord,
 	getRecordList,
