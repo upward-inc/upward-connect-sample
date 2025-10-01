@@ -8,7 +8,7 @@ import {
 export const configurationRouter = new Hono().get(
 	"/",
 	describeRoute({
-		description: "構成データを返却する",
+		description: "UPWARDとの連携のために必要な構成データ（静的情報）を返却する",
 		schema: ConfigurationSchema,
 	}),
 	async (c) => {
