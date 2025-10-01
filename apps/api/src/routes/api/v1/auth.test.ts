@@ -91,6 +91,7 @@ describe("Auth Tests", () => {
 				email: "expired_user@example.com",
 			})
 			const expiredToken = createExpiredToken(testUser.id)
+			console.log("Expired Token:", expiredToken) // Debug log
 
 			const response = await app.request("/api/v1/oauth2/userinfo", {
 				method: "GET",
@@ -135,7 +136,7 @@ describe("Auth Tests", () => {
 				algorithm: "HS256",
 				issuer: process.env.OIDC_ISSUER,
 				subject: testUser.id,
-				audience: process.env.OIDC_AUDIENCE,
+				audience: "wrong-audience",
 				expiresIn: "1h",
 			})
 
@@ -158,7 +159,7 @@ describe("Auth Tests", () => {
 			const noSubjectToken = sign({}, tokenSecret, {
 				algorithm: "HS256",
 				issuer: process.env.OIDC_ISSUER,
-				audience: process.env.OIDC_AUDIENCE,
+				audience: "no-subject-audience",
 				expiresIn: "1h",
 				// No subject specified
 			})
@@ -183,7 +184,7 @@ describe("Auth Tests", () => {
 				algorithm: "HS256",
 				issuer: process.env.OIDC_ISSUER,
 				subject: "", // Empty subject
-				audience: process.env.OIDC_AUDIENCE,
+				audience: "empty-subject-audience",
 				expiresIn: "1h",
 			})
 

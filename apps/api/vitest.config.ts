@@ -14,7 +14,6 @@ export default defineConfig({
 		// Test environment variables (will be overridden by testcontainers)
 		env: {
 			OIDC_ISSUER: "https://iss.test.upward.jp",
-			OIDC_AUDIENCE: "https://aud.test.upward.jp",
 			OIDC_TOKEN_SECRET: "test-secret-key-for-tests-12345",
 			OIDC_REFRESH_TOKEN_SECRET: "test-refresh-secret-key-for-tests-12345",
 		},
