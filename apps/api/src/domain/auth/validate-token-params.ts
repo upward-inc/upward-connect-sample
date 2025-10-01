@@ -39,13 +39,8 @@ export const validateTokenParams = async (
 		redirect_uri: string
 		user_id: string
 		nonce: string | null
-	} | null,
+	},
 ): Promise<ValidateResult> => {
-	// 発行済み認可コードの存在確認
-	if (!publishedAuthCode) {
-		return { success: false, error_message: "Invalid authorization code" }
-	}
-
 	// 有効期限の検証
 	if (isBefore(publishedAuthCode.expire_at, new Date())) {
 		return { success: false, error_message: "expired authorization code" }
