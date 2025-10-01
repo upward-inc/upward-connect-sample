@@ -5,28 +5,28 @@ export const ConfigurationSchema = z
 	.object({
 		entity_name: z.object({
 			user: z.string().openapi({
-				description: "ユーザーエンティティの名称",
+				description: "システムユーザーが管理されているエンティティ名",
 				example: "user",
 			}),
 			account: z.string().openapi({
-				description: "取引先エンティティの名称",
-				example: "account",
+				description: "取引先が管理されているエンティティ名",
+				examples: ["account", "company"],
 			}),
-			lead: z.string().openapi({
-				description: "リードエンティティの名称",
+			lead: z.string().optional().openapi({
+				description: "リードが管理されているエンティティ名",
 				example: "lead",
 			}),
-			contact: z.string().openapi({
-				description: "取引先責任者エンティティの名称",
-				example: "contact",
+			contact: z.string().optional().openapi({
+				description: "取引先担当者が管理されているエンティティ名",
+				examples: ["contact", "contact_person"],
 			}),
-			activity: z.string().openapi({
-				description: "活動エンティティの名称",
-				example: "activity",
+			activity: z.string().optional().openapi({
+				description: "活動の予定や実績が管理されているエンティティ名",
+				examples: ["activity", "schedule", "event"],
 			}),
-			phone_call: z.string().openapi({
-				description: "通話エンティティの名称",
-				example: "phone_call",
+			phone_call: z.string().optional().openapi({
+				description: "通話履歴が管理されているエンティティ名",
+				examples: ["phone_call", "call_history", "task"],
 			}),
 		}),
 	})
