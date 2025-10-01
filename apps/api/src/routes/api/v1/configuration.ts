@@ -1,7 +1,9 @@
 import { Hono } from "hono"
-import { getConfiguration } from "../../../domain/configuration"
 import { describeRoute } from "../../../libs/hono-openapi"
-import { ConfigurationSchema } from "../../../schema/configuration"
+import {
+	type Configuration,
+	ConfigurationSchema,
+} from "../../../schema/configuration"
 
 export const configurationRouter = new Hono().get(
 	"/",
@@ -10,7 +12,16 @@ export const configurationRouter = new Hono().get(
 		schema: ConfigurationSchema,
 	}),
 	async (c) => {
-		const configuration = getConfiguration()
+		const configuration: Configuration = {
+			entity_name: {
+				user: "user",
+				account: "account",
+				lead: "lead",
+				contact: "contact",
+				activity: "activity",
+				phone_call: "phone_call",
+			},
+		}
 
 		return c.json(configuration)
 	},
