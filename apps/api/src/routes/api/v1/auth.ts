@@ -274,10 +274,13 @@ export const authRouter = new Hono<{ Variables: AuthContexts }>()
 
 			return c.json({
 				sub: loggedInUser.id,
+				user_id: loggedInUser.id, // custom claim
 				name: `${loggedInUser.last_name} ${loggedInUser.first_name}`,
 				given_name: loggedInUser.first_name,
-				family_name: loggedInUser.last_name,
-				email: loggedInUser.email,
+				family_name: loggedInUser.last_name ?? undefined,
+				email: loggedInUser.email ?? undefined,
+				zoneinfo: loggedInUser.timezone,
+				locale: loggedInUser.locale,
 			})
 		},
 	)

@@ -142,12 +142,17 @@ export const GetOAuthClientResultSchema = OAuthClientSchema.pick({
  */
 export const GetUserInfoResultSchema = z.object({
 	sub: SubjectSchema,
+	user_id: UserIdSchema.openapi({
+		description: "システムユーザーID（非標準クレーム）",
+	}),
 	name: FullNameSchema.openapi({
 		description: "表示用のフルネーム",
 	}),
 	given_name: FirstNameSchema,
-	family_name: LastNameSchema,
-	email: EmailSchema,
+	family_name: LastNameSchema.optional(),
+	email: EmailSchema.optional(),
+	zoneinfo: TimezoneSchema,
+	locale: LocaleSchema,
 })
 
 // 認可コードリクエスト用のスキーマ

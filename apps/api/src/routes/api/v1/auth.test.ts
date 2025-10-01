@@ -42,6 +42,8 @@ describe("Auth Tests", () => {
 				first_name: "Test",
 				last_name: "User",
 				email: "test_user@example.com",
+				timezone: "Asia/Tokyo",
+				locale: "ja-JP",
 			})
 			const token = createValidToken(testUser.id)
 			const response = await app.request("/api/v1/oauth2/userinfo", {
@@ -55,10 +57,45 @@ describe("Auth Tests", () => {
 			expect(response.status).toBe(200)
 			expect(data).toEqual({
 				sub: testUser.id,
+				user_id: testUser.id,
 				name: `${testUser.last_name} ${testUser.first_name}`,
 				given_name: testUser.first_name,
 				family_name: testUser.last_name,
 				email: testUser.email,
+				zoneinfo: testUser.timezone,
+				locale: testUser.locale,
+			})
+		})
+
+		it("200 OK - メールがないユーザのユーザ情報にemailが含まれない", async () => {
+			// テストユーザを作成
+			const testUser = await createTestUser({
+				user_name: "no_mail_user",
+				first_name: "No",
+				last_name: "Mail",
+				// emailを設定しない
+				timezone: "Asia/Tokyo",
+				locale: "ja-JP",
+			})
+			const token = createValidToken(testUser.id)
+			const response = await app.request("/api/v1/oauth2/userinfo", {
+				method: "GET",
+				headers: {
+					Authorization: `Bearer ${token}`,
+				},
+			})
+
+			const data = await response.json()
+			expect(response.status).toBe(200)
+			expect(data).toEqual({
+				sub: testUser.id,
+				user_id: testUser.id,
+				name: `${testUser.last_name} ${testUser.first_name}`,
+				given_name: testUser.first_name,
+				family_name: testUser.last_name,
+				// emailがないことを確認
+				zoneinfo: testUser.timezone,
+				locale: testUser.locale,
 			})
 		})
 
