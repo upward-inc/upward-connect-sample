@@ -141,11 +141,10 @@ export const NestableOrFilterSchema = z
 
 // フィルター条件
 export const NestableFilterSchema = z
-	.union([BaseFilterSchema, NestableAndFilterSchema, NestableOrFilterSchema])
+	.union([NestableAndFilterSchema, NestableOrFilterSchema])
 	.openapi({
 		description: "フィルター条件（最大2階層の入れ子構造可）",
 		examples: [
-			singleFilterExample,
 			{
 				and: andFilterExample,
 			},

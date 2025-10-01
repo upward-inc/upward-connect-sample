@@ -542,15 +542,12 @@ describe("Record Tests", () => {
 				testUser.id,
 			)
 
-			const response = await app.request(
-				"/api/v1/records?entity_name=account",
-				{
-					method: "GET",
-					headers: {
-						Authorization: `Bearer ${token}`,
-					},
+			const response = await app.request("/api/v1/records/account", {
+				method: "GET",
+				headers: {
+					Authorization: `Bearer ${token}`,
 				},
-			)
+			})
 
 			const data = await response.json()
 			expect(response.status).toBe(200)
@@ -584,7 +581,7 @@ describe("Record Tests", () => {
 			)
 
 			const response = await app.request(
-				"/api/v1/records?entity_name=account&fields=id,name,account_number",
+				"/api/v1/records/account?fields=id,name,account_number",
 				{
 					method: "GET",
 					headers: {
@@ -611,72 +608,6 @@ describe("Record Tests", () => {
 			// Verify that other fields are not included when not specified
 			expect(testAccount).not.toHaveProperty("main_phone_number")
 			expect(testAccount).not.toHaveProperty("website")
-		})
-
-		it("should return record list with base filter", async () => {
-			const testUser = await createTestUser({
-				user_name: "base_filter_user",
-				first_name: "Base",
-				last_name: "Filter",
-				email: "base_filter@example.com",
-			})
-			const token = createValidToken(testUser.id)
-
-			// Create test accounts with different names
-			const activeAccount = await createTestAccount(
-				{
-					name: "Active Test Account",
-				},
-				testUser.id,
-			)
-
-			await createTestAccount(
-				{
-					name: "Inactive Test Account",
-				},
-				testUser.id,
-			)
-
-			// Test filtering by name using "eq" operator
-			const filterQuery = encodeURIComponent(
-				JSON.stringify({
-					field: "name",
-					operator: "eq",
-					value: "test_Active Test Account",
-					is_not: false,
-				}),
-			)
-
-			const response = await app.request(
-				`/api/v1/records?entity_name=account&filter=${filterQuery}`,
-				{
-					method: "GET",
-					headers: {
-						Authorization: `Bearer ${token}`,
-					},
-				},
-			)
-
-			const data = await response.json()
-			expect(response.status).toBe(200)
-			expect(data).toHaveProperty("has_next_page")
-			expect(data).toHaveProperty("total_size")
-			expect(data).toHaveProperty("data")
-			expect(Array.isArray(data.data)).toBe(true)
-
-			// Should only return the active account
-			const foundActiveAccount = data.data.find(
-				(record: { id: string }) => record.id === activeAccount.id,
-			)
-			expect(foundActiveAccount).toBeTruthy()
-			expect(foundActiveAccount.name).toBe("test_Active Test Account")
-
-			// Should not contain accounts with different names
-			const shouldNotExist = data.data.find(
-				(record: { name: string }) =>
-					record.name === "test_Inactive Test Account",
-			)
-			expect(shouldNotExist).toBeUndefined()
 		})
 
 		it("should return record list with nest and filter", async () => {
@@ -734,7 +665,7 @@ describe("Record Tests", () => {
 			)
 
 			const response = await app.request(
-				`/api/v1/records?entity_name=account&filter=${filterQuery}`,
+				`/api/v1/records/account?filter=${filterQuery}`,
 				{
 					method: "GET",
 					headers: {
@@ -811,7 +742,7 @@ describe("Record Tests", () => {
 			)
 
 			const response = await app.request(
-				`/api/v1/records?entity_name=account&filter=${filterQuery}`,
+				`/api/v1/records/account?filter=${filterQuery}`,
 				{
 					method: "GET",
 					headers: {
@@ -889,15 +820,19 @@ describe("Record Tests", () => {
 
 			const filterQuery = encodeURIComponent(
 				JSON.stringify({
-					field: "name",
-					operator: "starts_with",
-					value: "test_OrderBy_",
-					is_not: false,
+					and: [
+						{
+							field: "name",
+							operator: "starts_with",
+							value: "test_OrderBy_",
+							is_not: false,
+						},
+					],
 				}),
 			)
 
 			const response = await app.request(
-				`/api/v1/records?entity_name=account&order_by=${orderByQuery}&filter=${filterQuery}`,
+				`/api/v1/records/account?order_by=${orderByQuery}&filter=${filterQuery}`,
 				{
 					method: "GET",
 					headers: {
@@ -944,7 +879,7 @@ describe("Record Tests", () => {
 
 			// Test pagination with limit=2, offset=1
 			const response = await app.request(
-				"/api/v1/records?entity_name=account&limit=2&offset=1",
+				"/api/v1/records/account?limit=2&offset=1",
 				{
 					method: "GET",
 					headers: {
@@ -1010,7 +945,7 @@ describe("Record Tests", () => {
 			)
 
 			const response = await app.request(
-				`/api/v1/records?entity_name=account&fields=industry&group_by=${groupByQuery}&order_by=${orderByQuery}`,
+				`/api/v1/records/account?fields=industry&group_by=${groupByQuery}&order_by=${orderByQuery}`,
 				{
 					method: "GET",
 					headers: {
@@ -1065,15 +1000,19 @@ describe("Record Tests", () => {
 			// Test filtering by number_of_employees > 100
 			const filterQuery = encodeURIComponent(
 				JSON.stringify({
-					field: "number_of_employees",
-					operator: "gt",
-					value: 100,
-					is_not: false,
+					and: [
+						{
+							field: "number_of_employees",
+							operator: "gt",
+							value: 100,
+							is_not: false,
+						},
+					],
 				}),
 			)
 
 			const response = await app.request(
-				`/api/v1/records?entity_name=account&filter=${filterQuery}`,
+				`/api/v1/records/account?filter=${filterQuery}`,
 				{
 					method: "GET",
 					headers: {
@@ -1129,15 +1068,19 @@ describe("Record Tests", () => {
 			// Test filtering by name containing "Technology"
 			const filterQuery = encodeURIComponent(
 				JSON.stringify({
-					field: "name",
-					operator: "match",
-					value: "Technology",
-					is_not: false,
+					and: [
+						{
+							field: "name",
+							operator: "match",
+							value: "Technology",
+							is_not: false,
+						},
+					],
 				}),
 			)
 
 			const response = await app.request(
-				`/api/v1/records?entity_name=account&filter=${filterQuery}`,
+				`/api/v1/records/account?filter=${filterQuery}`,
 				{
 					method: "GET",
 					headers: {
@@ -1192,15 +1135,19 @@ describe("Record Tests", () => {
 			// Test filtering to exclude "Excluded Company" (NOT name = "Excluded Company")
 			const filterQuery = encodeURIComponent(
 				JSON.stringify({
-					field: "name",
-					operator: "eq",
-					value: "test_Excluded Company",
-					is_not: true,
+					and: [
+						{
+							field: "name",
+							operator: "eq",
+							value: "test_Excluded Company",
+							is_not: true,
+						},
+					],
 				}),
 			)
 
 			const response = await app.request(
-				`/api/v1/records?entity_name=account&filter=${filterQuery}`,
+				`/api/v1/records/account?filter=${filterQuery}`,
 				{
 					method: "GET",
 					headers: {
@@ -1257,14 +1204,18 @@ describe("Record Tests", () => {
 			// Test filtering for records where website IS SET (not null)
 			const filterQuery = encodeURIComponent(
 				JSON.stringify({
-					field: "website",
-					operator: "is_set",
-					is_not: false,
+					and: [
+						{
+							field: "website",
+							operator: "is_set",
+							is_not: false,
+						},
+					],
 				}),
 			)
 
 			const response = await app.request(
-				`/api/v1/records?entity_name=account&filter=${filterQuery}`,
+				`/api/v1/records/account?filter=${filterQuery}`,
 				{
 					method: "GET",
 					headers: {
@@ -1302,7 +1253,7 @@ describe("Record Tests", () => {
 			})
 			const token = createValidToken(testUser.id)
 
-			const response = await app.request("/api/v1/records?entity_name=user", {
+			const response = await app.request("/api/v1/records/user", {
 				method: "GET",
 				headers: {
 					Authorization: `Bearer ${token}`,
@@ -1346,7 +1297,7 @@ describe("Record Tests", () => {
 				testUser.id,
 			)
 
-			const response = await app.request("/api/v1/records?entity_name=lead", {
+			const response = await app.request("/api/v1/records/lead", {
 				method: "GET",
 				headers: {
 					Authorization: `Bearer ${token}`,
@@ -1389,15 +1340,12 @@ describe("Record Tests", () => {
 				testUser.id,
 			)
 
-			const response = await app.request(
-				"/api/v1/records?entity_name=activity",
-				{
-					method: "GET",
-					headers: {
-						Authorization: `Bearer ${token}`,
-					},
+			const response = await app.request("/api/v1/records/activity", {
+				method: "GET",
+				headers: {
+					Authorization: `Bearer ${token}`,
 				},
-			)
+			})
 
 			const data = await response.json()
 			expect(response.status).toBe(200)
@@ -1444,15 +1392,12 @@ describe("Record Tests", () => {
 				testUser.id,
 			)
 
-			const response = await app.request(
-				"/api/v1/records?entity_name=phone_call",
-				{
-					method: "GET",
-					headers: {
-						Authorization: `Bearer ${token}`,
-					},
+			const response = await app.request("/api/v1/records/phone_call", {
+				method: "GET",
+				headers: {
+					Authorization: `Bearer ${token}`,
 				},
-			)
+			})
 
 			const data = await response.json()
 			expect(response.status).toBe(200)
@@ -1526,10 +1471,14 @@ describe("Record Tests", () => {
 			// Create clauses with reserved keyword "user"
 			const whereClause = encodeURIComponent(
 				JSON.stringify({
-					field: "user",
-					operator: "eq",
-					value: targetUser.id,
-					is_not: false,
+					and: [
+						{
+							field: "user",
+							operator: "eq",
+							value: targetUser.id,
+							is_not: false,
+						},
+					],
 				}),
 			)
 			const orderByClause = encodeURIComponent(
@@ -1537,7 +1486,7 @@ describe("Record Tests", () => {
 			)
 
 			const response = await app.request(
-				`/api/v1/records?entity_name=phone_call&fields=user&filter=${whereClause}&order_by=${orderByClause}`,
+				`/api/v1/records/phone_call?fields=user&filter=${whereClause}&order_by=${orderByClause}`,
 				{
 					method: "GET",
 					headers: {
@@ -1590,15 +1539,12 @@ describe("Record Tests", () => {
 				testUser.id,
 			)
 
-			const response = await app.request(
-				"/api/v1/records?entity_name=contact",
-				{
-					method: "GET",
-					headers: {
-						Authorization: `Bearer ${token}`,
-					},
+			const response = await app.request("/api/v1/records/contact", {
+				method: "GET",
+				headers: {
+					Authorization: `Bearer ${token}`,
 				},
-			)
+			})
 
 			const data = await response.json()
 			expect(response.status).toBe(200)
@@ -1644,15 +1590,12 @@ describe("Record Tests", () => {
 				testUser.id,
 			)
 
-			const response = await app.request(
-				"/api/v1/records?entity_name=opportunity",
-				{
-					method: "GET",
-					headers: {
-						Authorization: `Bearer ${token}`,
-					},
+			const response = await app.request("/api/v1/records/opportunity", {
+				method: "GET",
+				headers: {
+					Authorization: `Bearer ${token}`,
 				},
-			)
+			})
 
 			const data = await response.json()
 			expect(response.status).toBe(200)
@@ -1697,7 +1640,7 @@ describe("Record Tests", () => {
 				testUser.id,
 			)
 
-			const response = await app.request("/api/v1/records?entity_name=case", {
+			const response = await app.request("/api/v1/records/case", {
 				method: "GET",
 				headers: {
 					Authorization: `Bearer ${token}`,
@@ -1737,15 +1680,12 @@ describe("Record Tests", () => {
 				testUser.id,
 			)
 
-			const response = await app.request(
-				"/api/v1/records?entity_name=product",
-				{
-					method: "GET",
-					headers: {
-						Authorization: `Bearer ${token}`,
-					},
+			const response = await app.request("/api/v1/records/product", {
+				method: "GET",
+				headers: {
+					Authorization: `Bearer ${token}`,
 				},
-			)
+			})
 
 			const data = await response.json()
 			expect(response.status).toBe(200)
@@ -1779,15 +1719,12 @@ describe("Record Tests", () => {
 				testUser.id,
 			)
 
-			const response = await app.request(
-				"/api/v1/records?entity_name=campaign",
-				{
-					method: "GET",
-					headers: {
-						Authorization: `Bearer ${token}`,
-					},
+			const response = await app.request("/api/v1/records/campaign", {
+				method: "GET",
+				headers: {
+					Authorization: `Bearer ${token}`,
 				},
-			)
+			})
 
 			const data = await response.json()
 			expect(response.status).toBe(200)
@@ -1821,15 +1758,12 @@ describe("Record Tests", () => {
 				testUser.id,
 			)
 
-			const response = await app.request(
-				"/api/v1/records?entity_name=sample",
-				{
-					method: "GET",
-					headers: {
-						Authorization: `Bearer ${token}`,
-					},
+			const response = await app.request("/api/v1/records/sample", {
+				method: "GET",
+				headers: {
+					Authorization: `Bearer ${token}`,
 				},
-			)
+			})
 
 			const data = await response.json()
 			expect(response.status).toBe(200)
@@ -1847,41 +1781,15 @@ describe("Record Tests", () => {
 		})
 
 		it("should return 401 for missing authorization header", async () => {
-			const response = await app.request(
-				"/api/v1/records?entity_name=account",
-				{
-					method: "GET",
-				},
-			)
+			const response = await app.request("/api/v1/records/account", {
+				method: "GET",
+			})
 
 			const data = await response.json()
 			expect(response.status).toBe(401)
 			expect(data).toEqual({
 				message: "No authentication header",
 			})
-		})
-
-		it("should return 400 for missing entity_name query parameter", async () => {
-			const testUser = await createTestUser({
-				user_name: "missing_query_user",
-				first_name: "Missing",
-				last_name: "Query",
-				email: "missing_query@example.com",
-			})
-			const token = createValidToken(testUser.id)
-
-			const response = await app.request("/api/v1/records", {
-				method: "GET",
-				headers: {
-					Authorization: `Bearer ${token}`,
-				},
-			})
-
-			const data = await response.json()
-			expect(response.status).toBe(400)
-			expect(data.success).toBe(false)
-			expect(data.error).toHaveProperty("issues")
-			expect(data.error.issues[0].path).toContainEqual("entity_name")
 		})
 
 		it("should return 400 for invalid entity_name", async () => {
@@ -1893,15 +1801,12 @@ describe("Record Tests", () => {
 			})
 			const token = createValidToken(testUser.id)
 
-			const response = await app.request(
-				"/api/v1/records?entity_name=nonexistent_entity",
-				{
-					method: "GET",
-					headers: {
-						Authorization: `Bearer ${token}`,
-					},
+			const response = await app.request("/api/v1/records/nonexistent_entity", {
+				method: "GET",
+				headers: {
+					Authorization: `Bearer ${token}`,
 				},
-			)
+			})
 
 			const data = await response.json()
 			expect(response.status).toBe(400)

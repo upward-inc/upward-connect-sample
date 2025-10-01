@@ -26,15 +26,10 @@ type Reference = {
 	id: string
 }
 
-export const getRecordList = async ({
-	entity_name,
-	fields,
-	filter,
-	group_by,
-	order_by,
-	limit,
-	offset,
-}: GetRecordListQuery): Promise<GetRecordListResponse> => {
+export const getRecordList = async (
+	entity_name: string,
+	{ fields, filter, group_by, order_by, limit, offset }: GetRecordListQuery,
+): Promise<GetRecordListResponse> => {
 	const entityItems = await getEntityItemList(entity_name)
 	const entityItemMap = new Map(entityItems.map((item) => [item.name, item]))
 
