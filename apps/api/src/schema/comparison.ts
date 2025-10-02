@@ -1,15 +1,15 @@
 import { z } from "zod"
 import "zod-openapi/extend"
 import {
+	ContainsOperatorSchema,
 	EndsWithOperatorSchema,
 	EqualOperatorSchema,
 	GraterThanOperatorSchema,
 	GraterThanOrEqualOperatorSchema,
-	IncludeOperatorSchema,
+	IncludesOperatorSchema,
 	IsSetOperatorSchema,
 	LessThanOperatorSchema,
 	LessThanOrEqualOperatorSchema,
-	MatchOperatorSchema,
 	StartsWithOperatorSchema,
 } from "./operator"
 
@@ -33,7 +33,7 @@ export const TextFieldComparisonSchema = z
 		operator: z
 			.union([
 				EqualOperatorSchema,
-				MatchOperatorSchema,
+				ContainsOperatorSchema,
 				StartsWithOperatorSchema,
 				EndsWithOperatorSchema,
 				GraterThanOperatorSchema,
@@ -117,7 +117,7 @@ export const OptionFieldComparisonSchema = z
 	.object({
 		field: FieldSchema,
 		operator: z
-			.union([EqualOperatorSchema, IncludeOperatorSchema])
+			.union([EqualOperatorSchema, IncludesOperatorSchema])
 			.openapi({ description: "演算子" }),
 		value: z.string().openapi({ description: "検索値", example: "apparel" }),
 		is_not: IsNotSchema.optional().default(false),
@@ -133,7 +133,7 @@ export const ReferenceFieldStringComparisonSchema = z
 	.object({
 		field: FieldSchema,
 		operator: z
-			.union([EqualOperatorSchema, IncludeOperatorSchema])
+			.union([EqualOperatorSchema, IncludesOperatorSchema])
 			.openapi({ description: "演算子" }),
 		value: z.string().openapi({ description: "検索値", example: "000001" }),
 		is_not: IsNotSchema.optional().default(false),
@@ -149,7 +149,7 @@ export const ReferenceFieldObjectComparisonSchema = z
 	.object({
 		field: FieldSchema,
 		operator: z
-			.union([EqualOperatorSchema, IncludeOperatorSchema])
+			.union([EqualOperatorSchema, IncludesOperatorSchema])
 			.openapi({ description: "演算子" }),
 		value: RecordReferenceValueSchema.openapi({
 			description: "検索値",

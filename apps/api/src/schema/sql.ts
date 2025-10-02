@@ -10,14 +10,14 @@ import {
 	isOrFilter,
 } from "./filter"
 import type {
+	ContainsOperator,
 	EndsWithOperator,
 	EqualOperator,
 	GraterThanOperator,
 	GraterThanOrEqualOperator,
-	IncludeOperator,
+	IncludesOperator,
 	LessThanOperator,
 	LessThanOrEqualOperator,
-	MatchOperator,
 	StartsWithOperator,
 } from "./operator"
 import { LimitSchema, OffsetSchema, OrderBySchema } from "./paging"
@@ -148,7 +148,7 @@ const baseFilterToPredicate = (
 	if (
 		item.type === "text" &&
 		filter.filter_type === "string" &&
-		filter.operator !== "include"
+		filter.operator !== "includes"
 	) {
 		return withPredicatePrefix(
 			filter.is_not,
@@ -191,7 +191,7 @@ const baseFilterToPredicate = (
 	if (
 		item.type === "date" &&
 		filter.filter_type === "string" &&
-		filter.operator !== "include"
+		filter.operator !== "includes"
 	) {
 		// SQL Serverにて、datetime型のみ形式が厳密であるためフォーマットを実施
 		const value =
@@ -218,7 +218,7 @@ const baseFilterToPredicate = (
 	if (
 		item.type === "option" &&
 		filter.filter_type === "string" &&
-		(filter.operator === "eq" || filter.operator === "include")
+		(filter.operator === "eq" || filter.operator === "includes")
 	) {
 		return withPredicatePrefix(
 			filter.is_not,
@@ -230,7 +230,7 @@ const baseFilterToPredicate = (
 	if (
 		item.type === "reference" &&
 		(filter.filter_type === "string" || filter.filter_type === "object") &&
-		(filter.operator === "eq" || filter.operator === "include")
+		(filter.operator === "eq" || filter.operator === "includes")
 	) {
 		const value =
 			typeof filter.value === "string"
@@ -251,7 +251,7 @@ const getSimpleComparisonPredicate = (
 	itemType: EntityItem["type"],
 	operator:
 		| EqualOperator
-		| MatchOperator
+		| ContainsOperator
 		| StartsWithOperator
 		| EndsWithOperator
 		| GraterThanOperator
@@ -273,7 +273,7 @@ const getSimpleComparisonPredicate = (
 		}
 	> = {
 		eq: { operator: "=" },
-		match: { operator: "LIKE", wildcard: { prefix: "%", suffix: "%" } },
+		contains: { operator: "LIKE", wildcard: { prefix: "%", suffix: "%" } },
 		starts_with: { operator: "LIKE", wildcard: { suffix: "%" } },
 		ends_with: { operator: "LIKE", wildcard: { prefix: "%" } },
 		gt: { operator: ">" },
@@ -302,11 +302,11 @@ const getSimpleComparisonPredicate = (
 
 const getOptionComparisonPredicate = (
 	fieldName: string,
-	operator: EqualOperator | IncludeOperator,
+	operator: EqualOperator | IncludesOperator,
 	value: string,
 ) => {
 	// "対象の値を含む"検索クエリを生成
-	// 単一オプションのカラムには単一の値しか設定されない前提であるため、オペレーター（`eq` or `include`）毎に処理を分ける必要なし
+	// 単一オプションのカラムには単一の値しか設定されない前提であるため、オペレーター（`eq` or `includes`）毎に処理を分ける必要なし
 	const safeColumnName = `[${fieldName}]`
 	const isNotNullExpression = `${safeColumnName} IS NOT NULL`
 	const jsonExpression = [
@@ -322,11 +322,11 @@ const getOptionComparisonPredicate = (
 
 const getReferenceComparisonPredicate = (
 	fieldName: string,
-	operator: EqualOperator | IncludeOperator,
+	operator: EqualOperator | IncludesOperator,
 	value: RecordReferenceValue,
 ) => {
 	// "対象の値を含む"検索クエリを生成
-	// 単一参照のカラムには単一の値しか設定されない前提であるため、オペレーター（`eq` or `include`）毎に処理を分ける必要なし
+	// 単一参照のカラムには単一の値しか設定されない前提であるため、オペレーター（`eq` or `includes`）毎に処理を分ける必要なし
 	const safeColumnName = `[${fieldName}]`
 	const subQuery = [
 		`SELECT * FROM OPENJSON(${safeColumnName})`,

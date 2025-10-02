@@ -5,8 +5,8 @@ export const EqualOperatorSchema = z.literal("eq").openapi({
 	description: "Equal (=)",
 })
 
-export const MatchOperatorSchema = z.literal("match").openapi({
-	description: "Match (LIKE '%abc%')",
+export const ContainsOperatorSchema = z.literal("contains").openapi({
+	description: "Contains (LIKE '%abc%')",
 })
 
 export const StartsWithOperatorSchema = z.literal("starts_with").openapi({
@@ -33,8 +33,8 @@ export const LessThanOrEqualOperatorSchema = z.literal("lte").openapi({
 	description: "Less Than Or Equal (<=)",
 })
 
-export const IncludeOperatorSchema = z.literal("include").openapi({
-	description: "Include",
+export const IncludesOperatorSchema = z.literal("includes").openapi({
+	description: "Includes",
 })
 
 export const IsSetOperatorSchema = z.literal("is_set").openapi({
@@ -43,19 +43,19 @@ export const IsSetOperatorSchema = z.literal("is_set").openapi({
 
 export const OperatorSchema = z.union([
 	EqualOperatorSchema,
-	MatchOperatorSchema,
+	ContainsOperatorSchema,
 	StartsWithOperatorSchema,
 	EndsWithOperatorSchema,
 	GraterThanOperatorSchema,
 	GraterThanOrEqualOperatorSchema,
 	LessThanOperatorSchema,
 	LessThanOrEqualOperatorSchema,
-	IncludeOperatorSchema,
+	IncludesOperatorSchema,
 	IsSetOperatorSchema,
 ])
 
 export type EqualOperator = z.infer<typeof EqualOperatorSchema>
-export type MatchOperator = z.infer<typeof MatchOperatorSchema>
+export type ContainsOperator = z.infer<typeof ContainsOperatorSchema>
 export type StartsWithOperator = z.infer<typeof StartsWithOperatorSchema>
 export type EndsWithOperator = z.infer<typeof EndsWithOperatorSchema>
 export type GraterThanOperator = z.infer<typeof GraterThanOperatorSchema>
@@ -66,6 +66,6 @@ export type LessThanOperator = z.infer<typeof LessThanOperatorSchema>
 export type LessThanOrEqualOperator = z.infer<
 	typeof LessThanOrEqualOperatorSchema
 >
-export type IncludeOperator = z.infer<typeof IncludeOperatorSchema>
+export type IncludesOperator = z.infer<typeof IncludesOperatorSchema>
 export type IsSetOperator = z.infer<typeof IsSetOperatorSchema>
 export type Operator = z.infer<typeof OperatorSchema>
