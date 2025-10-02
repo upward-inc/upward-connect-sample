@@ -60,11 +60,16 @@ export const validateTokenParams = async (
 		return { success: false, error_message: "Unknown user" }
 	}
 
+	// スコープの存在確認
+	if (!publishedAuthCode.scope) {
+		return { success: false, error_message: "No scope" }
+	}
+
 	return {
 		success: true,
 		user: user,
 		client_id: publishedAuthCode.client_id,
-		scopes: publishedAuthCode.scope ? publishedAuthCode.scope.split(" ") : [],
+		scopes: publishedAuthCode.scope.split(" "),
 		nonce: publishedAuthCode.nonce ?? undefined,
 	}
 }
