@@ -4,6 +4,7 @@ import {
 	deleteAuthorizationCode,
 	generateRefreshToken,
 	generateToken,
+	getAuthorizationCode,
 	getOAuthClientById,
 	getUserById,
 	getUserByUsernameAndPassword,
@@ -126,8 +127,27 @@ export const authRouter = new Hono<{ Variables: AuthContexts }>()
 			const params = c.req.valid("form")
 
 			if (params.grant_type === "authorization_code") {
+				// 発行済み認可コードの存在確認
+				const publishedAuthCode = await getAuthorizationCode(params.code)
+				if (!publishedAuthCode) {
+					return c.json(
+						{
+							error: "invalid_grant",
+							error_description: "Invalid authorization code",
+						},
+						400,
+					)
+				}
+
+				// 認可コードを使用済みにする（データベースから削除する）
+				// タイミング攻撃対策のため、パラメータ検証より前に実行
+				await deleteAuthorizationCode(publishedAuthCode.auth_code)
+
 				// パラメータの検証
-				const validateResult = await validateTokenParams(params)
+				const validateResult = await validateTokenParams(
+					params,
+					publishedAuthCode,
+				)
 
 				if (!validateResult.success) {
 					return c.json(
@@ -139,9 +159,6 @@ export const authRouter = new Hono<{ Variables: AuthContexts }>()
 					)
 				}
 				const { user_id, user_name, client_id, nonce } = validateResult
-
-				// 認可コードを使用済みにする（データベースから削除する）
-				await deleteAuthorizationCode(params.code)
 
 				// アクセストークン、IDトークンを生成
 				const { accessToken, idToken } = generateToken({

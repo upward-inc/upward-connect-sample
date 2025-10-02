@@ -1,5 +1,5 @@
 import { isBefore } from "@formkit/tempo"
-import { getAuthorizationCode } from "./get-code"
+import type { PublishedAuthCode } from "../../schema/auth"
 import { getUserById } from "./get-user"
 
 interface TokenParams {
@@ -32,13 +32,8 @@ interface ValidateResultFailure {
  */
 export const validateTokenParams = async (
 	params: TokenParams,
+	publishedAuthCode: PublishedAuthCode,
 ): Promise<ValidateResult> => {
-	// 発行済み認可コードの存在確認
-	const publishedAuthCode = await getAuthorizationCode(params.code)
-	if (!publishedAuthCode) {
-		return { success: false, error_message: "Invalid authorization code" }
-	}
-
 	// 有効期限の検証
 	if (isBefore(publishedAuthCode.expire_at, new Date())) {
 		return { success: false, error_message: "expired authorization code" }

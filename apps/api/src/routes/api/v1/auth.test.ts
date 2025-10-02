@@ -465,6 +465,171 @@ describe("Auth Tests", () => {
 		})
 	})
 
+	describe("Token Endpoint - Authorization Code", () => {
+		it("should prevent reuse of authorization code", async () => {
+			// Create a test user and client
+			const testUser = await createTestUser({
+				user_name: "reuse_code_user",
+				first_name: "Reuse",
+				last_name: "Code",
+				email: "reuse_code@example.com",
+			})
+
+			const testClient = await createTestOAuthClient({
+				name: "reuse_code_cli",
+				secret: "test_secret_12345",
+				redirect_uris: "https://example.com/callback",
+				scopes: "openid,profile,email",
+			})
+
+			const token = createValidToken(testUser.id)
+
+			// Step 1: Get authorization code
+			const authorizeResponse = await app.request("/api/v1/oauth2/authorize", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/x-www-form-urlencoded",
+					Authorization: `Bearer ${token}`,
+				},
+				body: new URLSearchParams({
+					response_type: "code",
+					client_id: testClient.id,
+					redirect_uri: "https://example.com/callback",
+					scope: "openid profile email",
+				}),
+			})
+
+			const authorizeData = await authorizeResponse.json()
+			expect(authorizeResponse.status).toBe(200)
+			expect(authorizeData).toHaveProperty("code")
+
+			// Step 2: Exchange authorization code for tokens (first time - should succeed)
+			const firstTokenResponse = await app.request("/api/v1/oauth2/token", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/x-www-form-urlencoded",
+				},
+				body: new URLSearchParams({
+					grant_type: "authorization_code",
+					code: authorizeData.code,
+					redirect_uri: "https://example.com/callback",
+					client_id: testClient.id,
+					client_secret: testClient.secret,
+				}),
+			})
+
+			const firstTokenData = await firstTokenResponse.json()
+			expect(firstTokenResponse.status).toBe(200)
+			expect(firstTokenData).toHaveProperty("access_token")
+			expect(firstTokenData).toHaveProperty("id_token")
+			expect(firstTokenData).toHaveProperty("refresh_token")
+
+			// Step 3: Try to reuse the same authorization code (should fail)
+			const secondTokenResponse = await app.request("/api/v1/oauth2/token", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/x-www-form-urlencoded",
+				},
+				body: new URLSearchParams({
+					grant_type: "authorization_code",
+					code: authorizeData.code,
+					redirect_uri: "https://example.com/callback",
+					client_id: testClient.id,
+					client_secret: testClient.secret,
+				}),
+			})
+
+			const secondTokenData = await secondTokenResponse.json()
+			expect(secondTokenResponse.status).toBe(400)
+			expect(secondTokenData).toEqual({
+				error: "invalid_grant",
+				error_description: "Invalid authorization code",
+			})
+		})
+
+		it("should invalidate authorization code even with invalid parameters (timing attack prevention)", async () => {
+			// Create a test user and client
+			const testUser = await createTestUser({
+				user_name: "timing_attack_user",
+				first_name: "Timing",
+				last_name: "Attack",
+				email: "timing_attack@example.com",
+			})
+
+			const testClient = await createTestOAuthClient({
+				name: "timing_cli",
+				secret: "test_secret_12345",
+				redirect_uris: "https://example.com/callback",
+				scopes: "openid,profile,email",
+			})
+
+			const token = createValidToken(testUser.id)
+
+			// Step 1: Get authorization code
+			const authorizeResponse = await app.request("/api/v1/oauth2/authorize", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/x-www-form-urlencoded",
+					Authorization: `Bearer ${token}`,
+				},
+				body: new URLSearchParams({
+					response_type: "code",
+					client_id: testClient.id,
+					redirect_uri: "https://example.com/callback",
+					scope: "openid profile email",
+				}),
+			})
+
+			const authorizeData = await authorizeResponse.json()
+			expect(authorizeResponse.status).toBe(200)
+			expect(authorizeData).toHaveProperty("code")
+
+			// Step 2: Try to exchange with INVALID client_secret (should fail but code should be invalidated)
+			const invalidSecretResponse = await app.request("/api/v1/oauth2/token", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/x-www-form-urlencoded",
+				},
+				body: new URLSearchParams({
+					grant_type: "authorization_code",
+					code: authorizeData.code,
+					redirect_uri: "https://example.com/callback",
+					client_id: testClient.id,
+					client_secret: "wrong_secret", // Invalid secret
+				}),
+			})
+
+			const invalidSecretData = await invalidSecretResponse.json()
+			expect(invalidSecretResponse.status).toBe(400)
+			expect(invalidSecretData).toEqual({
+				error: "invalid_grant",
+				error_description: "Invalid client_secret",
+			})
+
+			// Step 3: Try to exchange with VALID parameters (should fail because code was already invalidated)
+			const validParamsResponse = await app.request("/api/v1/oauth2/token", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/x-www-form-urlencoded",
+				},
+				body: new URLSearchParams({
+					grant_type: "authorization_code",
+					code: authorizeData.code,
+					redirect_uri: "https://example.com/callback",
+					client_id: testClient.id,
+					client_secret: testClient.secret, // Correct secret
+				}),
+			})
+
+			const validParamsData = await validParamsResponse.json()
+			expect(validParamsResponse.status).toBe(400)
+			expect(validParamsData).toEqual({
+				error: "invalid_grant",
+				error_description: "Invalid authorization code",
+			})
+		})
+	})
+
 	describe("Authorize Endpoint", () => {
 		it("should return code for valid authorization request", async () => {
 			// Create a test user and client
