@@ -172,7 +172,7 @@ export const authRouter = new Hono<{ Variables: AuthContexts }>()
 				})
 
 				// IDトークンを生成
-				let idToken = undefined
+				let idToken: string | undefined = undefined
 				if (scopes.includes("openid")) {
 					idToken = generateIdToken({
 						user: user,
