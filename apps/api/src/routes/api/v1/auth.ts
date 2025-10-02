@@ -48,6 +48,7 @@ export const authRouter = new Hono<{ Variables: AuthContexts }>()
 			const accessToken = generateAccessToken({
 				userId: user.id,
 				userName: user.user_name,
+				clientId: "https://connect.upward.jp",
 			})
 			return c.json({ ...user, access_token: accessToken })
 		},

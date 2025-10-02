@@ -8,7 +8,7 @@ import type { LoggedInUser } from "../../schema/auth"
 export const generateAccessToken = (payload: {
 	userId: string
 	userName: string
-	clientId?: string
+	clientId: string
 	nonce?: string
 }) => {
 	const accessToken = sign({}, env.OIDC_TOKEN_SECRET, {
@@ -70,7 +70,7 @@ export const generateIdToken = (payload: {
  */
 export const generateRefreshToken = (payload: {
 	userId: string
-	clientId?: string
+	clientId: string
 }) => {
 	const refreshToken = sign({}, env.OIDC_REFRESH_TOKEN_SECRET, {
 		algorithm: "HS256",
