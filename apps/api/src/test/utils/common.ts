@@ -157,18 +157,20 @@ export async function createTestUser(userData: {
 	user_name: string
 	first_name: string
 	last_name: string
-	email: string | null
+	email?: string
+	timezone?: string
+	locale?: string
 }) {
 	const user = await testPrisma.user.create({
 		data: {
 			user_name: `test_${userData.user_name}`,
 			first_name: userData.first_name,
 			last_name: userData.last_name,
-			email: userData.email,
+			email: userData.email || null,
 			hashed_password: "test-password-123", // Use a fixed password for testing purposes
 			is_active: true,
-			timezone: "Asia/Tokyo",
-			locale: "ja-JP",
+			timezone: userData.timezone || null,
+			locale: userData.locale || null,
 		},
 		select: {
 			id: true,
@@ -177,6 +179,8 @@ export async function createTestUser(userData: {
 			last_name: true,
 			email: true,
 			is_active: true,
+			timezone: true,
+			locale: true,
 		},
 	})
 

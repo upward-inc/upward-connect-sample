@@ -18,6 +18,8 @@ export const getUserById = async (
 			first_name: true,
 			last_name: true,
 			email: true,
+			timezone: true,
+			locale: true,
 		},
 	})
 
@@ -46,6 +48,8 @@ export const getUserByUsernameAndPassword = async (
 			first_name: true,
 			last_name: true,
 			email: true,
+			timezone: true,
+			locale: true,
 		},
 	})
 

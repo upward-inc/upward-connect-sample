@@ -20,15 +20,15 @@ export const SystemUserSchema = z
 			description: "姓",
 			example: "Smail",
 		}),
-		email: z.string().openapi({
+		email: z.string().nullable().openapi({
 			description: "メールアドレス",
 			example: "dsmail0@example.com",
 		}),
-		timezone: z.string().openapi({
+		timezone: z.string().nullable().openapi({
 			description: "タイムゾーン",
 			example: "Asia/Tokyo",
 		}),
-		locale: z.string().openapi({
+		locale: z.string().nullable().openapi({
 			description: "ロケール",
 			example: "ja-JP",
 		}),

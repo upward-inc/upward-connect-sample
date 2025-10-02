@@ -92,9 +92,17 @@ export const LoggedInUserSchema = z
 			description: "姓",
 			example: "Smail",
 		}),
-		email: z.string().email().openapi({
+		email: z.string().email().nullable().openapi({
 			description: "メールアドレス",
 			example: "dsmail0@example.com",
+		}),
+		timezone: z.string().nullable().openapi({
+			description: "タイムゾーン",
+			example: "Asia/Tokyo",
+		}),
+		locale: z.string().nullable().openapi({
+			description: "ロケール",
+			example: "ja-JP",
 		}),
 	})
 	.openapi({

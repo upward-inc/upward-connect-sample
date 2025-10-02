@@ -1,5 +1,5 @@
 import { isBefore } from "@formkit/tempo"
-import type { PublishedAuthCode } from "../../schema/auth"
+import type { LoggedInUser, PublishedAuthCode } from "../../schema/auth"
 import { getUserById } from "./get-user"
 
 interface TokenParams {
@@ -14,9 +14,9 @@ type ValidateResult = ValidateResultSuccess | ValidateResultFailure
 
 interface ValidateResultSuccess {
 	success: true
-	user_id: string
-	user_name: string
+	user: LoggedInUser
 	client_id: string
+	scopes: string[]
 	nonce?: string
 }
 
@@ -62,9 +62,9 @@ export const validateTokenParams = async (
 
 	return {
 		success: true,
-		user_id: user.id,
-		user_name: user.user_name,
+		user: user,
 		client_id: publishedAuthCode.client_id,
+		scopes: publishedAuthCode.scope ? publishedAuthCode.scope.split(" ") : [],
 		nonce: publishedAuthCode.nonce ?? undefined,
 	}
 }
