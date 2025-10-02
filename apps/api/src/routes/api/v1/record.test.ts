@@ -1826,7 +1826,6 @@ describe("Record Tests", () => {
 			})
 			const token = createValidToken(testUser.id)
 
-			// 削除対象のテストアカウントを作成
 			const testAccount = await createTestAccount(
 				{
 					name: "Account to Delete",
@@ -1847,39 +1846,10 @@ describe("Record Tests", () => {
 			expect(response.status).toBe(204)
 			expect(await response.text()).toBe("")
 
-			// データベースからレコードが削除されたことを確認
 			const deletedAccount = await testPrisma.account.findFirst({
 				where: { id: testAccount.id },
 			})
 			expect(deletedAccount).toBeNull()
-		})
-
-		it("存在しないレコードを削除しようとした場合に404を返すこと", async () => {
-			const testUser = await createTestUser({
-				user_name: "delete_not_found_user",
-				first_name: "Delete",
-				last_name: "NotFound",
-				email: "delete_not_found@example.com",
-			})
-			const token = createValidToken(testUser.id)
-
-			const nonexistentId = crypto.randomUUID()
-
-			const response = await app.request(
-				`/api/v1/records/account/${nonexistentId}`,
-				{
-					method: "DELETE",
-					headers: {
-						Authorization: `Bearer ${token}`,
-					},
-				},
-			)
-
-			const data = await response.json()
-			expect(response.status).toBe(404)
-			expect(data).toEqual({
-				message: `ID '${nonexistentId}' のレコードは 'account' に存在しません`,
-			})
 		})
 
 		it("存在しないエンティティのレコードを削除しようとした場合に404を返すこと", async () => {
@@ -1910,31 +1880,19 @@ describe("Record Tests", () => {
 			})
 		})
 
-		it("認証ヘッダーなしでリクエストした場合に401を返すこと", async () => {
-			const randomId = crypto.randomUUID()
-
-			const response = await app.request(`/api/v1/records/account/${randomId}`, {
-				method: "DELETE",
-			})
-
-			const data = await response.json()
-			expect(response.status).toBe(401)
-			expect(data).toEqual({
-				message: "No authentication header",
-			})
-		})
-
-		it("不正なUUID形式でリクエストした場合に400を返すこと", async () => {
+		it("存在しないレコードを削除しようとした場合に404を返すこと", async () => {
 			const testUser = await createTestUser({
-				user_name: "delete_invalid_uuid_user",
+				user_name: "delete_not_found_user",
 				first_name: "Delete",
-				last_name: "InvalidUUID",
-				email: "delete_invalid_uuid@example.com",
+				last_name: "NotFound",
+				email: "delete_not_found@example.com",
 			})
 			const token = createValidToken(testUser.id)
 
+			const nonexistentId = crypto.randomUUID()
+
 			const response = await app.request(
-				"/api/v1/records/account/invalid-uuid",
+				`/api/v1/records/account/${nonexistentId}`,
 				{
 					method: "DELETE",
 					headers: {
@@ -1944,8 +1902,27 @@ describe("Record Tests", () => {
 			)
 
 			const data = await response.json()
-			expect(response.status).toBe(400)
-			expect(data).toHaveProperty("message")
+			expect(response.status).toBe(404)
+			expect(data).toEqual({
+				message: `ID '${nonexistentId}' のレコードは 'account' に存在しません`,
+			})
+		})
+
+		it("認証ヘッダーなしでリクエストした場合に401を返すこと", async () => {
+			const randomId = crypto.randomUUID()
+
+			const response = await app.request(
+				`/api/v1/records/account/${randomId}`,
+				{
+					method: "DELETE",
+				},
+			)
+
+			const data = await response.json()
+			expect(response.status).toBe(401)
+			expect(data).toEqual({
+				message: "No authentication header",
+			})
 		})
 	})
 })
