@@ -1,6 +1,5 @@
 import { isBefore } from "@formkit/tempo"
 import type { PublishedAuthCode } from "../../schema/auth"
-import { getAuthorizationCode } from "./get-code"
 import { getUserById } from "./get-user"
 
 interface TokenParams {
