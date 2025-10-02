@@ -3,7 +3,7 @@ import { prisma } from "../../libs/prisma"
 export const deleteRecord = async (
 	entityName: string,
 	id: string,
-): Promise<void> => {
+): Promise<boolean> => {
 	const query = `
 		DELETE FROM [${entityName}]
 		WHERE id = '${id}'
@@ -11,7 +11,5 @@ export const deleteRecord = async (
 
 	const result = await prisma.$executeRawUnsafe(query)
 
-	if (result === 0) {
-		throw new Error("レコードが見つかりません")
-	}
+	return result > 0
 }
