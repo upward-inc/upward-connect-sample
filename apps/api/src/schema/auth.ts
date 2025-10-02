@@ -29,6 +29,51 @@ export const OAuthClientSchema = z
 		description: "登録済みOAuthクライアント",
 	})
 
+export const PublishedAuthCodeSchema = z
+	.object({
+		auth_code: z.string().openapi({
+			description: "認可コード",
+			example: "sample_authorization_code",
+		}),
+		client_id: z.string().openapi({
+			description: "クライアントID",
+			example: "00000001",
+		}),
+		client_secret: z.string().openapi({
+			description: "クライアントシークレット",
+			example: "sample_client_secret",
+		}),
+		redirect_uri: z.string().openapi({
+			description: "リダイレクトURI",
+			example: "https://example.com/callback",
+		}),
+		scope: z.string().nullable().openapi({
+			description: "スコープ",
+			example: "openid profile email",
+		}),
+		state: z.string().nullable().openapi({
+			description: "state",
+			example: "sample_state",
+		}),
+		nonce: z.string().nullable().openapi({
+			description: "nonce",
+			example: "sample_nonce",
+		}),
+		published_at: z.date().openapi({
+			description: "発行日時",
+		}),
+		expire_at: z.date().openapi({
+			description: "有効期限",
+		}),
+		user_id: z.string().openapi({
+			description: "ユーザーID",
+			example: "00000001",
+		}),
+	})
+	.openapi({
+		description: "発行済み認可コード情報",
+	})
+
 export const LoggedInUserSchema = z
 	.object({
 		id: z.string().openapi({
@@ -159,6 +204,7 @@ export const PostTokenResultSchema = z.object({
 })
 
 export type OAuthClient = z.infer<typeof OAuthClientSchema>
+export type PublishedAuthCode = z.infer<typeof PublishedAuthCodeSchema>
 export type LoggedInUser = z.infer<typeof LoggedInUserSchema>
 export type PostLoginParam = z.infer<typeof PostLoginParamSchema>
 export type PostLoginResult = z.infer<typeof PostLoginResultSchema>

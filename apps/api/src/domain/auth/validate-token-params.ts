@@ -1,4 +1,5 @@
 import { isBefore } from "@formkit/tempo"
+import type { PublishedAuthCode } from "../../schema/auth"
 import { getAuthorizationCode } from "./get-code"
 import { getUserById } from "./get-user"
 
@@ -31,15 +32,7 @@ interface ValidateResultFailure {
  */
 export const validateTokenParams = async (
 	params: TokenParams,
-	publishedAuthCode: {
-		auth_code: string
-		expire_at: Date
-		client_id: string
-		client_secret: string
-		redirect_uri: string
-		user_id: string
-		nonce: string | null
-	},
+	publishedAuthCode: PublishedAuthCode,
 ): Promise<ValidateResult> => {
 	// 有効期限の検証
 	if (isBefore(publishedAuthCode.expire_at, new Date())) {
