@@ -502,6 +502,8 @@ describe("Auth Tests", () => {
 					client_id: testClient.id,
 					redirect_uri: "https://example.com/callback",
 					scope: "openid profile email",
+					state: "random_state_12345",
+					nonce: "random_nonce_12345",
 				}),
 			})
 
@@ -583,6 +585,8 @@ describe("Auth Tests", () => {
 					client_id: testClient.id,
 					redirect_uri: "https://example.com/callback",
 					scope: "openid profile email",
+					state: "random_state_12345",
+					nonce: "random_nonce_12345",
 				}),
 			})
 
@@ -637,7 +641,7 @@ describe("Auth Tests", () => {
 	})
 
 	describe("Authorize Endpoint", () => {
-		it("should return code for valid authorization request", async () => {
+		it("should return state and code for valid authorization request", async () => {
 			// Create a test user and client
 			const testUser = await createTestUser({
 				user_name: "auth_user",
@@ -648,43 +652,6 @@ describe("Auth Tests", () => {
 
 			const testClient = await createTestOAuthClient({
 				name: "auth_cli",
-				secret: "test_secret_12345",
-				redirect_uris: "https://example.com/callback",
-				scopes: "openid,profile,email",
-			})
-
-			const token = createValidToken(testUser.id)
-
-			const response = await app.request("/api/v1/oauth2/authorize", {
-				method: "POST",
-				headers: {
-					"Content-Type": "application/x-www-form-urlencoded",
-					Authorization: `Bearer ${token}`,
-				},
-				body: new URLSearchParams({
-					response_type: "code",
-					client_id: testClient.id,
-					redirect_uri: "https://example.com/callback",
-					scope: "openid profile email",
-				}),
-			})
-
-			const data = await response.json()
-			expect(response.status).toBe(200)
-			expect(data).toHaveProperty("code")
-		})
-
-		it("should return state parameter when state parameter is provided", async () => {
-			// Create a test user and client
-			const testUser = await createTestUser({
-				user_name: "state_user",
-				first_name: "State",
-				last_name: "User",
-				email: "state_user@example.com",
-			})
-
-			const testClient = await createTestOAuthClient({
-				name: "state_cli",
 				secret: "test_secret_12345",
 				redirect_uris: "https://example.com/callback",
 				scopes: "openid,profile,email",
@@ -705,11 +672,13 @@ describe("Auth Tests", () => {
 					redirect_uri: "https://example.com/callback",
 					scope: "openid profile email",
 					state: stateValue,
+					nonce: "random_nonce_12345",
 				}),
 			})
 
 			const data = await response.json()
 			expect(response.status).toBe(200)
+			expect(data).toHaveProperty("code")
 			expect(data).toHaveProperty("state", stateValue)
 		})
 
@@ -736,6 +705,7 @@ describe("Auth Tests", () => {
 					redirect_uri: "https://example.com/callback",
 					scope: "openid profile email",
 					state: stateValue,
+					nonce: "random_nonce_12345",
 				}),
 			})
 
@@ -778,6 +748,7 @@ describe("Auth Tests", () => {
 					redirect_uri: "https://malicious-site.com/callback", // Different from registered URI
 					scope: "openid profile email",
 					state: stateValue,
+					nonce: "random_nonce_12345",
 				}),
 			})
 
@@ -819,6 +790,7 @@ describe("Auth Tests", () => {
 					redirect_uri: "https://example.com/callback",
 					scope: "openid profile email",
 					state: stateValue,
+					nonce: "random_nonce_12345",
 				}),
 			})
 
@@ -861,6 +833,7 @@ describe("Auth Tests", () => {
 					client_id: testClient.id,
 					redirect_uri: "https://example.com/callback",
 					scope: "openid profile email",
+					state: "random_state_12345",
 					nonce: nonceValue,
 				}),
 			})
@@ -933,6 +906,7 @@ describe("Auth Tests", () => {
 					client_id: testClient.id,
 					redirect_uri: "https://example.com/callback",
 					scope: "openid profile email",
+					state: "random_state_12345",
 					nonce: "", // Empty nonce
 				}),
 			})
@@ -1000,6 +974,7 @@ describe("Auth Tests", () => {
 					client_id: testClient.id,
 					redirect_uri: "https://example.com/callback",
 					scope: "openid profile email",
+					state: "random_state_12345",
 					nonce: specialNonce,
 				}),
 			})
@@ -1066,6 +1041,8 @@ describe("Auth Tests", () => {
 					client_id: testClient.id,
 					redirect_uri: "https://example.com/callback",
 					scope: "openid profile email",
+					state: "random_state_12345",
+					nonce: "random_nonce_12345",
 				}),
 			})
 
@@ -1136,6 +1113,8 @@ describe("Auth Tests", () => {
 					client_id: testClient.id,
 					redirect_uri: "https://example.com/callback",
 					scope: "openid profile email",
+					state: "random_state_12345",
+					nonce: "random_nonce_12345",
 				}),
 			})
 
@@ -1203,6 +1182,8 @@ describe("Auth Tests", () => {
 					client_id: testClient.id,
 					redirect_uri: "https://example.com/callback",
 					scope: "openid profile email",
+					state: "random_state_12345",
+					nonce: "random_nonce_12345",
 				}),
 			})
 
@@ -1333,6 +1314,8 @@ describe("Auth Tests", () => {
 					client_id: testClient.id,
 					redirect_uri: "https://example.com/callback",
 					scope: "openid profile email",
+					state: "random_state_12345",
+					nonce: "random_nonce_12345",
 				}),
 			})
 
@@ -1413,6 +1396,8 @@ describe("Auth Tests", () => {
 					client_id: testClient.id,
 					redirect_uri: "https://example.com/callback",
 					scope: "openid profile email",
+					state: "random_state_12345",
+					nonce: "random_nonce_12345",
 				}),
 			})
 

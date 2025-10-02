@@ -158,9 +158,9 @@ export const PostAuthorizeParamSchema = z.object({
 	response_type: z.literal("code"),
 	client_id: z.string().min(1),
 	redirect_uri: z.string().url(),
-	scope: z.string().optional(),
-	state: z.string().optional(),
-	nonce: z.string().optional(),
+	scope: z.string(),
+	state: z.string(),
+	nonce: z.string(),
 })
 
 export const PostAuthorizeResultSchema = z.object({
@@ -168,7 +168,7 @@ export const PostAuthorizeResultSchema = z.object({
 		description: "認可コード",
 		example: "sample_code",
 	}),
-	state: z.string().optional().openapi({
+	state: z.string().openapi({
 		description: "リクエストで渡されたstate",
 		example: "sample_state",
 	}),
