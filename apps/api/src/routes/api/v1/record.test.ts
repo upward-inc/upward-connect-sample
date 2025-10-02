@@ -1071,7 +1071,7 @@ describe("Record Tests", () => {
 					and: [
 						{
 							field: "name",
-							operator: "match",
+							operator: "contains",
 							value: "Technology",
 							is_not: false,
 						},
