@@ -1815,4 +1815,137 @@ describe("Record Tests", () => {
 			})
 		})
 	})
+
+	describe("DELETE /api/v1/records - Delete Record", () => {
+		it("should delete a record successfully", async () => {
+			const testUser = await createTestUser({
+				user_name: "delete_success_user",
+				first_name: "Delete",
+				last_name: "Success",
+				email: "delete_success@example.com",
+			})
+			const token = createValidToken(testUser.id)
+
+			// Create a test account to delete
+			const testAccount = await createTestAccount(
+				{
+					name: "Account to Delete",
+				},
+				testUser.id,
+			)
+
+			const response = await app.request(
+				`/api/v1/records/account/${testAccount.id}`,
+				{
+					method: "DELETE",
+					headers: {
+						Authorization: `Bearer ${token}`,
+					},
+				},
+			)
+
+			expect(response.status).toBe(204)
+			expect(await response.text()).toBe("")
+
+			// Verify the record was deleted from the database
+			const deletedAccount = await testPrisma.account.findFirst({
+				where: { id: testAccount.id },
+			})
+			expect(deletedAccount).toBeNull()
+		})
+
+		it("should return 404 for nonexistent record", async () => {
+			const testUser = await createTestUser({
+				user_name: "delete_not_found_user",
+				first_name: "Delete",
+				last_name: "NotFound",
+				email: "delete_not_found@example.com",
+			})
+			const token = createValidToken(testUser.id)
+
+			const nonexistentId = crypto.randomUUID()
+
+			const response = await app.request(
+				`/api/v1/records/account/${nonexistentId}`,
+				{
+					method: "DELETE",
+					headers: {
+						Authorization: `Bearer ${token}`,
+					},
+				},
+			)
+
+			const data = await response.json()
+			expect(response.status).toBe(404)
+			expect(data).toEqual({
+				message: `ID '${nonexistentId}' のレコードは 'account' に存在しません`,
+			})
+		})
+
+		it("should return 404 for nonexistent entity", async () => {
+			const testUser = await createTestUser({
+				user_name: "delete_entity_not_found_user",
+				first_name: "Delete",
+				last_name: "EntityNotFound",
+				email: "delete_entity_not_found@example.com",
+			})
+			const token = createValidToken(testUser.id)
+
+			const randomId = crypto.randomUUID()
+
+			const response = await app.request(
+				`/api/v1/records/nonexistent_entity/${randomId}`,
+				{
+					method: "DELETE",
+					headers: {
+						Authorization: `Bearer ${token}`,
+					},
+				},
+			)
+
+			const data = await response.json()
+			expect(response.status).toBe(404)
+			expect(data).toEqual({
+				message: "エンティティ 'nonexistent_entity' は存在しません",
+			})
+		})
+
+		it("should return 401 for missing authorization header", async () => {
+			const randomId = crypto.randomUUID()
+
+			const response = await app.request(`/api/v1/records/account/${randomId}`, {
+				method: "DELETE",
+			})
+
+			const data = await response.json()
+			expect(response.status).toBe(401)
+			expect(data).toEqual({
+				message: "No authentication header",
+			})
+		})
+
+		it("should return 400 for invalid UUID format", async () => {
+			const testUser = await createTestUser({
+				user_name: "delete_invalid_uuid_user",
+				first_name: "Delete",
+				last_name: "InvalidUUID",
+				email: "delete_invalid_uuid@example.com",
+			})
+			const token = createValidToken(testUser.id)
+
+			const response = await app.request(
+				"/api/v1/records/account/invalid-uuid",
+				{
+					method: "DELETE",
+					headers: {
+						Authorization: `Bearer ${token}`,
+					},
+				},
+			)
+
+			const data = await response.json()
+			expect(response.status).toBe(400)
+			expect(data).toHaveProperty("message")
+		})
+	})
 })
