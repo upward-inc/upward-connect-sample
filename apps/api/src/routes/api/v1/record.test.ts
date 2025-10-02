@@ -1816,8 +1816,8 @@ describe("Record Tests", () => {
 		})
 	})
 
-	describe("DELETE /api/v1/records - Delete Record", () => {
-		it("should delete a record successfully", async () => {
+	describe("DELETE /api/v1/records - レコード削除", () => {
+		it("レコードを正常に削除できること", async () => {
 			const testUser = await createTestUser({
 				user_name: "delete_success_user",
 				first_name: "Delete",
@@ -1826,7 +1826,7 @@ describe("Record Tests", () => {
 			})
 			const token = createValidToken(testUser.id)
 
-			// Create a test account to delete
+			// 削除対象のテストアカウントを作成
 			const testAccount = await createTestAccount(
 				{
 					name: "Account to Delete",
@@ -1847,14 +1847,14 @@ describe("Record Tests", () => {
 			expect(response.status).toBe(204)
 			expect(await response.text()).toBe("")
 
-			// Verify the record was deleted from the database
+			// データベースからレコードが削除されたことを確認
 			const deletedAccount = await testPrisma.account.findFirst({
 				where: { id: testAccount.id },
 			})
 			expect(deletedAccount).toBeNull()
 		})
 
-		it("should return 404 for nonexistent record", async () => {
+		it("存在しないレコードを削除しようとした場合に404を返すこと", async () => {
 			const testUser = await createTestUser({
 				user_name: "delete_not_found_user",
 				first_name: "Delete",
@@ -1882,7 +1882,7 @@ describe("Record Tests", () => {
 			})
 		})
 
-		it("should return 404 for nonexistent entity", async () => {
+		it("存在しないエンティティのレコードを削除しようとした場合に404を返すこと", async () => {
 			const testUser = await createTestUser({
 				user_name: "delete_entity_not_found_user",
 				first_name: "Delete",
@@ -1910,7 +1910,7 @@ describe("Record Tests", () => {
 			})
 		})
 
-		it("should return 401 for missing authorization header", async () => {
+		it("認証ヘッダーなしでリクエストした場合に401を返すこと", async () => {
 			const randomId = crypto.randomUUID()
 
 			const response = await app.request(`/api/v1/records/account/${randomId}`, {
@@ -1924,7 +1924,7 @@ describe("Record Tests", () => {
 			})
 		})
 
-		it("should return 400 for invalid UUID format", async () => {
+		it("不正なUUID形式でリクエストした場合に400を返すこと", async () => {
 			const testUser = await createTestUser({
 				user_name: "delete_invalid_uuid_user",
 				first_name: "Delete",
