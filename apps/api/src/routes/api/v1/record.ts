@@ -98,10 +98,12 @@ export const recordRouter = new Hono<{ Variables: AuthContexts }>()
 				)
 			}
 
-			const deleted = await deleteRecord(entity_name, id)
+			const { deleted } = await deleteRecord(entity_name, id)
 			if (!deleted) {
 				return c.json(
-					{ message: `ID '${id}' のレコードは '${entity_name}' に存在しません` },
+					{
+						message: `ID '${id}' のレコードは '${entity_name}' に存在しません`,
+					},
 					404,
 				)
 			}
