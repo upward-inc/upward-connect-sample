@@ -94,14 +94,25 @@ export const PostRecordResponseSchema = z
 			description: "作成されたレコードのエンティティ名",
 			examples: ["account", "lead"],
 		}),
-		id: z.string().uuid().openapi({
+		id: z.string().openapi({
 			description: "作成されたレコードのID",
-			example: "fe604faa-0731-4424-a22f-737d60047f39",
+			example: "account-00000001",
 		}),
 	})
 	.openapi({
 		description: "作成されたレコードデータ",
 	})
+
+export const DeleteRecordParamSchema = z.object({
+	entity_name: z.string().openapi({
+		description: "削除対象レコードのエンティティ名",
+		examples: ["account", "lead"],
+	}),
+	id: z.string().openapi({
+		description: "削除対象のレコードID",
+		example: "account-00000001",
+	}),
+})
 
 export type Record = z.infer<typeof RecordSchema>
 export type RecordList = z.infer<typeof RecordListSchema>
@@ -109,3 +120,4 @@ export type GetRecordListQuery = z.infer<typeof GetRecordListQuerySchema>
 export type GetRecordListResponse = z.infer<typeof GetRecordListResponseSchema>
 export type PostRecordBody = z.infer<typeof PostRecordBodySchema>
 export type PostRecordResponse = z.infer<typeof PostRecordResponseSchema>
+export type DeleteRecordParam = z.infer<typeof DeleteRecordParamSchema>

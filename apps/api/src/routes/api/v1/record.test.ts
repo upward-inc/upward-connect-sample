@@ -1815,4 +1815,102 @@ describe("Record Tests", () => {
 			})
 		})
 	})
+
+	describe("DELETE /api/v1/records - レコード削除", () => {
+		it("レコードを正常に削除できること", async () => {
+			const testUser = await createTestUser({
+				user_name: "delete_success_user",
+				first_name: "Delete",
+				last_name: "Success",
+				email: "delete_success@example.com",
+			})
+			const token = createValidToken(testUser.id)
+
+			const testAccount = await createTestAccount(
+				{
+					name: "Account to Delete",
+				},
+				testUser.id,
+			)
+
+			const response = await app.request(
+				`/api/v1/records/account/${testAccount.id}`,
+				{
+					method: "DELETE",
+					headers: {
+						Authorization: `Bearer ${token}`,
+					},
+				},
+			)
+
+			expect(response.status).toBe(204)
+			expect(await response.text()).toBe("")
+
+			const deletedAccount = await testPrisma.account.findFirst({
+				where: { id: testAccount.id },
+			})
+			expect(deletedAccount).toBeNull()
+		})
+
+		it("存在しないエンティティのレコードを削除しようとした場合に404を返すこと", async () => {
+			const testUser = await createTestUser({
+				user_name: "delete_entity_not_found_user",
+				first_name: "Delete",
+				last_name: "EntityNotFound",
+				email: "delete_entity_not_found@example.com",
+			})
+			const token = createValidToken(testUser.id)
+
+			const randomId = crypto.randomUUID()
+
+			const response = await app.request(
+				`/api/v1/records/nonexistent_entity/${randomId}`,
+				{
+					method: "DELETE",
+					headers: {
+						Authorization: `Bearer ${token}`,
+					},
+				},
+			)
+
+			expect(response.status).toBe(404)
+		})
+
+		it("存在しないレコードを削除しようとした場合に404を返すこと", async () => {
+			const testUser = await createTestUser({
+				user_name: "delete_not_found_user",
+				first_name: "Delete",
+				last_name: "NotFound",
+				email: "delete_not_found@example.com",
+			})
+			const token = createValidToken(testUser.id)
+
+			const nonexistentId = crypto.randomUUID()
+
+			const response = await app.request(
+				`/api/v1/records/account/${nonexistentId}`,
+				{
+					method: "DELETE",
+					headers: {
+						Authorization: `Bearer ${token}`,
+					},
+				},
+			)
+
+			expect(response.status).toBe(404)
+		})
+
+		it("認証ヘッダーなしでリクエストした場合に401を返すこと", async () => {
+			const randomId = crypto.randomUUID()
+
+			const response = await app.request(
+				`/api/v1/records/account/${randomId}`,
+				{
+					method: "DELETE",
+				},
+			)
+
+			expect(response.status).toBe(401)
+		})
+	})
 })

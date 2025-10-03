@@ -2,12 +2,14 @@ import { Hono } from "hono"
 import { getEntity } from "../../../domain/entity"
 import {
 	createRecord,
+	deleteRecord,
 	getRecordList,
 	validateCreateRecordParams,
 } from "../../../domain/record"
 import { describeRoute, validator } from "../../../libs/hono-openapi"
 import type { AuthContexts } from "../../../schema/auth"
 import {
+	DeleteRecordParamSchema,
 	GetRecordListQuerySchema,
 	GetRecordListResponseSchema,
 	GetRecordParamSchema,
@@ -77,5 +79,35 @@ export const recordRouter = new Hono<{ Variables: AuthContexts }>()
 			)
 
 			return c.json(createResult, 201)
+		},
+	)
+	.delete(
+		"/:entity_name/:id",
+		describeRoute({
+			description: "レコードを削除する",
+		}),
+		validator("param", DeleteRecordParamSchema),
+		async (c) => {
+			const { entity_name, id } = c.req.valid("param")
+
+			const entity = await getEntity(entity_name)
+			if (!entity) {
+				return c.json(
+					{ message: `Entity '${entity_name}' does not exist` },
+					404,
+				)
+			}
+
+			const { deleted } = await deleteRecord(entity_name, id)
+			if (!deleted) {
+				return c.json(
+					{
+						message: `Record with ID '${id}' does not exist in '${entity_name}'`,
+					},
+					404,
+				)
+			}
+
+			return c.body(null, 204)
 		},
 	)
