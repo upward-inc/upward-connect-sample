@@ -29,3 +29,16 @@ bun api#dev
 # ログイン用Webアプリケーションを開発モードで起動
 bun login#dev
 ```
+
+## DBスキーマ変更手順
+
+1. マイグレーションファイルを作成
+   1. `bun db#migratefile`
+2. 生成した`migration.sql`にスキーマ変更を行うスクリプトを記述
+3. マイグレーションを実施
+   1. `bun db#migrate`
+4. `prisma/schema.prisma`にDBの状態を反映
+   1. `bun db#pull`
+5. Prismaクライアントの最新化
+   1. `bun prisma#generate`
+6. (Optional)必要であればサンプルデータを作成し、DBにデータを投入

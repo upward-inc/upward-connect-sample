@@ -6,6 +6,7 @@
 		"db#up": "docker compose -f compose-db.yml up -d",
 		"db#down": "docker compose -f compose-db.yml down",
 		"db#migrate": "prisma migrate dev",
+		"db#pull": "prisma db pull",
 		"db#migratefile": "dir=$(mkdir -p prisma/migrations/$(date +%Y%m%d%H%M%S) && echo $_) && cp ./migration.template.sql $dir/migration.sql",
 		"db#seed": "bun run seed/index.ts",
 		"prisma#generate": "prisma generate",
