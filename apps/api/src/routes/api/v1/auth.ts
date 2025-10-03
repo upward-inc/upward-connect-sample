@@ -48,7 +48,8 @@ export const authRouter = new Hono<{ Variables: AuthContexts }>()
 			const accessToken = generateAccessToken({
 				userId: user.id,
 				userName: user.user_name,
-				// jwtのaud項目は必須ですので、ダミーの値を指定
+				// アクセストークンにはaud項目を含める必要があるが、
+				// パスワード認証時に発行するアクセストークンにおいては使用されることがないのでダミーの値を設定
 				clientId: "00000000-0000-0000-0000-000000000000",
 			})
 			return c.json({ ...user, access_token: accessToken })
