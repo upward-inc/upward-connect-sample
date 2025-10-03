@@ -93,7 +93,7 @@ export const recordRouter = new Hono<{ Variables: AuthContexts }>()
 			const entity = await getEntity(entity_name)
 			if (!entity) {
 				return c.json(
-					{ message: `エンティティ '${entity_name}' は存在しません` },
+					{ message: `Entity '${entity_name}' does not exist` },
 					404,
 				)
 			}
@@ -102,7 +102,7 @@ export const recordRouter = new Hono<{ Variables: AuthContexts }>()
 			if (!deleted) {
 				return c.json(
 					{
-						message: `ID '${id}' のレコードは '${entity_name}' に存在しません`,
+						message: `Record with ID '${id}' does not exist in '${entity_name}'`,
 					},
 					404,
 				)
