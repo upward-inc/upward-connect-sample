@@ -96,7 +96,7 @@ export const PostRecordResponseSchema = z
 		}),
 		id: z.string().openapi({
 			description: "作成されたレコードのID",
-			example: "fe604faa-0731-4424-a22f-737d60047f39",
+			example: "account-00000001",
 		}),
 	})
 	.openapi({
@@ -110,7 +110,7 @@ export const DeleteRecordParamSchema = z.object({
 	}),
 	id: z.string().openapi({
 		description: "削除対象のレコードID",
-		example: "fe604faa-0731-4424-a22f-737d60047f39",
+		example: "account-00000001",
 	}),
 })
 
