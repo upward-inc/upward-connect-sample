@@ -1,6 +1,5 @@
 import { isBefore } from "@formkit/tempo"
 import type { LoggedInUser, PublishedAuthCode } from "../../schema/auth"
-import { getUserById } from "./get-user"
 
 interface TokenParams {
 	grant_type: string
@@ -14,7 +13,6 @@ type ValidateResult = ValidateResultSuccess | ValidateResultFailure
 
 interface ValidateResultSuccess {
 	success: true
-	user: LoggedInUser
 	client_id: string
 	scopes: string[]
 	nonce?: string
@@ -30,10 +28,10 @@ interface ValidateResultFailure {
  *
  * @see [RFC6749 OAuth 2.0 - 4.1.3. Access Token Request](https://www.rfc-editor.org/rfc/rfc6749.html#section-4.1.3)
  */
-export const validateTokenParams = async (
+export const validateTokenParams = (
 	params: TokenParams,
 	publishedAuthCode: PublishedAuthCode,
-): Promise<ValidateResult> => {
+): ValidateResult => {
 	// 有効期限の検証
 	if (isBefore(publishedAuthCode.expire_at, new Date())) {
 		return { success: false, error_message: "expired authorization code" }
@@ -54,12 +52,6 @@ export const validateTokenParams = async (
 		return { success: false, error_message: "Invalid redirect_uri" }
 	}
 
-	// ユーザーの存在確認
-	const user = await getUserById(publishedAuthCode.user_id)
-	if (!user) {
-		return { success: false, error_message: "Unknown user" }
-	}
-
 	// スコープの存在確認
 	if (!publishedAuthCode.scope) {
 		return { success: false, error_message: "No scope" }
@@ -67,7 +59,6 @@ export const validateTokenParams = async (
 
 	return {
 		success: true,
-		user: user,
 		client_id: publishedAuthCode.client_id,
 		scopes: publishedAuthCode.scope.split(" "),
 		nonce: publishedAuthCode.nonce ?? undefined,

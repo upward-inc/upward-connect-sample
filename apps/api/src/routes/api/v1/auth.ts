@@ -151,6 +151,18 @@ export const authRouter = new Hono<{ Variables: AuthContexts }>()
 				// タイミング攻撃対策のため、パラメータ検証より前に実行
 				await deleteAuthorizationCode(publishedAuthCode.auth_code)
 
+				// ユーザーの存在確認
+				const user = await getUserById(publishedAuthCode.user_id)
+				if (!user) {
+					return c.json(
+						{
+							error: "invalid_grant",
+							error_description: "Unknown user",
+						},
+						400,
+					)
+				}
+
 				// パラメータの検証
 				const validateResult = await validateTokenParams(
 					params,
@@ -166,7 +178,7 @@ export const authRouter = new Hono<{ Variables: AuthContexts }>()
 						400,
 					)
 				}
-				const { user, client_id, scopes, nonce } = validateResult
+				const { client_id, scopes, nonce } = validateResult
 
 				// アクセストークンを生成
 				const accessToken = generateAccessToken({
