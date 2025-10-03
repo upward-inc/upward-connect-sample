@@ -166,11 +166,11 @@ export async function createTestUser(userData: {
 			user_name: `test_${userData.user_name}`,
 			first_name: userData.first_name,
 			last_name: userData.last_name,
-			email: userData.email || null,
+			email: userData.email ?? null,
 			hashed_password: "test-password-123", // Use a fixed password for testing purposes
 			is_active: true,
-			timezone: userData.timezone || null,
-			locale: userData.locale || null,
+			timezone: userData.timezone ?? null,
+			locale: userData.locale ?? null,
 		},
 		select: {
 			id: true,
