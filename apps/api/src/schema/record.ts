@@ -15,8 +15,7 @@ export const RecordSchema = z.object({}).openapi({
 export const RecordListSchema = z.array(RecordSchema)
 
 const FieldsQuerySchema = StringToArraySchema().openapi({
-	description:
-		"結果に含めるフィールド名（カンマ区切り）、未指定の場合は全フィールドを返却",
+	description: "結果に含めるフィールド名（カンマ区切り）",
 	example: "id,name",
 })
 
@@ -27,7 +26,7 @@ const GroupByQuerySchema = StringToArraySchema().openapi({
 
 export const GetRecordListQuerySchema = z.object({
 	// TODO: 参照先オブジェクトのフィールドを取得可能な形式を検討する
-	fields: FieldsQuerySchema.optional(),
+	fields: FieldsQuerySchema,
 	filter: NestableFilterQuerySchema.optional(),
 	group_by: GroupByQuerySchema.optional(),
 	order_by: OrderByQuerySchema.optional(),
