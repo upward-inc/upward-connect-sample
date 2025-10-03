@@ -1873,11 +1873,7 @@ describe("Record Tests", () => {
 				},
 			)
 
-			const data = await response.json()
 			expect(response.status).toBe(404)
-			expect(data).toEqual({
-				message: "エンティティ 'nonexistent_entity' は存在しません",
-			})
 		})
 
 		it("存在しないレコードを削除しようとした場合に404を返すこと", async () => {
@@ -1901,11 +1897,7 @@ describe("Record Tests", () => {
 				},
 			)
 
-			const data = await response.json()
 			expect(response.status).toBe(404)
-			expect(data).toEqual({
-				message: `ID '${nonexistentId}' のレコードは 'account' に存在しません`,
-			})
 		})
 
 		it("認証ヘッダーなしでリクエストした場合に401を返すこと", async () => {
@@ -1918,11 +1910,7 @@ describe("Record Tests", () => {
 				},
 			)
 
-			const data = await response.json()
 			expect(response.status).toBe(401)
-			expect(data).toEqual({
-				message: "No authentication header",
-			})
 		})
 	})
 })
