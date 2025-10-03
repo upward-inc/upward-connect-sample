@@ -100,18 +100,22 @@ export const authRouter = new Hono<{ Variables: AuthContexts }>()
 			// 認可コードを生成
 			const authorizationCode = nanoid(128)
 
-			await saveAuthorizationCode(authorizationCode, user.id, {
-				client_id: validateResult.client_id,
-				client_secret: validateResult.client_secret,
-				redirect_uri: validateResult.redirect_uri,
-				scope: validateResult.scope ?? null,
-				state: params.state ?? null,
-				nonce: validateResult.nonce ?? null,
-				published_at: new Date(),
-				expire_at: new Date(
-					Date.now() + 1000 * 60 * env.OAUTH2_AUTH_CODE_EXPIRES_IN_MINUTE,
-				),
-			})
+			await saveAuthorizationCode(
+				authorizationCode,
+				user.id,
+				validateResult.scopes,
+				{
+					client_id: validateResult.client_id,
+					client_secret: validateResult.client_secret,
+					redirect_uri: validateResult.redirect_uri,
+					state: params.state ?? null,
+					nonce: validateResult.nonce ?? null,
+					published_at: new Date(),
+					expire_at: new Date(
+						Date.now() + 1000 * 60 * env.OAUTH2_AUTH_CODE_EXPIRES_IN_MINUTE,
+					),
+				},
+			)
 
 			return c.json({
 				code: authorizationCode,

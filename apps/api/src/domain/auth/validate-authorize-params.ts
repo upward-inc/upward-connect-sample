@@ -25,7 +25,7 @@ interface AuthorizeParams {
 	response_type: string
 	client_id: string
 	redirect_uri: string
-	scope: string
+	scope: string[]
 	nonce: string
 }
 
@@ -37,7 +37,7 @@ interface AuthorizeResultSuccess {
 	client_id: string
 	client_secret: string
 	redirect_uri: string
-	scope: string
+	scopes: string[]
 	nonce: string
 }
 
@@ -88,7 +88,7 @@ export const validateAuthorizeParams = async (
 			client_id: params.client_id,
 			client_secret: oauthClient.secret,
 			redirect_uri: params.redirect_uri,
-			scope: params.scope,
+			scopes: params.scope,
 			nonce: params.nonce,
 		}
 	} catch {

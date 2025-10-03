@@ -158,7 +158,7 @@ export const PostAuthorizeParamSchema = z.object({
 	response_type: z.literal("code"),
 	client_id: z.string().min(1),
 	redirect_uri: z.string().url(),
-	scope: z.string(),
+	scope: StringToArraySchema(" "),
 	state: z.string(),
 	nonce: z.string(),
 })
