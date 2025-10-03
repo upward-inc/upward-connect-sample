@@ -191,7 +191,7 @@ export const PostTokenResultSchema = z.object({
 	token_type: z.literal("Bearer"),
 	access_token: AccessTokenSchema,
 	id_token: IdTokenSchema.optional(),
-	refresh_token: RefreshTokenSchema,
+	refresh_token: RefreshTokenSchema.optional(),
 	expires_in: z.number().min(1).openapi({
 		description: "有効期限（秒）",
 		example: 600,

@@ -196,11 +196,13 @@ export const authRouter = new Hono<{ Variables: AuthContexts }>()
 						})
 					: undefined
 
-				// リフレッシュトークンを生成
-				const refreshToken = generateRefreshToken({
-					userId: user.id,
-					clientId: client_id,
-				})
+				// リフレッシュトークンを生成 (offline_accessスコープが含まれている場合のみ)
+				const refreshToken = scopes.includes("offline_access")
+					? generateRefreshToken({
+							userId: user.id,
+							clientId: client_id,
+						})
+					: undefined
 
 				return c.json({
 					token_type: "Bearer",

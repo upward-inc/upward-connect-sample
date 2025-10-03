@@ -242,7 +242,7 @@ describe("Auth Tests", () => {
 				name: "refresh_cli",
 				secret: "test_secret_12345",
 				redirect_uris: "https://localhost:3000/callback",
-				scopes: "openid,profile,email",
+				scopes: "openid,profile,email,offline_access",
 			})
 
 			// Create a refresh token
@@ -317,7 +317,7 @@ describe("Auth Tests", () => {
 				name: "inv_secret",
 				secret: "test_secret_12345",
 				redirect_uris: "https://localhost:3000/callback",
-				scopes: "openid,profile,email",
+				scopes: "openid,profile,email,offline_access",
 			})
 
 			const refreshToken = createRefreshToken(testUser.id)
@@ -355,7 +355,7 @@ describe("Auth Tests", () => {
 				name: "exp_token",
 				secret: "test_secret_12345",
 				redirect_uris: "https://localhost:3000/callback",
-				scopes: "openid,profile,email",
+				scopes: "openid,profile,email,offline_access",
 			})
 
 			const expiredRefreshToken = createExpiredRefreshToken(testUser.id)
@@ -386,7 +386,7 @@ describe("Auth Tests", () => {
 				name: "malformed",
 				secret: "test_secret_12345",
 				redirect_uris: "https://localhost:3000/callback",
-				scopes: "openid,profile,email",
+				scopes: "openid,profile,email,offline_access",
 			})
 
 			const response = await app.request("/api/v1/oauth2/token", {
@@ -415,7 +415,7 @@ describe("Auth Tests", () => {
 				name: "unknown_user",
 				secret: "test_secret_12345",
 				redirect_uris: "https://localhost:3000/callback",
-				scopes: "openid,profile,email",
+				scopes: "openid,profile,email,offline_access",
 			})
 
 			const nonExistentUserId = crypto.randomUUID()
@@ -447,7 +447,7 @@ describe("Auth Tests", () => {
 				name: "unsupported",
 				secret: "test_secret_12345",
 				redirect_uris: "https://localhost:3000/callback",
-				scopes: "openid,profile,email",
+				scopes: "openid,profile,email,offline_access",
 			})
 
 			const response = await app.request("/api/v1/oauth2/token", {
@@ -468,6 +468,42 @@ describe("Auth Tests", () => {
 			expect(data.success).toBe(false)
 			expect(data.error).toHaveProperty("issues")
 			expect(data.error.issues[0].path).toContainEqual("grant_type")
+		})
+
+		it("400 Bad Request - クライアントのスコープにoffline_accessが含まれていない", async () => {
+			const testUser = await createTestUser({
+				user_name: "no_offline_access",
+				first_name: "No",
+				last_name: "OfflineAccess",
+				email: "no_offline_access@example.com",
+			})
+			const testClient = await createTestOAuthClient({
+				name: "no_oa_cli",
+				secret: "test_secret_12345",
+				redirect_uris: "https://localhost:3000/callback",
+				scopes: "openid,profile,email", // offline_accessがない
+			})
+			const refreshToken = createRefreshToken(testUser.id)
+
+			const response = await app.request("/api/v1/oauth2/token", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/x-www-form-urlencoded",
+				},
+				body: new URLSearchParams({
+					grant_type: "refresh_token",
+					refresh_token: refreshToken,
+					client_id: testClient.id,
+					client_secret: testClient.secret,
+				}),
+			})
+
+			const data = await response.json()
+			expect(response.status).toBe(400)
+			expect(data).toEqual({
+				error: "invalid_grant",
+				error_description: "No offline_access scope for this client",
+			})
 		})
 	})
 
@@ -530,7 +566,7 @@ describe("Auth Tests", () => {
 			expect(firstTokenResponse.status).toBe(200)
 			expect(firstTokenData).toHaveProperty("access_token")
 			expect(firstTokenData).toHaveProperty("id_token")
-			expect(firstTokenData).toHaveProperty("refresh_token")
+			expect(firstTokenData).not.toHaveProperty("refresh_token")
 
 			// Step 3: Try to reuse the same authorization code (should fail)
 			const secondTokenResponse = await app.request("/api/v1/oauth2/token", {
@@ -861,7 +897,7 @@ describe("Auth Tests", () => {
 			expect(tokenResponse.status).toBe(200)
 			expect(tokenData).toHaveProperty("access_token")
 			expect(tokenData).toHaveProperty("id_token")
-			expect(tokenData).toHaveProperty("refresh_token")
+			expect(tokenData).not.toHaveProperty("refresh_token")
 			expect(tokenData).toHaveProperty("token_type", "Bearer")
 
 			// Step 3: Verify nonce is included in ID token
@@ -1007,6 +1043,330 @@ describe("Auth Tests", () => {
 				tokenSecret,
 			) as DecodedIdToken
 			expect(decodedIdToken.nonce).toBe(specialNonce)
+		})
+
+		it("200 OK - 全てのスコープを要求する", async () => {
+			const testUser = await createTestUser({
+				user_name: "all_scope_user",
+				first_name: "All",
+				last_name: "Scope",
+				email: "all_scope@example.com",
+				timezone: "Asia/Tokyo",
+				locale: "ja-JP",
+			})
+
+			const testClient = await createTestOAuthClient({
+				name: "all_sc_cli",
+				secret: "test_secret_12345",
+				redirect_uris: "https://example.com/callback",
+				scopes: "openid,profile,email,offline_access",
+			})
+
+			const token = createValidToken(testUser.id)
+
+			// ステップ１：有効なスコープで認可を行う
+			const authorizeResponse = await app.request("/api/v1/oauth2/authorize", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/x-www-form-urlencoded",
+					Authorization: `Bearer ${token}`,
+				},
+				body: new URLSearchParams({
+					response_type: "code",
+					client_id: testClient.id,
+					redirect_uri: "https://example.com/callback",
+					scope: "openid profile email offline_access",
+					state: "random-state-value-12345",
+					nonce: "random-nonce-value-12345",
+				}),
+			})
+
+			const authorizeData = await authorizeResponse.json()
+			expect(authorizeResponse.status).toBe(200)
+			expect(authorizeData).toHaveProperty("code")
+
+			// ステップ２：認可コードをトークンに交換する
+			const tokenResponse = await app.request("/api/v1/oauth2/token", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/x-www-form-urlencoded",
+				},
+				body: new URLSearchParams({
+					grant_type: "authorization_code",
+					code: authorizeData.code,
+					redirect_uri: "https://example.com/callback",
+					client_id: testClient.id,
+					client_secret: testClient.secret,
+				}),
+			})
+
+			const tokenData = await tokenResponse.json()
+			expect(tokenResponse.status).toBe(200)
+			expect(tokenData).toHaveProperty("access_token")
+			expect(tokenData).toHaveProperty("id_token")
+			// offline_accessによりリフレッシュトークンが発行されるべき
+			expect(tokenData).toHaveProperty("refresh_token")
+
+			// ステップ３：IDトークンを検証する
+			const decodedIdToken = verify(
+				tokenData.id_token,
+				tokenSecret,
+			) as DecodedIdToken
+			expect(decodedIdToken.sub).toBe(testUser.id)
+			// カスタムクレームは必須
+			expect(decodedIdToken.user_id).toBe(testUser.id)
+			// profileスコープにより含まれるべき
+			expect(decodedIdToken.name).toBe(
+				`${testUser.last_name} ${testUser.first_name}`,
+			)
+			expect(decodedIdToken.given_name).toBe(testUser.first_name)
+			expect(decodedIdToken.family_name).toBe(testUser.last_name)
+			expect(decodedIdToken.zoneinfo).toBe(testUser.timezone)
+			expect(decodedIdToken.locale).toBe(testUser.locale)
+			// emailスコープにより含まれるべき
+			expect(decodedIdToken.email).toBe(testUser.email)
+		})
+
+		it("200 OK - 単一スコープを要求する", async () => {
+			const testUser = await createTestUser({
+				user_name: "openid_scope_user",
+				first_name: "Openid",
+				last_name: "Scope",
+				email: "openid_scope@example.com",
+			})
+
+			const testClient = await createTestOAuthClient({
+				name: "openid_cli",
+				secret: "test_secret_12345",
+				redirect_uris: "https://example.com/callback",
+				scopes: "openid,profile,email",
+			})
+
+			const token = createValidToken(testUser.id)
+
+			// ステップ１：有効なスコープで認可を行う
+			const authorizeResponse = await app.request("/api/v1/oauth2/authorize", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/x-www-form-urlencoded",
+					Authorization: `Bearer ${token}`,
+				},
+				body: new URLSearchParams({
+					response_type: "code",
+					client_id: testClient.id,
+					redirect_uri: "https://example.com/callback",
+					scope: "openid",
+					state: "random-state-value-12345",
+					nonce: "random-nonce-value-12345",
+				}),
+			})
+
+			const authorizeData = await authorizeResponse.json()
+			expect(authorizeResponse.status).toBe(200)
+			expect(authorizeData).toHaveProperty("code")
+
+			// ステップ２：認可コードをトークンに交換する
+			const tokenResponse = await app.request("/api/v1/oauth2/token", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/x-www-form-urlencoded",
+				},
+				body: new URLSearchParams({
+					grant_type: "authorization_code",
+					code: authorizeData.code,
+					redirect_uri: "https://example.com/callback",
+					client_id: testClient.id,
+					client_secret: testClient.secret,
+				}),
+			})
+
+			const tokenData = await tokenResponse.json()
+			expect(tokenResponse.status).toBe(200)
+			expect(tokenData).toHaveProperty("access_token")
+			expect(tokenData).toHaveProperty("id_token")
+			// offline_accessを要求していないためリフレッシュトークンは発行されない
+			expect(tokenData).not.toHaveProperty("refresh_token")
+
+			// ステップ３：IDトークンを検証する
+			const decodedIdToken = verify(
+				tokenData.id_token,
+				tokenSecret,
+			) as DecodedIdToken
+			expect(decodedIdToken.sub).toBe(testUser.id)
+			// カスタムクレームは必須
+			expect(decodedIdToken.user_id).toBe(testUser.id)
+			// profileスコープがないため含まれない
+			expect(decodedIdToken).not.toHaveProperty("name")
+			expect(decodedIdToken).not.toHaveProperty("username")
+			expect(decodedIdToken).not.toHaveProperty("preferred_username")
+			expect(decodedIdToken).not.toHaveProperty("given_name")
+			expect(decodedIdToken).not.toHaveProperty("family_name")
+			// emailスコープがないため含まれない
+			expect(decodedIdToken).not.toHaveProperty("email")
+			expect(decodedIdToken).not.toHaveProperty("email_verified")
+		})
+
+		it("400 Bad Request - スコープが空", async () => {
+			const testUser = await createTestUser({
+				user_name: "empty_scope_user",
+				first_name: "Empty",
+				last_name: "Scope",
+				email: "empty_scope@example.com",
+			})
+
+			const testClient = await createTestOAuthClient({
+				name: "empty_scope_cli",
+				secret: "test_secret_12345",
+				redirect_uris: "https://example.com/callback",
+				scopes: "openid,profile,email",
+			})
+
+			const token = createValidToken(testUser.id)
+
+			const response = await app.request("/api/v1/oauth2/authorize", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/x-www-form-urlencoded",
+					Authorization: `Bearer ${token}`,
+				},
+				body: new URLSearchParams({
+					response_type: "code",
+					client_id: testClient.id,
+					redirect_uri: "https://example.com/callback",
+					scope: "", // スコープが空
+					state: "random-state-value-12345",
+					nonce: "random-nonce-value-12345",
+				}),
+			})
+
+			const data = await response.json()
+			expect(response.status).toBe(400)
+			expect(data).toEqual({
+				error: "invalid_request",
+				state: "random-state-value-12345",
+			})
+		})
+
+		it("400 Bad Request - スコープが未定義", async () => {
+			const testUser = await createTestUser({
+				user_name: "no_scope_user",
+				first_name: "No",
+				last_name: "Scope",
+				email: "no_scope@example.com",
+			})
+
+			const testClient = await createTestOAuthClient({
+				name: "no_scope_cli",
+				secret: "test_secret_12345",
+				redirect_uris: "https://example.com/callback",
+				scopes: "openid,profile,email,address,phone",
+			})
+
+			const token = createValidToken(testUser.id)
+
+			const response = await app.request("/api/v1/oauth2/authorize", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/x-www-form-urlencoded",
+					Authorization: `Bearer ${token}`,
+				},
+				body: new URLSearchParams({
+					response_type: "code",
+					client_id: testClient.id,
+					redirect_uri: "https://example.com/callback",
+					// スコープパラメータがない
+					state: "random-state-value-12345",
+					nonce: "random-nonce-value-12345",
+				}),
+			})
+			const data = await response.json()
+			expect(response.status).toBe(400)
+			// Zodの検証エラーはOAuth検証よりも前に来る
+			expect(data.success).toBe(false)
+			expect(data.error).toHaveProperty("issues")
+			expect(data.error.issues[0].path).toContainEqual("scope")
+		})
+
+		it("400 Bad Request - OAuthクライアントに未登録のスコープを要求", async () => {
+			const testUser = await createTestUser({
+				user_name: "invalid_scope_user",
+				first_name: "Invalid",
+				last_name: "Scope",
+				email: "invalid_scope@example.com",
+			})
+
+			const testClient = await createTestOAuthClient({
+				name: "inv_scope",
+				secret: "test_secret_12345",
+				redirect_uris: "https://example.com/callback",
+				scopes: "openid,profile", // emailスコープは登録されていない
+			})
+
+			const token = createValidToken(testUser.id)
+
+			const response = await app.request("/api/v1/oauth2/authorize", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/x-www-form-urlencoded",
+					Authorization: `Bearer ${token}`,
+				},
+				body: new URLSearchParams({
+					response_type: "code",
+					client_id: testClient.id,
+					redirect_uri: "https://example.com/callback",
+					scope: "openid profile email", // emailスコープは登録されていない
+					state: "random-state-value-12345",
+					nonce: "random-nonce-value-12345",
+				}),
+			})
+
+			const data = await response.json()
+			expect(response.status).toBe(400)
+			expect(data).toEqual({
+				error: "invalid_request",
+				state: "random-state-value-12345",
+			})
+		})
+
+		it("400 Bad Request - 未認識のスコープ値を要求", async () => {
+			const testUser = await createTestUser({
+				user_name: "unrecognized_scope_user",
+				first_name: "Unrecognized",
+				last_name: "Scope",
+				email: "unrecognized_scope@example.com",
+			})
+
+			const testClient = await createTestOAuthClient({
+				name: "unrec_scope",
+				secret: "test_secret_12345",
+				redirect_uris: "https://example.com/callback",
+				scopes: "openid,profile,email",
+			})
+
+			const token = createValidToken(testUser.id)
+
+			const response = await app.request("/api/v1/oauth2/authorize", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/x-www-form-urlencoded",
+					Authorization: `Bearer ${token}`,
+				},
+				body: new URLSearchParams({
+					response_type: "code",
+					client_id: testClient.id,
+					redirect_uri: "https://example.com/callback",
+					scope: "openid profile unknown_scope", // unknown_scopeは未認識
+					state: "random-state-value-12345",
+					nonce: "random-nonce-value-12345",
+				}),
+			})
+
+			const data = await response.json()
+			expect(response.status).toBe(400)
+			expect(data).toEqual({
+				error: "invalid_request",
+				state: "random-state-value-12345",
+			})
 		})
 	})
 
@@ -1165,7 +1525,7 @@ describe("Auth Tests", () => {
 				name: "aud_ref_cli",
 				secret: "test_secret_refresh_123",
 				redirect_uris: "https://example.com/callback",
-				scopes: "openid,profile,email",
+				scopes: "openid,profile,email,offline_access",
 			})
 
 			const token = createValidToken(testUser.id)
@@ -1181,7 +1541,7 @@ describe("Auth Tests", () => {
 					response_type: "code",
 					client_id: testClient.id,
 					redirect_uri: "https://example.com/callback",
-					scope: "openid profile email",
+					scope: "openid profile email offline_access",
 					state: "random_state_12345",
 					nonce: "random_nonce_12345",
 				}),
@@ -1379,7 +1739,7 @@ describe("Auth Tests", () => {
 				name: "min_cli",
 				secret: "test-client-secret",
 				redirect_uris: "https://example.com/callback",
-				scopes: "openid profile email",
+				scopes: "openid,profile,email",
 			})
 
 			const token = createValidToken(testUser.id)
