@@ -1,7 +1,7 @@
 import { verify } from "jsonwebtoken"
 import { env } from "../../env"
 import { getOAuthClientById } from "./get-oauth-client"
-import { getUserById } from "./get-user"
+import { getActiveUserById } from "./get-user"
 
 interface RefreshTokenParams {
 	grant_type: string
@@ -56,7 +56,7 @@ export const validateRefreshTokenParams = async (
 		const userId = decoded.sub as string
 
 		// ユーザーの存在確認
-		const user = await getUserById(userId)
+		const user = await getActiveUserById(userId)
 		if (!user) {
 			return { success: false, error_message: "Unknown user" }
 		}

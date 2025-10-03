@@ -22,11 +22,11 @@ export type AuthorizeError =
 	| "registration_not_supported" // OP は Section 7.2.1 で定義されている registration パラメータをサポートしていない
 
 interface AuthorizeParams {
-	response_type: string | null
-	client_id: string | null
-	redirect_uri: string | null
-	scope?: string | undefined
-	nonce?: string | undefined
+	response_type: string
+	client_id: string
+	redirect_uri: string
+	scope: string[]
+	nonce: string
 }
 
 type AuthorizeResult = AuthorizeResultSuccess | AuthorizeResultFailure
@@ -37,8 +37,8 @@ interface AuthorizeResultSuccess {
 	client_id: string
 	client_secret: string
 	redirect_uri: string
-	scope: string | undefined
-	nonce: string | undefined
+	scopes: string[]
+	nonce: string
 }
 
 interface AuthorizeResultFailure {
@@ -88,7 +88,7 @@ export const validateAuthorizeParams = async (
 			client_id: params.client_id,
 			client_secret: oauthClient.secret,
 			redirect_uri: params.redirect_uri,
-			scope: params.scope,
+			scopes: params.scope,
 			nonce: params.nonce,
 		}
 	} catch {

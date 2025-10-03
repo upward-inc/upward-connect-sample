@@ -92,9 +92,17 @@ export const LoggedInUserSchema = z
 			description: "姓",
 			example: "Smail",
 		}),
-		email: z.string().email().openapi({
+		email: z.string().email().nullable().openapi({
 			description: "メールアドレス",
 			example: "dsmail0@example.com",
+		}),
+		timezone: z.string().nullable().openapi({
+			description: "タイムゾーン",
+			example: "Asia/Tokyo",
+		}),
+		locale: z.string().nullable().openapi({
+			description: "ロケール",
+			example: "ja-JP",
 		}),
 	})
 	.openapi({
@@ -150,9 +158,9 @@ export const PostAuthorizeParamSchema = z.object({
 	response_type: z.literal("code"),
 	client_id: z.string().min(1),
 	redirect_uri: z.string().url(),
-	scope: z.string().optional(),
-	state: z.string().optional(),
-	nonce: z.string().optional(),
+	scope: StringToArraySchema(" "),
+	state: z.string(),
+	nonce: z.string(),
 })
 
 export const PostAuthorizeResultSchema = z.object({
@@ -160,7 +168,7 @@ export const PostAuthorizeResultSchema = z.object({
 		description: "認可コード",
 		example: "sample_code",
 	}),
-	state: z.string().optional().openapi({
+	state: z.string().openapi({
 		description: "リクエストで渡されたstate",
 		example: "sample_state",
 	}),

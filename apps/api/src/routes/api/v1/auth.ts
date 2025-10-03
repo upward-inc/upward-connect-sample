@@ -2,12 +2,13 @@ import { Hono } from "hono"
 import { nanoid } from "nanoid"
 import {
 	deleteAuthorizationCode,
+	generateAccessToken,
+	generateIdToken,
 	generateRefreshToken,
-	generateToken,
+	getActiveUserById,
+	getActiveUserByUsernameAndPassword,
 	getAuthorizationCode,
 	getOAuthClientById,
-	getUserById,
-	getUserByUsernameAndPassword,
 	saveAuthorizationCode,
 	validateAuthorizeParams,
 	validateRefreshTokenParams,
@@ -18,6 +19,7 @@ import { describeRoute, validator } from "../../../libs/hono-openapi"
 import {
 	type AuthContexts,
 	GetOAuthClientResultSchema,
+	GetUserInfoResultSchema,
 	PostAuthorizeParamSchema,
 	PostAuthorizeResultSchema,
 	PostLoginParamSchema,
@@ -38,14 +40,17 @@ export const authRouter = new Hono<{ Variables: AuthContexts }>()
 		async (c) => {
 			const { username, password } = c.req.valid("form")
 
-			const user = await getUserByUsernameAndPassword(username, password)
+			const user = await getActiveUserByUsernameAndPassword(username, password)
 			if (!user) {
 				return c.json({ message: "Invalid username or password" }, 401)
 			}
 
-			const { accessToken } = generateToken({
+			const accessToken = generateAccessToken({
 				userId: user.id,
 				userName: user.user_name,
+				// アクセストークンにはaud項目を含める必要があるが、
+				// パスワード認証時に発行するアクセストークンにおいては使用されることがないのでダミーの値を設定
+				clientId: "00000000-0000-0000-0000-000000000000",
 			})
 			return c.json({ ...user, access_token: accessToken })
 		},
@@ -100,7 +105,7 @@ export const authRouter = new Hono<{ Variables: AuthContexts }>()
 				client_id: validateResult.client_id,
 				client_secret: validateResult.client_secret,
 				redirect_uri: validateResult.redirect_uri,
-				scope: validateResult.scope ?? null,
+				scopes: validateResult.scopes,
 				state: params.state ?? null,
 				nonce: validateResult.nonce ?? null,
 				published_at: new Date(),
@@ -143,6 +148,18 @@ export const authRouter = new Hono<{ Variables: AuthContexts }>()
 				// タイミング攻撃対策のため、パラメータ検証より前に実行
 				await deleteAuthorizationCode(publishedAuthCode.auth_code)
 
+				// ユーザーの存在確認
+				const user = await getActiveUserById(publishedAuthCode.user_id)
+				if (!user) {
+					return c.json(
+						{
+							error: "invalid_grant",
+							error_description: "Unknown user",
+						},
+						400,
+					)
+				}
+
 				// パラメータの検証
 				const validateResult = await validateTokenParams(
 					params,
@@ -158,19 +175,29 @@ export const authRouter = new Hono<{ Variables: AuthContexts }>()
 						400,
 					)
 				}
-				const { user_id, user_name, client_id, nonce } = validateResult
+				const { client_id, scopes, nonce } = validateResult
 
-				// アクセストークン、IDトークンを生成
-				const { accessToken, idToken } = generateToken({
-					userId: user_id,
-					userName: user_name,
+				// アクセストークンを生成
+				const accessToken = generateAccessToken({
+					userId: user.id,
+					userName: user.user_name,
 					clientId: client_id,
 					nonce: nonce,
 				})
 
+				// IDトークンを生成 (openidスコープが含まれている場合のみ)
+				const idToken = scopes.includes("openid")
+					? generateIdToken({
+							user: user,
+							clientId: client_id,
+							scopes: scopes,
+							nonce: nonce,
+						})
+					: undefined
+
 				// リフレッシュトークンを生成
-				const { refreshToken } = generateRefreshToken({
-					userId: user_id,
+				const refreshToken = generateRefreshToken({
+					userId: user.id,
 					clientId: client_id,
 				})
 
@@ -199,14 +226,14 @@ export const authRouter = new Hono<{ Variables: AuthContexts }>()
 				const { user_id, user_name, client_id } = validateResult
 
 				// アクセストークンを生成
-				const { accessToken } = generateToken({
+				const accessToken = generateAccessToken({
 					userId: user_id,
 					userName: user_name,
 					clientId: client_id,
 				})
 
 				// リフレッシュトークンを生成
-				const { refreshToken } = generateRefreshToken({
+				const refreshToken = generateRefreshToken({
 					userId: user_id,
 					clientId: client_id,
 				})
@@ -222,30 +249,38 @@ export const authRouter = new Hono<{ Variables: AuthContexts }>()
 			}
 		},
 	)
-	.get("/userinfo", async (c) => {
-		const user = c.get("user")
+	.get(
+		"/userinfo",
+		describeRoute({
+			description:
+				"OIDC1.0準拠のユーザー情報エンドポイント、ユーザー情報を返却する",
+			schema: GetUserInfoResultSchema,
+		}),
+		async (c) => {
+			const user = c.get("user")
 
-		const loggedInUser = await getUserById(user.id)
+			const loggedInUser = await getActiveUserById(user.id)
 
-		if (!loggedInUser) {
-			return c.json(
-				{
-					error: "User not found",
-					error_description:
-						"The user associated with the provided token does not exist.",
-				},
-				404,
-			)
-		}
+			if (!loggedInUser) {
+				return c.json(
+					{
+						error: "User not found",
+						error_description:
+							"The user associated with the provided token does not exist.",
+					},
+					404,
+				)
+			}
 
-		return c.json({
-			sub: loggedInUser.id,
-			name: `${loggedInUser.last_name} ${loggedInUser.first_name}`,
-			given_name: loggedInUser.first_name,
-			family_name: loggedInUser.last_name,
-			email: loggedInUser.email,
-		})
-	})
+			return c.json({
+				sub: loggedInUser.id,
+				name: `${loggedInUser.last_name} ${loggedInUser.first_name}`,
+				given_name: loggedInUser.first_name,
+				family_name: loggedInUser.last_name,
+				email: loggedInUser.email,
+			})
+		},
+	)
 // .get("/.well-known/openid-configuration", async (c) => {
 // 	// OpenID Connect Discoveryドキュメントを返す
 // 	// https://openid.net/specs/openid-connect-discovery-1_0.html

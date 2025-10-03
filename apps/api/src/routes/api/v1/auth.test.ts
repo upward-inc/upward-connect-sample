@@ -14,8 +14,14 @@ import { cleanupTestData, createTestUser } from "../../../test/utils/common"
 describe("Auth Tests", () => {
 	const tokenSecret = env.OIDC_TOKEN_SECRET
 	interface DecodedIdToken extends JwtPayload {
-		nonce?: string
-		username?: string
+		nonce: string
+		user_id: string
+		name: string
+		given_name: string
+		family_name?: string
+		email?: string
+		timezone: string
+		locale: string
 	}
 
 	beforeAll(async () => {
@@ -496,6 +502,8 @@ describe("Auth Tests", () => {
 					client_id: testClient.id,
 					redirect_uri: "https://example.com/callback",
 					scope: "openid profile email",
+					state: "random_state_12345",
+					nonce: "random_nonce_12345",
 				}),
 			})
 
@@ -577,6 +585,8 @@ describe("Auth Tests", () => {
 					client_id: testClient.id,
 					redirect_uri: "https://example.com/callback",
 					scope: "openid profile email",
+					state: "random_state_12345",
+					nonce: "random_nonce_12345",
 				}),
 			})
 
@@ -631,7 +641,7 @@ describe("Auth Tests", () => {
 	})
 
 	describe("Authorize Endpoint", () => {
-		it("should return code for valid authorization request", async () => {
+		it("should return state and code for valid authorization request", async () => {
 			// Create a test user and client
 			const testUser = await createTestUser({
 				user_name: "auth_user",
@@ -642,43 +652,6 @@ describe("Auth Tests", () => {
 
 			const testClient = await createTestOAuthClient({
 				name: "auth_cli",
-				secret: "test_secret_12345",
-				redirect_uris: "https://example.com/callback",
-				scopes: "openid,profile,email",
-			})
-
-			const token = createValidToken(testUser.id)
-
-			const response = await app.request("/api/v1/oauth2/authorize", {
-				method: "POST",
-				headers: {
-					"Content-Type": "application/x-www-form-urlencoded",
-					Authorization: `Bearer ${token}`,
-				},
-				body: new URLSearchParams({
-					response_type: "code",
-					client_id: testClient.id,
-					redirect_uri: "https://example.com/callback",
-					scope: "openid profile email",
-				}),
-			})
-
-			const data = await response.json()
-			expect(response.status).toBe(200)
-			expect(data).toHaveProperty("code")
-		})
-
-		it("should return state parameter when state parameter is provided", async () => {
-			// Create a test user and client
-			const testUser = await createTestUser({
-				user_name: "state_user",
-				first_name: "State",
-				last_name: "User",
-				email: "state_user@example.com",
-			})
-
-			const testClient = await createTestOAuthClient({
-				name: "state_cli",
 				secret: "test_secret_12345",
 				redirect_uris: "https://example.com/callback",
 				scopes: "openid,profile,email",
@@ -699,11 +672,13 @@ describe("Auth Tests", () => {
 					redirect_uri: "https://example.com/callback",
 					scope: "openid profile email",
 					state: stateValue,
+					nonce: "random_nonce_12345",
 				}),
 			})
 
 			const data = await response.json()
 			expect(response.status).toBe(200)
+			expect(data).toHaveProperty("code")
 			expect(data).toHaveProperty("state", stateValue)
 		})
 
@@ -730,6 +705,7 @@ describe("Auth Tests", () => {
 					redirect_uri: "https://example.com/callback",
 					scope: "openid profile email",
 					state: stateValue,
+					nonce: "random_nonce_12345",
 				}),
 			})
 
@@ -772,6 +748,7 @@ describe("Auth Tests", () => {
 					redirect_uri: "https://malicious-site.com/callback", // Different from registered URI
 					scope: "openid profile email",
 					state: stateValue,
+					nonce: "random_nonce_12345",
 				}),
 			})
 
@@ -813,6 +790,7 @@ describe("Auth Tests", () => {
 					redirect_uri: "https://example.com/callback",
 					scope: "openid profile email",
 					state: stateValue,
+					nonce: "random_nonce_12345",
 				}),
 			})
 
@@ -855,6 +833,7 @@ describe("Auth Tests", () => {
 					client_id: testClient.id,
 					redirect_uri: "https://example.com/callback",
 					scope: "openid profile email",
+					state: "random_state_12345",
 					nonce: nonceValue,
 				}),
 			})
@@ -891,7 +870,9 @@ describe("Auth Tests", () => {
 				tokenSecret,
 			) as DecodedIdToken
 			expect(decodedIdToken.nonce).toBe(nonceValue)
-			expect(decodedIdToken.username).toBe(testUser.user_name)
+			expect(decodedIdToken.name).toBe(
+				`${testUser.last_name} ${testUser.first_name}`,
+			)
 			expect(decodedIdToken.sub).toBe(testUser.id)
 		})
 
@@ -925,6 +906,7 @@ describe("Auth Tests", () => {
 					client_id: testClient.id,
 					redirect_uri: "https://example.com/callback",
 					scope: "openid profile email",
+					state: "random_state_12345",
 					nonce: "", // Empty nonce
 				}),
 			})
@@ -992,6 +974,7 @@ describe("Auth Tests", () => {
 					client_id: testClient.id,
 					redirect_uri: "https://example.com/callback",
 					scope: "openid profile email",
+					state: "random_state_12345",
 					nonce: specialNonce,
 				}),
 			})
@@ -1058,6 +1041,8 @@ describe("Auth Tests", () => {
 					client_id: testClient.id,
 					redirect_uri: "https://example.com/callback",
 					scope: "openid profile email",
+					state: "random_state_12345",
+					nonce: "random_nonce_12345",
 				}),
 			})
 
@@ -1093,7 +1078,9 @@ describe("Auth Tests", () => {
 			// The audience (aud) claim should match the client_id from the request
 			expect(decodedIdToken.aud).toBe(testClient.id)
 			expect(decodedIdToken.sub).toBe(testUser.id)
-			expect(decodedIdToken.username).toBe(testUser.user_name)
+			expect(decodedIdToken.name).toBe(
+				`${testUser.last_name} ${testUser.first_name}`,
+			)
 		})
 
 		it("should set aud claim in access_token equal to client_id from request", async () => {
@@ -1126,6 +1113,8 @@ describe("Auth Tests", () => {
 					client_id: testClient.id,
 					redirect_uri: "https://example.com/callback",
 					scope: "openid profile email",
+					state: "random_state_12345",
+					nonce: "random_nonce_12345",
 				}),
 			})
 
@@ -1193,6 +1182,8 @@ describe("Auth Tests", () => {
 					client_id: testClient.id,
 					redirect_uri: "https://example.com/callback",
 					scope: "openid profile email",
+					state: "random_state_12345",
+					nonce: "random_nonce_12345",
 				}),
 			})
 
@@ -1287,6 +1278,175 @@ describe("Auth Tests", () => {
 				tokenSecret,
 			) as JwtPayload
 			expect(decodedAccessToken.aud).toBe(testDefaultClient.id)
+		})
+	})
+
+	describe("IDトークン検証", () => {
+		it("IDトークンのpayloadに全項目を含む", async () => {
+			// テストユーザーとクライアントを作成
+			const testUser = await createTestUser({
+				user_name: "full_id_token_user",
+				first_name: "Full",
+				last_name: "IDToken",
+				email: "full_id_token_user@example.com",
+				timezone: "Asia/Tokyo",
+				locale: "ja-JP",
+			})
+
+			const testClient = await createTestOAuthClient({
+				name: "full_cli",
+				secret: "test-client-secret",
+				redirect_uris: "https://example.com/callback",
+				scopes: "openid,profile,email",
+			})
+
+			const token = createValidToken(testUser.id)
+
+			// ステップ1: 認可リクエスト
+			const authorizeResponse = await app.request("/api/v1/oauth2/authorize", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/x-www-form-urlencoded",
+					Authorization: `Bearer ${token}`,
+				},
+				body: new URLSearchParams({
+					response_type: "code",
+					client_id: testClient.id,
+					redirect_uri: "https://example.com/callback",
+					scope: "openid profile email",
+					state: "random_state_12345",
+					nonce: "random_nonce_12345",
+				}),
+			})
+
+			const authorizeData = await authorizeResponse.json()
+			expect(authorizeResponse.status).toBe(200)
+			expect(authorizeData).toHaveProperty("code")
+
+			// ステップ2: 認可コードをトークンに交換
+			const tokenResponse = await app.request("/api/v1/oauth2/token", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/x-www-form-urlencoded",
+				},
+				body: new URLSearchParams({
+					grant_type: "authorization_code",
+					code: authorizeData.code,
+					redirect_uri: "https://example.com/callback",
+					client_id: testClient.id,
+					client_secret: testClient.secret,
+				}),
+			})
+
+			const tokenData = await tokenResponse.json()
+			expect(tokenResponse.status).toBe(200)
+			expect(tokenData).toHaveProperty("id_token")
+
+			// ステップ3: IDトークンの検証
+			const decodedIdToken = verify(
+				tokenData.id_token,
+				tokenSecret,
+			) as DecodedIdToken
+
+			// IDトークンに全項目が含まれていることを検証
+			expect(decodedIdToken).toHaveProperty("iss", env.OIDC_ISSUER)
+			expect(decodedIdToken).toHaveProperty("sub", testUser.id)
+			expect(decodedIdToken).toHaveProperty("aud", testClient.id)
+			expect(decodedIdToken).toHaveProperty("exp")
+			expect(decodedIdToken).toHaveProperty("iat")
+			// payloadの検証
+			expect(decodedIdToken).toHaveProperty("user_id", testUser.id)
+			expect(decodedIdToken).toHaveProperty(
+				"name",
+				`${testUser.last_name} ${testUser.first_name}`,
+			)
+			expect(decodedIdToken).toHaveProperty("given_name", testUser.first_name)
+			expect(decodedIdToken).toHaveProperty("family_name", testUser.last_name)
+			expect(decodedIdToken).toHaveProperty("email", testUser.email)
+			expect(decodedIdToken).toHaveProperty("zoneinfo", testUser.timezone)
+			expect(decodedIdToken).toHaveProperty("locale", testUser.locale)
+		})
+
+		it("IDトークンのpayloadに必須項目のみを含む", async () => {
+			// テストユーザーとクライアントを作成
+			const testUser = await createTestUser({
+				user_name: "min_id_token_user",
+				first_name: "Min",
+				last_name: "IDToken",
+			})
+
+			const testClient = await createTestOAuthClient({
+				name: "min_cli",
+				secret: "test-client-secret",
+				redirect_uris: "https://example.com/callback",
+				scopes: "openid profile email",
+			})
+
+			const token = createValidToken(testUser.id)
+
+			// ステップ1: 認可リクエスト
+			const authorizeResponse = await app.request("/api/v1/oauth2/authorize", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/x-www-form-urlencoded",
+					Authorization: `Bearer ${token}`,
+				},
+				body: new URLSearchParams({
+					response_type: "code",
+					client_id: testClient.id,
+					redirect_uri: "https://example.com/callback",
+					scope: "openid profile email",
+					state: "random_state_12345",
+					nonce: "random_nonce_12345",
+				}),
+			})
+
+			const authorizeData = await authorizeResponse.json()
+			expect(authorizeResponse.status).toBe(200)
+			expect(authorizeData).toHaveProperty("code")
+
+			// ステップ2: 認可コードをトークンに交換
+			const tokenResponse = await app.request("/api/v1/oauth2/token", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/x-www-form-urlencoded",
+				},
+				body: new URLSearchParams({
+					grant_type: "authorization_code",
+					code: authorizeData.code,
+					redirect_uri: "https://example.com/callback",
+					client_id: testClient.id,
+					client_secret: testClient.secret,
+				}),
+			})
+			const tokenData = await tokenResponse.json()
+			expect(tokenResponse.status).toBe(200)
+			expect(tokenData).toHaveProperty("id_token")
+
+			// ステップ3: IDトークンの検証
+			const decodedIdToken = verify(
+				tokenData.id_token,
+				tokenSecret,
+			) as DecodedIdToken
+
+			// IDトークンに必須項目のみが含まれていることを検証
+			expect(decodedIdToken).toHaveProperty("iss", env.OIDC_ISSUER)
+			expect(decodedIdToken).toHaveProperty("sub", testUser.id)
+			expect(decodedIdToken).toHaveProperty("aud", testClient.id)
+			expect(decodedIdToken).toHaveProperty("exp")
+			expect(decodedIdToken).toHaveProperty("iat")
+			// payloadの検証
+			expect(decodedIdToken).toHaveProperty("user_id", testUser.id)
+			expect(decodedIdToken).toHaveProperty(
+				"name",
+				`${testUser.last_name} ${testUser.first_name}`,
+			)
+			expect(decodedIdToken).toHaveProperty("given_name", testUser.first_name)
+			expect(decodedIdToken).toHaveProperty("family_name", testUser.last_name)
+			// 任意項目は含まれないことを検証
+			expect(decodedIdToken).not.toHaveProperty("email")
+			expect(decodedIdToken).not.toHaveProperty("zoneinfo")
+			expect(decodedIdToken).not.toHaveProperty("locale")
 		})
 	})
 })
