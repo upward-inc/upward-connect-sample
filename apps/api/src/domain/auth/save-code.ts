@@ -6,11 +6,14 @@ import { prisma } from "../../libs/prisma"
 export const saveAuthorizationCode = async (
 	code: string,
 	userId: string,
-	scopes: string[],
-	payload: {
+	{
+		scopes,
+		...payload
+	}: {
 		client_id: string
 		client_secret: string
 		redirect_uri: string
+		scopes: string[]
 		state: string | null
 		nonce: string | null
 		published_at: Date
