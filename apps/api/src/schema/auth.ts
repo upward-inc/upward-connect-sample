@@ -1,24 +1,70 @@
 import { z } from "zod"
 import "zod-openapi/extend"
+import {
+	EmailSchema,
+	FirstNameSchema,
+	FullNameSchema,
+	LastNameSchema,
+	LocaleSchema,
+	TimezoneSchema,
+	UserIdSchema,
+	UserNameSchema,
+} from "./system-user"
 import { StringToArraySchema } from "./utility"
+
+export const ClientIdSchema = z.string().min(1).openapi({
+	description: "OAuth 2.0 クライアント識別子",
+	example: "client-00000001",
+})
+
+export const ClientNameSchema = z.string().min(1).openapi({
+	description: "OAuth 2.0 クライアント名",
+	example: "Sample Client",
+})
+
+export const ClientSecretSchema = z.string().min(1).openapi({
+	description: "OAuth 2.0 クライアントシークレット",
+	example: "sample_client_secret",
+})
+
+export const AuthCodeSchema = z.string().min(1).openapi({
+	description: "認可コード",
+	example: "sample_authorization_code",
+})
+
+export const RedirectUriSchema = z.string().url().openapi({
+	description: "リダイレクションURL（認可コード返却先URL）",
+	example: "https://sample-app.upward.com/callback",
+})
+
+export const AccessTokenSchema = z.string().min(1).openapi({
+	description: "アクセストークン",
+	example: "sample_access_token",
+})
+
+export const IdTokenSchema = z.string().min(1).openapi({
+	description: "IDトークン",
+	example: "sample_id_token",
+})
+
+export const RefreshTokenSchema = z.string().min(1).openapi({
+	description: "リフレッシュトークン",
+	example: "sample_refresh_token",
+})
+
+export const SubjectSchema = z.string().openapi({
+	description: "subjectクレーム",
+	examples: ["user-00000001", "https://example.com/users/user-00000001"],
+})
 
 export const OAuthClientSchema = z
 	.object({
-		id: z.string().openapi({
-			description: "クライアントID",
-			example: "00000001",
-		}),
-		name: z.string().openapi({
-			description: "クライアント名",
-			example: "Sample Client",
-		}),
-		secret: z.string().openapi({
-			description: "クライアントシークレット",
-			example: "sample_client_secret",
-		}),
+		id: ClientIdSchema,
+		name: ClientNameSchema,
+		secret: ClientSecretSchema,
 		redirect_uris: StringToArraySchema().openapi({
-			description: "リダイレクトURI",
-			example: ["https://example.com/callback"],
+			description: "リダイレクションURL（認可コード返却先URL）",
+			example: ["https://sample-app.upward.com/callback"],
 		}),
 		scopes: StringToArraySchema().openapi({
 			description: "スコープ",
@@ -31,22 +77,10 @@ export const OAuthClientSchema = z
 
 export const PublishedAuthCodeSchema = z
 	.object({
-		auth_code: z.string().openapi({
-			description: "認可コード",
-			example: "sample_authorization_code",
-		}),
-		client_id: z.string().openapi({
-			description: "クライアントID",
-			example: "00000001",
-		}),
-		client_secret: z.string().openapi({
-			description: "クライアントシークレット",
-			example: "sample_client_secret",
-		}),
-		redirect_uri: z.string().openapi({
-			description: "リダイレクトURI",
-			example: "https://example.com/callback",
-		}),
+		auth_code: AuthCodeSchema,
+		client_id: ClientIdSchema,
+		client_secret: ClientSecretSchema,
+		redirect_uri: RedirectUriSchema,
 		scope: z.string().nullable().openapi({
 			description: "スコープ",
 			example: "openid profile email",
@@ -65,10 +99,7 @@ export const PublishedAuthCodeSchema = z
 		expire_at: z.date().openapi({
 			description: "有効期限",
 		}),
-		user_id: z.string().openapi({
-			description: "ユーザーID",
-			example: "00000001",
-		}),
+		user_id: UserIdSchema,
 	})
 	.openapi({
 		description: "発行済み認可コード情報",
@@ -76,34 +107,13 @@ export const PublishedAuthCodeSchema = z
 
 export const LoggedInUserSchema = z
 	.object({
-		id: z.string().openapi({
-			description: "ユーザーID",
-			example: "00000001",
-		}),
-		user_name: z.string().openapi({
-			description: "ユーザー名",
-			example: "dsmail0@example.com",
-		}),
-		first_name: z.string().openapi({
-			description: "名",
-			example: "Dorey",
-		}),
-		last_name: z.string().openapi({
-			description: "姓",
-			example: "Smail",
-		}),
-		email: z.string().email().nullable().openapi({
-			description: "メールアドレス",
-			example: "dsmail0@example.com",
-		}),
-		timezone: z.string().nullable().openapi({
-			description: "タイムゾーン",
-			example: "Asia/Tokyo",
-		}),
-		locale: z.string().nullable().openapi({
-			description: "ロケール",
-			example: "ja-JP",
-		}),
+		id: UserIdSchema,
+		user_name: UserNameSchema,
+		first_name: FirstNameSchema,
+		last_name: LastNameSchema,
+		email: EmailSchema.nullable(),
+		timezone: TimezoneSchema.nullable(),
+		locale: LocaleSchema.nullable(),
 	})
 	.openapi({
 		description: "ログインに成功したユーザーの情報",
@@ -116,10 +126,7 @@ export const PostLoginParamSchema = z.object({
 })
 
 export const PostLoginResultSchema = LoggedInUserSchema.extend({
-	access_token: z.string().openapi({
-		description: "アクセストークン",
-		example: "sample_access_token",
-	}),
+	access_token: AccessTokenSchema,
 })
 
 export const GetOAuthClientResultSchema = OAuthClientSchema.pick({
@@ -131,43 +138,27 @@ export const GetOAuthClientResultSchema = OAuthClientSchema.pick({
  * see: https://openid-foundation-japan.github.io/openid-connect-core-1_0.ja.html#StandardClaims
  */
 export const GetUserInfoResultSchema = z.object({
-	sub: z.string().openapi({
-		description: "subjectクレーム（ユーザー識別子）",
-		example: "00000001",
-	}),
-	name: z.string().openapi({
+	sub: SubjectSchema,
+	name: FullNameSchema.openapi({
 		description: "表示用のフルネーム",
-		example: "Dorey Smail",
 	}),
-	given_name: z.string().openapi({
-		description: "名",
-		example: "Dorey",
-	}),
-	family_name: z.string().openapi({
-		description: "姓",
-		example: "Smail",
-	}),
-	email: z.string().email().openapi({
-		description: "メールアドレス",
-		example: "dsmail0@example.com",
-	}),
+	given_name: FirstNameSchema,
+	family_name: LastNameSchema,
+	email: EmailSchema,
 })
 
 // 認可コードリクエスト用のスキーマ
 export const PostAuthorizeParamSchema = z.object({
 	response_type: z.literal("code"),
-	client_id: z.string().min(1),
-	redirect_uri: z.string().url(),
+	client_id: ClientIdSchema,
+	redirect_uri: RedirectUriSchema,
 	scope: StringToArraySchema(" "),
 	state: z.string(),
 	nonce: z.string(),
 })
 
 export const PostAuthorizeResultSchema = z.object({
-	code: z.string().openapi({
-		description: "認可コード",
-		example: "sample_code",
-	}),
+	code: AuthCodeSchema,
 	state: z.string().openapi({
 		description: "リクエストで渡されたstate",
 		example: "sample_state",
@@ -178,33 +169,26 @@ export const PostAuthorizeResultSchema = z.object({
 export const PostTokenParamSchema = z.discriminatedUnion("grant_type", [
 	z.object({
 		grant_type: z.literal("authorization_code"),
-		code: z.string().min(1),
-		redirect_uri: z.string().url(),
-		client_id: z.string().min(1),
-		client_secret: z.string().min(1),
+		code: AuthCodeSchema.openapi({
+			description: "認可処理でクライアントが取得した認可コード",
+		}),
+		redirect_uri: RedirectUriSchema,
+		client_id: ClientIdSchema,
+		client_secret: ClientSecretSchema,
 	}),
 	z.object({
 		grant_type: z.literal("refresh_token"),
-		refresh_token: z.string().min(1),
-		client_id: z.string().min(1),
-		client_secret: z.string().min(1),
+		refresh_token: RefreshTokenSchema,
+		client_id: ClientIdSchema,
+		client_secret: ClientSecretSchema,
 	}),
 ])
 
 export const PostTokenResultSchema = z.object({
 	token_type: z.literal("Bearer"),
-	access_token: z.string().min(1).openapi({
-		description: "アクセストークン",
-		example: "sample_access_token",
-	}),
-	id_token: z.string().min(1).optional().openapi({
-		description: "IDトークン",
-		example: "sample_id_token",
-	}),
-	refresh_token: z.string().min(1).openapi({
-		description: "リフレッシュトークン",
-		example: "sample_refresh_token",
-	}),
+	access_token: AccessTokenSchema,
+	id_token: IdTokenSchema.optional(),
+	refresh_token: RefreshTokenSchema,
 	expires_in: z.number().min(1).openapi({
 		description: "有効期限（秒）",
 		example: 600,
