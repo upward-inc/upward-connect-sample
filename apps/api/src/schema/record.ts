@@ -9,10 +9,12 @@ import {
 import { StringToArraySchema } from "./utility"
 
 export const RecordSchema = z.object({}).openapi({
-	description: "レコードの説明",
+	description: "レコード",
 })
 
-export const RecordListSchema = z.array(RecordSchema)
+export const RecordListSchema = z.array(RecordSchema).openapi({
+	description: "レコード一覧",
+})
 
 const FieldsQuerySchema = StringToArraySchema().openapi({
 	description:
