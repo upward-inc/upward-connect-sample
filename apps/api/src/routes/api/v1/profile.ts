@@ -11,7 +11,7 @@ export const profileRouter = new Hono()
 	.get(
 		"/",
 		describeRoute({
-			description: "プロファイルの一覧を返却する",
+			description: "プロファイルの情報を一覧で返却する",
 			schema: ProfileListSchema,
 		}),
 		async (c) => {
@@ -22,7 +22,7 @@ export const profileRouter = new Hono()
 	.get(
 		"/:name",
 		describeRoute({
-			description: "単一のプロファイルを返却する",
+			description: "パスで指定された単一のプロファイル情報を返却する",
 			schema: ProfileSchema,
 		}),
 		validator("param", GetProfileParamSchema),

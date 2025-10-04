@@ -58,7 +58,7 @@ export const authRouter = new Hono<{ Variables: AuthContexts }>()
 	.get(
 		"/clients/:id",
 		describeRoute({
-			description: "OAuthクライアントアプリケーション名を返却する",
+			description: "OAuth 2.0 クライアントアプリケーション名を返却する",
 			schema: GetOAuthClientResultSchema,
 		}),
 		async (c) => {
@@ -76,7 +76,8 @@ export const authRouter = new Hono<{ Variables: AuthContexts }>()
 	.post(
 		"/authorize",
 		describeRoute({
-			description: "OAuth2.0準拠の認可エンドポイント、認可コードを返却する",
+			description:
+				"OIDC 1.0 で定められた認可処理を行う（認可コードを返却する）",
 			schema: PostAuthorizeResultSchema,
 		}),
 		validator("form", PostAuthorizeParamSchema),
@@ -124,7 +125,7 @@ export const authRouter = new Hono<{ Variables: AuthContexts }>()
 		"/token",
 		describeRoute({
 			description:
-				"OAuth2.0/OIDC1.0準拠のトークンエンドポイント、認可コードをアクセストークン/リフレッシュトークン/IDトークンと交換する",
+				"OIDC 1.0 で定められた認可やトークン更新処理を行う（各種トークンを返却する）",
 			schema: PostTokenResultSchema,
 		}),
 		validator("form", PostTokenParamSchema),
@@ -252,8 +253,7 @@ export const authRouter = new Hono<{ Variables: AuthContexts }>()
 	.get(
 		"/userinfo",
 		describeRoute({
-			description:
-				"OIDC1.0準拠のユーザー情報エンドポイント、ユーザー情報を返却する",
+			description: "OIDC 1.0 で定められたユーザー情報（UserInfo）を返却する",
 			schema: GetUserInfoResultSchema,
 		}),
 		async (c) => {
