@@ -1,10 +1,10 @@
 import { prisma } from "../../libs/prisma"
-import type { JsonValue } from "../../schema/common"
+import type { JsonObject } from "../../schema/common"
 import type { PostRecordResponse } from "../../schema/record"
 
 export const createRecord = async (
 	entityName: string,
-	data: Record<string, JsonValue>,
+	data: JsonObject,
 ): Promise<PostRecordResponse> => {
 	const fields = Object.keys(data)
 	const values = Object.values(data)
@@ -12,8 +12,9 @@ export const createRecord = async (
 	// Build complete SQL with proper value escaping for SQL Server
 	const fieldsList = fields.map((field) => `[${field}]`).join(", ")
 
+	// Insertクエリで使用可能な形式に変換
 	const escapedValues = values.map((value) => {
-		if (value === null || value === undefined) {
+		if (value === null) {
 			return "NULL"
 		}
 		if (typeof value === "string") {

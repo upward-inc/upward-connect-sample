@@ -1,4 +1,4 @@
-import type { JsonValue } from "../../schema/common"
+import { type JsonObject, JsonObjectSchema } from "../../schema/common"
 import type { PostRecordBody } from "../../schema/record"
 import { getEntityItemList } from "../entity"
 import { validateFieldValue } from "./validate-field-value"
@@ -8,7 +8,7 @@ type ValidateCreateRecordResult =
 	| ValidateCreateRecordParamsFailure
 interface ValidateCreateRecordParamsSuccess {
 	success: true
-	validatedData: Record<string, JsonValue>
+	validatedData: JsonObject
 }
 interface ValidateCreateRecordParamsFailure {
 	success: false
@@ -20,6 +20,9 @@ export const validateCreateRecordParams = async (
 	entity_name: string,
 	data: PostRecordBody,
 ): Promise<ValidateCreateRecordResult> => {
+	// JSONオブジェクトであることの検証（変換）
+	const jsonData = JsonObjectSchema.parse(data)
+
 	// Get entity items configuration
 	const entityItems = await getEntityItemList(entity_name)
 	const entityItemMap = new Map(entityItems.map((item) => [item.name, item]))
@@ -30,9 +33,9 @@ export const validateCreateRecordParams = async (
 	)
 	const missingRequiredFields = requiredFields.filter(
 		(field) =>
-			!(field.name in data) ||
-			data[field.name] === null ||
-			data[field.name] === undefined,
+			!(field.name in jsonData) ||
+			jsonData[field.name] === null ||
+			jsonData[field.name] === undefined,
 	)
 
 	if (missingRequiredFields.length > 0) {
@@ -44,9 +47,9 @@ export const validateCreateRecordParams = async (
 	}
 
 	// Validate field types and values
-	const validatedData: Record<string, JsonValue> = {}
+	const validatedData: JsonObject = {}
 
-	for (const [fieldName, value] of Object.entries(data)) {
+	for (const [fieldName, value] of Object.entries(jsonData)) {
 		const entityItem = entityItemMap.get(fieldName)
 		// Ignore unknown fields
 		if (!entityItem) {

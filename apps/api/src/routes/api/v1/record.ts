@@ -86,7 +86,7 @@ export const recordRouter = new Hono<{ Variables: AuthContexts }>()
 
 			const createResult = await createRecord(
 				entity_name,
-				validateResult.validatedData ?? {},
+				validateResult.validatedData,
 			)
 
 			return c.json(createResult, 201)

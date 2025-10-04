@@ -1,5 +1,6 @@
 import { z } from "zod"
 import "zod-openapi/extend"
+import { JsonObjectSchema } from "./common"
 import { NestableFilterQuerySchema } from "./filter"
 import {
 	LimitQuerySchema,
@@ -65,8 +66,7 @@ export const PostRecordParamSchema = z.object({
 export const PostRecordBodySchema = z
 	.any()
 	.refine((data) => {
-		// Ensure it's a non-null json object
-		return typeof data === "object" && data !== null && !Array.isArray(data)
+		return JsonObjectSchema.safeParse(data).success
 	})
 	.openapi({
 		description: "作成するレコードのデータ",
