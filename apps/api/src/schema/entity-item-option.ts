@@ -4,19 +4,20 @@ import "zod-openapi/extend"
 export const EntityItemOptionSchema = z
 	.object({
 		name: z.string().openapi({
-			description: "名称",
+			description: "オプション名",
 			example: "finance",
 		}),
 		display_name: z.string().openapi({
-			description: "表示名",
+			description: "オプションの表示名",
 			example: "金融業",
 		}),
 		is_default: z.boolean().openapi({
-			description: "デフォルト値かどうか",
+			description: "レコード作成時のデフォルト値かどうか",
+			example: true,
 		}),
 	})
 	.openapi({
-		description: "オプションの説明",
+		description: "項目選択肢",
 	})
 
 export const EntityItemOptionListSchema = z.array(EntityItemOptionSchema)
