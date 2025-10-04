@@ -66,6 +66,14 @@ export const recordRouter = new Hono<{ Variables: AuthContexts }>()
 			const data = c.req.valid("json")
 
 			const user = c.get("user")
+			// エンティティが存在しない場合はエラー
+			const entity = await getEntity(entity_name)
+			if (!entity) {
+				return c.json(
+					{ message: `Entity '${entity_name}' does not exist` },
+					404,
+				)
+			}
 
 			const validateResult = await validateCreateRecordParams(user.id, {
 				entity_name,

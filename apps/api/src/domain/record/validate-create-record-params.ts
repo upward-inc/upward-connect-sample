@@ -1,6 +1,6 @@
 import type { JsonValue } from "../../schema/common"
 import type { PostRecordBody } from "../../schema/record"
-import { getEntity, getEntityItemList } from "../entity"
+import { getEntityItemList } from "../entity"
 import { validateFieldValue } from "./validate-field-value"
 
 type ValidateCreateRecordResult =
@@ -19,14 +19,6 @@ export const validateCreateRecordParams = async (
 	userId: string,
 	{ entity_name, data }: PostRecordBody,
 ): Promise<ValidateCreateRecordResult> => {
-	// Check if entity exists
-	if (!(await getEntity(entity_name))) {
-		return {
-			success: false,
-			message: `Entity '${entity_name}' does not exist`,
-		}
-	}
-
 	// Get entity items configuration
 	const entityItems = await getEntityItemList(entity_name)
 	const entityItemMap = new Map(entityItems.map((item) => [item.name, item]))
