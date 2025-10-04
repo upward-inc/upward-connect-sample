@@ -17,7 +17,8 @@ interface ValidateCreateRecordParamsFailure {
 
 export const validateCreateRecordParams = async (
 	userId: string,
-	{ entity_name, data }: PostRecordBody,
+	entity_name: string,
+	data: PostRecordBody,
 ): Promise<ValidateCreateRecordResult> => {
 	// Get entity items configuration
 	const entityItems = await getEntityItemList(entity_name)

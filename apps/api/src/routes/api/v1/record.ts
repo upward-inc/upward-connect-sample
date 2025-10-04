@@ -62,10 +62,10 @@ export const recordRouter = new Hono<{ Variables: AuthContexts }>()
 		validator("param", PostRecordParamSchema),
 		validator("json", PostRecordBodySchema),
 		async (c) => {
+			const user = c.get("user")
 			const { entity_name } = c.req.valid("param")
 			const data = c.req.valid("json")
 
-			const user = c.get("user")
 			// エンティティが存在しない場合はエラー
 			const entity = await getEntity(entity_name)
 			if (!entity) {
@@ -75,10 +75,11 @@ export const recordRouter = new Hono<{ Variables: AuthContexts }>()
 				)
 			}
 
-			const validateResult = await validateCreateRecordParams(user.id, {
+			const validateResult = await validateCreateRecordParams(
+				user.id,
 				entity_name,
 				data,
-			})
+			)
 			if (!validateResult.success) {
 				return c.json({ message: validateResult.message }, 400)
 			}
