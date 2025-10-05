@@ -72,21 +72,21 @@ export const PostRecordBodySchema = z
 	.openapi({
 		description: "作成するレコードのデータ",
 		example: {
-			name: "株式会社 XXX", // string
-			account_number: "ACC-XXXXX",
-			main_phone_number: "03-1234-5678",
-			sub_phone_number: null,
-			website: "https://www.example.com",
-			industry: "agriculture", // single optional
-			number_of_employees: 1000, // numeric
-			revenue: 10000000,
-			address_zipcode: "123-4567",
-			address_prefecture: "東京都",
-			address_municipality: "新宿区",
-			address_street: "西新宿2丁目8-1",
-			latitude: 35.6895,
-			longitude: 139.6917,
-			parent: "fe604faa-0731-4424-a22f-737d60047f39", // reference
+			text_field: "ABC",
+			textarea_field: "ABC\nDEF",
+			integer_field: 123,
+			decimal_field: 123.45,
+			boolean_field: true,
+			date_field: "2025-01-01",
+			datetime_field: "2025-01-01T12:34:56Z",
+			time_field: "12:34:56",
+			single_option_field: "option-a",
+			multi_option_field: ["option-a", "option-b"],
+			single_reference_field: { entity_name: "lead", id: "lead-00000001" },
+			multi_reference_field: [
+				{ entity_name: "lead", id: "lead-00000001" },
+				{ entity_name: "lead", id: "lead-00000002" },
+			],
 		},
 	})
 
@@ -98,7 +98,7 @@ export const PostRecordResponseSchema = z
 		}),
 		id: z.string().openapi({
 			description: "作成されたレコードのID",
-			example: "account-00000001",
+			examples: ["account-00000001", "lead-00000001"],
 		}),
 	})
 	.openapi({
@@ -112,7 +112,7 @@ export const DeleteRecordParamSchema = z.object({
 	}),
 	id: z.string().openapi({
 		description: "削除対象のレコードID",
-		example: "account-00000001",
+		examples: ["account-00000001", "lead-00000001"],
 	}),
 })
 
