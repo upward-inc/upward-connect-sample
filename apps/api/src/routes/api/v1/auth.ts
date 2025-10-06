@@ -162,10 +162,7 @@ export const authRouter = new Hono<{ Variables: AuthContexts }>()
 				}
 
 				// パラメータの検証
-				const validateResult = await validateTokenParams(
-					params,
-					publishedAuthCode,
-				)
+				const validateResult = validateTokenParams(params, publishedAuthCode)
 
 				if (!validateResult.success) {
 					return c.json(
