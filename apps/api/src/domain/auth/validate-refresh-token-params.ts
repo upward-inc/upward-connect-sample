@@ -40,6 +40,12 @@ export const validateRefreshTokenParams = async (
 	if (client.secret !== params.client_secret) {
 		return { success: false, error_message: "Invalid client secret" }
 	}
+	if (!client.scopes.includes("offline_access")) {
+		return {
+			success: false,
+			error_message: "No offline_access scope for this client",
+		}
+	}
 
 	// リフレッシュトークンの検証
 	try {
