@@ -52,10 +52,13 @@ export const RefreshTokenSchema = z.string().min(1).openapi({
 	example: "sample_refresh_token",
 })
 
-export const SubjectSchema = z.string().openapi({
-	description: "subjectクレーム",
-	examples: ["user-00000001", "https://example.com/users/user-00000001"],
-})
+export const SubjectSchema = z
+	.string()
+	.min(1)
+	.openapi({
+		description: "subjectクレーム",
+		examples: ["user-00000001", "https://example.com/users/user-00000001"],
+	})
 
 export const OAuthClientSchema = z
 	.object({
