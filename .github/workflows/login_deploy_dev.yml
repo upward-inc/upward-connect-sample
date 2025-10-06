@@ -30,11 +30,25 @@ jobs:
         with:
           bun-version: 1.2.12
 
+      # Install dependencies
+      - name: Install dependencies
+        working-directory: ./apps/login-app
+        run: bun install --frozen-lockfile
+
+      # Lint
+      - name: Lint
+        working-directory: ./apps/login-app
+        run: bun run lint
+
+      # Test
+      - name: Test
+        working-directory: ./apps/login-app
+        run: bun run test
+
       # Build
       - name: Build
         working-directory: ./apps/login-app
         run: |
-          bun install --frozen-lockfile
           cp .env.${{ env.TARGET_ENV }} .env
           bun run build
           cp ../../staticwebapp.config.json ./dist
