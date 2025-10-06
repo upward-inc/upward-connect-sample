@@ -263,20 +263,24 @@ export const authRouter = new Hono<{ Variables: AuthContexts }>()
 			if (!loggedInUser) {
 				return c.json(
 					{
-						error: "User not found",
+						error: "invalid_token",
 						error_description:
 							"The user associated with the provided token does not exist.",
 					},
-					404,
+					401,
 				)
 			}
 
 			return c.json({
 				sub: loggedInUser.id,
+				user_id: loggedInUser.id, // custom claim
 				name: `${loggedInUser.last_name} ${loggedInUser.first_name}`,
 				given_name: loggedInUser.first_name,
-				family_name: loggedInUser.last_name,
-				email: loggedInUser.email,
+				family_name: loggedInUser.last_name ?? undefined,
+				email: loggedInUser.email ?? undefined,
+				// 下記のフィールドは必須なので、ファールバック値を設定する
+				zoneinfo: loggedInUser.timezone ?? "Asia/Tokyo",
+				locale: loggedInUser.locale ?? "ja-JP",
 			})
 		},
 	)
