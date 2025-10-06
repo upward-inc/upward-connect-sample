@@ -11,7 +11,7 @@ export const roleRouter = new Hono()
 	.get(
 		"/",
 		describeRoute({
-			description: "ロールの一覧を返却する",
+			description: "ロールの情報を一覧で返却する",
 			schema: RoleListSchema,
 		}),
 		async (c) => {
@@ -22,7 +22,7 @@ export const roleRouter = new Hono()
 	.get(
 		"/:name",
 		describeRoute({
-			description: "単一のロールを返却する",
+			description: "パスで指定された単一のロール情報を返却する",
 			schema: RoleSchema,
 		}),
 		validator("param", GetRoleParamSchema),

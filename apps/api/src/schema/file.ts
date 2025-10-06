@@ -1,6 +1,11 @@
 import { z } from "zod"
 import "zod-openapi/extend"
 
+export const FileIdSchema = z.string().openapi({
+	description: "ファイルID",
+	example: "file-00000001",
+})
+
 export const FileSchema = z.instanceof(Uint8Array<ArrayBuffer>).openapi({
 	description: "ファイル",
 })
@@ -17,10 +22,7 @@ export const FileRecordSchema = z
 	})
 
 export const GetFileParamSchema = z.object({
-	id: z.string().openapi({
-		description: "ID",
-		example: "00000001",
-	}),
+	id: FileIdSchema,
 })
 
 export const PostFileFormSchema = z.object({
@@ -29,12 +31,13 @@ export const PostFileFormSchema = z.object({
 	}),
 })
 
-export const PostFileResultSchema = z.object({
-	id: z.string().openapi({
-		description: "ID",
-		example: "00000001",
-	}),
-})
+export const PostFileResultSchema = z
+	.object({
+		id: FileIdSchema,
+	})
+	.openapi({
+		description: "ファイル保存結果",
+	})
 
 export type File = z.infer<typeof FileSchema>
 export type FileRecord = z.infer<typeof FileRecordSchema>

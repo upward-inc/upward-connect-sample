@@ -119,7 +119,7 @@ export const OptionFieldComparisonSchema = z
 		operator: z
 			.union([EqualOperatorSchema, IncludesOperatorSchema])
 			.openapi({ description: "演算子" }),
-		value: z.string().openapi({ description: "検索値", example: "apparel" }),
+		value: z.string().openapi({ description: "検索値", example: "finance" }),
 		is_not: IsNotSchema.optional().default(false),
 	})
 	.transform((data) => ({
@@ -135,7 +135,9 @@ export const ReferenceFieldStringComparisonSchema = z
 		operator: z
 			.union([EqualOperatorSchema, IncludesOperatorSchema])
 			.openapi({ description: "演算子" }),
-		value: z.string().openapi({ description: "検索値", example: "000001" }),
+		value: z
+			.string()
+			.openapi({ description: "検索値", example: "account-00000001" }),
 		is_not: IsNotSchema.optional().default(false),
 	})
 	.transform((data) => ({
@@ -153,7 +155,7 @@ export const ReferenceFieldObjectComparisonSchema = z
 			.openapi({ description: "演算子" }),
 		value: RecordReferenceValueSchema.openapi({
 			description: "検索値",
-			example: { entity: "account", id: "000001" },
+			example: { entity: "account", id: "account-00000001" },
 		}),
 		is_not: IsNotSchema.optional().default(false),
 	})

@@ -4,19 +4,21 @@ import "zod-openapi/extend"
 export const ProfileSchema = z
 	.object({
 		name: z.string().openapi({
-			description: "名称",
+			description: "プロファイル名",
 			example: "admin",
 		}),
 		display_name: z.string().openapi({
-			description: "表示名",
+			description: "プロファイルの表示名",
 			example: "システム管理者",
 		}),
 	})
 	.openapi({
-		description: "プロファイルの説明",
+		description: "プロファイル",
 	})
 
-export const ProfileListSchema = z.array(ProfileSchema)
+export const ProfileListSchema = z.array(ProfileSchema).openapi({
+	description: "プロファイル一覧",
+})
 
 export const GetProfileParamSchema = z.object({
 	name: z.string(),

@@ -11,7 +11,7 @@ export const systemUserRouter = new Hono()
 	.get(
 		"/",
 		describeRoute({
-			description: "システムユーザーの一覧を返却する",
+			description: "システムユーザーの情報を一覧で返却する",
 			schema: SystemUserListSchema,
 		}),
 		async (c) => {
@@ -22,7 +22,7 @@ export const systemUserRouter = new Hono()
 	.get(
 		"/:id",
 		describeRoute({
-			description: "単一のシステムユーザーを返却する",
+			description: "パスで指定された単一のシステムユーザー情報を返却する",
 			schema: SystemUserSchema,
 		}),
 		validator("param", GetSystemUserParamSchema),

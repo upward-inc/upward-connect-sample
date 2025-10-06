@@ -22,7 +22,8 @@ export const recordRouter = new Hono<{ Variables: AuthContexts }>()
 	.get(
 		"/:entity_name",
 		describeRoute({
-			description: "レコードの一覧を返却する",
+			description:
+				"パスで指定されたエンティティのレコードを検索し、一覧で返却する",
 			schema: GetRecordListResponseSchema,
 		}),
 		validator("param", GetRecordParamSchema),
@@ -54,7 +55,8 @@ export const recordRouter = new Hono<{ Variables: AuthContexts }>()
 	.post(
 		"/:entity_name",
 		describeRoute({
-			description: "レコードを作成する",
+			description:
+				"パスで指定されたエンティティに対し、リクエストボディの内容でレコードを作成する",
 			schema: PostRecordResponseSchema,
 		}),
 		validator("param", PostRecordParamSchema),
@@ -84,7 +86,7 @@ export const recordRouter = new Hono<{ Variables: AuthContexts }>()
 	.delete(
 		"/:entity_name/:id",
 		describeRoute({
-			description: "レコードを削除する",
+			description: "パスで指定されたエンティティのレコードを削除する",
 		}),
 		validator("param", DeleteRecordParamSchema),
 		async (c) => {

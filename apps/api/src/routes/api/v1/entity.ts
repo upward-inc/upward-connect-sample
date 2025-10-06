@@ -22,7 +22,7 @@ export const entityRouter = new Hono()
 	.get(
 		"/",
 		describeRoute({
-			description: "エンティティの一覧を返却する",
+			description: "エンティティの情報を一覧で返却する",
 			schema: EntityListSchema,
 		}),
 		async (c) => {
@@ -33,7 +33,7 @@ export const entityRouter = new Hono()
 	.get(
 		"/:name",
 		describeRoute({
-			description: "単一のエンティティを返却する",
+			description: "パスで指定された単一のエンティティ情報を返却する",
 			schema: EntitySchema,
 		}),
 		validator("param", GetEntityParamSchema),
@@ -49,7 +49,7 @@ export const entityRouter = new Hono()
 	.get(
 		"/:entity_name/items",
 		describeRoute({
-			description: "項目の一覧を返却する",
+			description: "エンティティ項目の情報を一覧で返却する",
 			schema: EntityItemListSchema,
 		}),
 		validator("param", GetEntityItemListParamSchema),
@@ -62,7 +62,7 @@ export const entityRouter = new Hono()
 	.get(
 		"/:entity_name/items/:name",
 		describeRoute({
-			description: "単一の項目を返却する",
+			description: "パスで指定された単一のエンティティ項目情報を返却する",
 			schema: EntityItemSchema,
 		}),
 		validator("param", GetEntityItemParamSchema),

@@ -86,7 +86,7 @@ export const EntityItemTypeSchema = z
 		EntityItemTypeReferenceSchema,
 	])
 	.openapi({
-		description: "タイプ",
+		description: "データ型",
 		examples: ["text", "numeric", "boolean", "date", "option", "reference"],
 	})
 
@@ -106,7 +106,7 @@ export const EntityItemSubTypeSchema = z
 		EntityItemSubTypeMultiTextSchema,
 	])
 	.openapi({
-		description: "サブタイプ",
+		description: "サブデータ型",
 		examples: [
 			"textarea",
 			"phone",
@@ -126,65 +126,74 @@ export const EntityItemSubTypeSchema = z
 export const EntityItemSchema = z
 	.object({
 		name: z.string().openapi({
-			description: "名称",
+			description: "項目名",
 			examples: ["name", "phone_number"],
 		}),
 		display_name: z.string().openapi({
-			description: "表示名",
+			description: "項目の表示名",
 			examples: ["取引先名", "電話番号"],
 		}),
 		type: EntityItemTypeSchema,
 		sub_type: EntityItemSubTypeSchema.nullish(),
 		is_required: z.boolean().openapi({
 			description: "必須入力かどうか",
+			example: true,
 		}),
 		is_filterable: z.boolean().openapi({
 			description: "フィルタリング可能かどうか",
+			example: true,
 		}),
 		is_creatable: z.boolean().openapi({
-			description: "作成可能かどうか",
+			description: "レコード作成時に指定可能かどうか",
+			example: true,
 		}),
 		is_updatable: z.boolean().openapi({
-			description: "更新可能かどうか",
+			description: "レコード更新時に指定可能かどうか",
+			example: true,
 		}),
 		is_formula: z.boolean().openapi({
-			description: "計算式かどうか",
+			description: "計算によって表現されるフィールドかどうか",
+			example: false,
 		}),
 		max_length: z
 			.number()
 			.openapi({
-				description: "最大文字数",
+				description: "データ型が`text`の場合の最大文字数",
 			})
 			.nullish(),
 		precision: z
 			.number()
 			.openapi({
-				description: "精度",
+				description: "データ型が`numeric`の場合の精度（全体の桁数）",
 			})
 			.nullish(),
 		scale: z
 			.number()
 			.openapi({
-				description: "小数点以下の桁数",
+				description: "データ型が`numeric`の場合の小数点以下の桁数",
 			})
 			.nullish(),
 		reference_entities: z
 			.array(z.string())
 			.min(1)
 			.openapi({
-				description: "参照先のエンティティ名一覧",
-				example: ["user"],
+				description: "データ型が`reference`の場合の参照先のエンティティ名一覧",
+				example: [],
 			})
 			.nullish(),
 		options: EntityItemOptionListSchema.openapi({
-			description: "選択肢一覧",
+			description:
+				"データ型が`option`の場合、または、サブデータ型が`combobox`の場合の選択肢一覧",
+			example: [],
 		}).nullish(),
 	})
 	.openapi({
-		description: "項目の説明",
+		description: "エンティティ項目",
 	})
 
-export const EntityItemListSchema = z.array(EntityItemSchema)
+export const EntityItemListSchema = z.array(EntityItemSchema).openapi({
+	description: "エンティティ項目一覧",
+})
 
 export const GetEntityItemParamSchema = z.object({
 	entity_name: z.string(),

@@ -13,7 +13,7 @@ export const fileRouter = new Hono<{ Variables: AuthContexts }>()
 		"/:id",
 		// Response は json ではないので schema validation は行わない
 		describeRoute({
-			description: "単一のファイルを返却する",
+			description: "パスで指定されたIDのファイルを返却する",
 		}),
 		validator("param", GetFileParamSchema),
 		async (c) => {
@@ -37,7 +37,7 @@ export const fileRouter = new Hono<{ Variables: AuthContexts }>()
 	.post(
 		"/",
 		describeRoute({
-			description: "ファイルを投稿する",
+			description: "送信されたファイルを保存する",
 			schema: PostFileResultSchema,
 		}),
 		validator("form", PostFileFormSchema),
