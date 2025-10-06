@@ -279,8 +279,9 @@ export const authRouter = new Hono<{ Variables: AuthContexts }>()
 				given_name: loggedInUser.first_name,
 				family_name: loggedInUser.last_name ?? undefined,
 				email: loggedInUser.email ?? undefined,
-				zoneinfo: loggedInUser.timezone,
-				locale: loggedInUser.locale,
+				// 下記のフィールドは必須なので、ファールバック値を設定する
+				zoneinfo: loggedInUser.timezone ?? "Asia/Tokyo",
+				locale: loggedInUser.locale ?? "ja-JP",
 			})
 		},
 	)
