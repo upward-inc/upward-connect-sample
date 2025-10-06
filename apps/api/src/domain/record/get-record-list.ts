@@ -43,17 +43,21 @@ export const getRecordList = async (
 		}
 
 		if (isAndFilter(filter)) {
-			return filter.and.flatMap((f) => collectFilterFields(f))
+			return filter.and.flatMap((f) =>
+				collectFilterFields(f as GetRecordListQuery["filter"]),
+			)
 		}
 		if (isOrFilter(filter)) {
-			return filter.or.flatMap((f) => collectFilterFields(f))
+			return filter.or.flatMap((f) =>
+				collectFilterFields(f as GetRecordListQuery["filter"]),
+			)
 		}
 
 		return []
 	}
 
-	const usedFormulaField = [
-		...(fields ?? []),
+	const needFormulaField = [
+		...fields,
 		...collectFilterFields(filter),
 		...(group_by ?? []),
 		...(order_by?.map(({ field }) => field) ?? []),
@@ -62,14 +66,9 @@ export const getRecordList = async (
 		return !!item?.is_formula
 	})
 
-	const needFormulaField =
-		(!fields?.length && entityItems.some((item) => item.is_formula)) ||
-		usedFormulaField
-
-	const selectFields =
-		fields?.filter((field) => {
-			return !!entityItems.find(({ name }) => name === field)
-		}) ?? entityItems.map(({ name }) => name)
+	const selectFields = fields.filter((field) => {
+		return !!entityItems.find(({ name }) => name === field)
+	})
 
 	const selectClause = SelectClauseSchema.parse(selectFields)
 
@@ -130,7 +129,7 @@ export const getRecordList = async (
 	// 余分に取得したレコードを除外
 	const records = limit ? fetchDataResult.slice(0, limit) : fetchDataResult
 
-	const data = await covertRecords(records, fields ?? [], entityItemMap)
+	const data = await covertRecords(records, fields, entityItemMap)
 	const hasNextPage = limit ? fetchDataResult.length > limit : false
 	const totalSize = totalSizeResult.at(0)?.count ?? 0
 
@@ -151,16 +150,12 @@ const covertRecords = async (
 	queryFields: string[],
 	entityItemMap: Map<string, EntityItem>,
 ) => {
-	const responseFields = queryFields.length
-		? queryFields
-		: Array.from(entityItemMap.keys())
-
 	const referenceRecords = await getReferenceRecords(records, entityItemMap)
 
 	return records.map((row) => {
 		let data: Record<string, JsonValue | Date> = {}
 
-		for (const field of responseFields) {
+		for (const field of queryFields) {
 			const { type, sub_type } = entityItemMap.get(field) ?? {}
 			let value = row[field]
 

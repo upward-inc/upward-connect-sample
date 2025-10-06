@@ -525,8 +525,8 @@ describe("Record Tests", () => {
 		})
 	})
 
-	describe("GET /api/v1/records - Get Record List", () => {
-		it("should return record list with only entity name", async () => {
+	describe("GET /api/v1/records - レコード一覧取得", () => {
+		it("fieldsパラメータがない場合に400を返すこと", async () => {
 			const testUser = await createTestUser({
 				user_name: "list_user",
 				first_name: "List",
@@ -535,13 +535,6 @@ describe("Record Tests", () => {
 			})
 			const token = createValidToken(testUser.id)
 
-			const testCreatedAccount = await createTestAccount(
-				{
-					name: "List Test Account",
-				},
-				testUser.id,
-			)
-
 			const response = await app.request("/api/v1/records/account", {
 				method: "GET",
 				headers: {
@@ -549,17 +542,7 @@ describe("Record Tests", () => {
 				},
 			})
 
-			const data = await response.json()
-			expect(response.status).toBe(200)
-			expect(data).toHaveProperty("has_next_page")
-			expect(data).toHaveProperty("total_size")
-			expect(data).toHaveProperty("data")
-			expect(Array.isArray(data.data)).toBe(true)
-			expect(
-				data.data.some(
-					(record: { id: string }) => record.id === testCreatedAccount.id,
-				),
-			).toBe(true)
+			expect(response.status).toBe(400)
 		})
 
 		it("should return record list with specified field", async () => {
@@ -665,7 +648,7 @@ describe("Record Tests", () => {
 			)
 
 			const response = await app.request(
-				`/api/v1/records/account?filter=${filterQuery}`,
+				`/api/v1/records/account?fields=id,name,number_of_employees&filter=${filterQuery}`,
 				{
 					method: "GET",
 					headers: {
@@ -742,7 +725,7 @@ describe("Record Tests", () => {
 			)
 
 			const response = await app.request(
-				`/api/v1/records/account?filter=${filterQuery}`,
+				`/api/v1/records/account?fields=id,name,number_of_employees&filter=${filterQuery}`,
 				{
 					method: "GET",
 					headers: {
@@ -832,7 +815,7 @@ describe("Record Tests", () => {
 			)
 
 			const response = await app.request(
-				`/api/v1/records/account?order_by=${orderByQuery}&filter=${filterQuery}`,
+				`/api/v1/records/account?fields=id,name&order_by=${orderByQuery}&filter=${filterQuery}`,
 				{
 					method: "GET",
 					headers: {
@@ -879,7 +862,7 @@ describe("Record Tests", () => {
 
 			// Test pagination with limit=2, offset=1
 			const response = await app.request(
-				"/api/v1/records/account?limit=2&offset=1",
+				"/api/v1/records/account?fields=id,name&limit=2&offset=1",
 				{
 					method: "GET",
 					headers: {
@@ -1012,7 +995,7 @@ describe("Record Tests", () => {
 			)
 
 			const response = await app.request(
-				`/api/v1/records/account?filter=${filterQuery}`,
+				`/api/v1/records/account?fields=id,name,number_of_employees&filter=${filterQuery}`,
 				{
 					method: "GET",
 					headers: {
@@ -1080,7 +1063,7 @@ describe("Record Tests", () => {
 			)
 
 			const response = await app.request(
-				`/api/v1/records/account?filter=${filterQuery}`,
+				`/api/v1/records/account?fields=id,name&filter=${filterQuery}`,
 				{
 					method: "GET",
 					headers: {
@@ -1147,7 +1130,7 @@ describe("Record Tests", () => {
 			)
 
 			const response = await app.request(
-				`/api/v1/records/account?filter=${filterQuery}`,
+				`/api/v1/records/account?fields=id,name&filter=${filterQuery}`,
 				{
 					method: "GET",
 					headers: {
@@ -1215,7 +1198,7 @@ describe("Record Tests", () => {
 			)
 
 			const response = await app.request(
-				`/api/v1/records/account?filter=${filterQuery}`,
+				`/api/v1/records/account?fields=id,name,website&filter=${filterQuery}`,
 				{
 					method: "GET",
 					headers: {
@@ -1253,12 +1236,15 @@ describe("Record Tests", () => {
 			})
 			const token = createValidToken(testUser.id)
 
-			const response = await app.request("/api/v1/records/user", {
-				method: "GET",
-				headers: {
-					Authorization: `Bearer ${token}`,
+			const response = await app.request(
+				"/api/v1/records/user?fields=id,user_name,first_name,last_name",
+				{
+					method: "GET",
+					headers: {
+						Authorization: `Bearer ${token}`,
+					},
 				},
-			})
+			)
 
 			const data = await response.json()
 			expect(response.status).toBe(200)
@@ -1297,12 +1283,15 @@ describe("Record Tests", () => {
 				testUser.id,
 			)
 
-			const response = await app.request("/api/v1/records/lead", {
-				method: "GET",
-				headers: {
-					Authorization: `Bearer ${token}`,
+			const response = await app.request(
+				"/api/v1/records/lead?fields=id,company,first_name,last_name",
+				{
+					method: "GET",
+					headers: {
+						Authorization: `Bearer ${token}`,
+					},
 				},
-			})
+			)
 
 			const data = await response.json()
 			expect(response.status).toBe(200)
@@ -1340,12 +1329,15 @@ describe("Record Tests", () => {
 				testUser.id,
 			)
 
-			const response = await app.request("/api/v1/records/activity", {
-				method: "GET",
-				headers: {
-					Authorization: `Bearer ${token}`,
+			const response = await app.request(
+				"/api/v1/records/activity?fields=id,subject,is_all_day_event,is_archived",
+				{
+					method: "GET",
+					headers: {
+						Authorization: `Bearer ${token}`,
+					},
 				},
-			})
+			)
 
 			const data = await response.json()
 			expect(response.status).toBe(200)
@@ -1392,12 +1384,15 @@ describe("Record Tests", () => {
 				testUser.id,
 			)
 
-			const response = await app.request("/api/v1/records/phone_call", {
-				method: "GET",
-				headers: {
-					Authorization: `Bearer ${token}`,
+			const response = await app.request(
+				"/api/v1/records/phone_call?fields=id,subject,user,their,direction",
+				{
+					method: "GET",
+					headers: {
+						Authorization: `Bearer ${token}`,
+					},
 				},
-			})
+			)
 
 			const data = await response.json()
 			expect(response.status).toBe(200)
@@ -1539,12 +1534,15 @@ describe("Record Tests", () => {
 				testUser.id,
 			)
 
-			const response = await app.request("/api/v1/records/contact", {
-				method: "GET",
-				headers: {
-					Authorization: `Bearer ${token}`,
+			const response = await app.request(
+				"/api/v1/records/contact?fields=id,last_name",
+				{
+					method: "GET",
+					headers: {
+						Authorization: `Bearer ${token}`,
+					},
 				},
-			})
+			)
 
 			const data = await response.json()
 			expect(response.status).toBe(200)
@@ -1590,12 +1588,15 @@ describe("Record Tests", () => {
 				testUser.id,
 			)
 
-			const response = await app.request("/api/v1/records/opportunity", {
-				method: "GET",
-				headers: {
-					Authorization: `Bearer ${token}`,
+			const response = await app.request(
+				"/api/v1/records/opportunity?fields=id,name,account,phase,close_date,is_closed",
+				{
+					method: "GET",
+					headers: {
+						Authorization: `Bearer ${token}`,
+					},
 				},
-			})
+			)
 
 			const data = await response.json()
 			expect(response.status).toBe(200)
@@ -1640,12 +1641,15 @@ describe("Record Tests", () => {
 				testUser.id,
 			)
 
-			const response = await app.request("/api/v1/records/case", {
-				method: "GET",
-				headers: {
-					Authorization: `Bearer ${token}`,
+			const response = await app.request(
+				"/api/v1/records/case?fields=id,case_number,subject",
+				{
+					method: "GET",
+					headers: {
+						Authorization: `Bearer ${token}`,
+					},
 				},
-			})
+			)
 
 			const data = await response.json()
 			expect(response.status).toBe(200)
@@ -1680,12 +1684,15 @@ describe("Record Tests", () => {
 				testUser.id,
 			)
 
-			const response = await app.request("/api/v1/records/product", {
-				method: "GET",
-				headers: {
-					Authorization: `Bearer ${token}`,
+			const response = await app.request(
+				"/api/v1/records/product?fields=id,name",
+				{
+					method: "GET",
+					headers: {
+						Authorization: `Bearer ${token}`,
+					},
 				},
-			})
+			)
 
 			const data = await response.json()
 			expect(response.status).toBe(200)
@@ -1719,12 +1726,15 @@ describe("Record Tests", () => {
 				testUser.id,
 			)
 
-			const response = await app.request("/api/v1/records/campaign", {
-				method: "GET",
-				headers: {
-					Authorization: `Bearer ${token}`,
+			const response = await app.request(
+				"/api/v1/records/campaign?fields=id,name",
+				{
+					method: "GET",
+					headers: {
+						Authorization: `Bearer ${token}`,
+					},
 				},
-			})
+			)
 
 			const data = await response.json()
 			expect(response.status).toBe(200)
@@ -1758,12 +1768,15 @@ describe("Record Tests", () => {
 				testUser.id,
 			)
 
-			const response = await app.request("/api/v1/records/sample", {
-				method: "GET",
-				headers: {
-					Authorization: `Bearer ${token}`,
+			const response = await app.request(
+				"/api/v1/records/sample?fields=id,name",
+				{
+					method: "GET",
+					headers: {
+						Authorization: `Bearer ${token}`,
+					},
 				},
-			})
+			)
 
 			const data = await response.json()
 			expect(response.status).toBe(200)
@@ -1781,9 +1794,12 @@ describe("Record Tests", () => {
 		})
 
 		it("should return 401 for missing authorization header", async () => {
-			const response = await app.request("/api/v1/records/account", {
-				method: "GET",
-			})
+			const response = await app.request(
+				"/api/v1/records/account?fields=id,name",
+				{
+					method: "GET",
+				},
+			)
 
 			const data = await response.json()
 			expect(response.status).toBe(401)
@@ -1801,12 +1817,15 @@ describe("Record Tests", () => {
 			})
 			const token = createValidToken(testUser.id)
 
-			const response = await app.request("/api/v1/records/nonexistent_entity", {
-				method: "GET",
-				headers: {
-					Authorization: `Bearer ${token}`,
+			const response = await app.request(
+				"/api/v1/records/nonexistent_entity?fields=id,name",
+				{
+					method: "GET",
+					headers: {
+						Authorization: `Bearer ${token}`,
+					},
 				},
-			})
+			)
 
 			const data = await response.json()
 			expect(response.status).toBe(400)
