@@ -8,6 +8,7 @@
 		"db#up": "bun run --filter api db#up",
 		"db#down": "bun run --filter api db#down",
 		"db#migrate": "bun run --filter api db#migrate",
+		"db#pull": "bun run --filter api db#pull",
 		"db#migratefile": "bun run --filter api db#migratefile",
 		"db#seed": "bun run --filter api db#seed",
 		"prisma#generate": "bun run --filter api prisma#generate",
