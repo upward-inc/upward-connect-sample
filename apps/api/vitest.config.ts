@@ -17,8 +17,6 @@ export default defineConfig({
 			OIDC_TOKEN_SECRET: "test-secret-key-for-tests-12345",
 			OIDC_REFRESH_TOKEN_SECRET: "test-refresh-secret-key-for-tests-12345",
 		},
-		// Use threads pool for better testcontainers compatibility
-		pool: "threads",
 		// Global setup for testcontainers
 		globals: true,
 	},
