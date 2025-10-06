@@ -34,11 +34,21 @@ jobs:
       # Build
       - name: Build
         working-directory: ./apps/login-app
+        env:
+          VARS_JSON: ${{ toJSON(vars) }}
         run: |
           bun install --frozen-lockfile
-          echo "VITE_API_URL=${{ vars.VITE_API_URL }}" > .env
+          echo "$VARS_JSON" | jq -r 'to_entries[] | "\(.key)=\(.value)"' > .env
           bun run build
           cp ../../staticwebapp.config.json ./dist
+
+      # Verify .env file (temporary - remove after verification)
+      - name: Verify .env file
+        working-directory: ./apps/login-app
+        run: |
+          echo "=== .env file contents ==="
+          cat .env
+          echo "=========================="
 
       # Upload Publish Files
       - name: Upload Publish Files
