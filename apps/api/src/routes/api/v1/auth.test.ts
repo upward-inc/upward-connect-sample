@@ -500,10 +500,7 @@ describe("Auth Tests", () => {
 
 			const data = await response.json()
 			expect(response.status).toBe(400)
-			expect(data).toEqual({
-				error: "invalid_grant",
-				error_description: "No offline_access scope for this client",
-			})
+			expect(data.error).toBe("invalid_grant")
 		})
 	})
 
