@@ -32,13 +32,27 @@ bun login#dev
 
 ## DBスキーマ変更手順
 
+### 自らが変更を実施する場合
+
 1. マイグレーションファイルを作成
    1. `bun db#migratefile`
 2. 生成した`migration.sql`にスキーマ変更を行うスクリプトを記述
+3. ローカルデータベース（Docker）の起動
+   1. `bun db#up`
+4. マイグレーションを実施
+   1. `bun db#migrate`
+5. `prisma/schema.prisma`にDBの状態を反映
+   1. `bun db#pull`
+6. Prismaクライアントの最新化
+   1. `bun prisma#generate`
+
+### 他の開発者が実施した変更を取り込む場合
+
+1. 最新のブランチをローカルに取り込む
+   1. `git checkout develop && git pull`
+2. ローカルデータベース（Docker）の起動
+   1. `bun db#up`
 3. マイグレーションを実施
    1. `bun db#migrate`
-4. `prisma/schema.prisma`にDBの状態を反映
-   1. `bun db#pull`
-5. Prismaクライアントの最新化
+4. Prismaクライアントの最新化
    1. `bun prisma#generate`
-6. (Optional)必要であればサンプルデータを作成し、DBにデータを投入
