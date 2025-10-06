@@ -19,6 +19,7 @@ jobs:
     name: Build Job
     if: github.event_name == 'push' || github.event_name == 'workflow_dispatch' || (github.event_name == 'pull_request' && github.event.action != 'closed')
     runs-on: ubuntu-latest
+    environment: develop
     steps:
       # Checkout
       - name: Checkout repository
@@ -35,9 +36,17 @@ jobs:
         working-directory: ./apps/login-app
         run: |
           bun install --frozen-lockfile
-          cp .env.${{ env.TARGET_ENV }} .env
+          echo "VITE_API_URL=${{ vars.VITE_API_URL }}" > .env
           bun run build
           cp ../../staticwebapp.config.json ./dist
+
+      # 確認用（動作確認後は削除）
+      - name: Verify .env file
+        working-directory: ./apps/login-app
+        run: |
+          echo "=== .env file contents ==="
+          cat .env
+          echo "=========================="
 
       # Upload Publish Files
       - name: Upload Publish Files
