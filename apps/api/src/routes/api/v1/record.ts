@@ -4,7 +4,7 @@ import {
 	createRecord,
 	deleteRecord,
 	getRecordList,
-	validateCreateRecordParams,
+	validateCreateRecordBody,
 } from "../../../domain/record"
 import { describeRoute, validator } from "../../../libs/hono-openapi"
 import type { AuthContexts } from "../../../schema/auth"
@@ -34,10 +34,8 @@ export const recordRouter = new Hono<{ Variables: AuthContexts }>()
 
 			const entity = await getEntity(entity_name)
 			if (!entity) {
-				return c.json(
-					{ message: `Entity '${entity_name}' does not exist` },
-					400,
-				)
+				const message = `Entity '${entity_name}' does not exist`
+				return c.json({ message }, 404)
 			}
 
 			const { data, has_next_page, total_size } = await getRecordList(
@@ -69,24 +67,20 @@ export const recordRouter = new Hono<{ Variables: AuthContexts }>()
 			// エンティティが存在しない場合はエラー
 			const entity = await getEntity(entity_name)
 			if (!entity) {
-				return c.json(
-					{ message: `Entity '${entity_name}' does not exist` },
-					404,
-				)
+				const message = `Entity '${entity_name}' does not exist`
+				return c.json({ message }, 404)
 			}
 
-			const validateResult = await validateCreateRecordParams(
-				user.id,
-				entity_name,
-				data,
-			)
+			// ボディデータのバリデーション
+			const validateResult = await validateCreateRecordBody(entity_name, data)
 			if (!validateResult.success) {
 				return c.json({ message: validateResult.message }, 400)
 			}
 
 			const createResult = await createRecord(
+				user.id,
 				entity_name,
-				validateResult.validatedData,
+				validateResult.fields,
 			)
 
 			return c.json(createResult, 201)
@@ -103,20 +97,14 @@ export const recordRouter = new Hono<{ Variables: AuthContexts }>()
 
 			const entity = await getEntity(entity_name)
 			if (!entity) {
-				return c.json(
-					{ message: `Entity '${entity_name}' does not exist` },
-					404,
-				)
+				const message = `Entity '${entity_name}' does not exist`
+				return c.json({ message }, 404)
 			}
 
 			const { deleted } = await deleteRecord(entity_name, id)
 			if (!deleted) {
-				return c.json(
-					{
-						message: `Record with ID '${id}' does not exist in '${entity_name}'`,
-					},
-					404,
-				)
+				const message = `Record with ID '${id}' does not exist in '${entity_name}'`
+				return c.json({ message }, 404)
 			}
 
 			return c.body(null, 204)

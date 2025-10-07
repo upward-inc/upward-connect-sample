@@ -1,44 +1,87 @@
+import { getEntityItemList } from "../../domain/entity"
 import { prisma } from "../../libs/prisma"
-import type { JsonObject } from "../../schema/common"
 import type { PostRecordResponse } from "../../schema/record"
+import type { ValidateCreateRecordBodyResultSuccess } from "./validate-create-record-body"
 
 export const createRecord = async (
+	userId: string,
 	entityName: string,
-	data: JsonObject,
+	fields: ValidateCreateRecordBodyResultSuccess["fields"],
 ): Promise<PostRecordResponse> => {
-	const fields = Object.keys(data)
-	const values = Object.values(data)
+	// このサンプルシステムにおける仕様に合わせて、操作ユーザー等の設定や値の変換を実施
 
-	// Build complete SQL with proper value escaping for SQL Server
-	const fieldsList = fields.map((field) => `[${field}]`).join(", ")
+	const entityItems = await getEntityItemList(entityName)
 
-	// Insertクエリで使用可能な形式に変換
-	const escapedValues = values.map((value) => {
-		if (value === null) {
-			return "NULL"
-		}
-		if (typeof value === "string") {
-			// Use N prefix for Unicode strings in SQL Server and escape single quotes
-			return `N'${value.replace(/'/g, "''")}'`
-		}
-		if (typeof value === "boolean") {
-			return value ? "1" : "0"
-		}
-		return String(value)
-	})
+	const owner = entityItems.find(({ name }) => name === "owner")
+	const createdBy = entityItems.find(({ name }) => name === "created_by")
+	const modifiedBy = entityItems.find(({ name }) => name === "modified_by")
 
-	const valuesClause = escapedValues.join(", ")
+	const userReferenceData = {
+		success: true as const,
+		kind: "reference-input-array" as const,
+		value: [{ entity: "user", id: userId }],
+	}
+
+	const insertFields: ValidateCreateRecordBodyResultSuccess["fields"] = [
+		...fields,
+		// 所有者や操作ユーザーカラムが存在するエンティティの場合は、対象ユーザー情報を設定
+		...(owner ? [{ entityItem: owner, result: userReferenceData }] : []),
+		...(createdBy
+			? [{ entityItem: createdBy, result: userReferenceData }]
+			: []),
+		...(modifiedBy
+			? [{ entityItem: modifiedBy, result: userReferenceData }]
+			: []),
+	]
+
+	const columnsClause = insertFields
+		.map(({ entityItem }) => escapeName(entityItem.name))
+		.join(", ")
+
+	const valuesClause = insertFields
+		.map(({ result }) => {
+			if (result.kind === "null") {
+				return "NULL"
+			}
+			if (result.kind === "string") {
+				return escapeStringValue(result.value)
+			}
+			if (result.kind === "boolean") {
+				return result.value ? "1" : "0"
+			}
+			if (result.kind === "number") {
+				return result.value
+			}
+			if (result.kind === "date") {
+				return escapeStringValue(result.value.toISOString())
+			}
+			if (result.kind === "string-array") {
+				return escapeStringValue(JSON.stringify(result.value))
+			}
+			if (result.kind === "reference-input") {
+				return escapeStringValue(JSON.stringify(result.value))
+			}
+			if (result.kind === "reference-input-array") {
+				return escapeStringValue(JSON.stringify(result.value))
+			}
+		})
+		.join(", ")
 
 	const query = `
-		INSERT INTO [${entityName}] (${fieldsList})
+		INSERT INTO ${escapeName(entityName)} (${columnsClause})
 		OUTPUT INSERTED.id
 		VALUES (${valuesClause})
 	`
+
 	const result = await prisma.$queryRawUnsafe<{ id: string }[]>(query)
 
-	if (!result || result.length !== 1) {
-		throw new Error("Failed to create record")
-	}
-
 	return { entity_name: entityName, id: result[0].id }
+}
+
+const escapeName = (name: string) => {
+	return `[${name}]`
+}
+
+const escapeStringValue = (value: string) => {
+	return `N'${value.replace(/'/g, "''")}'`
 }

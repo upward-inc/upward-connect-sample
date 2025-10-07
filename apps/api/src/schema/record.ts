@@ -115,6 +115,13 @@ export const DeleteRecordParamSchema = z.object({
 	}),
 })
 
+export const RecordReferenceInputSchema = z
+	.object({
+		entity: z.string().openapi({ description: "エンティティ名" }),
+		id: z.string().openapi({ description: "レコードID" }),
+	})
+	.openapi({ description: "レコードへの参照（入力）" })
+
 export type Record = z.infer<typeof RecordSchema>
 export type RecordList = z.infer<typeof RecordListSchema>
 export type GetRecordListQuery = z.infer<typeof GetRecordListQuerySchema>
@@ -122,3 +129,4 @@ export type GetRecordListResponse = z.infer<typeof GetRecordListResponseSchema>
 export type PostRecordBody = z.infer<typeof PostRecordBodySchema>
 export type PostRecordResponse = z.infer<typeof PostRecordResponseSchema>
 export type DeleteRecordParam = z.infer<typeof DeleteRecordParamSchema>
+export type RecordReferenceInput = z.infer<typeof RecordReferenceInputSchema>
