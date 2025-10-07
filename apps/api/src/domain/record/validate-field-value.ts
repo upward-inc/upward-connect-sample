@@ -251,10 +251,8 @@ const validateOptionValue = (
 ):
 	| ValidateFieldValueResultSuccessStringArray
 	| ValidateFieldValueResultFailure => {
-	const subType = entityItem.sub_type ?? "single"
-
 	// sub_typeの妥当性チェック
-	if (subType !== "single" && subType !== "multi") {
+	if (entityItem.sub_type !== "single" && entityItem.sub_type !== "multi") {
 		return { success: false, message: "Invalid sub_type for option field" }
 	}
 
@@ -262,7 +260,7 @@ const validateOptionValue = (
 	const { success: isOptions, data: selectedOptions } = z
 		.union([
 			z.string(),
-			subType === "single"
+			entityItem.sub_type === "single"
 				? z.array(z.string()).length(1)
 				: z.array(z.string()),
 		])
@@ -271,7 +269,7 @@ const validateOptionValue = (
 
 	if (!isOptions) {
 		const message =
-			subType === "single"
+			entityItem.sub_type === "single"
 				? `Field '${entityItem.name}' must be a string or an array containing a single string`
 				: `Field '${entityItem.name}' must be an array of strings`
 		return { success: false, message }
@@ -299,10 +297,8 @@ const validateReferenceValue = async (
 	| ValidateFieldValueResultSuccessReferenceInputArray
 	| ValidateFieldValueResultFailure
 > => {
-	const subType = entityItem.sub_type ?? "single"
-
 	// single
-	if (subType === "single") {
+	if (entityItem.sub_type === "single") {
 		// 構造の妥当性チェック
 		const { success: isReferenceInput, data: referenceInput } = z
 			.union([
@@ -343,7 +339,7 @@ const validateReferenceValue = async (
 	}
 
 	// multi
-	if (subType === "multi") {
+	if (entityItem.sub_type === "multi") {
 		// 構造の妥当性チェック
 		const { success: isReferenceInputArray, data: referenceInputs } = z
 			.array(RecordReferenceInputSchema)
