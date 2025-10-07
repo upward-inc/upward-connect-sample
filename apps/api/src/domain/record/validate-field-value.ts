@@ -284,7 +284,7 @@ const validateOptionValue = (
 		return !allOptionNames.includes(option)
 	})
 	if (invalidOptions.length > 0) {
-		const message = `Field '${entityItem.name}' must be a value included in the options (${allOptionNames.map((name) => `'${name}'`).join(", ")})`
+		const message = `Field '${entityItem.name}' must be one of the valid options: ${allOptionNames.join(", ")}`
 		return { success: false, message }
 	}
 
@@ -318,11 +318,10 @@ const validateReferenceValue = async (
 		}
 
 		// 項目に指定可能なエンティティかどうかのチェック
-		const isValidEntity = !!entityItem.reference_entities?.includes(
-			referenceInput.entity,
-		)
+		const validEntities = entityItem.reference_entities ?? []
+		const isValidEntity = validEntities.includes(referenceInput.entity)
 		if (!isValidEntity) {
-			const message = `Field '${entityItem.name}' must be a valid reference entity`
+			const message = `Field '${entityItem.name}' must reference one of the allowed entities: ${validEntities.join(", ")}`
 			return { success: false, message }
 		}
 
@@ -332,7 +331,7 @@ const validateReferenceValue = async (
 			referenceInput.id,
 		)
 		if (!isRecordExists) {
-			const message = `Field '${entityItem.name}' must be a valid record reference input`
+			const message = `Field '${entityItem.name}' references a non-existent record`
 			return { success: false, message }
 		}
 
@@ -358,11 +357,10 @@ const validateReferenceValue = async (
 		// 各参照の妥当性チェック
 		for (const referenceInput of referenceInputs) {
 			// 項目に指定可能なエンティティかどうかのチェック
-			const isValidEntity = !!entityItem.reference_entities?.includes(
-				referenceInput.entity,
-			)
+			const validEntities = entityItem.reference_entities ?? []
+			const isValidEntity = validEntities.includes(referenceInput.entity)
 			if (!isValidEntity) {
-				const message = `Field '${entityItem.name}' must be a valid reference entity`
+				const message = `Field '${entityItem.name}' must reference one of the allowed entities: ${validEntities.join(", ")}`
 				return { success: false, message }
 			}
 
@@ -372,7 +370,7 @@ const validateReferenceValue = async (
 				referenceInput.id,
 			)
 			if (!isRecordExists) {
-				const message = `Field '${entityItem.name}' must be a valid record reference input`
+				const message = `Field '${entityItem.name}' references a non-existent record`
 				return { success: false, message }
 			}
 		}
