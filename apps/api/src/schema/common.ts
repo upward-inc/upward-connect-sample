@@ -32,6 +32,7 @@ export type JsonObject = z.infer<typeof JsonObjectSchema>
  */
 export type ZodJsonType = z.ZodType<JsonValue, z.ZodTypeDef, JsonValue>
 
+export const UuidSchema = z.string().uuid()
 export const EMailSchema = z.string().email()
 export const UrlSchema = z.string().url()
 export const PhoneNumberSchema = z
@@ -41,6 +42,7 @@ export const ISO8601DateSchema = z.string().date()
 export const ISO8601DatetimeSchema = z.string().datetime({ offset: true })
 export const ISO8601TimeSchema = z.string().time()
 
+export type Uuid = z.infer<typeof UuidSchema>
 export type EMail = z.infer<typeof EMailSchema>
 export type Url = z.infer<typeof UrlSchema>
 export type PhoneNumber = z.infer<typeof PhoneNumberSchema>
