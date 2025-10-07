@@ -26,6 +26,10 @@ jobs:
         working-directory: ./apps/api
         run: bun install --frozen-lockfile
 
+      - name: Generate Prisma Client
+        working-directory: ./apps/api
+        run: bun run prisma#generate
+
       - name: Lint
         working-directory: ./apps/api
         run: bun run lint
