@@ -40,9 +40,8 @@ export const validateCreateRecordBody = async (
 	})
 
 	// 入力がない必須項目一覧
-	// NOTE: このサンプルシステムでは、すべてのboolean(bit)カラムにはデフォルト値が設定されているため、チェック対象から除外
 	const missingRequiredFields = requiredFields.filter((field) => {
-		return !data[field.name] && field.type !== "boolean"
+		return !data[field.name]
 	})
 
 	// 必須入力項目が不足している場合はエラー
