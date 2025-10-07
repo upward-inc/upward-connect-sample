@@ -4,6 +4,7 @@ import { trimTrailingSlash } from "hono/trailing-slash"
 import { env } from "./env"
 import { handleError, handleNotFound } from "./error-handler"
 import { apiRouter } from "./routes/api"
+import { wellKnownRouter } from "./routes/well-known"
 
 export const app = new Hono()
 
@@ -14,6 +15,7 @@ app.use(trimTrailingSlash())
 
 // routing
 app.route("/api", apiRouter)
+app.route("/.well-known", wellKnownRouter)
 
 // handle error
 app.onError(handleError)
