@@ -11,9 +11,6 @@ on:
   # Allow manually trigger
   workflow_dispatch:
 
-env:
-  TARGET_ENV: dev
-
 jobs:
   build_job:
     name: Build Job
