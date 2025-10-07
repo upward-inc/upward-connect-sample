@@ -263,70 +263,24 @@ export const authRouter = new Hono<{ Variables: AuthContexts }>()
 			if (!loggedInUser) {
 				return c.json(
 					{
-						error: "User not found",
+						error: "invalid_token",
 						error_description:
 							"The user associated with the provided token does not exist.",
 					},
-					404,
+					401,
 				)
 			}
 
 			return c.json({
 				sub: loggedInUser.id,
+				user_id: loggedInUser.id, // custom claim
 				name: `${loggedInUser.last_name} ${loggedInUser.first_name}`,
 				given_name: loggedInUser.first_name,
-				family_name: loggedInUser.last_name,
-				email: loggedInUser.email,
+				family_name: loggedInUser.last_name ?? undefined,
+				email: loggedInUser.email ?? undefined,
+				// 下記のフィールドは必須なので、ファールバック値を設定する
+				zoneinfo: loggedInUser.timezone ?? "Asia/Tokyo",
+				locale: loggedInUser.locale ?? "ja-JP",
 			})
 		},
 	)
-// .get("/.well-known/openid-configuration", async (c) => {
-// 	// OpenID Connect Discoveryドキュメントを返す
-// 	// https://openid.net/specs/openid-connect-discovery-1_0.html
-// 	return c.json({
-// 		issuer: env.OIDC_ISSUER,
-// 		authorization_endpoint: `${env.OIDC_ISSUER}/auth/authorize`,
-// 		token_endpoint: `${env.OIDC_ISSUER}/auth/token`,
-// 		userinfo_endpoint: `${env.OIDC_ISSUER}/auth/userinfo`,
-// 		jwks_uri: `${env.OIDC_ISSUER}/auth/.well-known/jwks.json`,
-// 		response_types_supported: [
-// 			"code",
-// 			"token",
-// 			"id_token",
-// 			"code token",
-// 			"code id_token",
-// 			"token id_token",
-// 			"code token id_token",
-// 		],
-// 		subject_types_supported: ["public"],
-// 		id_token_signing_alg_values_supported: ["HS256", "RS256"],
-// 		scopes_supported: ["openid", "profile", "email"],
-// 		token_endpoint_auth_methods_supported: [
-// 			"client_secret_basic",
-// 			"client_secret_post",
-// 		],
-// 		claims_supported: ["sub", "iss", "name", "email", "picture"],
-// 		grant_types_supported: [
-// 			"authorization_code",
-// 			"refresh_token",
-// 			"password",
-// 		],
-// 		// その他の必要な設定...
-// 	})
-// })
-// .get("/.well-known/jwks.json", async (c) => {
-// 	// JWKS（JSON Web Key Set）を返す
-// 	// 実際の実装ではRSA鍵ペアを使用し、公開鍵を返すべきです
-// 	// この例ではシンプルな対称鍵を使用しているため、実際のJWKSは返しません
-// 	return c.json({
-// 		keys: [
-// 			// 実際のアプリケーションでは、ここに公開鍵情報を含めます
-// 			{
-// 				kty: "oct",
-// 				use: "sig",
-// 				kid: "sample-key-id",
-// 				alg: "HS256",
-// 			},
-// 		],
-// 	})
-// })

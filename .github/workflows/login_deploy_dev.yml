@@ -11,14 +11,12 @@ on:
   # Allow manually trigger
   workflow_dispatch:
 
-env:
-  TARGET_ENV: dev
-
 jobs:
   build_job:
     name: Build Job
     if: github.event_name == 'push' || github.event_name == 'workflow_dispatch' || (github.event_name == 'pull_request' && github.event.action != 'closed')
     runs-on: ubuntu-latest
+    environment: develop
     steps:
       # Checkout
       - name: Checkout repository
@@ -48,8 +46,10 @@ jobs:
       # Build
       - name: Build
         working-directory: ./apps/login-app
+        env:
+          VARS_JSON: ${{ toJSON(vars) }}
         run: |
-          cp .env.${{ env.TARGET_ENV }} .env
+          echo "$VARS_JSON" | jq -r 'to_entries[] | "\(.key)=\(.value)"' > .env
           bun run build
           cp ../../staticwebapp.config.json ./dist
 
