@@ -1,326 +1,382 @@
-import { format } from "@formkit/tempo"
-import { prisma } from "../../libs/prisma"
+import { parse } from "@formkit/tempo"
+import { z } from "zod"
+
+import {
+	EMailSchema,
+	ISO8601DateSchema,
+	ISO8601DatetimeSchema,
+	ISO8601TimeSchema,
+	PhoneNumberSchema,
+	UrlSchema,
+} from "../../schema/common"
 import type { JsonValue } from "../../schema/common"
 import type { EntityItem } from "../../schema/entity-item"
+import {
+	type RecordReferenceInput,
+	RecordReferenceInputSchema,
+} from "../../schema/record"
+import { getRecordExists } from "./get-record-exists"
 
-type RecordValidationResult =
-	| RecordValidationResultSuccess
-	| RecordValidationResultFailure
+export type ValidateFieldValueResult =
+	| ValidateFieldValueResultSuccess
+	| ValidateFieldValueResultFailure
 
-interface RecordValidationResultSuccess {
-	success: true
-	validatedValue: JsonValue
-}
+export type ValidateFieldValueResultSuccess =
+	| ValidateFieldValueResultSuccessNull
+	| ValidateFieldValueResultSuccessString
+	| ValidateFieldValueResultSuccessNumber
+	| ValidateFieldValueResultSuccessBoolean
+	| ValidateFieldValueResultSuccessDate
+	| ValidateFieldValueResultSuccessStringArray
+	| ValidateFieldValueResultSuccessReferenceInput
+	| ValidateFieldValueResultSuccessReferenceInputArray
 
-interface RecordValidationResultFailure {
+export interface ValidateFieldValueResultFailure {
 	success: false
 	message: string
 }
 
-type Reference = {
-	entity: string
-	id: string
+interface ValidateFieldValueResultSuccessNull {
+	success: true
+	kind: "null"
+	value: null
 }
 
-const validateTextValue = (
-	value: JsonValue,
-	name: string,
-	sub_type: string | null | undefined,
-	entityName: string,
-): RecordValidationResult => {
-	if (typeof value !== "string") {
-		return {
-			success: false,
-			message: `Field '${name}' must be a string for ${entityName}`,
-		}
-	}
-
-	if (sub_type === "email") {
-		// Simple email regex validation
-		const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-		if (!emailRegex.test(value)) {
-			return {
-				success: false,
-				message: `Field '${name}' must be a valid email address for '${entityName}'`,
-			}
-		}
-	} else if (sub_type === "phone") {
-		// Simple phone number validation (digits, spaces, dashes, parentheses)
-		const phoneRegex = /^[0-9\s\-()+]+$/
-		if (!phoneRegex.test(value)) {
-			return {
-				success: false,
-				message: `Field '${name}' must be a valid phone number for '${entityName}'`,
-			}
-		}
-	} else if (sub_type === "url") {
-		try {
-			new URL(value)
-		} catch {
-			return {
-				success: false,
-				message: `Field '${name}' must be a valid URL for '${entityName}'`,
-			}
-		}
-	}
-	return { success: true, validatedValue: value }
+interface ValidateFieldValueResultSuccessString {
+	success: true
+	kind: "string"
+	value: string
 }
 
-const validateNumericValue = (
-	value: JsonValue,
-	name: string,
-	sub_type: string | null | undefined,
-	entityName: string,
-): RecordValidationResult => {
-	if (typeof value !== "number" && !Number.isFinite(Number(value))) {
-		return {
-			success: false,
-			message: `Field '${name}' must be a number for '${entityName}'`,
-		}
-	}
-	if (sub_type === "integer" && !Number.isInteger(value)) {
-		return {
-			success: false,
-			message: `Field '${name}' must be an integer for '${entityName}'`,
-		}
-	}
-	return { success: true, validatedValue: Number(value) }
+interface ValidateFieldValueResultSuccessNumber {
+	success: true
+	kind: "number"
+	value: number
 }
 
-const validateBooleanValue = (
-	value: JsonValue,
-	name: string,
-	entityName: string,
-): RecordValidationResult => {
-	if (typeof value !== "boolean") {
-		return {
-			success: false,
-			message: `Field '${name}' must be a boolean for '${entityName}'`,
-		}
-	}
-	return { success: true, validatedValue: value }
+interface ValidateFieldValueResultSuccessBoolean {
+	success: true
+	kind: "boolean"
+	value: boolean
 }
 
-const validateDateValue = (
-	value: JsonValue,
-	name: string,
-	sub_type: string | null | undefined,
-	entityName: string,
-): RecordValidationResult => {
-	if (typeof value === "string") {
-		if (sub_type === "date") {
-			// Expecting date only (YYYY-MM-DD)
-			const dateOnlyRegex = /^\d{4}-\d{2}-\d{2}$/
-			if (!dateOnlyRegex.test(value)) {
-				return {
-					success: false,
-					message: `Field '${name}' must be a valid date string (YYYY-MM-DD) for '${entityName}'`,
-				}
-			}
-			return { success: true, validatedValue: value }
-		}
-		// Expecting full datetime
-		const parsedDate = new Date(value)
-		if (Number.isNaN(parsedDate.getTime())) {
-			return {
-				success: false,
-				message: `Field '${name}' must be a valid datetime string for '${entityName}'`,
-			}
-		}
-		return {
-			success: true,
-			validatedValue: format({
-				date: parsedDate,
-				format: "YYYY-MM-DDTHH:mm:ssZ",
-				tz: "Asia/Tokyo",
-			}),
-		}
-	}
-	return {
-		success: false,
-		message: `Field '${name}' must be a date for '${entityName}'`,
-	}
+interface ValidateFieldValueResultSuccessDate {
+	success: true
+	kind: "date"
+	value: Date
 }
 
-const validateOptionValue = (
-	value: JsonValue,
-	name: string,
-	sub_type: string | null | undefined,
-	options: { name: string }[] | null | undefined,
-	entityName: string,
-): RecordValidationResult => {
-	if (!options || options.length === 0) {
-		return {
-			success: false,
-			message: `Field '${name}' has no available options for '${entityName}'`,
-		}
-	}
-
-	const optionNames = options.map((opt) => opt.name)
-
-	if (sub_type === "single") {
-		if (typeof value !== "string" || !optionNames.includes(value)) {
-			return {
-				success: false,
-				message: `Field '${name}' must be one of: '${optionNames.join("', '")}' for '${entityName}'`,
-			}
-		}
-		return { success: true, validatedValue: JSON.stringify([value]) }
-	}
-
-	// multi-select
-	if (!Array.isArray(value)) {
-		return {
-			success: false,
-			message: `Field '${name}' must be an array for '${entityName}'`,
-		}
-	}
-	const invalidOptions = value.filter(
-		(v) => typeof v !== "string" || !optionNames.includes(v),
-	)
-	if (invalidOptions.length > 0) {
-		return {
-			success: false,
-			message: `Field '${name}' contains invalid options: '${invalidOptions.join("', '")}' for '${entityName}'`,
-		}
-	}
-	return { success: true, validatedValue: JSON.stringify(value) }
+interface ValidateFieldValueResultSuccessStringArray {
+	success: true
+	kind: "string-array"
+	value: string[]
 }
 
-const validateReferenceValue = async (
-	value: JsonValue,
-	name: string,
-	sub_type: string | null | undefined,
-	reference_entities: string[] | null | undefined,
-	entityName: string,
-): Promise<RecordValidationResult> => {
-	if (!reference_entities || reference_entities.length === 0) {
-		return {
-			success: false,
-			message: `Field '${name}' has no available reference entities for '${entityName}'`,
-		}
-	}
-	if (sub_type === "single" && typeof value !== "string") {
-		return {
-			success: false,
-			message: `Field '${name}' must be a string ID for '${entityName}'`,
-		}
-	}
-	if (sub_type === "multi") {
-		if (!Array.isArray(value) || value.some((v) => typeof v !== "string")) {
-			return {
-				success: false,
-				message: `Field '${name}' must be an array of IDs for '${entityName}'`,
-			}
-		}
-	}
+interface ValidateFieldValueResultSuccessReferenceInput {
+	success: true
+	kind: "reference-input"
+	value: RecordReferenceInput
+}
 
-	// Handle single reference or array of references
-	const references = Array.isArray(value) ? value : [value]
-	const validatedReferences: Reference[] = []
-
-	for (const ref of references) {
-		if (typeof ref === "string") {
-			// Simple ID string - check all possible reference entities
-			const referenceId = ref
-			let foundEntity = null
-
-			for (const entityName of reference_entities) {
-				const exists = await checkReferenceExists(entityName, referenceId)
-				if (exists) {
-					foundEntity = entityName
-					break
-				}
-			}
-
-			if (!foundEntity) {
-				return {
-					success: false,
-					message: `Referenced record '${referenceId}' does not exist in any of: '${reference_entities.join("', '")}' for '${entityName}'`,
-				}
-			}
-			validatedReferences.push({ entity: foundEntity, id: referenceId })
-		} else {
-			// 辿りつかないはずだが、念のため
-			return {
-				success: false,
-				message: `Field '${name}' reference must be a string ID for '${entityName}'`,
-			}
-		}
-	}
-
-	return {
-		success: true,
-		validatedValue: JSON.stringify(
-			Array.isArray(value) ? validatedReferences : validatedReferences[0],
-		),
-	}
+interface ValidateFieldValueResultSuccessReferenceInputArray {
+	success: true
+	kind: "reference-input-array"
+	value: RecordReferenceInput[]
 }
 
 export const validateFieldValue = async (
 	entityItem: EntityItem,
 	value: JsonValue,
-	entityName: string,
-): Promise<RecordValidationResult> => {
-	const { name, type, sub_type, options, reference_entities } = entityItem
-
-	// Handle null values
-	if (value === null || value === undefined) {
-		return { success: true, validatedValue: null }
+): Promise<ValidateFieldValueResult> => {
+	// null設定可能な項目にnullを設定された場合は早期リターン
+	if (!entityItem.is_required && value === null) {
+		return { success: true, kind: "null", value: null }
 	}
 
-	// Validate based on type
-	if (type === "text") {
-		return validateTextValue(value, name, sub_type, entityName)
+	const validateFunctions: Record<
+		EntityItem["type"],
+		(
+			entityItem: EntityItem,
+			value: JsonValue,
+		) => ValidateFieldValueResult | Promise<ValidateFieldValueResult>
+	> = {
+		text: validateTextValue,
+		numeric: validateNumericValue,
+		boolean: validateBooleanValue,
+		date: validateDateValue,
+		option: validateOptionValue,
+		reference: validateReferenceValue,
 	}
 
-	if (type === "numeric") {
-		return validateNumericValue(value, name, sub_type, entityName)
-	}
-
-	if (type === "boolean") {
-		return validateBooleanValue(value, name, entityName)
-	}
-
-	if (type === "date") {
-		return validateDateValue(value, name, sub_type, entityName)
-	}
-
-	if (type === "option") {
-		return validateOptionValue(value, name, sub_type, options, entityName)
-	}
-
-	if (type === "reference") {
-		return await validateReferenceValue(
-			value,
-			name,
-			sub_type,
-			reference_entities,
-			entityName,
-		)
-	}
-
-	// Default case
-	return { success: true, validatedValue: value }
+	return validateFunctions[entityItem.type](entityItem, value)
 }
 
-// TODO: getRecordList() を使う
-const checkReferenceExists = async (
-	entityName: string,
-	id: string,
-): Promise<boolean> => {
-	try {
-		const escapedId = `N'${id.replace(/'/g, "''")}'`
-		const query = `SELECT COUNT(*) as count FROM [${entityName}] WHERE id = ${escapedId} AND is_deleted = 0`
+const validateTextValue = (
+	entityItem: EntityItem,
+	value: JsonValue,
+): ValidateFieldValueResultSuccessString | ValidateFieldValueResultFailure => {
+	// 文字列かどうかの検証
+	const { success: isString, data: stringValue } = z.string().safeParse(value)
 
-		const result = await prisma.$queryRawUnsafe<{ count: number }[]>(query)
-
-		return result[0]?.count > 0
-	} catch (error) {
-		console.error(
-			`Error checking reference existence for ${entityName}:${id}`,
-			error,
-		)
-		return false
+	if (!isString) {
+		const message = `Field '${entityItem.name}' must be a string`
+		return { success: false, message }
 	}
+
+	// NOTE: 要件に応じて詳細なバリデーションを実施する
+
+	// // メールアドレス形式の検証
+	// if (entityItem.sub_type === "email") {
+	// 	const { success } = EMailSchema.safeParse(stringValue)
+	// 	if (!success) {
+	// 		const message = `Field '${entityItem.name}' must be a valid email address`
+	// 		return { success: false, message }
+	// 	}
+	// }
+
+	// // 電話番号形式の検証
+	// if (entityItem.sub_type === "phone") {
+	// 	const { success } = PhoneNumberSchema.safeParse(stringValue)
+	// 	if (!success) {
+	// 		const message = `Field '${entityItem.name}' must be a valid phone number`
+	// 		return { success: false, message }
+	// 	}
+	// }
+
+	// // URL形式の検証
+	// if (entityItem.sub_type === "url") {
+	// 	const { success } = UrlSchema.safeParse(stringValue)
+	// 	if (!success) {
+	// 		const message = `Field '${entityItem.name}' must be a valid URL`
+	// 		return { success: false, message }
+	// 	}
+	// }
+
+	return { success: true, kind: "string", value: stringValue }
+}
+
+const validateNumericValue = (
+	entityItem: EntityItem,
+	value: JsonValue,
+): ValidateFieldValueResultSuccessNumber | ValidateFieldValueResultFailure => {
+	// 数値かどうかの検証
+	const { success: isNumber, data: numberValue } = z
+		.number()
+		.finite()
+		.safeParse(value)
+
+	if (!isNumber) {
+		const message = `Field '${entityItem.name}' must be a number`
+		return { success: false, message }
+	}
+
+	// 整数かどうかの検証
+	if (entityItem.sub_type === "integer") {
+		const { success } = z.number().int().safeParse(numberValue)
+		if (!success) {
+			const message = `Field '${entityItem.name}' must be an integer`
+			return { success: false, message }
+		}
+	}
+
+	return { success: true, kind: "number", value: numberValue }
+}
+
+const validateBooleanValue = (
+	entityItem: EntityItem,
+	value: JsonValue,
+): ValidateFieldValueResult => {
+	// 真偽値かどうかの検証
+	const { success: isBoolean, data: booleanValue } = z
+		.boolean()
+		.safeParse(value)
+
+	if (!isBoolean) {
+		const message = `Field '${entityItem.name}' must be a boolean`
+		return { success: false, message }
+	}
+
+	return { success: true, kind: "boolean", value: booleanValue }
+}
+
+const validateDateValue = (
+	entityItem: EntityItem,
+	value: JsonValue,
+):
+	| ValidateFieldValueResultSuccessString
+	| ValidateFieldValueResultSuccessDate
+	| ValidateFieldValueResultFailure => {
+	// 日付形式の検証
+	if (entityItem.sub_type === "date") {
+		const { success: isDate, data: dateValue } =
+			ISO8601DateSchema.safeParse(value)
+
+		if (!isDate) {
+			const message = `Field '${entityItem.name}' must be a valid date string (YYYY-MM-DD)`
+			return { success: false, message }
+		}
+		return { success: true, kind: "string", value: dateValue }
+	}
+
+	// 日時形式（日付と時刻）の検証
+	if (entityItem.sub_type === "datetime") {
+		const { success: isDatetime, data: datetimeValue } =
+			ISO8601DatetimeSchema.safeParse(value)
+
+		if (!isDatetime) {
+			const message = `Field '${entityItem.name}' must be a valid datetime string (YYYY-MM-DDTHH:MM[:SS[.s+]]Z)`
+			return { success: false, message }
+		}
+		return { success: true, kind: "date", value: parse(datetimeValue) }
+	}
+
+	// 時刻形式の検証
+	if (entityItem.sub_type === "time") {
+		const { success: isTime, data: timeValue } =
+			ISO8601TimeSchema.safeParse(value)
+
+		if (!isTime) {
+			const message = `Field '${entityItem.name}' must be a valid time string (HH:MM[:SS[.s+]])`
+			return { success: false, message }
+		}
+		return { success: true, kind: "string", value: timeValue }
+	}
+
+	return { success: false, message: "Invalid sub_type" }
+}
+
+const validateOptionValue = (
+	entityItem: EntityItem,
+	value: JsonValue,
+):
+	| ValidateFieldValueResultSuccessStringArray
+	| ValidateFieldValueResultFailure => {
+	// sub_typeの妥当性チェック
+	if (entityItem.sub_type !== "single" && entityItem.sub_type !== "multi") {
+		return { success: false, message: "Invalid sub_type for option field" }
+	}
+
+	// 構造の妥当性チェック
+	const { success: isOptions, data: selectedOptions } = z
+		.union([
+			z.string(),
+			entityItem.sub_type === "single"
+				? z.array(z.string()).length(1)
+				: z.array(z.string()),
+		])
+		.transform((val) => (!Array.isArray(val) ? [val] : val))
+		.safeParse(value)
+
+	if (!isOptions) {
+		const message =
+			entityItem.sub_type === "single"
+				? `Field '${entityItem.name}' must be a string or an array containing a single string`
+				: `Field '${entityItem.name}' must be an array of strings`
+		return { success: false, message }
+	}
+
+	const allOptionNames = (entityItem.options ?? []).map(({ name }) => name)
+
+	// 選択肢の妥当性チェック
+	const invalidOptions = selectedOptions.filter((option) => {
+		return !allOptionNames.includes(option)
+	})
+	if (invalidOptions.length > 0) {
+		const message = `Field '${entityItem.name}' must be one of the valid options: ${allOptionNames.join(", ")}`
+		return { success: false, message }
+	}
+
+	return { success: true, kind: "string-array", value: selectedOptions }
+}
+
+const validateReferenceValue = async (
+	entityItem: EntityItem,
+	value: JsonValue,
+): Promise<
+	| ValidateFieldValueResultSuccessReferenceInput
+	| ValidateFieldValueResultSuccessReferenceInputArray
+	| ValidateFieldValueResultFailure
+> => {
+	// single
+	if (entityItem.sub_type === "single") {
+		// 構造の妥当性チェック
+		const { success: isReferenceInput, data: referenceInput } = z
+			.union([
+				RecordReferenceInputSchema,
+				z.array(RecordReferenceInputSchema).length(1),
+			])
+			.transform((val) => (Array.isArray(val) ? val[0] : val))
+			.safeParse(value)
+
+		if (!isReferenceInput) {
+			const message = `Field '${entityItem.name}' must be a record reference input or an array containing a single record reference input`
+			return { success: false, message }
+		}
+
+		// 項目に指定可能なエンティティかどうかのチェック
+		const validEntities = entityItem.reference_entities ?? []
+		const isValidEntity = validEntities.includes(referenceInput.entity)
+		if (!isValidEntity) {
+			const message = `Field '${entityItem.name}' must reference one of the allowed entities: ${validEntities.join(", ")}`
+			return { success: false, message }
+		}
+
+		// レコードの存在確認
+		const isRecordExists = await getRecordExists(
+			referenceInput.entity,
+			referenceInput.id,
+		)
+		if (!isRecordExists) {
+			const message = `Field '${entityItem.name}' references a non-existent record`
+			return { success: false, message }
+		}
+
+		return {
+			success: true,
+			kind: "reference-input",
+			value: referenceInput,
+		}
+	}
+
+	// multi
+	if (entityItem.sub_type === "multi") {
+		// 構造の妥当性チェック
+		const { success: isReferenceInputArray, data: referenceInputs } = z
+			.array(RecordReferenceInputSchema)
+			.safeParse(value)
+
+		if (!isReferenceInputArray) {
+			const message = `Field '${entityItem.name}' must be an array of record reference input`
+			return { success: false, message }
+		}
+
+		// 各参照の妥当性チェック
+		for (const referenceInput of referenceInputs) {
+			// 項目に指定可能なエンティティかどうかのチェック
+			const validEntities = entityItem.reference_entities ?? []
+			const isValidEntity = validEntities.includes(referenceInput.entity)
+			if (!isValidEntity) {
+				const message = `Field '${entityItem.name}' must reference one of the allowed entities: ${validEntities.join(", ")}`
+				return { success: false, message }
+			}
+
+			// レコードの存在確認
+			const isRecordExists = await getRecordExists(
+				referenceInput.entity,
+				referenceInput.id,
+			)
+			if (!isRecordExists) {
+				const message = `Field '${entityItem.name}' references a non-existent record`
+				return { success: false, message }
+			}
+		}
+
+		return {
+			success: true,
+			kind: "reference-input-array",
+			value: referenceInputs,
+		}
+	}
+
+	return { success: false, message: "Invalid sub_type for reference field" }
 }
