@@ -104,6 +104,58 @@ export const PostRecordResponseSchema = z
 		description: "作成されたレコードデータ",
 	})
 
+export const PatchRecordBodySchema = z
+	.any()
+	.refine((data) => {
+		return JsonObjectSchema.safeParse(data).success
+	})
+	.openapi({
+		description: "更新するレコードのデータ",
+		example: {
+			text_field: "ABC",
+			textarea_field: "ABC\nDEF",
+			integer_field: 123,
+			decimal_field: 123.45,
+			boolean_field: true,
+			date_field: "2025-01-01",
+			datetime_field: "2025-01-01T12:34:56Z",
+			time_field: "12:34:56",
+			single_option_field: "option-a",
+			multi_option_field: ["option-a", "option-b"],
+			single_reference_field: { entity_name: "lead", id: "lead-00000001" },
+			multi_reference_field: [
+				{ entity_name: "lead", id: "lead-00000001" },
+				{ entity_name: "lead", id: "lead-00000002" },
+			],
+		},
+	})
+
+export const PatchRecordParamSchema = z.object({
+	entity_name: z.string().openapi({
+		description: "レコード更新対象のエンティティ名",
+		examples: ["account", "lead"],
+	}),
+	id: z.string().openapi({
+		description: "更新対象のレコードID",
+		examples: ["account-00000001", "lead-00000001"],
+	}),
+})
+
+export const PatchRecordResponseSchema = z
+	.object({
+		entity_name: z.string().openapi({
+			description: "更新されたレコードのエンティティ名",
+			examples: ["account", "lead"],
+		}),
+		id: z.string().openapi({
+			description: "更新されたレコードのID",
+			examples: ["account-00000001", "lead-00000001"],
+		}),
+	})
+	.openapi({
+		description: "更新されたレコードデータ",
+	})
+
 export const DeleteRecordParamSchema = z.object({
 	entity_name: z.string().openapi({
 		description: "削除対象レコードのエンティティ名",
@@ -128,5 +180,7 @@ export type GetRecordListQuery = z.infer<typeof GetRecordListQuerySchema>
 export type GetRecordListResponse = z.infer<typeof GetRecordListResponseSchema>
 export type PostRecordBody = z.infer<typeof PostRecordBodySchema>
 export type PostRecordResponse = z.infer<typeof PostRecordResponseSchema>
+export type PatchRecordBody = z.infer<typeof PatchRecordBodySchema>
+export type PatchRecordResponse = z.infer<typeof PatchRecordResponseSchema>
 export type DeleteRecordParam = z.infer<typeof DeleteRecordParamSchema>
 export type RecordReferenceInput = z.infer<typeof RecordReferenceInputSchema>
