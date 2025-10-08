@@ -53,7 +53,7 @@ export const getUniquePersons = (size: number) => {
 	// 組み合わせをシャッフル
 	for (let i = combinations.length - 1; i > 0; i--) {
 		const j = Math.floor(Math.random() * (i + 1))
-		;[combinations[i], combinations[j]] = [combinations[j]!, combinations[i]!]
+		;[combinations[i], combinations[j]] = [combinations[j], combinations[i]]
 	}
 
 	// 必要な数だけ取得

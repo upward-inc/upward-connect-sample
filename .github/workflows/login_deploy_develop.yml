@@ -1,4 +1,4 @@
-name: Azure Static Web Apps CI/CD
+name: login deploy - develop
 
 on:
   push:
@@ -28,13 +28,27 @@ jobs:
         with:
           bun-version: 1.2.12
 
+      # Install dependencies
+      - name: Install dependencies
+        working-directory: ./apps/login-app
+        run: bun install --frozen-lockfile
+
+      # Lint
+      - name: Lint
+        working-directory: ./apps/login-app
+        run: bun run lint
+
+      # Test
+      - name: Test
+        working-directory: ./apps/login-app
+        run: bun run test
+
       # Build
       - name: Build
         working-directory: ./apps/login-app
         env:
           VARS_JSON: ${{ toJSON(vars) }}
         run: |
-          bun install --frozen-lockfile
           echo "$VARS_JSON" | jq -r 'to_entries[] | "\(.key)=\(.value)"' > .env
           bun run build
           cp ../../staticwebapp.config.json ./dist
