@@ -14,7 +14,11 @@ on:
   workflow_dispatch:
 
 jobs:
+  lint-and-test:
+    uses: ./.github/workflows/api_lint_test.yml
+
   build:
+    needs: lint-and-test
     uses: ./.github/workflows/api_build.yml
     with:
       environment: 'develop'
