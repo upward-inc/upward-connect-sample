@@ -1,11 +1,11 @@
-name: api - lint and test
+name: call api lint
 
 on:
   workflow_call:
 
 jobs:
-  lint-and-test:
-    name: Lint and Test
+  lint:
+    name: Lint
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -23,11 +23,3 @@ jobs:
       - name: Lint
         working-directory: ./apps/api
         run: bun run lint
-
-      - name: Generate Prisma Client
-        working-directory: ./apps/api
-        run: bun run prisma#generate
-
-      - name: Test
-        working-directory: ./apps/api
-        run: bun run test
