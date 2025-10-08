@@ -96,7 +96,7 @@ export const updateRecord = async (
 		WHERE id = ${escapeStringValue(recordId)}
 	`
 
-	await prisma.$queryRawUnsafe<{ id: string }[]>(query)
+	await prisma.$queryRawUnsafe(query)
 
 	return { entity_name: entityName, id: recordId }
 }
