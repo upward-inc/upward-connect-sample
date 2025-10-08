@@ -13,7 +13,7 @@ export const EntitySchema = z
 		}),
 		title_field_name: z.string().openapi({
 			description: "エンティティのタイトルとなる項目名",
-			examples: ["name"],
+			example: "name",
 		}),
 	})
 	.openapi({
