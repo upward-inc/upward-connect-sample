@@ -954,6 +954,162 @@ describe("Record Tests", () => {
 			expect(uniqueIndustries).toContain("finance")
 		})
 
+		it("group_byに含まれていないfieldsが指定された場合に400を返すこと", async () => {
+			const testUser = await createTestUser({
+				user_name: "group_by_validation_user",
+				first_name: "GroupBy",
+				last_name: "Validation",
+				email: "group_by_validation@example.com",
+			})
+			const token = createValidToken(testUser.id)
+
+			await createTestAccount(
+				{
+					name: "Test Company",
+					industry: "it",
+				},
+				testUser.id,
+			)
+
+			const groupByQuery = encodeURIComponent("industry")
+
+			const response = await app.request(
+				`/api/v1/records/account?fields=id,name,industry&group_by=${groupByQuery}`,
+				{
+					method: "GET",
+					headers: {
+						Authorization: `Bearer ${token}`,
+					},
+				},
+			)
+
+			expect(response.status).toBe(400)
+		})
+
+		it("group_byが指定されorder_byが指定されていない場合、デフォルトのorder_by（group_byフィールド）を使用すること", async () => {
+			const testUser = await createTestUser({
+				user_name: "group_by_default_order_user",
+				first_name: "GroupBy",
+				last_name: "DefaultOrder",
+				email: "group_by_default_order@example.com",
+			})
+			const token = createValidToken(testUser.id)
+
+			// 異なるindustryのテストアカウントを作成
+			await createTestAccount(
+				{
+					name: "Company Z",
+					industry: "manufacturing",
+				},
+				testUser.id,
+			)
+
+			await createTestAccount(
+				{
+					name: "Company A",
+					industry: "finance",
+				},
+				testUser.id,
+			)
+
+			await createTestAccount(
+				{
+					name: "Company M",
+					industry: "it",
+				},
+				testUser.id,
+			)
+
+			const groupByQuery = encodeURIComponent("industry")
+
+			const response = await app.request(
+				`/api/v1/records/account?fields=industry&group_by=${groupByQuery}`,
+				{
+					method: "GET",
+					headers: {
+						Authorization: `Bearer ${token}`,
+					},
+				},
+			)
+
+			const data = await response.json()
+
+			expect(response.status).toBe(200)
+			expect(data).toHaveProperty("data")
+			expect(Array.isArray(data.data)).toBe(true)
+
+			const industries = data.data.map(
+				(record: { industry: string }) => record.industry,
+			)
+
+			// industryが昇順にソートされているか確認
+			expect(industries).toEqual([null, "finance", "it", "manufacturing"])
+		})
+
+		it("group_byとorder_byの両方が指定された場合、order_byを優先すること", async () => {
+			const testUser = await createTestUser({
+				user_name: "group_by_explicit_order_user",
+				first_name: "GroupBy",
+				last_name: "ExplicitOrder",
+				email: "group_by_explicit_order@example.com",
+			})
+			const token = createValidToken(testUser.id)
+
+			// 異なるindustryのテストアカウントを作成
+			await createTestAccount(
+				{
+					name: "Company A",
+					industry: "finance",
+				},
+				testUser.id,
+			)
+
+			await createTestAccount(
+				{
+					name: "Company M",
+					industry: "it",
+				},
+				testUser.id,
+			)
+
+			await createTestAccount(
+				{
+					name: "Company Z",
+					industry: "manufacturing",
+				},
+				testUser.id,
+			)
+
+			const groupByQuery = encodeURIComponent("industry")
+			const orderByQuery = encodeURIComponent(
+				JSON.stringify([{ field: "industry", direction: "desc" }]),
+			)
+
+			const response = await app.request(
+				`/api/v1/records/account?fields=industry&group_by=${groupByQuery}&order_by=${orderByQuery}`,
+				{
+					method: "GET",
+					headers: {
+						Authorization: `Bearer ${token}`,
+					},
+				},
+			)
+
+			const data = await response.json()
+
+			expect(response.status).toBe(200)
+			expect(data).toHaveProperty("data")
+			expect(Array.isArray(data.data)).toBe(true)
+
+			// industryで降順にソートされているべき（明示的）
+			const industries = data.data.map(
+				(record: { industry: string }) => record.industry,
+			)
+
+			// industryが降順にソートされているか確認
+			expect(industries).toEqual(["manufacturing", "it", "finance", null])
+		})
+
 		it("should return record list with numeric filter (greater than)", async () => {
 			const testUser = await createTestUser({
 				user_name: "numeric_filter_user",
