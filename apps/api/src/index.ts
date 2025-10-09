@@ -3,8 +3,7 @@ import { secureHeaders } from "hono/secure-headers"
 import { trimTrailingSlash } from "hono/trailing-slash"
 import { env } from "./env"
 import { handleError, handleNotFound } from "./error-handler"
-import { apiRouter } from "./routes/api"
-import { wellKnownRouter } from "./routes/well-known"
+import { router } from "./routes"
 
 export const app = new Hono()
 
@@ -14,8 +13,7 @@ app.use(secureHeaders())
 app.use(trimTrailingSlash())
 
 // routing
-app.route("/api", apiRouter)
-app.route("/.well-known", wellKnownRouter)
+app.route("/", router)
 
 // handle error
 app.onError(handleError)

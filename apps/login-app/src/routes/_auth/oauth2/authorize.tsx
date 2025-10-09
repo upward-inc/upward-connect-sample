@@ -156,7 +156,7 @@ function useOAuthClient(
 					setIsFetching(true)
 
 					const response = await fetch(
-						`${env.API_URL}/oauth2/clients/${clientId}`,
+						`${env.API_URL}/auth/clients/${clientId}`,
 						{
 							headers: { authorization: `Bearer ${token}` },
 						},
@@ -248,7 +248,7 @@ function AuthorizePage() {
 		}
 
 		// サーバーサイドで検証
-		const response = await fetch(`${env.API_URL}/oauth2/authorize`, {
+		const response = await fetch(`${env.API_URL}/auth/authorize`, {
 			method: "POST",
 			headers: {
 				authorization: `Bearer ${token}`,
