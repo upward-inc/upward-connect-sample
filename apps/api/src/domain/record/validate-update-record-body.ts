@@ -33,6 +33,18 @@ export const validateUpdateRecordBody = async (
 
 	const entityItems = await getEntityItemList(entity_name)
 
+	// レコード更新時に入力が必須である項目一覧
+	const requiredFields = entityItems.filter((item) => {
+		return item.is_required && item.is_updatable
+	})
+
+	// 一件でも必須項目がnullで更新されている場合はエラー
+	for (const field of requiredFields) {
+		if (jsonData[field.name] === null) {
+			return { success: false, message: `Field '${field.name}' cannot be null` }
+		}
+	}
+
 	// 渡されたデータのうち、レコード更新時に指定可能なフィールドのみを抽出
 	const updatableFields = Object.entries(jsonData)
 		.map(([fieldName, value]) => {
