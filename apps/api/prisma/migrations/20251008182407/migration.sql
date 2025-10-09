@@ -41,7 +41,7 @@ INSERT INTO [dbo].[entity]
   ([id], [name], [display_name], [order], [title_field_name],
    [created_at], [created_by], [modified_at], [modified_by])
 SELECT
-  [id], [name], [display_name], [order], '',
+  [id], [name], [display_name], [order], '', -- title_field_nameはデフォルト値
   [created_at], [created_by], [modified_at], [modified_by]
 FROM [dbo].[entity_temp];
 
