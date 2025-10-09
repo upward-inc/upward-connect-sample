@@ -1,14 +1,14 @@
 import type { GetRecordListQuery } from "../../schema/record"
 
-export type ValidateGetRecordListQueryResult =
+type ValidateGetRecordListQueryResult =
 	| ValidateGetRecordListQueryResultSuccess
 	| ValidateGetRecordListQueryResultFailure
 
-export interface ValidateGetRecordListQueryResultSuccess {
+interface ValidateGetRecordListQueryResultSuccess {
 	success: true
 }
 
-export interface ValidateGetRecordListQueryResultFailure {
+interface ValidateGetRecordListQueryResultFailure {
 	success: false
 	message: string
 }
