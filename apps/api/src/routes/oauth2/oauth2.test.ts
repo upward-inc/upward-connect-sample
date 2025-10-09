@@ -46,7 +46,7 @@ describe("Auth Tests", () => {
 				locale: "ja-JP",
 			})
 			const token = createValidToken(testUser.id)
-			const response = await app.request("/api/v1/oauth2/userinfo", {
+			const response = await app.request("/oauth2/userinfo", {
 				method: "GET",
 				headers: {
 					Authorization: `Bearer ${token}`,
@@ -78,7 +78,7 @@ describe("Auth Tests", () => {
 				locale: "ja-JP",
 			})
 			const token = createValidToken(testUser.id)
-			const response = await app.request("/api/v1/oauth2/userinfo", {
+			const response = await app.request("/oauth2/userinfo", {
 				method: "GET",
 				headers: {
 					Authorization: `Bearer ${token}`,
@@ -100,7 +100,7 @@ describe("Auth Tests", () => {
 		})
 
 		it("should return 400 for invalid authorization header format", async () => {
-			const response = await app.request("/api/v1/oauth2/userinfo", {
+			const response = await app.request("/oauth2/userinfo", {
 				method: "GET",
 				headers: {
 					Authorization: "InvalidFormat token_here",
@@ -115,7 +115,7 @@ describe("Auth Tests", () => {
 		})
 
 		it("should return 401 for missing authorization header", async () => {
-			const response = await app.request("/api/v1/oauth2/userinfo", {
+			const response = await app.request("/oauth2/userinfo", {
 				method: "GET",
 			})
 
@@ -135,7 +135,7 @@ describe("Auth Tests", () => {
 			})
 			const expiredToken = createExpiredToken(testUser.id)
 
-			const response = await app.request("/api/v1/oauth2/userinfo", {
+			const response = await app.request("/oauth2/userinfo", {
 				method: "GET",
 				headers: {
 					Authorization: `Bearer ${expiredToken}`,
@@ -150,7 +150,7 @@ describe("Auth Tests", () => {
 		})
 
 		it("should return 401 for malformed token", async () => {
-			const response = await app.request("/api/v1/oauth2/userinfo", {
+			const response = await app.request("/oauth2/userinfo", {
 				method: "GET",
 				headers: {
 					Authorization: "Bearer invalid.malformed.token",
@@ -182,7 +182,7 @@ describe("Auth Tests", () => {
 				expiresIn: "1h",
 			})
 
-			const response = await app.request("/api/v1/oauth2/userinfo", {
+			const response = await app.request("/oauth2/userinfo", {
 				method: "GET",
 				headers: {
 					Authorization: `Bearer ${wrongSecretToken}`,
@@ -206,7 +206,7 @@ describe("Auth Tests", () => {
 				// No subject specified
 			})
 
-			const response = await app.request("/api/v1/oauth2/userinfo", {
+			const response = await app.request("/oauth2/userinfo", {
 				method: "GET",
 				headers: {
 					Authorization: `Bearer ${noSubjectToken}`,
@@ -230,7 +230,7 @@ describe("Auth Tests", () => {
 				expiresIn: "1h",
 			})
 
-			const response = await app.request("/api/v1/oauth2/userinfo", {
+			const response = await app.request("/oauth2/userinfo", {
 				method: "GET",
 				headers: {
 					Authorization: `Bearer ${emptySubjectToken}`,
@@ -247,7 +247,7 @@ describe("Auth Tests", () => {
 		it("401 Unauthorized - 非アクティブなユーザ", async () => {
 			const nonExistentUserId = crypto.randomUUID()
 			const token = createValidToken(nonExistentUserId)
-			const response = await app.request("/api/v1/oauth2/userinfo", {
+			const response = await app.request("/oauth2/userinfo", {
 				method: "GET",
 				headers: {
 					Authorization: `Bearer ${token}`,
@@ -281,7 +281,7 @@ describe("Auth Tests", () => {
 			// Create a refresh token
 			const refreshToken = createRefreshToken(testUser.id)
 
-			const response = await app.request("/api/v1/oauth2/token", {
+			const response = await app.request("/oauth2/token", {
 				method: "POST",
 				headers: {
 					"Content-Type": "application/x-www-form-urlencoded",
@@ -317,7 +317,7 @@ describe("Auth Tests", () => {
 			const refreshToken = createRefreshToken(testUser.id)
 			const nonExistentClientId = crypto.randomUUID()
 
-			const response = await app.request("/api/v1/oauth2/token", {
+			const response = await app.request("/oauth2/token", {
 				method: "POST",
 				headers: {
 					"Content-Type": "application/x-www-form-urlencoded",
@@ -355,7 +355,7 @@ describe("Auth Tests", () => {
 
 			const refreshToken = createRefreshToken(testUser.id)
 
-			const response = await app.request("/api/v1/oauth2/token", {
+			const response = await app.request("/oauth2/token", {
 				method: "POST",
 				headers: {
 					"Content-Type": "application/x-www-form-urlencoded",
@@ -393,7 +393,7 @@ describe("Auth Tests", () => {
 
 			const expiredRefreshToken = createExpiredRefreshToken(testUser.id)
 
-			const response = await app.request("/api/v1/oauth2/token", {
+			const response = await app.request("/oauth2/token", {
 				method: "POST",
 				headers: {
 					"Content-Type": "application/x-www-form-urlencoded",
@@ -422,7 +422,7 @@ describe("Auth Tests", () => {
 				scopes: "openid,profile,email,offline_access",
 			})
 
-			const response = await app.request("/api/v1/oauth2/token", {
+			const response = await app.request("/oauth2/token", {
 				method: "POST",
 				headers: {
 					"Content-Type": "application/x-www-form-urlencoded",
@@ -454,7 +454,7 @@ describe("Auth Tests", () => {
 			const nonExistentUserId = crypto.randomUUID()
 			const refreshToken = createRefreshToken(nonExistentUserId)
 
-			const response = await app.request("/api/v1/oauth2/token", {
+			const response = await app.request("/oauth2/token", {
 				method: "POST",
 				headers: {
 					"Content-Type": "application/x-www-form-urlencoded",
@@ -483,7 +483,7 @@ describe("Auth Tests", () => {
 				scopes: "openid,profile,email,offline_access",
 			})
 
-			const response = await app.request("/api/v1/oauth2/token", {
+			const response = await app.request("/oauth2/token", {
 				method: "POST",
 				headers: {
 					"Content-Type": "application/x-www-form-urlencoded",
@@ -518,7 +518,7 @@ describe("Auth Tests", () => {
 			})
 			const refreshToken = createRefreshToken(testUser.id)
 
-			const response = await app.request("/api/v1/oauth2/token", {
+			const response = await app.request("/oauth2/token", {
 				method: "POST",
 				headers: {
 					"Content-Type": "application/x-www-form-urlencoded",
@@ -557,7 +557,7 @@ describe("Auth Tests", () => {
 			const token = createValidToken(testUser.id)
 
 			// Step 1: Get authorization code
-			const authorizeResponse = await app.request("/api/v1/oauth2/authorize", {
+			const authorizeResponse = await app.request("/auth/authorize", {
 				method: "POST",
 				headers: {
 					"Content-Type": "application/x-www-form-urlencoded",
@@ -578,7 +578,7 @@ describe("Auth Tests", () => {
 			expect(authorizeData).toHaveProperty("code")
 
 			// Step 2: Exchange authorization code for tokens (first time - should succeed)
-			const firstTokenResponse = await app.request("/api/v1/oauth2/token", {
+			const firstTokenResponse = await app.request("/oauth2/token", {
 				method: "POST",
 				headers: {
 					"Content-Type": "application/x-www-form-urlencoded",
@@ -599,7 +599,7 @@ describe("Auth Tests", () => {
 			expect(firstTokenData).not.toHaveProperty("refresh_token")
 
 			// Step 3: Try to reuse the same authorization code (should fail)
-			const secondTokenResponse = await app.request("/api/v1/oauth2/token", {
+			const secondTokenResponse = await app.request("/oauth2/token", {
 				method: "POST",
 				headers: {
 					"Content-Type": "application/x-www-form-urlencoded",
@@ -640,7 +640,7 @@ describe("Auth Tests", () => {
 			const token = createValidToken(testUser.id)
 
 			// Step 1: Get authorization code
-			const authorizeResponse = await app.request("/api/v1/oauth2/authorize", {
+			const authorizeResponse = await app.request("/auth/authorize", {
 				method: "POST",
 				headers: {
 					"Content-Type": "application/x-www-form-urlencoded",
@@ -661,7 +661,7 @@ describe("Auth Tests", () => {
 			expect(authorizeData).toHaveProperty("code")
 
 			// Step 2: Try to exchange with INVALID client_secret (should fail but code should be invalidated)
-			const invalidSecretResponse = await app.request("/api/v1/oauth2/token", {
+			const invalidSecretResponse = await app.request("/oauth2/token", {
 				method: "POST",
 				headers: {
 					"Content-Type": "application/x-www-form-urlencoded",
@@ -683,7 +683,7 @@ describe("Auth Tests", () => {
 			})
 
 			// Step 3: Try to exchange with VALID parameters (should fail because code was already invalidated)
-			const validParamsResponse = await app.request("/api/v1/oauth2/token", {
+			const validParamsResponse = await app.request("/oauth2/token", {
 				method: "POST",
 				headers: {
 					"Content-Type": "application/x-www-form-urlencoded",
@@ -726,7 +726,7 @@ describe("Auth Tests", () => {
 			const token = createValidToken(testUser.id)
 
 			// Step 1: Authorize request
-			const authorizeResponse = await app.request("/api/v1/oauth2/authorize", {
+			const authorizeResponse = await app.request("/auth/authorize", {
 				method: "POST",
 				headers: {
 					"Content-Type": "application/x-www-form-urlencoded",
@@ -747,7 +747,7 @@ describe("Auth Tests", () => {
 			expect(authorizeData).toHaveProperty("code")
 
 			// Step 2: Exchange authorization code for tokens
-			const tokenResponse = await app.request("/api/v1/oauth2/token", {
+			const tokenResponse = await app.request("/oauth2/token", {
 				method: "POST",
 				headers: {
 					"Content-Type": "application/x-www-form-urlencoded",
@@ -798,7 +798,7 @@ describe("Auth Tests", () => {
 			const token = createValidToken(testUser.id)
 
 			// Step 1: Authorize request
-			const authorizeResponse = await app.request("/api/v1/oauth2/authorize", {
+			const authorizeResponse = await app.request("/auth/authorize", {
 				method: "POST",
 				headers: {
 					"Content-Type": "application/x-www-form-urlencoded",
@@ -819,7 +819,7 @@ describe("Auth Tests", () => {
 			expect(authorizeData).toHaveProperty("code")
 
 			// Step 2: Exchange authorization code for tokens
-			const tokenResponse = await app.request("/api/v1/oauth2/token", {
+			const tokenResponse = await app.request("/oauth2/token", {
 				method: "POST",
 				headers: {
 					"Content-Type": "application/x-www-form-urlencoded",
@@ -867,7 +867,7 @@ describe("Auth Tests", () => {
 			const token = createValidToken(testUser.id)
 
 			// Step 1: Get initial tokens through authorization code flow
-			const authorizeResponse = await app.request("/api/v1/oauth2/authorize", {
+			const authorizeResponse = await app.request("/auth/authorize", {
 				method: "POST",
 				headers: {
 					"Content-Type": "application/x-www-form-urlencoded",
@@ -886,7 +886,7 @@ describe("Auth Tests", () => {
 			const authorizeData = await authorizeResponse.json()
 			expect(authorizeResponse.status).toBe(200)
 
-			const tokenResponse = await app.request("/api/v1/oauth2/token", {
+			const tokenResponse = await app.request("/oauth2/token", {
 				method: "POST",
 				headers: {
 					"Content-Type": "application/x-www-form-urlencoded",
@@ -904,7 +904,7 @@ describe("Auth Tests", () => {
 			expect(tokenResponse.status).toBe(200)
 
 			// Step 2: Use refresh token to get new access token
-			const refreshResponse = await app.request("/api/v1/oauth2/token", {
+			const refreshResponse = await app.request("/oauth2/token", {
 				method: "POST",
 				headers: {
 					"Content-Type": "application/x-www-form-urlencoded",
@@ -953,7 +953,7 @@ describe("Auth Tests", () => {
 			}
 
 			// Access login endpoint with the correct password format expected by the test utility
-			const response = await app.request("/api/v1/oauth2/login", {
+			const response = await app.request("/oauth2/login", {
 				method: "POST",
 				headers: {
 					"Content-Type": "application/x-www-form-urlencoded",
@@ -999,7 +999,7 @@ describe("Auth Tests", () => {
 			const token = createValidToken(testUser.id)
 
 			// ステップ1: 認可リクエスト
-			const authorizeResponse = await app.request("/api/v1/oauth2/authorize", {
+			const authorizeResponse = await app.request("/auth/authorize", {
 				method: "POST",
 				headers: {
 					"Content-Type": "application/x-www-form-urlencoded",
@@ -1020,7 +1020,7 @@ describe("Auth Tests", () => {
 			expect(authorizeData).toHaveProperty("code")
 
 			// ステップ2: 認可コードをトークンに交換
-			const tokenResponse = await app.request("/api/v1/oauth2/token", {
+			const tokenResponse = await app.request("/oauth2/token", {
 				method: "POST",
 				headers: {
 					"Content-Type": "application/x-www-form-urlencoded",
@@ -1081,7 +1081,7 @@ describe("Auth Tests", () => {
 			const token = createValidToken(testUser.id)
 
 			// ステップ1: 認可リクエスト
-			const authorizeResponse = await app.request("/api/v1/oauth2/authorize", {
+			const authorizeResponse = await app.request("/auth/authorize", {
 				method: "POST",
 				headers: {
 					"Content-Type": "application/x-www-form-urlencoded",
@@ -1102,7 +1102,7 @@ describe("Auth Tests", () => {
 			expect(authorizeData).toHaveProperty("code")
 
 			// ステップ2: 認可コードをトークンに交換
-			const tokenResponse = await app.request("/api/v1/oauth2/token", {
+			const tokenResponse = await app.request("/oauth2/token", {
 				method: "POST",
 				headers: {
 					"Content-Type": "application/x-www-form-urlencoded",

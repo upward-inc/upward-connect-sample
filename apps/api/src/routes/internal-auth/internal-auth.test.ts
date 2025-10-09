@@ -48,7 +48,7 @@ describe("Internal Auth Tests", () => {
 			const stateValue = "random-state-value-12345"
 			const token = createValidToken(testUser.id)
 
-			const response = await app.request("/api/v1/oauth2/authorize", {
+			const response = await app.request("/auth/authorize", {
 				method: "POST",
 				headers: {
 					"Content-Type": "application/x-www-form-urlencoded",
@@ -81,7 +81,7 @@ describe("Internal Auth Tests", () => {
 			const stateValue = "state-for-error-test"
 			const token = createValidToken(testUser.id)
 
-			const response = await app.request("/api/v1/oauth2/authorize", {
+			const response = await app.request("/auth/authorize", {
 				method: "POST",
 				headers: {
 					"Content-Type": "application/x-www-form-urlencoded",
@@ -124,7 +124,7 @@ describe("Internal Auth Tests", () => {
 			const stateValue = "state-for-redirect-error"
 			const token = createValidToken(testUser.id)
 
-			const response = await app.request("/api/v1/oauth2/authorize", {
+			const response = await app.request("/auth/authorize", {
 				method: "POST",
 				headers: {
 					"Content-Type": "application/x-www-form-urlencoded",
@@ -166,7 +166,7 @@ describe("Internal Auth Tests", () => {
 			const stateValue = "state-for-response-type-error"
 			const token = createValidToken(testUser.id)
 
-			const response = await app.request("/api/v1/oauth2/authorize", {
+			const response = await app.request("/auth/authorize", {
 				method: "POST",
 				headers: {
 					"Content-Type": "application/x-www-form-urlencoded",
@@ -210,7 +210,7 @@ describe("Internal Auth Tests", () => {
 			const token = createValidToken(testUser.id)
 
 			// Step 1: Authorize with nonce
-			const authorizeResponse = await app.request("/api/v1/oauth2/authorize", {
+			const authorizeResponse = await app.request("/auth/authorize", {
 				method: "POST",
 				headers: {
 					"Content-Type": "application/x-www-form-urlencoded",
@@ -231,7 +231,7 @@ describe("Internal Auth Tests", () => {
 			expect(authorizeData).toHaveProperty("code")
 
 			// Step 2: Exchange authorization code for tokens
-			const tokenResponse = await app.request("/api/v1/oauth2/token", {
+			const tokenResponse = await app.request("/oauth2/token", {
 				method: "POST",
 				headers: {
 					"Content-Type": "application/x-www-form-urlencoded",
@@ -283,7 +283,7 @@ describe("Internal Auth Tests", () => {
 			const token = createValidToken(testUser.id)
 
 			// Authorize with empty nonce
-			const authorizeResponse = await app.request("/api/v1/oauth2/authorize", {
+			const authorizeResponse = await app.request("/auth/authorize", {
 				method: "POST",
 				headers: {
 					"Content-Type": "application/x-www-form-urlencoded",
@@ -304,7 +304,7 @@ describe("Internal Auth Tests", () => {
 			expect(authorizeData).toHaveProperty("code")
 
 			// Exchange authorization code for tokens
-			const tokenResponse = await app.request("/api/v1/oauth2/token", {
+			const tokenResponse = await app.request("/oauth2/token", {
 				method: "POST",
 				headers: {
 					"Content-Type": "application/x-www-form-urlencoded",
@@ -351,7 +351,7 @@ describe("Internal Auth Tests", () => {
 			const token = createValidToken(testUser.id)
 
 			// Authorize with special character nonce
-			const authorizeResponse = await app.request("/api/v1/oauth2/authorize", {
+			const authorizeResponse = await app.request("/auth/authorize", {
 				method: "POST",
 				headers: {
 					"Content-Type": "application/x-www-form-urlencoded",
@@ -372,7 +372,7 @@ describe("Internal Auth Tests", () => {
 			expect(authorizeData).toHaveProperty("code")
 
 			// Exchange authorization code for tokens
-			const tokenResponse = await app.request("/api/v1/oauth2/token", {
+			const tokenResponse = await app.request("/oauth2/token", {
 				method: "POST",
 				headers: {
 					"Content-Type": "application/x-www-form-urlencoded",
@@ -417,7 +417,7 @@ describe("Internal Auth Tests", () => {
 			const token = createValidToken(testUser.id)
 
 			// ステップ１：有効なスコープで認可を行う
-			const authorizeResponse = await app.request("/api/v1/oauth2/authorize", {
+			const authorizeResponse = await app.request("/auth/authorize", {
 				method: "POST",
 				headers: {
 					"Content-Type": "application/x-www-form-urlencoded",
@@ -438,7 +438,7 @@ describe("Internal Auth Tests", () => {
 			expect(authorizeData).toHaveProperty("code")
 
 			// ステップ２：認可コードをトークンに交換する
-			const tokenResponse = await app.request("/api/v1/oauth2/token", {
+			const tokenResponse = await app.request("/oauth2/token", {
 				method: "POST",
 				headers: {
 					"Content-Type": "application/x-www-form-urlencoded",
@@ -497,7 +497,7 @@ describe("Internal Auth Tests", () => {
 			const token = createValidToken(testUser.id)
 
 			// ステップ１：有効なスコープで認可を行う
-			const authorizeResponse = await app.request("/api/v1/oauth2/authorize", {
+			const authorizeResponse = await app.request("/auth/authorize", {
 				method: "POST",
 				headers: {
 					"Content-Type": "application/x-www-form-urlencoded",
@@ -518,7 +518,7 @@ describe("Internal Auth Tests", () => {
 			expect(authorizeData).toHaveProperty("code")
 
 			// ステップ２：認可コードをトークンに交換する
-			const tokenResponse = await app.request("/api/v1/oauth2/token", {
+			const tokenResponse = await app.request("/oauth2/token", {
 				method: "POST",
 				headers: {
 					"Content-Type": "application/x-www-form-urlencoded",
@@ -575,7 +575,7 @@ describe("Internal Auth Tests", () => {
 
 			const token = createValidToken(testUser.id)
 
-			const response = await app.request("/api/v1/oauth2/authorize", {
+			const response = await app.request("/auth/authorize", {
 				method: "POST",
 				headers: {
 					"Content-Type": "application/x-www-form-urlencoded",
@@ -616,7 +616,7 @@ describe("Internal Auth Tests", () => {
 
 			const token = createValidToken(testUser.id)
 
-			const response = await app.request("/api/v1/oauth2/authorize", {
+			const response = await app.request("/auth/authorize", {
 				method: "POST",
 				headers: {
 					"Content-Type": "application/x-www-form-urlencoded",
@@ -656,7 +656,7 @@ describe("Internal Auth Tests", () => {
 
 			const token = createValidToken(testUser.id)
 
-			const response = await app.request("/api/v1/oauth2/authorize", {
+			const response = await app.request("/auth/authorize", {
 				method: "POST",
 				headers: {
 					"Content-Type": "application/x-www-form-urlencoded",
@@ -697,7 +697,7 @@ describe("Internal Auth Tests", () => {
 
 			const token = createValidToken(testUser.id)
 
-			const response = await app.request("/api/v1/oauth2/authorize", {
+			const response = await app.request("/auth/authorize", {
 				method: "POST",
 				headers: {
 					"Content-Type": "application/x-www-form-urlencoded",
