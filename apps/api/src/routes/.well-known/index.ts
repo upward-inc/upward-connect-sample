@@ -3,10 +3,8 @@ import { env } from "../../env"
 import { describeRoute } from "../../libs/hono-openapi"
 import { OidcConfigurationResultSchema } from "../../schema/auth"
 
-const wellKnownRouter = new Hono()
-
-wellKnownRouter.get(
-	"openid-configuration",
+export const wellKnownRouter = new Hono().get(
+	"/openid-configuration",
 	describeRoute({
 		description:
 			"OIDC 1.0 で定められた OpenID プロバイダーに関する情報を返却する",
@@ -28,5 +26,3 @@ wellKnownRouter.get(
 		})
 	},
 )
-
-export { wellKnownRouter }
