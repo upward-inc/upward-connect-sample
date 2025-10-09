@@ -1101,7 +1101,6 @@ describe("Record Tests", () => {
 			expect(data).toHaveProperty("data")
 			expect(Array.isArray(data.data)).toBe(true)
 
-			// industryで降順にソートされているべき（明示的）
 			const industries = data.data.map(
 				(record: { industry: string }) => record.industry,
 			)
