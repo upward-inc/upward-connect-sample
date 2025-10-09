@@ -104,10 +104,6 @@ export const PostRecordResponseSchema = z
 		description: "作成されたレコードデータ",
 	})
 
-export const PatchRecordBodySchema = PostRecordBodySchema.openapi({
-	description: "更新するレコードのデータ",
-})
-
 export const PatchRecordParamSchema = z.object({
 	entity_name: z.string().openapi({
 		description: "レコード更新対象のエンティティ名",
@@ -117,6 +113,10 @@ export const PatchRecordParamSchema = z.object({
 		description: "更新対象のレコードID",
 		examples: ["account-00000001", "lead-00000001"],
 	}),
+})
+
+export const PatchRecordBodySchema = PostRecordBodySchema.openapi({
+	description: "更新するレコードのデータ",
 })
 
 export const PatchRecordResponseSchema = z
