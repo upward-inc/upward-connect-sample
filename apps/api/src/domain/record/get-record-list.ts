@@ -87,7 +87,11 @@ export const getRecordList = async (
 
 	const orderByClause = order_by
 		? OrderByClauseSchema.parse(order_by)
-		: OrderByClauseSchema.parse([{ field: "id" }])
+		: groupByFields && groupByFields.length > 0
+			? OrderByClauseSchema.parse(
+					groupByFields.map((field) => ({ field, direction: "asc" as const })),
+				)
+			: OrderByClauseSchema.parse([{ field: "id" }])
 
 	const pagingClause = PagingClauseSchema.parse({
 		// `has_next_page`の効率的な算出の為、指定された件数よりも1件多く取得する
