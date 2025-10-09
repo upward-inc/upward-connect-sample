@@ -15,7 +15,7 @@ export function setupOpenAPIEndpoints<T extends Hono>(
 		// OpenAPI specification
 		.get(
 			"/openapi",
-			generateOpenAPISpecs(router, {
+			generateOpenAPISpecs(router, routerPath, {
 				version: config.version,
 				description: config.description,
 			}),

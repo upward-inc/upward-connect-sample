@@ -33,6 +33,7 @@ export const validator = honoOpenApiZod.validator
 
 export const generateOpenAPISpecs = (
 	router: Hono,
+	routerPath: string,
 	{
 		version,
 		description,
@@ -51,7 +52,7 @@ export const generateOpenAPISpecs = (
 			},
 			servers: [
 				{
-					url: "http://localhost:{port}",
+					url: `http://localhost:{port}${routerPath}`,
 					description: "Local Server",
 					variables: {
 						port: {
