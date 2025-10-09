@@ -104,31 +104,9 @@ export const PostRecordResponseSchema = z
 		description: "作成されたレコードデータ",
 	})
 
-export const PatchRecordBodySchema = z
-	.any()
-	.refine((data) => {
-		return JsonObjectSchema.safeParse(data).success
-	})
-	.openapi({
-		description: "更新するレコードのデータ",
-		example: {
-			text_field: "ABC",
-			textarea_field: "ABC\nDEF",
-			integer_field: 123,
-			decimal_field: 123.45,
-			boolean_field: true,
-			date_field: "2025-01-01",
-			datetime_field: "2025-01-01T12:34:56Z",
-			time_field: "12:34:56",
-			single_option_field: "option-a",
-			multi_option_field: ["option-a", "option-b"],
-			single_reference_field: { entity_name: "lead", id: "lead-00000001" },
-			multi_reference_field: [
-				{ entity_name: "lead", id: "lead-00000001" },
-				{ entity_name: "lead", id: "lead-00000002" },
-			],
-		},
-	})
+export const PatchRecordBodySchema = PostRecordBodySchema.openapi({
+	description: "更新するレコードのデータ",
+})
 
 export const PatchRecordParamSchema = z.object({
 	entity_name: z.string().openapi({
