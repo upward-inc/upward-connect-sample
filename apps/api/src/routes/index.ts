@@ -1,21 +1,25 @@
-import { Scalar } from "@scalar/hono-api-reference"
 import { Hono } from "hono"
-import { openAPISpecs } from "hono-openapi"
 import { cors } from "hono/cors"
-import { env } from "../env"
 import { bearerAuth } from "../middleware/bearer-auth"
 import type { AuthContexts } from "../schema/auth"
 import { wellKnownRouter } from "./.well-known"
 import { apiRouter } from "./api"
 import { internalAuthRouter } from "./internal-auth"
 import { oauth2Router } from "./oauth2"
+import { setupOpenAPIEndpoints } from "./utils/openapi-setup"
 
-const currentVersion = "v1" as const
-const documentTitle = "Custom API for UPWARD CONNECT" as const
+const noneVersioningRouter = new Hono()
+	.route("/.well-known", wellKnownRouter)
+	.route("/oauth2", oauth2Router)
+	.route("/auth", internalAuthRouter)
 
-const router = new Hono<{ Variables: AuthContexts }>()
+setupOpenAPIEndpoints(noneVersioningRouter, "/", {
+	pageTitle: "AuthN/AuthZ API",
+	version: "",
+	description: "認証・認可APIドキュメント",
+})
 
-router
+export const router = new Hono<{ Variables: AuthContexts }>()
 	.use("/*", cors())
 	// bearer auth
 	.use("/*", async (c, next) => {
@@ -23,6 +27,8 @@ router
 		const publicPaths = [
 			"/openapi",
 			"/docs",
+			"/api/v1/openapi",
+			"/api/v1/docs",
 			"/.well-known/openid-configuration",
 			"/auth/login",
 			"/oauth2/token",
@@ -35,43 +41,5 @@ router
 		}
 		return bearerAuth(c, next)
 	})
-	// generate OpenAPI specification
-	.get(
-		"/openapi",
-		openAPISpecs(router, {
-			excludeStaticFile: false,
-			documentation: {
-				info: {
-					title: documentTitle,
-					version: currentVersion,
-					description: "",
-				},
-				servers: [
-					{
-						url: "http://localhost:{port}",
-						description: "Local Server",
-						variables: {
-							port: {
-								default: env.PORT.toString(),
-							},
-						},
-					},
-				],
-			},
-		}),
-	)
-	// serve API documentation
-	.get(
-		"/docs",
-		Scalar({
-			theme: "saturn",
-			pageTitle: `API Doc | ${documentTitle}`,
-			spec: { url: "/openapi" },
-		}),
-	)
-	.route("/.well-known", wellKnownRouter)
-	.route("/oauth2", oauth2Router)
-	.route("/auth", internalAuthRouter)
 	.route("/api", apiRouter)
-
-export { router }
+	.route("/", noneVersioningRouter)
