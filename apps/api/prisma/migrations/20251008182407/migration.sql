@@ -27,7 +27,7 @@ CREATE TABLE [dbo].[entity] (
   [name] NVARCHAR(255) NOT NULL,
   [display_name] NVARCHAR(255) NOT NULL,
   [order] SMALLINT NOT NULL DEFAULT 0,
-  [title_field_name] NVARCHAR(255) NOT NULL DEFAULT '',  -- orderの直後
+  [title_field_name] NVARCHAR(255) NOT NULL,
   [created_at] DATETIME NOT NULL DEFAULT getutcdate(),
   [created_by] UNIQUEIDENTIFIER NOT NULL,
   [modified_at] DATETIME NOT NULL DEFAULT getutcdate(),
@@ -41,7 +41,7 @@ INSERT INTO [dbo].[entity]
   ([id], [name], [display_name], [order], [title_field_name],
    [created_at], [created_by], [modified_at], [modified_by])
 SELECT
-  [id], [name], [display_name], [order], '',  -- title_field_nameはデフォルト値
+  [id], [name], [display_name], [order], '',
   [created_at], [created_by], [modified_at], [modified_by]
 FROM [dbo].[entity_temp];
 
