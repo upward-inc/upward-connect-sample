@@ -13,6 +13,7 @@ export default defineConfig({
 		},
 		// Test environment variables (will be overridden by testcontainers)
 		env: {
+			APP_NAME: "test app",
 			PORT: "8787",
 			OAUTH2_AUTH_CODE_EXPIRES_IN_MINUTE: "10",
 			OIDC_ISSUER: "https://iss.test.upward.jp",
