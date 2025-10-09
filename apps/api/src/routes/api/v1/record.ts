@@ -114,7 +114,8 @@ export const recordRouter = new Hono<{ Variables: AuthContexts }>()
 			}
 
 			// 更新対象のレコードが存在しない場合はエラー
-			if (!(await getRecordExists(entity_name, id))) {
+			const isRecordExists = await getRecordExists(entity_name, id)
+			if (!isRecordExists) {
 				const message = `Record with ID '${id}' does not exist in '${entity_name}'`
 				return c.json({ message }, 404)
 			}
