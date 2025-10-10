@@ -13,12 +13,15 @@ export default defineConfig({
 		},
 		// Test environment variables (will be overridden by testcontainers)
 		env: {
+			APP_NAME: "test app",
+			PORT: "8787",
+			OAUTH2_AUTH_CODE_EXPIRES_IN_MINUTE: "10",
 			OIDC_ISSUER: "https://iss.test.upward.jp",
 			OIDC_TOKEN_SECRET: "test-secret-key-for-tests-12345",
+			OIDC_TOKEN_EXPIRES_IN_MINUTE: "10",
 			OIDC_REFRESH_TOKEN_SECRET: "test-refresh-secret-key-for-tests-12345",
+			OIDC_REFRESH_TOKEN_EXPIRES_IN_DAY: "180",
 		},
-		// Use threads pool for better testcontainers compatibility
-		pool: "threads",
 		// Global setup for testcontainers
 		globals: true,
 	},

@@ -1,6 +1,7 @@
 import { z } from "zod"
 
 const envSchema = z.object({
+	APP_NAME: z.string(),
 	PORT: z.coerce.number().min(1000).max(65535),
 	OAUTH2_AUTH_CODE_EXPIRES_IN_MINUTE: z.coerce.number().min(1),
 	OIDC_ISSUER: z.union([

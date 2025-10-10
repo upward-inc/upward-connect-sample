@@ -52,6 +52,16 @@ export const RefreshTokenSchema = z.string().min(1).openapi({
 	example: "sample_refresh_token",
 })
 
+const UrlUnionSchema = z.union([
+	z.string().url().startsWith("https://"),
+	z.string().url().startsWith("http://localhost:"),
+])
+
+export const IssuerSchema = UrlUnionSchema.openapi({
+	description: "発行者識別子",
+	example: "https://auth.example.com",
+})
+
 export const SubjectSchema = z
 	.string()
 	.min(1)
@@ -137,6 +147,48 @@ export const GetOAuthClientResultSchema = OAuthClientSchema.pick({
 	name: true,
 })
 
+export const OidcConfigurationResultSchema = z
+	.object({
+		issuer: IssuerSchema,
+		authorization_endpoint: UrlUnionSchema.openapi({
+			description: "認可処理エンドポイントのURL",
+			example: "https://auth.example.com/oauth2/authorize",
+		}),
+		token_endpoint: UrlUnionSchema.openapi({
+			description: "トークン交換処理エンドポイントのURL",
+			example: "https://auth.example.com/oauth2/token",
+		}),
+		userinfo_endpoint: UrlUnionSchema.openapi({
+			description: "ユーザー情報取得エンドポイントのURL",
+			example: "https://auth.example.com/oauth2/userinfo",
+		}),
+		jwks_uri: UrlUnionSchema.openapi({
+			description: "公開鍵群が公開されているURL",
+			example: "https://auth.example.com/oauth2/jwks",
+		}),
+		response_types_supported: z.array(z.enum(["code"])).openapi({
+			description: "サポートされているレスポンスタイプ一覧",
+			example: ["code"],
+		}),
+		subject_types_supported: z.array(z.enum(["public"])).openapi({
+			description: "サポートされているサブジェクトタイプ一覧",
+			example: ["public"],
+		}),
+		id_token_signing_alg_values_supported: z.array(z.enum(["RS256"])).openapi({
+			description: "サポートされているJWSサインアルゴリズム一覧",
+			example: ["RS256"],
+		}),
+		scopes_supported: z
+			.array(z.enum(["openid", "profile", "email", "offline_access"]))
+			.openapi({
+				description: "サポートされているスコープ一覧",
+				example: ["openid", "profile", "email", "offline_access"],
+			}),
+	})
+	.openapi({
+		description: "OIDC 1.0 プロバイダーコンフィグレーション",
+	})
+
 /**
  * see: https://openid-foundation-japan.github.io/openid-connect-core-1_0.ja.html#StandardClaims
  */
@@ -209,6 +261,9 @@ export type LoggedInUser = z.infer<typeof LoggedInUserSchema>
 export type PostLoginParam = z.infer<typeof PostLoginParamSchema>
 export type PostLoginResult = z.infer<typeof PostLoginResultSchema>
 export type GetOAuthClientResult = z.infer<typeof GetOAuthClientResultSchema>
+export type OidcConfigurationResult = z.infer<
+	typeof OidcConfigurationResultSchema
+>
 export type GetUserInfoResult = z.infer<typeof GetUserInfoResultSchema>
 export type PostAuthorizeParam = z.infer<typeof PostAuthorizeParamSchema>
 export type PostAuthorizeResult = z.infer<typeof PostAuthorizeResultSchema>

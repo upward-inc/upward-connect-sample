@@ -67,7 +67,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 		formData.append("username", username)
 		formData.append("password", password)
 
-		const response = await fetch(`${env.API_URL}/oauth2/login`, {
+		const response = await fetch(`${env.API_URL}/auth/login`, {
 			method: "POST",
 			body: formData,
 		})

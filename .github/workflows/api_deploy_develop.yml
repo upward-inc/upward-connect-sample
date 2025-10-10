@@ -1,4 +1,4 @@
-name: api (develop) - deploy
+name: api deploy - develop
 
 # When this action will be executed
 on:
@@ -8,14 +8,21 @@ on:
       [ develop ]
     paths:
       - 'apps/api/**'
-      - '.github/workflows/api_deploy_dev.yml'
+      - '.github/workflows/api_deploy_develop.yml'
 
   # Allow manually trigger
   workflow_dispatch:
 
 jobs:
+  lint:
+    uses: ./.github/workflows/call_api_lint.yml
+
+  test:
+    uses: ./.github/workflows/call_api_test.yml
+
   build:
-    uses: ./.github/workflows/api_build.yml
+    needs: [lint, test]
+    uses: ./.github/workflows/call_api_build.yml
     with:
       environment: 'develop'
       registry_domain: 'multipfdevjecr.azurecr.io'
@@ -27,7 +34,7 @@ jobs:
 
   deploy:
     needs: build
-    uses: ./.github/workflows/api_deploy.yml
+    uses: ./.github/workflows/call_api_deploy.yml
     with:
       environment: 'develop'
       container_app_name: 'multi-pf-dev-je-api'

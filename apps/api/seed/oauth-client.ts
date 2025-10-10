@@ -5,11 +5,10 @@ export async function seedOauthClients(prisma: Prisma.TransactionClient) {
 	const oauthClients: Prisma.oauth_clientCreateManyInput[] = [
 		{
 			// TODO: 実際のリダイレクトURLを設定する
-			// TODO: スコープを見直す
 			name: "UPWARD",
 			secret: nanoid(128),
 			redirect_uris: "https://upward.localhost:1234/callback",
-			scopes: "openid,profile,email",
+			scopes: "openid,profile,email,offline_access",
 		},
 	]
 

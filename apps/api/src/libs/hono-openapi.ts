@@ -1,6 +1,8 @@
+import type { Hono } from "hono"
 import * as honoOpenApi from "hono-openapi"
 import * as honoOpenApiZod from "hono-openapi/zod"
 import type { ZodType } from "zod"
+import { env } from "../env"
 
 export const describeRoute = <S extends ZodType>(options: {
 	description: string
@@ -28,3 +30,37 @@ export const describeRoute = <S extends ZodType>(options: {
 }
 
 export const validator = honoOpenApiZod.validator
+
+export const generateOpenAPISpecs = (
+	router: Hono,
+	routerPath: string,
+	{
+		version,
+		description,
+	}: {
+		version: string
+		description?: string
+	},
+) => {
+	return honoOpenApi.openAPISpecs(router, {
+		excludeStaticFile: false,
+		documentation: {
+			info: {
+				title: env.APP_NAME,
+				version,
+				description,
+			},
+			servers: [
+				{
+					url: `http://localhost:{port}${routerPath}`,
+					description: "Local Server",
+					variables: {
+						port: {
+							default: env.PORT.toString(),
+						},
+					},
+				},
+			],
+		},
+	})
+}

@@ -1,6 +1,7 @@
 import { getEntityItemList } from "../../domain/entity"
 import { prisma } from "../../libs/prisma"
 import type { PostRecordResponse } from "../../schema/record"
+import { escapeName, escapeStringValue } from "../../utility/sql"
 import type { ValidateCreateRecordBodyResultSuccess } from "./validate-create-record-body"
 
 export const createRecord = async (
@@ -76,12 +77,4 @@ export const createRecord = async (
 	const result = await prisma.$queryRawUnsafe<{ id: string }[]>(query)
 
 	return { entity_name: entityName, id: result[0].id }
-}
-
-const escapeName = (name: string) => {
-	return `[${name}]`
-}
-
-const escapeStringValue = (value: string) => {
-	return `N'${value.replace(/'/g, "''")}'`
 }
