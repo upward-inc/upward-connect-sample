@@ -11,6 +11,10 @@ export const EntitySchema = z
 			description: "エンティティの表示名",
 			examples: ["取引先", "商談"],
 		}),
+		title_field_name: z.string().openapi({
+			description: "エンティティのタイトルとなる項目名",
+			example: "name",
+		}),
 	})
 	.openapi({
 		description: "エンティティ",
