@@ -85,18 +85,16 @@ export const getRecordList = async (
 		? GroupByClauseSchema.parse(groupByFields)
 		: null
 
-	const hasGroupBy = groupByFields && groupByFields.length > 0
+	const hasGroupByFields = groupByFields && groupByFields.length > 0
 
 	const baseOrderBy = order_by
 		? order_by
-		: hasGroupBy
+		: hasGroupByFields
 			? groupByFields.map((field) => ({ field, direction: "asc" as const }))
 			: []
 
-	const hasIdInOrderBy = baseOrderBy.some(
-		(orderItem) => orderItem.field === "id",
-	)
-	const finalOrderBy = hasGroupBy
+	const hasIdInOrderBy = baseOrderBy.some(({ field }) => field === "id")
+	const finalOrderBy = hasGroupByFields
 		? baseOrderBy
 		: hasIdInOrderBy
 			? baseOrderBy
