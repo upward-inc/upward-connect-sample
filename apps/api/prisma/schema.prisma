@@ -129,14 +129,14 @@ model contact {
 }
 
 model entity {
-  id                            String        @id(map: "pk_entity") @default(dbgenerated("newid()"), map: "DF__entity__id__742F31CF") @db.UniqueIdentifier
+  id                            String        @id(map: "pk_entity") @default(dbgenerated("newid()"), map: "DF__entity__id__3D491139") @db.UniqueIdentifier
   name                          String        @unique(map: "uk_entity_1") @db.NVarChar(255)
   display_name                  String        @db.NVarChar(255)
-  order                         Int           @default(0, map: "DF__entity__order__75235608") @db.SmallInt
-  title_field_name              String        @default("", map: "DF__entity__title_fi__76177A41") @db.NVarChar(255)
-  created_at                    DateTime      @default(dbgenerated("getutcdate()"), map: "DF__entity__created___770B9E7A") @db.DateTime
+  order                         Int           @default(0, map: "DF__entity__order__3E3D3572") @db.SmallInt
+  title_field_name              String        @db.NVarChar(255)
+  created_at                    DateTime      @default(dbgenerated("getutcdate()"), map: "DF__entity__created___3F3159AB") @db.DateTime
   created_by                    String        @db.UniqueIdentifier
-  modified_at                   DateTime      @default(dbgenerated("getutcdate()"), map: "DF__entity__modified__77FFC2B3") @db.DateTime
+  modified_at                   DateTime      @default(dbgenerated("getutcdate()"), map: "DF__entity__modified__40257DE4") @db.DateTime
   modified_by                   String        @db.UniqueIdentifier
   user_entity_created_byTouser  user          @relation("entity_created_byTouser", fields: [created_by], references: [id], onUpdate: NoAction, map: "fk_entity_created_by")
   user_entity_modified_byTouser user          @relation("entity_modified_byTouser", fields: [modified_by], references: [id], onUpdate: NoAction, map: "fk_entity_modified_by")
