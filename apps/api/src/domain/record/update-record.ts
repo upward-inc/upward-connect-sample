@@ -1,11 +1,8 @@
-import {
-	type ValidateUpdateRecordBodyResultSuccess,
-	escapeName,
-	escapeStringValue,
-} from "."
 import { prisma } from "../../libs/prisma"
 import type { PatchRecordResponse } from "../../schema/record"
+import { escapeName, escapeStringValue } from "../../utility/sql"
 import { getEntityItemList } from "../entity"
+import type { ValidateUpdateRecordBodyResultSuccess } from "./validate-update-record-body"
 
 export const updateRecord = async (
 	userId: string,

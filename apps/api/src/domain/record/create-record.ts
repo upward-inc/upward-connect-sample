@@ -1,11 +1,8 @@
-import {
-	type ValidateCreateRecordBodyResultSuccess,
-	escapeName,
-	escapeStringValue,
-} from "."
 import { getEntityItemList } from "../../domain/entity"
 import { prisma } from "../../libs/prisma"
 import type { PostRecordResponse } from "../../schema/record"
+import { escapeName, escapeStringValue } from "../../utility/sql"
+import type { ValidateCreateRecordBodyResultSuccess } from "./validate-create-record-body"
 
 export const createRecord = async (
 	userId: string,
