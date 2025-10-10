@@ -3,16 +3,23 @@ import { getEntity } from "../../../domain/entity"
 import {
 	createRecord,
 	deleteRecord,
+	getRecordExists,
 	getRecordList,
+	updateRecord,
 	validateCreateRecordBody,
+	validateUpdateRecordBody,
 } from "../../../domain/record"
 import { describeRoute, validator } from "../../../libs/hono-openapi"
 import type { AuthContexts } from "../../../schema/auth"
+import { NestableAndFilterSchema } from "../../../schema/filter"
 import {
 	DeleteRecordParamSchema,
 	GetRecordListQuerySchema,
 	GetRecordListResponseSchema,
 	GetRecordParamSchema,
+	PatchRecordBodySchema,
+	PatchRecordParamSchema,
+	PatchRecordResponseSchema,
 	PostRecordBodySchema,
 	PostRecordParamSchema,
 	PostRecordResponseSchema,
@@ -84,6 +91,49 @@ export const recordRouter = new Hono<{ Variables: AuthContexts }>()
 			)
 
 			return c.json(createResult, 201)
+		},
+	)
+	.patch(
+		"/:entity_name/:id",
+		describeRoute({
+			description: "パスで指定されたエンティティのレコードを更新する",
+			schema: PatchRecordResponseSchema,
+		}),
+		validator("param", PatchRecordParamSchema),
+		validator("json", PatchRecordBodySchema),
+		async (c) => {
+			const user = c.get("user")
+			const { entity_name, id } = c.req.valid("param")
+			const data = c.req.valid("json")
+
+			// エンティティが存在しない場合はエラー
+			const entity = await getEntity(entity_name)
+			if (!entity) {
+				const message = `Entity '${entity_name}' does not exist`
+				return c.json({ message }, 404)
+			}
+
+			// 更新対象のレコードが存在しない場合はエラー
+			const isRecordExists = await getRecordExists(entity_name, id)
+			if (!isRecordExists) {
+				const message = `Record with ID '${id}' does not exist in '${entity_name}'`
+				return c.json({ message }, 404)
+			}
+
+			// ボディデータのバリデーション
+			const validateResult = await validateUpdateRecordBody(entity_name, data)
+			if (!validateResult.success) {
+				return c.json({ message: validateResult.message }, 400)
+			}
+
+			const updateResult = await updateRecord(
+				user.id,
+				id,
+				entity_name,
+				validateResult.fields,
+			)
+
+			return c.json(updateResult)
 		},
 	)
 	.delete(

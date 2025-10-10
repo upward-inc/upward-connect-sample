@@ -104,6 +104,36 @@ export const PostRecordResponseSchema = z
 		description: "作成されたレコードデータ",
 	})
 
+export const PatchRecordParamSchema = z.object({
+	entity_name: z.string().openapi({
+		description: "レコード更新対象のエンティティ名",
+		examples: ["account", "lead"],
+	}),
+	id: z.string().openapi({
+		description: "更新対象のレコードID",
+		examples: ["account-00000001", "lead-00000001"],
+	}),
+})
+
+export const PatchRecordBodySchema = PostRecordBodySchema.openapi({
+	description: "更新するレコードのデータ",
+})
+
+export const PatchRecordResponseSchema = z
+	.object({
+		entity_name: z.string().openapi({
+			description: "更新されたレコードのエンティティ名",
+			examples: ["account", "lead"],
+		}),
+		id: z.string().openapi({
+			description: "更新されたレコードのID",
+			examples: ["account-00000001", "lead-00000001"],
+		}),
+	})
+	.openapi({
+		description: "更新されたレコードデータ",
+	})
+
 export const DeleteRecordParamSchema = z.object({
 	entity_name: z.string().openapi({
 		description: "削除対象レコードのエンティティ名",
@@ -128,5 +158,7 @@ export type GetRecordListQuery = z.infer<typeof GetRecordListQuerySchema>
 export type GetRecordListResponse = z.infer<typeof GetRecordListResponseSchema>
 export type PostRecordBody = z.infer<typeof PostRecordBodySchema>
 export type PostRecordResponse = z.infer<typeof PostRecordResponseSchema>
+export type PatchRecordBody = z.infer<typeof PatchRecordBodySchema>
+export type PatchRecordResponse = z.infer<typeof PatchRecordResponseSchema>
 export type DeleteRecordParam = z.infer<typeof DeleteRecordParamSchema>
 export type RecordReferenceInput = z.infer<typeof RecordReferenceInputSchema>
