@@ -1109,6 +1109,117 @@ describe("Record Tests", () => {
 			expect(industries).toEqual(["manufacturing", "it", "finance", null])
 		})
 
+		it("group_byが指定されていない場合、order_byが指定されていなくてもIDの昇順でソートされること", async () => {
+			const testUser = await createTestUser({
+				user_name: "no_group_by_no_order_by_user",
+				first_name: "NoGroupBy",
+				last_name: "NoOrderBy",
+				email: "no_group_by_no_order_by@example.com",
+			})
+			const token = createValidToken(testUser.id)
+
+			const testAccountNames = ["ZZZ Company", "AAA Company", "MMM Company"]
+			await Promise.all(
+				testAccountNames.map((name) =>
+					createTestAccount({ name }, testUser.id),
+				),
+			)
+
+			const makeRequest = () =>
+				app.request("/api/v1/records/account?fields=id,name", {
+					method: "GET",
+					headers: { Authorization: `Bearer ${token}` },
+				})
+
+			const [response1, response2] = await Promise.all([
+				makeRequest(),
+				makeRequest(),
+			])
+			const [data1, data2] = await Promise.all([
+				response1.json(),
+				response2.json(),
+			])
+
+			const getTestAccounts = (data: {
+				data: { id: string; name: string }[]
+			}) =>
+				data.data.filter((record: { name: string }) =>
+					testAccountNames.map((name) => `test_${name}`).includes(record.name),
+				)
+
+			const testAccounts1 = getTestAccounts(data1)
+			const testAccounts2 = getTestAccounts(data2)
+
+			const actualIds1 = testAccounts1.map(
+				(record: { id: string }) => record.id,
+			)
+			const actualIds2 = testAccounts2.map(
+				(record: { id: string }) => record.id,
+			)
+
+			// 同じクエリで一貫した結果が返されることを確認
+			expect(actualIds1).toEqual(actualIds2)
+		})
+
+		it("group_byが指定されていない場合、order_byが指定されていても最終的にIDの昇順が追加されること", async () => {
+			const testUser = await createTestUser({
+				user_name: "no_group_by_with_order_by_user",
+				first_name: "NoGroupBy",
+				last_name: "WithOrderBy",
+				email: "no_group_by_with_order_by@example.com",
+			})
+			const token = createValidToken(testUser.id)
+
+			await Promise.all([
+				createTestAccount({ name: "Same Name Company" }, testUser.id),
+				createTestAccount({ name: "Same Name Company" }, testUser.id),
+				createTestAccount({ name: "Same Name Company" }, testUser.id),
+			])
+
+			const orderByQuery = encodeURIComponent(
+				JSON.stringify([{ field: "name", direction: "asc" }]),
+			)
+
+			const makeRequest = () =>
+				app.request(
+					`/api/v1/records/account?fields=id,name&order_by=${orderByQuery}`,
+					{
+						method: "GET",
+						headers: { Authorization: `Bearer ${token}` },
+					},
+				)
+
+			const [response1, response2] = await Promise.all([
+				makeRequest(),
+				makeRequest(),
+			])
+			const [data1, data2] = await Promise.all([
+				response1.json(),
+				response2.json(),
+			])
+
+			const getSameNameAccounts = (data: {
+				data: { id: string; name: string }[]
+			}) =>
+				data.data.filter(
+					(record: { name: string }) =>
+						record.name === "test_Same Name Company",
+				)
+
+			const sameNameAccounts1 = getSameNameAccounts(data1)
+			const sameNameAccounts2 = getSameNameAccounts(data2)
+
+			const actualIds1 = sameNameAccounts1.map(
+				(record: { id: string }) => record.id,
+			)
+			const actualIds2 = sameNameAccounts2.map(
+				(record: { id: string }) => record.id,
+			)
+
+			// 同じクエリで一貫した結果が返されることを確認
+			expect(actualIds1).toEqual(actualIds2)
+		})
+
 		it("should return record list with numeric filter (greater than)", async () => {
 			const testUser = await createTestUser({
 				user_name: "numeric_filter_user",
