@@ -8,13 +8,13 @@ export const JsonValueSchema: z.ZodType<JsonValue> = z.lazy(() =>
 		z.number(),
 		z.string(),
 		z.array(JsonValueSchema),
-		z.record(JsonValueSchema),
+		z.record(z.string(), JsonValueSchema),
 	]),
 )
 
 // JSONオブジェクト
 export const JsonObjectSchema: z.ZodType<Record<string, JsonValue>> = z.lazy(
-	() => z.record(JsonValueSchema),
+	() => z.record(z.string(), JsonValueSchema),
 )
 
 export type JsonValue =
@@ -30,17 +30,17 @@ export type JsonObject = z.infer<typeof JsonObjectSchema>
 /**
  * JSONとして解析可能な型
  */
-export type ZodJsonType = z.ZodType<JsonValue, z.ZodTypeDef, JsonValue>
+export type ZodJsonType = z.ZodType<JsonValue, JsonValue>
 
-export const UuidSchema = z.string().uuid()
-export const EMailSchema = z.string().email()
-export const UrlSchema = z.string().url()
+export const UuidSchema = z.uuid()
+export const EMailSchema = z.email()
+export const UrlSchema = z.url()
 export const PhoneNumberSchema = z
 	.string()
 	.regex(/^[0-9\s\-()+]+$/, "Invalid phone number")
-export const ISO8601DateSchema = z.string().date()
-export const ISO8601DatetimeSchema = z.string().datetime({ offset: true })
-export const ISO8601TimeSchema = z.string().time()
+export const ISO8601DateSchema = z.iso.date()
+export const ISO8601DatetimeSchema = z.iso.datetime({ offset: true })
+export const ISO8601TimeSchema = z.iso.time()
 
 export type Uuid = z.infer<typeof UuidSchema>
 export type EMail = z.infer<typeof EMailSchema>

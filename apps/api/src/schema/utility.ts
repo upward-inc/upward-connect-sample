@@ -18,7 +18,7 @@ export const ToIntegerSchema = z.preprocess((value) => {
 		return Number(value)
 	}
 	return value
-}, z.number().int())
+}, z.int())
 
 /**
  * 任意の値を日付に変換する
@@ -30,7 +30,7 @@ export const ToDateSchema = z.preprocess((value) => {
 		return new Date(value)
 	}
 	return value
-}, z.date())
+}, z.iso.date())
 
 /**
  * 文字列またはその他の値をJSONとして解析し、指定されたスキーマに変換する

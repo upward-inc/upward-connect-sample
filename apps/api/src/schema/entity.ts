@@ -1,26 +1,25 @@
 import { z } from "zod"
-import "zod-openapi/extend"
 
 export const EntitySchema = z
 	.object({
-		name: z.string().openapi({
+		name: z.string().meta({
 			description: "エンティティ名",
 			examples: ["account", "opportunity"],
 		}),
-		display_name: z.string().openapi({
+		display_name: z.string().meta({
 			description: "エンティティの表示名",
 			examples: ["取引先", "商談"],
 		}),
-		title_field_name: z.string().openapi({
+		title_field_name: z.string().meta({
 			description: "エンティティのタイトルとなる項目名",
 			example: "name",
 		}),
 	})
-	.openapi({
+	.meta({
 		description: "エンティティ",
 	})
 
-export const EntityListSchema = z.array(EntitySchema).openapi({
+export const EntityListSchema = z.array(EntitySchema).meta({
 	description: "エンティティ一覧",
 })
 

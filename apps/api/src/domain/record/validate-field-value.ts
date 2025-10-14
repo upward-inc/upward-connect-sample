@@ -172,7 +172,7 @@ const validateNumericValue = (
 
 	// 整数かどうかの検証
 	if (entityItem.sub_type === "integer") {
-		const { success } = z.number().int().safeParse(numberValue)
+		const { success } = z.int().safeParse(numberValue)
 		if (!success) {
 			const message = `Field '${entityItem.name}' must be an integer`
 			return { success: false, message }

@@ -1,6 +1,6 @@
+import { zValidator } from "@hono/zod-validator"
 import type { Hono } from "hono"
 import * as honoOpenApi from "hono-openapi"
-import * as honoOpenApiZod from "hono-openapi/zod"
 import type { ZodType } from "zod"
 import { env } from "../env"
 
@@ -13,13 +13,12 @@ export const describeRoute = <S extends ZodType>(options: {
 	const content = schema
 		? {
 				"application/json": {
-					schema: honoOpenApiZod.resolver(schema),
+					schema: honoOpenApi.resolver(schema),
 				},
 			}
 		: undefined
 	return honoOpenApi.describeRoute({
 		description,
-		validateResponse: !!schema,
 		responses: {
 			200: {
 				description: "Success",
@@ -29,7 +28,7 @@ export const describeRoute = <S extends ZodType>(options: {
 	})
 }
 
-export const validator = honoOpenApiZod.validator
+export const validator = zValidator
 
 export const generateOpenAPISpecs = (
 	router: Hono,
@@ -42,7 +41,7 @@ export const generateOpenAPISpecs = (
 		description?: string
 	},
 ) => {
-	return honoOpenApi.openAPISpecs(router, {
+	return honoOpenApi.openAPIRouteHandler(router, {
 		excludeStaticFile: false,
 		documentation: {
 			info: {

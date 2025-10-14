@@ -1,22 +1,21 @@
 import { z } from "zod"
-import "zod-openapi/extend"
 
 export const ProfileSchema = z
 	.object({
-		name: z.string().openapi({
+		name: z.string().meta({
 			description: "プロファイル名",
 			example: "admin",
 		}),
-		display_name: z.string().openapi({
+		display_name: z.string().meta({
 			description: "プロファイルの表示名",
 			example: "システム管理者",
 		}),
 	})
-	.openapi({
+	.meta({
 		description: "プロファイル",
 	})
 
-export const ProfileListSchema = z.array(ProfileSchema).openapi({
+export const ProfileListSchema = z.array(ProfileSchema).meta({
 	description: "プロファイル一覧",
 })
 
