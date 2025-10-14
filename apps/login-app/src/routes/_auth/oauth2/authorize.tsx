@@ -20,9 +20,9 @@ const AuthorizeParamsRedirectUriSchema = z.string().url().startsWith("https://")
 const AuthorizeParamsWithoutRedirectUriSchema = z.object({
 	response_type: z.literal("code"),
 	client_id: z.string(),
-	scope: z.string().optional(),
-	state: z.string().optional(),
-	nonce: z.string().optional(),
+	scope: z.string(),
+	state: z.string(),
+	nonce: z.string(),
 })
 
 const AuthorizeParamsSchema = AuthorizeParamsWithoutRedirectUriSchema.extend({
