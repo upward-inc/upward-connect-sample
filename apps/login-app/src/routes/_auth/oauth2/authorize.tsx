@@ -6,6 +6,7 @@ import { Button } from "../../../components/button"
 import { env } from "../../../env"
 
 // OAuth2認可リクエストのパラメータと同等のクエリパラメータを受け取る
+// バリデーション実装の都合、すべてのパラメータをoptionalで定義
 const SearchParamsSchema = z.object({
 	response_type: z.string().optional(),
 	client_id: z.string().optional(),
@@ -113,6 +114,7 @@ function useAuthorizeValidation(
 			AuthorizeParamsWithoutRedirectUriSchema.safeParse(searchParams),
 	}
 
+	// パラメータの検証（サーバーサイドでの検証前の最低限の検証）
 	useEffect(() => {
 		if (!validationResult.redirectUri.success) {
 			// `redirect_uri`に不備がある場合は、エラーをスロー
