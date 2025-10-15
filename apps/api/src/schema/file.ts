@@ -1,4 +1,4 @@
-import { z } from "zod"
+import { z } from "../libs/zod"
 
 export const FileIdSchema = z.string().meta({
 	description: "ファイルID",

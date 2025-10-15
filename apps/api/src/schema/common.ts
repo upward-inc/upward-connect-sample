@@ -1,4 +1,4 @@
-import { z } from "zod"
+import { z } from "../libs/zod"
 
 // JSONに指定可能な値
 export const JsonValueSchema: z.ZodType<JsonValue> = z.lazy(() =>

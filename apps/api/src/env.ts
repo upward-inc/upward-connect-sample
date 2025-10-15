@@ -1,4 +1,4 @@
-import { z } from "zod"
+import { z } from "./libs/zod"
 
 const envSchema = z.object({
 	APP_NAME: z.string(),
