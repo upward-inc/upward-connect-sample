@@ -211,7 +211,9 @@ export const PostAuthorizeParamSchema = z.object({
 	response_type: z.literal("code"),
 	client_id: ClientIdSchema,
 	redirect_uri: RedirectUriSchema,
-	scope: StringToArraySchema(" "),
+	scope: StringToArraySchema(" ").refine((arr) => arr.length > 0, {
+		message: "At least one scope is required",
+	}),
 	state: z.string(),
 	nonce: z.string(),
 })

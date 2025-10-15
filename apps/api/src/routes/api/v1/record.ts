@@ -7,6 +7,7 @@ import {
 	getRecordList,
 	updateRecord,
 	validateCreateRecordBody,
+	validateGetRecordListQuery,
 	validateUpdateRecordBody,
 } from "../../../domain/record"
 import { describeRoute, validator } from "../../../libs/hono-openapi"
@@ -43,6 +44,11 @@ export const recordRouter = new Hono<{ Variables: AuthContexts }>()
 			if (!entity) {
 				const message = `Entity '${entity_name}' does not exist`
 				return c.json({ message }, 404)
+			}
+
+			const validateResult = validateGetRecordListQuery(query)
+			if (!validateResult.success) {
+				return c.json({ message: validateResult.message }, 400)
 			}
 
 			const { data, has_next_page, total_size } = await getRecordList(

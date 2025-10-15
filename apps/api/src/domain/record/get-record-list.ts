@@ -85,9 +85,10 @@ export const getRecordList = async (
 		? GroupByClauseSchema.parse(groupByFields)
 		: null
 
-	const orderByClause = order_by
-		? OrderByClauseSchema.parse(order_by)
-		: OrderByClauseSchema.parse([{ field: "id" }])
+	const baseOrderBy = buildBaseOrderBy(order_by, groupByFields)
+	const hasGroupByFields = hasFields(groupByFields)
+	const orderBy = appendIdToOrderBy(baseOrderBy, hasGroupByFields)
+	const orderByClause = OrderByClauseSchema.parse(orderBy)
 
 	const pagingClause = PagingClauseSchema.parse({
 		// `has_next_page`の効率的な算出の為、指定された件数よりも1件多く取得する
@@ -138,6 +139,43 @@ export const getRecordList = async (
 		total_size: totalSize,
 		data,
 	}
+}
+
+const hasFields = (fields: string[] | undefined): fields is string[] => {
+	return !!(fields && fields.length > 0)
+}
+
+const buildBaseOrderBy = (
+	order_by: GetRecordListQuery["order_by"],
+	groupByFields: string[] | undefined,
+): Array<{ field: string; direction: "asc" | "desc" }> => {
+	if (order_by) return order_by
+
+	if (hasFields(groupByFields)) {
+		return groupByFields.map((field) => ({
+			field,
+			direction: "asc" as const,
+		}))
+	}
+
+	return []
+}
+
+const appendIdToOrderBy = (
+	baseOrderBy: Array<{ field: string; direction: "asc" | "desc" }>,
+	hasGroupByFields: boolean,
+): Array<{ field: string; direction: "asc" | "desc" }> => {
+	if (hasGroupByFields) {
+		return baseOrderBy
+	}
+
+	// すでにidのソートが指定されている場合は追加不要
+	const hasIdInOrderBy = baseOrderBy.some(({ field }) => field === "id")
+	if (hasIdInOrderBy) {
+		return baseOrderBy
+	}
+
+	return [...baseOrderBy, { field: "id", direction: "asc" as const }]
 }
 
 const isArray = <T>(maybeArray: T | readonly T[]): maybeArray is T[] => {

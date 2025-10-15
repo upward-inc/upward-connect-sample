@@ -5,7 +5,24 @@ import { useAuth } from "../../../auth"
 import { Button } from "../../../components/button"
 import { env } from "../../../env"
 
-// OAuth2認可リクエストのパラメータと同等のクエリパラメータを受け取る
+// 指定可能なスコープ
+const specifiedScopes = ["openid", "profile", "email", "offline_access"]
+
+const ResponseTypeSchema = z.literal("code")
+const ClientIdSchema = z.string().min(1)
+const AuthorizeParamsRedirectUriSchema = z.url().startsWith("https://")
+const ScopeSchema = z
+	.string()
+	.refine(
+		(value) =>
+			value.trim().length > 0 &&
+			value.split(" ").every((scope) => specifiedScopes.includes(scope)),
+	)
+const StateSchema = z.string().min(1)
+const NonceSchema = z.string().min(1)
+
+// 検索パラメータ一覧を表現するスキーマ
+// バリデーション実装の都合、すべてのパラメータをoptionalで定義
 const SearchParamsSchema = z.object({
 	response_type: z.string().optional(),
 	client_id: z.string().optional(),
@@ -15,18 +32,14 @@ const SearchParamsSchema = z.object({
 	nonce: z.string().optional(),
 })
 
-const AuthorizeParamsRedirectUriSchema = z.url().startsWith("https://")
-
-const AuthorizeParamsWithoutRedirectUriSchema = z.object({
-	response_type: z.literal("code"),
-	client_id: z.string(),
-	scope: z.string().optional(),
-	state: z.string().optional(),
-	nonce: z.string().optional(),
-})
-
-const AuthorizeParamsSchema = AuthorizeParamsWithoutRedirectUriSchema.extend({
+// OAuth2認可リクエストのパラメータ一覧を表現するスキーマ
+const AuthorizeParamsSchema = z.object({
+	response_type: ResponseTypeSchema,
+	client_id: ClientIdSchema,
 	redirect_uri: AuthorizeParamsRedirectUriSchema,
+	scope: ScopeSchema,
+	state: StateSchema,
+	nonce: NonceSchema,
 })
 
 interface AuthorizeResultSuccess {
@@ -83,14 +96,6 @@ export const Route = createFileRoute("/_auth/oauth2/authorize")({
 	component: AuthorizePage,
 })
 
-// バリデーション結果の型
-interface ValidationResult {
-	redirectUri: z.ZodSafeParseResult<string>
-	withoutRedirectUri: z.ZodSafeParseResult<
-		z.output<typeof AuthorizeParamsWithoutRedirectUriSchema>
-	>
-}
-
 /**
  * 認可パラメータのバリデーションフック
  *
@@ -103,36 +108,55 @@ function useAuthorizeValidation(
 ) {
 	const [isValidating, setIsValidating] = useState(true)
 
-	// クエリパラメータを検証
-	const validationResult: ValidationResult = {
-		redirectUri: AuthorizeParamsRedirectUriSchema.safeParse(
-			searchParams.redirect_uri,
-		),
-		withoutRedirectUri:
-			AuthorizeParamsWithoutRedirectUriSchema.safeParse(searchParams),
-	}
-
+	// パラメータの検証（サーバーサイドでの検証前の最低限の検証）
 	useEffect(() => {
-		if (!validationResult.redirectUri.success) {
+		// `redirect_uri`の検証
+		const { success: redirectUriSuccess, data: redirectUri } =
+			AuthorizeParamsRedirectUriSchema.safeParse(searchParams.redirect_uri)
+		if (!redirectUriSuccess) {
 			// `redirect_uri`に不備がある場合は、エラーをスロー
 			// オープンリダイレクト攻撃を防止するため、リダイレクトを行ってはならない
 			throw new Error("invalid redirect_uri")
 		}
 
-		if (!validationResult.withoutRedirectUri.success) {
-			// `redirect_uri`以外のパラメータに不備がある場合は、リダイレクト
-			redirectFail(validationResult.redirectUri.data, {
-				error: "invalid_request",
-				state: searchParams.state,
-			})
+		// `state`の検証
+		const { success: stateSuccess, data: state } = StateSchema.safeParse(
+			searchParams.state,
+		)
+		if (!stateSuccess) {
+			redirectFail(redirectUri, { error: "invalid_request", state })
+		}
+
+		// `response_type`の検証
+		const { success: responseTypeSuccess } = ResponseTypeSchema.safeParse(
+			searchParams.response_type,
+		)
+		if (!responseTypeSuccess) {
+			redirectFail(redirectUri, { error: "unsupported_response_type", state })
+		}
+
+		// `client_id`の検証
+		const { success: clientIdSuccess } = ClientIdSchema.safeParse(
+			searchParams.client_id,
+		)
+		if (!clientIdSuccess) {
+			redirectFail(redirectUri, { error: "unauthorized_client", state })
+		}
+
+		// `scope`の検証
+		const { success: scopeSuccess } = ScopeSchema.safeParse(searchParams.scope)
+		if (!scopeSuccess) {
+			redirectFail(redirectUri, { error: "invalid_scope", state })
+		}
+
+		// `nonce`の検証
+		const { success: nonceSuccess } = NonceSchema.safeParse(searchParams.nonce)
+		if (!nonceSuccess) {
+			redirectFail(redirectUri, { error: "invalid_request", state })
 		}
 
 		setIsValidating(false)
-	}, [
-		validationResult.redirectUri,
-		validationResult.withoutRedirectUri,
-		searchParams.state,
-	])
+	}, [searchParams])
 
 	return { isValidating }
 }
@@ -182,7 +206,7 @@ function useOAuthClient(
 	}
 	if (!clientName) {
 		// 見つからない場合は全てエラーとする
-		return { isSuccess: false, error: "invalid_request", isFetching }
+		return { isSuccess: false, error: "unauthorized_client", isFetching }
 	}
 	return { isSuccess: true, name: clientName, isFetching }
 }
@@ -236,15 +260,9 @@ function AuthorizePage() {
 		formData.append("client_id", strictQueryParams.client_id)
 		formData.append("redirect_uri", strictQueryParams.redirect_uri)
 		formData.append("response_type", strictQueryParams.response_type)
-		if (strictQueryParams.scope) {
-			formData.append("scope", strictQueryParams.scope)
-		}
-		if (strictQueryParams.state) {
-			formData.append("state", strictQueryParams.state)
-		}
-		if (strictQueryParams.nonce) {
-			formData.append("nonce", strictQueryParams.nonce)
-		}
+		formData.append("scope", strictQueryParams.scope)
+		formData.append("state", strictQueryParams.state)
+		formData.append("nonce", strictQueryParams.nonce)
 
 		// サーバーサイドで検証
 		const response = await fetch(`${env.API_URL}/auth/authorize`, {
