@@ -23,8 +23,7 @@
 		"hono": "^4.7.9",
 		"hono-openapi": "^1.1.0",
 		"jsonwebtoken": "^9.0.2",
-		"zod": "^4.1.12",
-		"zod-openapi": "^4.2.4"
+		"zod": "^4.1.12"
 	},
 	"devDependencies": {
 		"@testcontainers/mssqlserver": "^11.2.1",
