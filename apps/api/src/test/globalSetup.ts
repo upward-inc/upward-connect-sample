@@ -94,13 +94,4 @@ export default async function globalSetup() {
 
 	// テストで使用するために環境変数に接続文字列を保存
 	process.env.TEST_DATABASE_URL = sqlServerConnectionString
-
-	// // クリーンアップ関数を返す
-	// return async () => {
-	// 	console.log("🧹 Running global test teardown...")
-	// 	if (mssqlContainer) {
-	// 		await mssqlContainer.stop()
-	// 		console.log("✅ MSSQL container stopped")
-	// 	}
-	// }
 }
