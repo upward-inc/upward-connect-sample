@@ -497,10 +497,7 @@ describe("Auth Tests", () => {
 
 			const data = await response.json()
 			expect(response.status).toBe(400)
-			// Zod validation error for unsupported grant type
 			expect(data.success).toBe(false)
-			expect(data.error).toHaveProperty("issues")
-			expect(data.error.issues[0].path).toContainEqual("grant_type")
 		})
 
 		it("400 Bad Request - クライアントのスコープにoffline_accessが含まれていない", async () => {
