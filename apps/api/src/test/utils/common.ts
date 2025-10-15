@@ -4,35 +4,151 @@ import { testPrisma } from "../setup"
  * Clean up all test data from the database
  */
 export async function cleanupTestData() {
-	// 1. テーブル一覧を取得: Prismaが管理するテーブルを除外
-	const tableNames = await testPrisma.$queryRaw<{ TABLE_NAME: string }[]>`
-		SELECT TABLE_NAME
-		FROM INFORMATION_SCHEMA.TABLES
-		WHERE TABLE_TYPE = 'BASE TABLE'
-		AND TABLE_SCHEMA = 'dbo'
-		AND TABLE_NAME NOT LIKE '_prisma%'
-		ORDER BY TABLE_NAME
-	`
+	// Clean up in reverse order of dependencies
 
-	// 2. 全テーブルの制約を一括無効化
-	for (const table of tableNames) {
-		await testPrisma.$executeRawUnsafe(
-			`ALTER TABLE [${table.TABLE_NAME}] NOCHECK CONSTRAINT all`,
-		)
-	}
+	// Clean up published_auth_code first (references user)
+	await testPrisma.published_auth_code.deleteMany({
+		where: {
+			user: {
+				user_name: {
+					contains: "test_",
+				},
+			},
+		},
+	})
 
-	// 3. データ削除: 各テーブルのデータを順次削除
-	for (const table of tableNames) {
-		await testPrisma.$executeRawUnsafe(`DELETE FROM [${table.TABLE_NAME}]`)
-	}
+	// Clean up files created by test users
+	await testPrisma.file.deleteMany({
+		where: {
+			created_by: {
+				in: await testPrisma.user
+					.findMany({
+						where: {
+							user_name: {
+								contains: "test_",
+							},
+						},
+						select: {
+							id: true,
+						},
+					})
+					.then((users) => users.map((u) => u.id)),
+			},
+		},
+	})
 
-	// 4. 全テーブルの制約を復元
-	for (const table of tableNames) {
-		await testPrisma.$executeRawUnsafe(
-			`ALTER TABLE [${table.TABLE_NAME}] CHECK CONSTRAINT all`,
-		)
-	}
+	await testPrisma.user_access_control.deleteMany({
+		where: {
+			user_user_access_control_user_idTouser: {
+				user_name: {
+					contains: "test_",
+				},
+			},
+		},
+	})
+
+	await testPrisma.profile.deleteMany({
+		where: {
+			name: {
+				contains: "test_",
+			},
+		},
+	})
+
+	await testPrisma.oauth_client.deleteMany({
+		where: {
+			name: {
+				contains: "test_",
+			},
+		},
+	})
+
+	// Clean up record data
+	await testPrisma.lead.deleteMany({
+		where: {
+			company: {
+				contains: "test_",
+			},
+		},
+	})
+	await testPrisma.account.deleteMany({
+		where: {
+			name: {
+				contains: "test_",
+			},
+		},
+	})
+	await testPrisma.activity.deleteMany({
+		where: {
+			subject: {
+				contains: "test_",
+			},
+		},
+	})
+	await testPrisma.phone_call.deleteMany({
+		where: {
+			subject: {
+				contains: "test_",
+			},
+		},
+	})
+	await testPrisma.contact.deleteMany({
+		where: {
+			last_name: {
+				contains: "test_",
+			},
+		},
+	})
+	await testPrisma.opportunity.deleteMany({
+		where: {
+			name: {
+				contains: "test_",
+			},
+		},
+	})
+	await testPrisma.renamedcase.deleteMany({
+		where: {
+			case_number: {
+				contains: "test_",
+			},
+			subject: {
+				contains: "test_",
+			},
+		},
+	})
+	await testPrisma.product.deleteMany({
+		where: {
+			name: {
+				contains: "test_",
+			},
+		},
+	})
+	await testPrisma.campaign.deleteMany({
+		where: {
+			name: {
+				contains: "test_",
+			},
+		},
+	})
+	await testPrisma.sample.deleteMany({
+		where: {
+			name: {
+				contains: "test_",
+			},
+		},
+	})
+
+	// Finally, clean up test users
+	await testPrisma.user.deleteMany({
+		where: {
+			user_name: {
+				contains: "test_",
+			},
+		},
+	})
 }
+
+let testProfile: { id: string }
 
 /**
  * Create a test user for tests
@@ -68,8 +184,9 @@ export async function createTestUser(userData: {
 		},
 	})
 
-	// Create a new test profile for each user
-	const testProfile = await createTestProfile(user.id)
+	if (!testProfile) {
+		testProfile = await createTestProfile(user.id)
+	}
 
 	// Create user access control to link user with profile
 	await testPrisma.user_access_control.create({
@@ -85,11 +202,9 @@ export async function createTestUser(userData: {
 }
 
 async function createTestProfile(userId: string) {
-	// Generate unique profile name using userId to avoid conflicts
-	const uniqueName = `test_profile_${userId.slice(0, 8)}`
 	return await testPrisma.profile.create({
 		data: {
-			name: uniqueName,
+			name: "test_profile",
 			display_name: "Test Profile",
 			order: 999,
 			created_by: userId,
