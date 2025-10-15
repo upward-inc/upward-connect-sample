@@ -15,7 +15,7 @@ const SearchParamsSchema = z.object({
 	nonce: z.string().optional(),
 })
 
-const AuthorizeParamsRedirectUriSchema = z.string().url().startsWith("https://")
+const AuthorizeParamsRedirectUriSchema = z.url().startsWith("https://")
 
 const AuthorizeParamsWithoutRedirectUriSchema = z.object({
 	response_type: z.literal("code"),
@@ -85,9 +85,8 @@ export const Route = createFileRoute("/_auth/oauth2/authorize")({
 
 // バリデーション結果の型
 interface ValidationResult {
-	redirectUri: z.SafeParseReturnType<string | undefined, string>
-	withoutRedirectUri: z.SafeParseReturnType<
-		z.input<typeof AuthorizeParamsWithoutRedirectUriSchema>,
+	redirectUri: z.ZodSafeParseResult<string>
+	withoutRedirectUri: z.ZodSafeParseResult<
 		z.output<typeof AuthorizeParamsWithoutRedirectUriSchema>
 	>
 }
