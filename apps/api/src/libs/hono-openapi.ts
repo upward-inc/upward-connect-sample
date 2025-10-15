@@ -1,4 +1,4 @@
-import type { Hono } from "hono"
+import type { OpenAPIHono } from "@hono/zod-openapi"
 import * as honoOpenApi from "hono-openapi"
 import type { ZodType } from "zod"
 import { env } from "../env"
@@ -30,7 +30,7 @@ export const describeRoute = <S extends ZodType>(options: {
 export const validator = honoOpenApi.validator
 
 export const generateOpenAPISpecs = (
-	router: Hono,
+	router: OpenAPIHono,
 	routerPath: string,
 	{
 		version,

@@ -1,4 +1,4 @@
-import { Hono } from "hono"
+import { OpenAPIHono } from "@hono/zod-openapi"
 import {
 	deleteAuthorizationCode,
 	generateAccessToken,
@@ -18,7 +18,7 @@ import {
 	PostTokenResultSchema,
 } from "../../schema/auth"
 
-export const oauth2Router = new Hono<{ Variables: AuthContexts }>()
+export const oauth2Router = new OpenAPIHono<{ Variables: AuthContexts }>()
 	.post(
 		"/token",
 		describeRoute({

@@ -1,4 +1,4 @@
-import { Hono } from "hono"
+import { OpenAPIHono } from "@hono/zod-openapi"
 import { nanoid } from "nanoid"
 import {
 	generateAccessToken,
@@ -18,7 +18,7 @@ import {
 	PostLoginResultSchema,
 } from "../../schema/auth"
 
-export const internalAuthRouter = new Hono<{ Variables: AuthContexts }>()
+export const internalAuthRouter = new OpenAPIHono<{ Variables: AuthContexts }>()
 	.post(
 		"/login",
 		describeRoute({

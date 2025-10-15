@@ -1,4 +1,4 @@
-import { Hono } from "hono"
+import { OpenAPIHono } from "@hono/zod-openapi"
 import { setupOpenAPIEndpoints } from "../../utils/openapi-setup"
 import { configurationRouter } from "./configuration"
 import { entityRouter } from "./entity"
@@ -8,7 +8,7 @@ import { recordRouter } from "./record"
 import { roleRouter } from "./role"
 import { systemUserRouter } from "./system-user"
 
-const v1Router = new Hono()
+const v1Router = new OpenAPIHono()
 	.route("/system-users", systemUserRouter)
 	.route("/profiles", profileRouter)
 	.route("/roles", roleRouter)

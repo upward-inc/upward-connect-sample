@@ -1,4 +1,4 @@
-import { Hono } from "hono"
+import { OpenAPIHono } from "@hono/zod-openapi"
 import {
 	getEntity,
 	getEntityItem,
@@ -18,7 +18,7 @@ import {
 	GetEntityItemParamSchema,
 } from "../../../schema/entity-item"
 
-export const entityRouter = new Hono()
+export const entityRouter = new OpenAPIHono()
 	.get(
 		"/",
 		describeRoute({

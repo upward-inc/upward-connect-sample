@@ -1,4 +1,4 @@
-import { Hono } from "hono"
+import { OpenAPIHono } from "@hono/zod-openapi"
 import { getProfile, getProfileList } from "../../../domain/profile"
 import { describeRoute, validator } from "../../../libs/hono-openapi"
 import {
@@ -7,7 +7,7 @@ import {
 	ProfileSchema,
 } from "../../../schema/profile"
 
-export const profileRouter = new Hono()
+export const profileRouter = new OpenAPIHono()
 	.get(
 		"/",
 		describeRoute({

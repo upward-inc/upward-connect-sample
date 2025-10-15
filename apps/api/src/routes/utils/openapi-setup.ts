@@ -1,8 +1,8 @@
-import type { Hono } from "hono"
+import type { OpenAPIHono } from "@hono/zod-openapi"
 import { generateOpenAPISpecs } from "../../libs/hono-openapi"
 import { generateOpenAPISpecsPage } from "../../libs/scalar"
 
-export function setupOpenAPIEndpoints<T extends Hono>(
+export function setupOpenAPIEndpoints<T extends OpenAPIHono>(
 	router: T,
 	routerPath: string,
 	config: {

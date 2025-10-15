@@ -1,4 +1,4 @@
-import { Hono } from "hono"
+import { OpenAPIHono } from "@hono/zod-openapi"
 import { getSystemUser, getSystemUserList } from "../../../domain/system-user"
 import { describeRoute, validator } from "../../../libs/hono-openapi"
 import {
@@ -7,7 +7,7 @@ import {
 	SystemUserSchema,
 } from "../../../schema/system-user"
 
-export const systemUserRouter = new Hono()
+export const systemUserRouter = new OpenAPIHono()
 	.get(
 		"/",
 		describeRoute({

@@ -1,4 +1,4 @@
-import { Hono } from "hono"
+import { OpenAPIHono } from "@hono/zod-openapi"
 import { createFile, getFile } from "../../../domain/file"
 import { describeRoute, validator } from "../../../libs/hono-openapi"
 import type { AuthContexts } from "../../../schema/auth"
@@ -8,7 +8,7 @@ import {
 	PostFileResultSchema,
 } from "../../../schema/file"
 
-export const fileRouter = new Hono<{ Variables: AuthContexts }>()
+export const fileRouter = new OpenAPIHono<{ Variables: AuthContexts }>()
 	.get(
 		"/:id",
 		// Response は json ではないので schema validation は行わない
