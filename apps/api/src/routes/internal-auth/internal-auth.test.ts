@@ -101,7 +101,7 @@ describe("Internal Auth Tests", () => {
 			expect(response.status).toBe(400)
 			expect(data).toHaveProperty("error")
 			expect(data).toEqual({
-				error: "invalid_request",
+				error: "unauthorized_client",
 				state: stateValue,
 			})
 		})
@@ -143,7 +143,7 @@ describe("Internal Auth Tests", () => {
 			const data = await response.json()
 			expect(response.status).toBe(400)
 			expect(data).toEqual({
-				error: "invalid_request",
+				error: "invalid_request_uri",
 				state: stateValue,
 			})
 		})
@@ -594,7 +594,7 @@ describe("Internal Auth Tests", () => {
 			const data = await response.json()
 			expect(response.status).toBe(400)
 			expect(data).toEqual({
-				error: "invalid_request",
+				error: "invalid_scope",
 				state: "random-state-value-12345",
 			})
 		})
@@ -675,7 +675,7 @@ describe("Internal Auth Tests", () => {
 			const data = await response.json()
 			expect(response.status).toBe(400)
 			expect(data).toEqual({
-				error: "invalid_request",
+				error: "invalid_scope",
 				state: "random-state-value-12345",
 			})
 		})
@@ -716,7 +716,7 @@ describe("Internal Auth Tests", () => {
 			const data = await response.json()
 			expect(response.status).toBe(400)
 			expect(data).toEqual({
-				error: "invalid_request",
+				error: "invalid_scope",
 				state: "random-state-value-12345",
 			})
 		})

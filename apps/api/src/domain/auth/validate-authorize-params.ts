@@ -58,36 +58,21 @@ export const validateAuthorizeParams = async (
 	params: AuthorizeParams,
 ): Promise<AuthorizeResult> => {
 	try {
-		if (params.response_type !== "code") {
-			return { success: false, error: "invalid_request" }
-		}
-		if (!params.client_id) {
-			return { success: false, error: "invalid_request" }
-		}
-		if (!params.redirect_uri) {
-			return { success: false, error: "invalid_request" }
-		}
-
 		const oauthClient = await getOAuthClientById(params.client_id)
 
 		// 登録済みクライアントIDの存在確認
 		if (!oauthClient) {
-			return { success: false, error: "invalid_request" }
+			return { success: false, error: "unauthorized_client" }
 		}
 
 		// redirect_uriがクライアントIDに対して登録されたものと完全一致していることの確認
 		if (!oauthClient.redirect_uris.includes(params.redirect_uri)) {
-			return { success: false, error: "invalid_request" }
+			return { success: false, error: "invalid_request_uri" }
 		}
 
-		// scopeの検証
-		if (params.scope.length === 0) {
-			return { success: false, error: "invalid_request" }
-		}
-		// https://openid.net/specs/openid-connect-core-1_0.html#ScopeClaims
-		// Multiple scope values MAY be used by creating a space-delimited, case-sensitive list of ASCII scope values.
+		// クライアント登録時に許可されたスコープのみ指定されていることの確認
 		if (!params.scope.every((scope) => oauthClient.scopes.includes(scope))) {
-			return { success: false, error: "invalid_request" }
+			return { success: false, error: "invalid_scope" }
 		}
 
 		return {
