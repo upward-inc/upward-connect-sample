@@ -19,8 +19,8 @@ export const updateRecord = async (
 
 	const userReferenceData = {
 		success: true as const,
-		kind: "reference-input-array" as const,
-		value: [{ entity_name: "user", id: userId }],
+		kind: "reference-input" as const,
+		value: { entity_name: "user", id: userId },
 	}
 
 	const nowData = {
