@@ -1,7 +1,10 @@
 import { z } from "zod"
 
 const envSchema = z.object({
-	API_URL: z.url().regex(/^(https:\/\/|http:\/\/localhost(:[0-9]+)?(\/.*)?$)/), // start with https:// or http://localhost:[port]
+	API_URL: z.union([
+		z.url().startsWith("https://"),
+		z.url().startsWith("http://localhost:"),
+	]),
 })
 
 export const env = envSchema.parse({
