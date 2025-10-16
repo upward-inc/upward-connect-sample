@@ -10,8 +10,6 @@ async function executeViewSqlFiles(prisma: PrismaClient) {
 	const allFiles = readdirSync(viewsPath)
 	const sqlFiles = allFiles.filter((file) => extname(file) === ".sql")
 
-	console.log(`Found ${sqlFiles.length} view files to execute`)
-
 	// Prisma の executeRaw を使用して各 SQL ファイルを実行
 	for (const sqlFile of sqlFiles.sort()) {
 		const filePath = join(viewsPath, sqlFile)
@@ -19,15 +17,11 @@ async function executeViewSqlFiles(prisma: PrismaClient) {
 
 		// テンプレートリテラルで executeRaw を使用して DDL を実行
 		await prisma.$executeRaw`EXEC(${sqlContent})`
-		console.log(`  ✅ Successfully executed ${sqlFile}`)
 	}
-
-	console.log("✅ Database views execution completed")
 }
 
 export default async function globalSetup() {
-	console.log("🚀 Starting global test setup...")
-	console.log("⚙️  Starting MSSQL container...")
+	console.log("🚀 テストセットアップ開始")
 
 	// MSSQL Server コンテナを起動
 	const mssqlContainer = await new MSSQLServerContainer(
@@ -46,8 +40,6 @@ export default async function globalSetup() {
 	// SQL Server 接続文字列を構築（master データベースを使用）
 	const sqlServerConnectionString = `sqlserver://${host}:${port};database=master;user=${username};password=${password};encrypt=true;trustServerCertificate=true;connection_limit=1;pool_timeout=10`
 
-	console.log("🔗 Connection string:", sqlServerConnectionString)
-
 	// テストデータベース用の Prisma クライアントを作成
 	const prisma = new PrismaClient({
 		datasources: {
@@ -60,16 +52,12 @@ export default async function globalSetup() {
 	// データベースに接続
 	await prisma.$connect()
 
-	console.log("✅ MSSQL container started and connected")
-
 	// マイグレーションを実行
 	try {
-		console.log("🔄 Running database migrations...")
 		execSync("npx prisma migrate deploy", {
 			stdio: "inherit",
 			env: { ...process.env, DATABASE_URL: sqlServerConnectionString },
 		})
-		console.log("✅ Database migrations completed")
 	} catch (error) {
 		console.error("❌ Migration failed:", error)
 		await prisma.$disconnect()
@@ -90,7 +78,7 @@ export default async function globalSetup() {
 	// セットアップ用の Prisma クライアントを切断
 	await prisma.$disconnect()
 
-	console.log("✅ Global test setup completed")
+	console.log("✅ テストセットアップ完了")
 
 	// テストで使用するために環境変数に接続文字列を保存
 	process.env.TEST_DATABASE_URL = sqlServerConnectionString
