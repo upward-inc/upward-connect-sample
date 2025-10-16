@@ -21,29 +21,16 @@ export const ToIntegerSchema = z.preprocess((value) => {
 }, z.int())
 
 /**
- * 日付オブジェクトを日付文字列（YYYY-MM-DD）に変換する
- * @param value 日付オブジェクト
- * @returns YYYY-MM-DD形式の日付文字列
- */
-function convertDateToDateOnlyString(value: Date) {
-	return value.toISOString().split("T")[0]
-}
-
-/**
- * 任意の値を日付に変換する
+ * 任意の値を日時に変換する
  *
- * @description 日付として表現したいが`z.iso.date()`を使用できない特殊なケースで使用する
+ * @description 日時として表現したいが`z.iso.datetime()`を使用できない特殊なケースで使用する
  */
 export const ToDateSchema = z.preprocess((value) => {
-	if (
-		typeof value === "string" ||
-		typeof value === "number" ||
-		value instanceof Date
-	) {
-		return convertDateToDateOnlyString(new Date(value))
+	if (typeof value === "number" || value instanceof Date) {
+		return new Date(value).toISOString()
 	}
 	return value
-}, z.iso.date())
+}, z.iso.datetime())
 
 /**
  * 文字列またはその他の値をJSONとして解析し、指定されたスキーマに変換する
