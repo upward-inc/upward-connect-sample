@@ -4,12 +4,19 @@ export default defineConfig({
 	test: {
 		environment: "node",
 		include: ["src/**/*.test.ts"],
+		globalSetup: ["./src/test/global-setup.ts"],
 		setupFiles: ["./src/test/setup.ts"],
 		testTimeout: 60000, // 60 seconds for tests with container startup
 		hookTimeout: 60000, // 60 seconds for setup/teardown (container operations)
 		// Run tests sequentially to avoid container conflicts
 		sequence: {
 			concurrent: false,
+		},
+		pool: "forks",
+		poolOptions: {
+			forks: {
+				singleFork: true,
+			},
 		},
 		// Test environment variables (will be overridden by testcontainers)
 		env: {
