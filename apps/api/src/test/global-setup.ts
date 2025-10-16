@@ -36,7 +36,7 @@ export default async function globalSetup() {
 	// データベースに接続
 	await prisma.$connect()
 
-	// マイグレーションを実行
+	// マイグレーションを実行（テーブル作成）
 	try {
 		execSync("npx prisma migrate deploy", {
 			stdio: "inherit",
@@ -49,7 +49,7 @@ export default async function globalSetup() {
 		throw error
 	}
 
-	// データベースビューを実行
+	// ビュー作成
 	try {
 		await executeViewSqlFiles(prisma)
 	} catch (error) {
