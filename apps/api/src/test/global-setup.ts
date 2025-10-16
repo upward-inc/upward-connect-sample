@@ -4,22 +4,6 @@ import { extname, join } from "node:path"
 import { PrismaClient } from "@prisma/client"
 import { MSSQLServerContainer } from "@testcontainers/mssqlserver"
 
-async function executeViewSqlFiles(prisma: PrismaClient) {
-	// views/dbo ディレクトリ内のすべての SQL ファイルを取得
-	const viewsPath = join(process.cwd(), "prisma", "views", "dbo")
-	const allFiles = readdirSync(viewsPath)
-	const sqlFiles = allFiles.filter((file) => extname(file) === ".sql")
-
-	// Prisma の executeRaw を使用して各 SQL ファイルを実行
-	for (const sqlFile of sqlFiles.sort()) {
-		const filePath = join(viewsPath, sqlFile)
-		const sqlContent = readFileSync(filePath, "utf-8").trim()
-
-		// テンプレートリテラルで executeRaw を使用して DDL を実行
-		await prisma.$executeRaw`EXEC(${sqlContent})`
-	}
-}
-
 export default async function globalSetup() {
 	console.log("🚀 テストセットアップ開始")
 
@@ -94,5 +78,21 @@ export default async function globalSetup() {
 			console.error("❌ クリーンアップ失敗:", error)
 			// エラーをスローせずに続行（Testcontainers の自動クリーンアップ機構が最終的に処理する）
 		}
+	}
+}
+
+async function executeViewSqlFiles(prisma: PrismaClient) {
+	// views/dbo ディレクトリ内のすべての SQL ファイルを取得
+	const viewsPath = join(process.cwd(), "prisma", "views", "dbo")
+	const allFiles = readdirSync(viewsPath)
+	const sqlFiles = allFiles.filter((file) => extname(file) === ".sql")
+
+	// Prisma の executeRaw を使用して各 SQL ファイルを実行
+	for (const sqlFile of sqlFiles.sort()) {
+		const filePath = join(viewsPath, sqlFile)
+		const sqlContent = readFileSync(filePath, "utf-8").trim()
+
+		// テンプレートリテラルで executeRaw を使用して DDL を実行
+		await prisma.$executeRaw`EXEC(${sqlContent})`
 	}
 }
