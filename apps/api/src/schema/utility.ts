@@ -23,7 +23,7 @@ export const ToIntegerSchema = z.preprocess((value) => {
 /**
  * 任意の値を日時に変換する
  *
- * @description 日時として表現したいが`z.iso.datetime()`を使用できない特殊なケースで使用する
+ * @description Dateオブジェクトとして表現したいがz.iso.datetime()`を使用できない特殊なケースで使用する
  */
 export const ToDateSchema = z.preprocess((value) => {
 	if (typeof value === "number" || value instanceof Date) {
