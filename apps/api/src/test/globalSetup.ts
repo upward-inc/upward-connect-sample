@@ -82,4 +82,17 @@ export default async function globalSetup() {
 
 	// テストで使用するために環境変数に接続文字列を保存
 	process.env.TEST_DATABASE_URL = sqlServerConnectionString
+
+	// teardown 関数を返す
+	return async () => {
+		console.log("🧹 テストクリーンアップ開始")
+
+		try {
+			await mssqlContainer.stop()
+			console.log("✅ テストクリーンアップ完了")
+		} catch (error) {
+			console.error("❌ クリーンアップ失敗:", error)
+			// エラーをスローせずに続行（Testcontainers の自動クリーンアップ機構が最終的に処理する）
+		}
+	}
 }
