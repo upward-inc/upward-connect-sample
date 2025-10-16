@@ -1,5 +1,4 @@
 import { z } from "zod"
-import "zod-openapi/extend"
 import { JsonObjectSchema } from "./common"
 import { NestableFilterQuerySchema } from "./filter"
 import {
@@ -9,20 +8,20 @@ import {
 } from "./paging"
 import { StringToArraySchema } from "./utility"
 
-export const RecordSchema = z.object({}).openapi({
+export const RecordSchema = z.object({}).meta({
 	description: "レコード",
 })
 
-export const RecordListSchema = z.array(RecordSchema).openapi({
+export const RecordListSchema = z.array(RecordSchema).meta({
 	description: "レコード一覧",
 })
 
-const FieldsQuerySchema = StringToArraySchema().openapi({
+const FieldsQuerySchema = StringToArraySchema().meta({
 	description: "結果に含めるフィールド名（カンマ区切り）",
 	example: "id,name",
 })
 
-const GroupByQuerySchema = StringToArraySchema().openapi({
+const GroupByQuerySchema = StringToArraySchema().meta({
 	description: "グループ化するフィールド名（カンマ区切り）",
 	example: "category",
 })
@@ -38,26 +37,26 @@ export const GetRecordListQuerySchema = z.object({
 })
 
 export const GetRecordListResponseSchema = z.object({
-	has_next_page: z.boolean().openapi({
+	has_next_page: z.boolean().meta({
 		description: "同一の検索条件にて次ページが存在するかどうか",
 		example: false,
 	}),
-	total_size: z.number().openapi({
+	total_size: z.number().meta({
 		description: "同一の検索条件にて取得可能なデータの総数",
 		example: 1234,
 	}),
-	data: RecordListSchema.openapi({ description: "クエリの結果を表す配列" }),
+	data: RecordListSchema.meta({ description: "クエリの結果を表す配列" }),
 })
 
 export const GetRecordParamSchema = z.object({
-	entity_name: z.string().openapi({
+	entity_name: z.string().meta({
 		description: "レコード検索対象のエンティティ名",
 		examples: ["account", "lead"],
 	}),
 })
 
 export const PostRecordParamSchema = z.object({
-	entity_name: z.string().openapi({
+	entity_name: z.string().meta({
 		description: "レコード作成対象のエンティティ名",
 		examples: ["account", "lead"],
 	}),
@@ -68,7 +67,7 @@ export const PostRecordBodySchema = z
 	.refine((data) => {
 		return JsonObjectSchema.safeParse(data).success
 	})
-	.openapi({
+	.meta({
 		description: "作成するレコードのデータ",
 		example: {
 			text_field: "ABC",
@@ -91,55 +90,55 @@ export const PostRecordBodySchema = z
 
 export const PostRecordResponseSchema = z
 	.object({
-		entity_name: z.string().openapi({
+		entity_name: z.string().meta({
 			description: "作成されたレコードのエンティティ名",
 			examples: ["account", "lead"],
 		}),
-		id: z.string().openapi({
+		id: z.string().meta({
 			description: "作成されたレコードのID",
 			examples: ["account-00000001", "lead-00000001"],
 		}),
 	})
-	.openapi({
+	.meta({
 		description: "作成されたレコードデータ",
 	})
 
 export const PatchRecordParamSchema = z.object({
-	entity_name: z.string().openapi({
+	entity_name: z.string().meta({
 		description: "レコード更新対象のエンティティ名",
 		examples: ["account", "lead"],
 	}),
-	id: z.string().openapi({
+	id: z.string().meta({
 		description: "更新対象のレコードID",
 		examples: ["account-00000001", "lead-00000001"],
 	}),
 })
 
-export const PatchRecordBodySchema = PostRecordBodySchema.openapi({
+export const PatchRecordBodySchema = PostRecordBodySchema.meta({
 	description: "更新するレコードのデータ",
 })
 
 export const PatchRecordResponseSchema = z
 	.object({
-		entity_name: z.string().openapi({
+		entity_name: z.string().meta({
 			description: "更新されたレコードのエンティティ名",
 			examples: ["account", "lead"],
 		}),
-		id: z.string().openapi({
+		id: z.string().meta({
 			description: "更新されたレコードのID",
 			examples: ["account-00000001", "lead-00000001"],
 		}),
 	})
-	.openapi({
+	.meta({
 		description: "更新されたレコードデータ",
 	})
 
 export const DeleteRecordParamSchema = z.object({
-	entity_name: z.string().openapi({
+	entity_name: z.string().meta({
 		description: "削除対象レコードのエンティティ名",
 		examples: ["account", "lead"],
 	}),
-	id: z.string().openapi({
+	id: z.string().meta({
 		description: "削除対象のレコードID",
 		examples: ["account-00000001", "lead-00000001"],
 	}),
@@ -147,10 +146,10 @@ export const DeleteRecordParamSchema = z.object({
 
 export const RecordReferenceInputSchema = z
 	.object({
-		entity: z.string().openapi({ description: "エンティティ名" }),
-		id: z.string().openapi({ description: "レコードID" }),
+		entity: z.string().meta({ description: "エンティティ名" }),
+		id: z.string().meta({ description: "レコードID" }),
 	})
-	.openapi({ description: "レコードへの参照（入力）" })
+	.meta({ description: "レコードへの参照（入力）" })
 
 export type Record = z.infer<typeof RecordSchema>
 export type RecordList = z.infer<typeof RecordListSchema>

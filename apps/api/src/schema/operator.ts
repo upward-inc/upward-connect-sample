@@ -1,43 +1,42 @@
 import { z } from "zod"
-import "zod-openapi/extend"
 
-export const EqualOperatorSchema = z.literal("eq").openapi({
+export const EqualOperatorSchema = z.literal("eq").meta({
 	description: "Equal (=)",
 })
 
-export const ContainsOperatorSchema = z.literal("contains").openapi({
+export const ContainsOperatorSchema = z.literal("contains").meta({
 	description: "Contains (LIKE '%abc%')",
 })
 
-export const StartsWithOperatorSchema = z.literal("starts_with").openapi({
+export const StartsWithOperatorSchema = z.literal("starts_with").meta({
 	description: "Starts With (LIKE 'abc%')",
 })
 
-export const EndsWithOperatorSchema = z.literal("ends_with").openapi({
+export const EndsWithOperatorSchema = z.literal("ends_with").meta({
 	description: "Ends With (LIKE '%abc')",
 })
 
-export const GraterThanOperatorSchema = z.literal("gt").openapi({
+export const GraterThanOperatorSchema = z.literal("gt").meta({
 	description: "Grater Than (>)",
 })
 
-export const GraterThanOrEqualOperatorSchema = z.literal("gte").openapi({
+export const GraterThanOrEqualOperatorSchema = z.literal("gte").meta({
 	description: "Grater Than Or Equal (>=)",
 })
 
-export const LessThanOperatorSchema = z.literal("lt").openapi({
+export const LessThanOperatorSchema = z.literal("lt").meta({
 	description: "Less Than (<)",
 })
 
-export const LessThanOrEqualOperatorSchema = z.literal("lte").openapi({
+export const LessThanOrEqualOperatorSchema = z.literal("lte").meta({
 	description: "Less Than Or Equal (<=)",
 })
 
-export const IncludesOperatorSchema = z.literal("includes").openapi({
+export const IncludesOperatorSchema = z.literal("includes").meta({
 	description: "Includes",
 })
 
-export const IsSetOperatorSchema = z.literal("is_set").openapi({
+export const IsSetOperatorSchema = z.literal("is_set").meta({
 	description: "Is Set",
 })
 

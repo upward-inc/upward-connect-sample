@@ -1,5 +1,4 @@
 import { z } from "zod"
-import "zod-openapi/extend"
 import {
 	BooleanFieldComparisonSchema,
 	DateFieldComparisonSchema,
@@ -67,31 +66,31 @@ export const BaseFilterSchema = z
 			...data,
 		})),
 	])
-	.openapi({
+	.meta({
 		description: "単一の条件オブジェクト",
 	})
 
 // AND条件
 export const AndFilterSchema = z
 	.object({
-		and: z.array(BaseFilterSchema).openapi({
+		and: z.array(BaseFilterSchema).meta({
 			description: "条件オブジェクト配列",
 			example: andFilterExample,
 		}),
 	})
-	.openapi({
+	.meta({
 		description: "AND論理演算子による条件オブジェクト配列",
 	})
 
 // OR条件
 export const OrFilterSchema = z
 	.object({
-		or: z.array(BaseFilterSchema).openapi({
+		or: z.array(BaseFilterSchema).meta({
 			description: "条件オブジェクト配列",
 			example: orFilterExample,
 		}),
 	})
-	.openapi({
+	.meta({
 		description: "OR論理演算子による条件オブジェクト配列",
 	})
 
@@ -100,7 +99,7 @@ export const NestableAndFilterSchema = z
 	.object({
 		and: z
 			.array(z.union([BaseFilterSchema, AndFilterSchema, OrFilterSchema]))
-			.openapi({
+			.meta({
 				description: "条件オブジェクト配列（入れ子構造可）",
 				examples: [
 					andFilterExample,
@@ -113,7 +112,7 @@ export const NestableAndFilterSchema = z
 				],
 			}),
 	})
-	.openapi({
+	.meta({
 		description: "AND論理演算子による条件オブジェクト配列（入れ子構造可）",
 	})
 
@@ -122,7 +121,7 @@ export const NestableOrFilterSchema = z
 	.object({
 		or: z
 			.array(z.union([BaseFilterSchema, AndFilterSchema, OrFilterSchema]))
-			.openapi({
+			.meta({
 				description: "条件オブジェクト配列（入れ子構造可）",
 				examples: [
 					orFilterExample,
@@ -135,14 +134,14 @@ export const NestableOrFilterSchema = z
 				],
 			}),
 	})
-	.openapi({
+	.meta({
 		description: "OR論理演算子による条件オブジェクト配列（入れ子構造可）",
 	})
 
 // フィルター条件
 export const NestableFilterSchema = z
 	.union([NestableAndFilterSchema, NestableOrFilterSchema])
-	.openapi({
+	.meta({
 		description: "フィルター条件（最大2階層の入れ子構造可）",
 		examples: [
 			{

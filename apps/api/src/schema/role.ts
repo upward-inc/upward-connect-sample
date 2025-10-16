@@ -1,26 +1,25 @@
 import { z } from "zod"
-import "zod-openapi/extend"
 
 export const RoleSchema = z
 	.object({
-		name: z.string().openapi({
+		name: z.string().meta({
 			description: "ロール名",
 			example: "east_japan_sales_department",
 		}),
-		display_name: z.string().openapi({
+		display_name: z.string().meta({
 			description: "ロールの表示名",
 			example: "東日本営業部",
 		}),
-		parent_name: z.string().nullish().openapi({
+		parent_name: z.string().nullish().meta({
 			description: "親ロール名",
 			example: "sales_department",
 		}),
 	})
-	.openapi({
+	.meta({
 		description: "ロール",
 	})
 
-export const RoleListSchema = z.array(RoleSchema).openapi({
+export const RoleListSchema = z.array(RoleSchema).meta({
 	description: "ロール一覧",
 })
 

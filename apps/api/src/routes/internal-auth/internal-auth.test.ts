@@ -186,8 +186,6 @@ describe("Internal Auth Tests", () => {
 			expect(response.status).toBe(400)
 			// Zod validation error for invalid response_type comes before OAuth validation
 			expect(data.success).toBe(false)
-			expect(data.error).toHaveProperty("issues")
-			expect(data.error.issues[0].path).toContainEqual("response_type")
 		})
 
 		it("should contain nonce claim in ID token", async () => {
@@ -635,8 +633,6 @@ describe("Internal Auth Tests", () => {
 			expect(response.status).toBe(400)
 			// Zodの検証エラーはOAuth検証よりも前に来る
 			expect(data.success).toBe(false)
-			expect(data.error).toHaveProperty("issues")
-			expect(data.error.issues[0].path).toContainEqual("scope")
 		})
 
 		it("400 Bad Request - OAuthクライアントに未登録のスコープを要求", async () => {

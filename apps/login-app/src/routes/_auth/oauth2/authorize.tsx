@@ -18,7 +18,7 @@ const scopeDescriptions: Record<(typeof specifiedScopes)[number], string> = {
 
 const ResponseTypeSchema = z.literal("code")
 const ClientIdSchema = z.string().min(1)
-const AuthorizeParamsRedirectUriSchema = z.string().url().startsWith("https://")
+const AuthorizeParamsRedirectUriSchema = z.url().startsWith("https://")
 const ScopeSchema = z
 	.string()
 	.refine(

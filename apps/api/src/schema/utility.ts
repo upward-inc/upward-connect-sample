@@ -18,19 +18,19 @@ export const ToIntegerSchema = z.preprocess((value) => {
 		return Number(value)
 	}
 	return value
-}, z.number().int())
+}, z.int())
 
 /**
- * 任意の値を日付に変換する
+ * 任意の値を日時に変換する
  *
- * @description 日付として表現したいが`z.date()`を使用できない特殊なケースで使用する
+ * @description Dateオブジェクトとして表現したいが`z.iso.datetime()`を使用できない特殊なケースで使用する
  */
 export const ToDateSchema = z.preprocess((value) => {
-	if (typeof value === "string" || typeof value === "number") {
-		return new Date(value)
+	if (typeof value === "number" || value instanceof Date) {
+		return new Date(value).toISOString()
 	}
 	return value
-}, z.date())
+}, z.iso.datetime())
 
 /**
  * 文字列またはその他の値をJSONとして解析し、指定されたスキーマに変換する

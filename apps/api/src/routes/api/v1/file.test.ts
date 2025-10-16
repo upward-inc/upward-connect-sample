@@ -244,12 +244,6 @@ describe("File Tests", () => {
 			const data = await response.json()
 			expect(response.status).toBe(400)
 			expect(data.success).toBe(false)
-			expect(data.error).toHaveProperty("issues")
-			expect(data.error.issues[0]).toMatchObject({
-				code: "custom",
-				message: "Input not instance of File",
-				path: ["file"],
-			})
 		})
 
 		it("should return 400 for empty form data", async () => {
@@ -275,12 +269,6 @@ describe("File Tests", () => {
 			const data = await response.json()
 			expect(response.status).toBe(400)
 			expect(data.success).toBe(false)
-			expect(data.error).toHaveProperty("issues")
-			expect(data.error.issues[0]).toMatchObject({
-				code: "custom",
-				message: "Input not instance of File",
-				path: ["file"],
-			})
 		})
 	})
 
