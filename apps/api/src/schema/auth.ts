@@ -141,6 +141,10 @@ export const PostLoginResultSchema = LoggedInUserSchema.extend({
 	access_token: AccessTokenSchema,
 })
 
+export const GetOAuthClientParamSchema = z.object({
+	id: ClientIdSchema,
+})
+
 export const GetOAuthClientResultSchema = OAuthClientSchema.pick({
 	id: true,
 	name: true,

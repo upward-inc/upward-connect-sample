@@ -1,4 +1,4 @@
-import { OpenAPIHono } from "@hono/zod-openapi"
+import { OpenAPIHono, createRoute, z } from "@hono/zod-openapi"
 import { nanoid } from "nanoid"
 import {
 	generateAccessToken,
@@ -8,25 +8,49 @@ import {
 	validateAuthorizeParams,
 } from "../../domain/auth"
 import { env } from "../../env"
-import { describeRoute, validator } from "../../libs/hono-openapi"
 import {
 	type AuthContexts,
+	GetOAuthClientParamSchema,
 	GetOAuthClientResultSchema,
 	PostAuthorizeParamSchema,
 	PostAuthorizeResultSchema,
 	PostLoginParamSchema,
 	PostLoginResultSchema,
 } from "../../schema/auth"
+import {
+	ApiErrorResultSchema,
+	OAuthErrorResultSchema,
+} from "../../schema/error"
 
 export const internalAuthRouter = new OpenAPIHono<{ Variables: AuthContexts }>()
-	.post(
-		"/login",
-		describeRoute({
+	.openapi(
+		createRoute({
+			method: "post",
+			path: "/login",
 			description:
 				"ユーザー名 + パスワードでユーザー認証を行う（アクセストークンを返却する）",
-			schema: PostLoginResultSchema,
+			request: {
+				body: {
+					content: {
+						"application/x-www-form-urlencoded": {
+							schema: PostLoginParamSchema,
+						},
+					},
+				},
+			},
+			responses: {
+				200: {
+					description: "Success",
+					content: {
+						"application/json": { schema: PostLoginResultSchema },
+					},
+				},
+				401: {
+					description: "Unauthorized",
+					content: { "application/json": { schema: ApiErrorResultSchema } },
+				},
+			},
 		}),
-		validator("form", PostLoginParamSchema),
 		async (c) => {
 			const { username, password } = c.req.valid("form")
 
@@ -42,14 +66,29 @@ export const internalAuthRouter = new OpenAPIHono<{ Variables: AuthContexts }>()
 				// パスワード認証時に発行するアクセストークンにおいては使用されることがないのでダミーの値を設定
 				clientId: "00000000-0000-0000-0000-000000000000",
 			})
-			return c.json({ ...user, access_token: accessToken })
+			return c.json({ ...user, access_token: accessToken }, 200)
 		},
 	)
-	.get(
-		"/clients/:id",
-		describeRoute({
+	.openapi(
+		createRoute({
+			method: "get",
+			path: "/clients/{id}",
 			description: "OAuth 2.0 クライアントアプリケーション名を返却する",
-			schema: GetOAuthClientResultSchema,
+			request: {
+				params: GetOAuthClientParamSchema,
+			},
+			responses: {
+				200: {
+					description: "Success",
+					content: {
+						"application/json": { schema: GetOAuthClientResultSchema },
+					},
+				},
+				404: {
+					description: "Not Found",
+					content: { "application/json": { schema: ApiErrorResultSchema } },
+				},
+			},
 		}),
 		async (c) => {
 			const clientId = c.req.param("id")
@@ -60,17 +99,45 @@ export const internalAuthRouter = new OpenAPIHono<{ Variables: AuthContexts }>()
 			}
 
 			// 必要最低限のフィールドのみ返却
-			return c.json({ id: client.id, name: client.name })
+			return c.json({ id: client.id, name: client.name }, 200)
 		},
 	)
-	.post(
-		"/authorize",
-		describeRoute({
+	.openapi(
+		createRoute({
+			method: "post",
+			path: "/authorize",
 			description:
 				"OIDC 1.0 で定められた認可処理を行う（認可コードを返却する）",
-			schema: PostAuthorizeResultSchema,
+			request: {
+				body: {
+					content: {
+						"application/x-www-form-urlencoded": {
+							schema: PostAuthorizeParamSchema,
+						},
+					},
+				},
+			},
+			responses: {
+				200: {
+					description: "Success",
+					content: {
+						"application/json": { schema: PostAuthorizeResultSchema },
+					},
+				},
+				400: {
+					description: "Bad Request",
+					content: {
+						"application/json": {
+							schema: OAuthErrorResultSchema.extend({
+								state: z.string().meta({
+									description: "リクエストで送信された state パラメータ",
+								}),
+							}),
+						},
+					},
+				},
+			},
 		}),
-		validator("form", PostAuthorizeParamSchema),
 		async (c) => {
 			const user = c.get("user")
 			const params = c.req.valid("form")
@@ -105,9 +172,12 @@ export const internalAuthRouter = new OpenAPIHono<{ Variables: AuthContexts }>()
 				),
 			})
 
-			return c.json({
-				code: authorizationCode,
-				state: params.state,
-			})
+			return c.json(
+				{
+					code: authorizationCode,
+					state: params.state,
+				},
+				200,
+			)
 		},
 	)
