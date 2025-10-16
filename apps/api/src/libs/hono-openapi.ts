@@ -1,4 +1,3 @@
-import { zValidator } from "@hono/zod-validator"
 import type { Hono } from "hono"
 import * as honoOpenApi from "hono-openapi"
 import type { ZodType } from "zod"
@@ -28,7 +27,7 @@ export const describeRoute = <S extends ZodType>(options: {
 	})
 }
 
-export const validator = zValidator
+export const validator = honoOpenApi.validator
 
 export const generateOpenAPISpecs = (
 	router: Hono,
