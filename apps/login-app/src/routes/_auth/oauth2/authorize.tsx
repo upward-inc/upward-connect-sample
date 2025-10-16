@@ -9,12 +9,12 @@ import { env } from "../../../env"
 const specifiedScopes = ["openid", "profile", "email", "offline_access"]
 
 // スコープの説明
-const scopeDescriptions: Record<string, string> = {
+const scopeDescriptions: Record<(typeof specifiedScopes)[number], string> = {
 	openid: "IDトークン発行",
 	profile: "プロフィール情報",
 	email: "メールアドレス",
 	offline_access: "リフレッシュトークン発行",
-}
+} as const
 
 const ResponseTypeSchema = z.literal("code")
 const ClientIdSchema = z.string().min(1)
@@ -350,7 +350,10 @@ function AuthorizePage() {
 					<ul className="list-disc pl-5 mb-4">
 						{searchParams.scope?.split(" ").map((scope) => (
 							<li key={scope} className="mb-1">
-								{scope}（{scopeDescriptions[scope] || ""}）
+								{scope}
+								{scopeDescriptions[scope]
+									? `（${scopeDescriptions[scope]}）`
+									: ""}
 							</li>
 						))}
 					</ul>
