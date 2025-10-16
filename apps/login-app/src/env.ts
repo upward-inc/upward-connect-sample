@@ -1,10 +1,7 @@
 import { z } from "zod"
 
 const envSchema = z.object({
-	API_URL: z.union([
-		z.url().startsWith("https://"),
-		z.url().startsWith("http://localhost:"),
-	]),
+	API_URL: z.url(),
 })
 
 export const env = envSchema.parse({
