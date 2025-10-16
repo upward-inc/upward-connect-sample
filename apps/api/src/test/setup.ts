@@ -10,27 +10,14 @@ if (!testDatabaseUrl) {
 	)
 }
 
-// グローバル変数の型定義
-const globalForPrisma = globalThis as unknown as {
-	testPrisma: PrismaClient | undefined
-}
-
-// シングルトンパターン: プロセス全体で1つのインスタンスを共有
-if (!globalForPrisma.testPrisma) {
-	console.log("🔍 [setup.ts] 新しいPrismaClientを生成します")
-	globalForPrisma.testPrisma = new PrismaClient({
-		datasources: {
-			db: {
-				url: testDatabaseUrl,
-			},
+// テストデータベース用の Prisma クライアントを作成
+const testPrisma = new PrismaClient({
+	datasources: {
+		db: {
+			url: testDatabaseUrl,
 		},
-	})
-	console.log("✅ [setup.ts] PrismaClientを生成しました")
-} else {
-	console.log("♻️  [setup.ts] 既存のPrismaClientを再利用します")
-}
-
-const testPrisma = globalForPrisma.testPrisma
+	},
+})
 
 // 利用するprisma クライアントをテストデータベース用に更新
 Object.assign(prisma, testPrisma)
