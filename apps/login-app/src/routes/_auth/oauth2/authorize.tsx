@@ -8,6 +8,14 @@ import { env } from "../../../env"
 // 指定可能なスコープ
 const specifiedScopes = ["openid", "profile", "email", "offline_access"]
 
+// スコープの説明
+const scopeDescriptions: Record<(typeof specifiedScopes)[number], string> = {
+	openid: "IDトークン発行",
+	profile: "プロフィール情報",
+	email: "メールアドレス",
+	offline_access: "リフレッシュトークン発行",
+} as const
+
 const ResponseTypeSchema = z.literal("code")
 const ClientIdSchema = z.string().min(1)
 const AuthorizeParamsRedirectUriSchema = z.string().url().startsWith("https://")
@@ -343,6 +351,9 @@ function AuthorizePage() {
 						{searchParams.scope?.split(" ").map((scope) => (
 							<li key={scope} className="mb-1">
 								{scope}
+								{scopeDescriptions[scope]
+									? `（${scopeDescriptions[scope]}）`
+									: ""}
 							</li>
 						))}
 					</ul>
