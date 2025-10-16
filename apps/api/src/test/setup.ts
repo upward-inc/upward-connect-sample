@@ -6,7 +6,7 @@ const testDatabaseUrl = process.env.TEST_DATABASE_URL
 
 if (!testDatabaseUrl) {
 	throw new Error(
-		"TEST_DATABASE_URL 環境変数が設定されていません。globalSetup が正しく設定されているか確認してください。",
+		"TEST_DATABASE_URL environment variable is not set. Please verify that globalSetup is configured correctly.",
 	)
 }
 
