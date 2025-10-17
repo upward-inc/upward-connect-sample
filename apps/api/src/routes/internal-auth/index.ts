@@ -8,7 +8,6 @@ import {
 	validateAuthorizeParams,
 } from "../../domain/auth"
 import { env } from "../../env"
-import { z } from "../../libs/zod"
 import {
 	type AuthContexts,
 	GetOAuthClientParamSchema,
@@ -17,6 +16,7 @@ import {
 	PostAuthorizeResultSchema,
 	PostLoginParamSchema,
 	PostLoginResultSchema,
+	StateSchema,
 } from "../../schema/auth"
 import {
 	ApiErrorResultSchema,
@@ -130,9 +130,7 @@ export const internalAuthRouter = new OpenAPIHono<{ Variables: AuthContexts }>()
 					content: {
 						"application/json": {
 							schema: OAuthErrorResultSchema.extend({
-								state: z.string().meta({
-									description: "リクエストで送信された state パラメータ",
-								}),
+								state: StateSchema,
 							}),
 						},
 					},

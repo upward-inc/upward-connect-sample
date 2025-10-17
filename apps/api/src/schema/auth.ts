@@ -36,6 +36,16 @@ export const RedirectUriSchema = z.url().meta({
 	example: "https://sample-app.upward.com/callback",
 })
 
+export const StateSchema = z.string().meta({
+	description: "CSRF攻撃防止のために使用するランダムな文字列",
+	example: "WVwJX4KDmLTs8piK",
+})
+
+export const NonceSchema = z.string().meta({
+	description: "リプレイアタック対策のために使用する推測不可能な文字列",
+	example: "cma33PzyycBFb3LA",
+})
+
 export const AccessTokenSchema = z.string().min(1).meta({
 	description: "アクセストークン",
 	example: "sample_access_token",
@@ -97,14 +107,8 @@ export const PublishedAuthCodeSchema = z
 			description: "スコープ",
 			example: "openid profile email",
 		}),
-		state: z.string().nullable().meta({
-			description: "state",
-			example: "sample_state",
-		}),
-		nonce: z.string().nullable().meta({
-			description: "nonce",
-			example: "sample_nonce",
-		}),
+		state: StateSchema.nullable(),
+		nonce: NonceSchema.nullable(),
 		published_at: z.date().meta({
 			description: "発行日時",
 		}),
@@ -218,16 +222,13 @@ export const PostAuthorizeParamSchema = z.object({
 	scope: StringToArraySchema(" ").refine((arr) => arr.length > 0, {
 		message: "At least one scope is required",
 	}),
-	state: z.string(),
-	nonce: z.string(),
+	state: StateSchema,
+	nonce: NonceSchema,
 })
 
 export const PostAuthorizeResultSchema = z.object({
 	code: AuthCodeSchema,
-	state: z.string().meta({
-		description: "リクエストで渡されたstate",
-		example: "sample_state",
-	}),
+	state: StateSchema,
 })
 
 // トークンリクエスト用のスキーマ
