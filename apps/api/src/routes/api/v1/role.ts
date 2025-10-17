@@ -1,6 +1,6 @@
-import { OpenAPIHono } from "@hono/zod-openapi"
+import { OpenAPIHono, createRoute } from "@hono/zod-openapi"
 import { getRole, getRoleList } from "../../../domain/role"
-import { describeRoute, validator } from "../../../libs/hono-openapi"
+import { ApiErrorResultSchema } from "../../../schema/error"
 import {
 	GetRoleParamSchema,
 	RoleListSchema,
@@ -8,30 +8,54 @@ import {
 } from "../../../schema/role"
 
 export const roleRouter = new OpenAPIHono()
-	.get(
-		"/",
-		describeRoute({
+	.openapi(
+		createRoute({
+			method: "get",
+			path: "/",
 			description: "ロールの情報を一覧で返却する",
-			schema: RoleListSchema,
+			responses: {
+				200: {
+					description: "Success",
+					content: {
+						"application/json": { schema: RoleListSchema },
+					},
+				},
+			},
 		}),
 		async (c) => {
 			const result = await getRoleList()
-			return c.json(result)
+			return c.json(result, 200)
 		},
 	)
-	.get(
-		"/:name",
-		describeRoute({
+	.openapi(
+		createRoute({
+			method: "get",
+			path: "/{name}",
 			description: "パスで指定された単一のロール情報を返却する",
-			schema: RoleSchema,
+			request: {
+				params: GetRoleParamSchema,
+			},
+			responses: {
+				200: {
+					description: "Success",
+					content: {
+						"application/json": { schema: RoleSchema },
+					},
+				},
+				404: {
+					description: "Role not found",
+					content: {
+						"application/json": { schema: ApiErrorResultSchema },
+					},
+				},
+			},
 		}),
-		validator("param", GetRoleParamSchema),
 		async (c) => {
 			const param = c.req.valid("param")
 			const result = await getRole(param.name)
 			if (!result) {
 				return c.json({ message: "Role not found" }, 404)
 			}
-			return c.json(result)
+			return c.json(result, 200)
 		},
 	)
