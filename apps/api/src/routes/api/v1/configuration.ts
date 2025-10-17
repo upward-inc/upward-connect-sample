@@ -1,17 +1,24 @@
-import { OpenAPIHono } from "@hono/zod-openapi"
-import { describeRoute } from "../../../libs/hono-openapi"
+import { OpenAPIHono, createRoute } from "@hono/zod-openapi"
 import {
 	type Configuration,
 	ConfigurationSchema,
 } from "../../../schema/configuration"
 
-export const configurationRouter = new OpenAPIHono().get(
-	"/",
-	describeRoute({
-		description: "UPWARDとの連携のために必要な構成データ（静的情報）を返却する",
-		schema: ConfigurationSchema,
+export const configurationRouter = new OpenAPIHono().openapi(
+	createRoute({
+		method: "get",
+		path: "/",
+		description: "UPWARDとの連携のために必要な構成データを取得する",
+		responses: {
+			200: {
+				description: "Success",
+				content: {
+					"application/json": { schema: ConfigurationSchema },
+				},
+			},
+		},
 	}),
-	async (c) => {
+	(c) => {
 		const configuration: Configuration = {
 			entity_name: {
 				user: "user",
@@ -23,6 +30,6 @@ export const configurationRouter = new OpenAPIHono().get(
 			},
 		}
 
-		return c.json(configuration)
+		return c.json(configuration, 200)
 	},
 )
