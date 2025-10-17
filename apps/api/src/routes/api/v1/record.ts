@@ -1,4 +1,4 @@
-import { OpenAPIHono } from "@hono/zod-openapi"
+import { OpenAPIHono, createRoute } from "@hono/zod-openapi"
 import { getEntity } from "../../../domain/entity"
 import {
 	createRecord,
@@ -10,9 +10,8 @@ import {
 	validateGetRecordListQuery,
 	validateUpdateRecordBody,
 } from "../../../domain/record"
-import { describeRoute, validator } from "../../../libs/hono-openapi"
 import type { AuthContexts } from "../../../schema/auth"
-import { NestableAndFilterSchema } from "../../../schema/filter"
+import { ApiErrorResultSchema } from "../../../schema/error"
 import {
 	DeleteRecordParamSchema,
 	GetRecordListQuerySchema,
@@ -27,15 +26,37 @@ import {
 } from "../../../schema/record"
 
 export const recordRouter = new OpenAPIHono<{ Variables: AuthContexts }>()
-	.get(
-		"/:entity_name",
-		describeRoute({
+	.openapi(
+		createRoute({
+			method: "get",
+			path: "/{entity_name}",
 			description:
 				"パスで指定されたエンティティのレコードを検索し、一覧で返却する",
-			schema: GetRecordListResponseSchema,
+			request: {
+				params: GetRecordParamSchema,
+				query: GetRecordListQuerySchema,
+			},
+			responses: {
+				200: {
+					description: "Success",
+					content: {
+						"application/json": { schema: GetRecordListResponseSchema },
+					},
+				},
+				400: {
+					description: "Bad Request",
+					content: {
+						"application/json": { schema: ApiErrorResultSchema },
+					},
+				},
+				404: {
+					description: "Entity not found",
+					content: {
+						"application/json": { schema: ApiErrorResultSchema },
+					},
+				},
+			},
 		}),
-		validator("param", GetRecordParamSchema),
-		validator("query", GetRecordListQuerySchema),
 		async (c) => {
 			const { entity_name } = c.req.valid("param")
 			const query = c.req.valid("query")
@@ -56,22 +77,51 @@ export const recordRouter = new OpenAPIHono<{ Variables: AuthContexts }>()
 				query,
 			)
 
-			return c.json({
-				has_next_page,
-				total_size,
-				data,
-			})
+			return c.json(
+				{
+					has_next_page,
+					total_size,
+					data,
+				},
+				200,
+			)
 		},
 	)
-	.post(
-		"/:entity_name",
-		describeRoute({
+	.openapi(
+		createRoute({
+			method: "post",
+			path: "/{entity_name}",
 			description:
 				"パスで指定されたエンティティに対し、リクエストボディの内容でレコードを作成する",
-			schema: PostRecordResponseSchema,
+			request: {
+				params: PostRecordParamSchema,
+				body: {
+					content: {
+						"application/json": { schema: PostRecordBodySchema },
+					},
+				},
+			},
+			responses: {
+				201: {
+					description: "Created",
+					content: {
+						"application/json": { schema: PostRecordResponseSchema },
+					},
+				},
+				400: {
+					description: "Bad Request",
+					content: {
+						"application/json": { schema: ApiErrorResultSchema },
+					},
+				},
+				404: {
+					description: "Entity not found",
+					content: {
+						"application/json": { schema: ApiErrorResultSchema },
+					},
+				},
+			},
 		}),
-		validator("param", PostRecordParamSchema),
-		validator("json", PostRecordBodySchema),
 		async (c) => {
 			const user = c.get("user")
 			const { entity_name } = c.req.valid("param")
@@ -99,14 +149,40 @@ export const recordRouter = new OpenAPIHono<{ Variables: AuthContexts }>()
 			return c.json(createResult, 201)
 		},
 	)
-	.patch(
-		"/:entity_name/:id",
-		describeRoute({
+	.openapi(
+		createRoute({
+			method: "patch",
+			path: "/{entity_name}/{id}",
 			description: "パスで指定されたエンティティのレコードを更新する",
-			schema: PatchRecordResponseSchema,
+			request: {
+				params: PatchRecordParamSchema,
+				body: {
+					content: {
+						"application/json": { schema: PatchRecordBodySchema },
+					},
+				},
+			},
+			responses: {
+				200: {
+					description: "Success",
+					content: {
+						"application/json": { schema: PatchRecordResponseSchema },
+					},
+				},
+				400: {
+					description: "Bad Request",
+					content: {
+						"application/json": { schema: ApiErrorResultSchema },
+					},
+				},
+				404: {
+					description: "Entity or record not found",
+					content: {
+						"application/json": { schema: ApiErrorResultSchema },
+					},
+				},
+			},
 		}),
-		validator("param", PatchRecordParamSchema),
-		validator("json", PatchRecordBodySchema),
 		async (c) => {
 			const user = c.get("user")
 			const { entity_name, id } = c.req.valid("param")
@@ -139,15 +215,29 @@ export const recordRouter = new OpenAPIHono<{ Variables: AuthContexts }>()
 				validateResult.fields,
 			)
 
-			return c.json(updateResult)
+			return c.json(updateResult, 200)
 		},
 	)
-	.delete(
-		"/:entity_name/:id",
-		describeRoute({
+	.openapi(
+		createRoute({
+			method: "delete",
+			path: "/{entity_name}/{id}",
 			description: "パスで指定されたエンティティのレコードを削除する",
+			request: {
+				params: DeleteRecordParamSchema,
+			},
+			responses: {
+				204: {
+					description: "No Content",
+				},
+				404: {
+					description: "Entity or record not found",
+					content: {
+						"application/json": { schema: ApiErrorResultSchema },
+					},
+				},
+			},
 		}),
-		validator("param", DeleteRecordParamSchema),
 		async (c) => {
 			const { entity_name, id } = c.req.valid("param")
 
