@@ -1,11 +1,10 @@
-import { OpenAPIHono } from "@hono/zod-openapi"
+import { OpenAPIHono, createRoute } from "@hono/zod-openapi"
 import {
 	getEntity,
 	getEntityItem,
 	getEntityItemList,
 	getEntityList,
 } from "../../../domain/entity"
-import { describeRoute, validator } from "../../../libs/hono-openapi"
 import {
 	EntityListSchema,
 	EntitySchema,
@@ -17,61 +16,110 @@ import {
 	GetEntityItemListParamSchema,
 	GetEntityItemParamSchema,
 } from "../../../schema/entity-item"
+import { ApiErrorResultSchema } from "../../../schema/error"
 
 export const entityRouter = new OpenAPIHono()
-	.get(
-		"/",
-		describeRoute({
+	.openapi(
+		createRoute({
+			method: "get",
+			path: "/",
 			description: "エンティティの情報を一覧で返却する",
-			schema: EntityListSchema,
+			responses: {
+				200: {
+					description: "Success",
+					content: {
+						"application/json": { schema: EntityListSchema },
+					},
+				},
+			},
 		}),
 		async (c) => {
 			const result = await getEntityList()
-			return c.json(result)
+			return c.json(result, 200)
 		},
 	)
-	.get(
-		"/:name",
-		describeRoute({
+	.openapi(
+		createRoute({
+			method: "get",
+			path: "/{name}",
 			description: "パスで指定された単一のエンティティ情報を返却する",
-			schema: EntitySchema,
+			request: {
+				params: GetEntityParamSchema,
+			},
+			responses: {
+				200: {
+					description: "Success",
+					content: {
+						"application/json": { schema: EntitySchema },
+					},
+				},
+				404: {
+					description: "Entity not found",
+					content: {
+						"application/json": { schema: ApiErrorResultSchema },
+					},
+				},
+			},
 		}),
-		validator("param", GetEntityParamSchema),
 		async (c) => {
 			const param = c.req.valid("param")
 			const result = await getEntity(param.name)
 			if (!result) {
 				return c.json({ message: "Entity not found" }, 404)
 			}
-			return c.json(result)
+			return c.json(result, 200)
 		},
 	)
-	.get(
-		"/:entity_name/items",
-		describeRoute({
+	.openapi(
+		createRoute({
+			method: "get",
+			path: "/{entity_name}/items",
 			description: "エンティティ項目の情報を一覧で返却する",
-			schema: EntityItemListSchema,
+			request: {
+				params: GetEntityItemListParamSchema,
+			},
+			responses: {
+				200: {
+					description: "Success",
+					content: { "application/json": { schema: EntityItemListSchema } },
+				},
+			},
 		}),
-		validator("param", GetEntityItemListParamSchema),
 		async (c) => {
 			const param = c.req.valid("param")
 			const result = await getEntityItemList(param.entity_name)
-			return c.json(result)
+			return c.json(result, 200)
 		},
 	)
-	.get(
-		"/:entity_name/items/:name",
-		describeRoute({
+	.openapi(
+		createRoute({
+			method: "get",
+			path: "/{entity_name}/items/{name}",
 			description: "パスで指定された単一のエンティティ項目情報を返却する",
-			schema: EntityItemSchema,
+			request: {
+				params: GetEntityItemParamSchema,
+			},
+			responses: {
+				200: {
+					description: "Success",
+					content: {
+						"application/json": { schema: EntityItemSchema },
+					},
+				},
+				404: {
+					description: "Entity Item not found",
+					content: {
+						"application/json": { schema: ApiErrorResultSchema },
+					},
+				},
+			},
 		}),
-		validator("param", GetEntityItemParamSchema),
 		async (c) => {
 			const param = c.req.valid("param")
 			const result = await getEntityItem(param.entity_name, param.name)
 			if (!result) {
 				return c.json({ message: "Entity not found" }, 404)
 			}
-			return c.json(result)
+			return c.json(result, 200)
 		},
 	)
