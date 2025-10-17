@@ -191,7 +191,7 @@ const covertRecords = async (
 	const referenceRecords = await getReferenceRecords(records, entityItemMap)
 
 	return records.map((row) => {
-		let data: Record<string, JsonValue | Date> = {}
+		let data: Record<string, JsonValue> = {}
 
 		for (const field of queryFields) {
 			const { type, sub_type } = entityItemMap.get(field) ?? {}
@@ -247,7 +247,8 @@ const covertRecords = async (
 				}
 			}
 
-			data = { ...data, [field]: value ?? null }
+			const jsonValue = value instanceof Date ? value.toISOString() : value
+			data = { ...data, [field]: jsonValue ?? null }
 		}
 
 		return data
