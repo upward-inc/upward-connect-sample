@@ -1,7 +1,7 @@
-import { OpenAPIHono } from "@hono/zod-openapi"
+import { OpenAPIHono, createRoute } from "@hono/zod-openapi"
 import { createFile, getFile } from "../../../domain/file"
-import { describeRoute, validator } from "../../../libs/hono-openapi"
 import type { AuthContexts } from "../../../schema/auth"
+import { ApiErrorResultSchema } from "../../../schema/error"
 import {
 	GetFileParamSchema,
 	PostFileFormSchema,
@@ -9,13 +9,27 @@ import {
 } from "../../../schema/file"
 
 export const fileRouter = new OpenAPIHono<{ Variables: AuthContexts }>()
-	.get(
-		"/:id",
-		// Response は json ではないので schema validation は行わない
-		describeRoute({
+	.openapi(
+		createRoute({
+			method: "get",
+			path: "/{id}",
 			description: "パスで指定されたIDのファイルを返却する",
+			request: {
+				params: GetFileParamSchema,
+			},
+			responses: {
+				200: {
+					description: "Success",
+					// 返却対象ファイルのコンテンツタイプは動的に変わるため、OpenAPIの仕様上 schema は指定しない
+				},
+				404: {
+					description: "File not found",
+					content: {
+						"application/json": { schema: PostFileResultSchema },
+					},
+				},
+			},
 		}),
-		validator("param", GetFileParamSchema),
 		async (c) => {
 			const param = c.req.valid("param")
 
@@ -31,16 +45,37 @@ export const fileRouter = new OpenAPIHono<{ Variables: AuthContexts }>()
 					"Content-Length": file.content.length.toString(),
 					"Content-Disposition": "inline",
 				},
+				status: 200,
 			})
 		},
 	)
-	.post(
-		"/",
-		describeRoute({
+	.openapi(
+		createRoute({
+			method: "post",
+			path: "/",
 			description: "送信されたファイルを保存する",
-			schema: PostFileResultSchema,
+			request: {
+				body: {
+					content: {
+						"multipart/form-data": { schema: PostFileFormSchema },
+					},
+				},
+			},
+			responses: {
+				200: {
+					description: "Success",
+					content: {
+						"application/json": { schema: PostFileResultSchema },
+					},
+				},
+				400: {
+					description: "Bad Request",
+					content: {
+						"application/json": { schema: ApiErrorResultSchema },
+					},
+				},
+			},
 		}),
-		validator("form", PostFileFormSchema),
 		async (c) => {
 			const formData = await c.req.formData()
 			const file = formData.get("file")
@@ -55,6 +90,6 @@ export const fileRouter = new OpenAPIHono<{ Variables: AuthContexts }>()
 
 			const id = await createFile(file, user.id)
 
-			return c.json({ id })
+			return c.json({ id }, 200)
 		},
 	)
