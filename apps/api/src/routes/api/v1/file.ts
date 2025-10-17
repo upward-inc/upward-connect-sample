@@ -25,7 +25,7 @@ export const fileRouter = new OpenAPIHono<{ Variables: AuthContexts }>()
 				404: {
 					description: "File not found",
 					content: {
-						"application/json": { schema: PostFileResultSchema },
+						"application/json": { schema: ApiErrorResultSchema },
 					},
 				},
 			},
