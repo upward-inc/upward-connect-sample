@@ -1,0 +1,19 @@
+name: backend test
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    branches:
+      - develop
+    paths:
+      - 'apps/backend/**'
+      - '.github/workflows/backend_test.yml'
+      - '.github/workflows/call_backend_lint.yml'
+      - '.github/workflows/call_backend_test.yml'
+
+jobs:
+  lint:
+    uses: ./.github/workflows/call_backend_lint.yml
+
+  test:
+    uses: ./.github/workflows/call_backend_test.yml

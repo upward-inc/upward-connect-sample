@@ -1,4 +1,4 @@
-name: login deploy - develop
+name: frontend deploy - develop
 
 on:
   push:

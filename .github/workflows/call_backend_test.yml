@@ -1,11 +1,11 @@
-name: call api lint
+name: call backend test
 
 on:
   workflow_call:
 
 jobs:
-  lint:
-    name: Lint
+  test:
+    name: Test
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -20,6 +20,10 @@ jobs:
         working-directory: ./apps/backend
         run: bun install --frozen-lockfile
 
-      - name: Lint
+      - name: Generate Prisma Client
         working-directory: ./apps/backend
-        run: bun run lint
+        run: bun run prisma#generate
+
+      - name: Test
+        working-directory: ./apps/backend
+        run: bun run test
