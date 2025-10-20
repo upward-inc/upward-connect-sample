@@ -219,7 +219,10 @@ const baseFilterToPredicate = (
 	) {
 		const value =
 			typeof filter.value === "string"
-				? { entity: item.reference_entities?.at(0) ?? "", id: filter.value }
+				? {
+						entity_name: item.reference_entities?.at(0) ?? "",
+						id: filter.value,
+					}
 				: filter.value
 
 		return withPredicatePrefix(
@@ -315,8 +318,8 @@ const getReferenceComparisonPredicate = (
 	const safeColumnName = `[${fieldName}]`
 	const subQuery = [
 		`SELECT * FROM OPENJSON(${safeColumnName})`,
-		"WITH (entity NVARCHAR(MAX), id NVARCHAR(MAX))",
-		`WHERE entity = '${value.entity}' AND id = '${value.id}'`,
+		"WITH (entity_name NVARCHAR(MAX), id NVARCHAR(MAX))",
+		`WHERE entity_name = '${value.entity_name}' AND id = '${value.id}'`,
 	].join(" ")
 
 	return `EXISTS (${subQuery})`

@@ -150,7 +150,7 @@ export const DeleteRecordParamSchema = z.object({
 
 export const RecordReferenceInputSchema = z
 	.object({
-		entity: z.string().meta({ description: "エンティティ名" }),
+		entity_name: z.string().meta({ description: "エンティティ名" }),
 		id: z.string().meta({ description: "レコードID" }),
 	})
 	.meta({ description: "レコードへの参照（入力）" })

@@ -50,7 +50,7 @@ export async function seedLeads(
 			const person = getAnyRow(persons)
 			const address = getAnyRow(addresses)
 			const userRecordReference = JSON.stringify({
-				entity: "user",
+				entity_name: "user",
 				id: user.id,
 			})
 

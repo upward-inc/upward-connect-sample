@@ -46,7 +46,10 @@ export async function seedCampaigns(
 	}).map((_, index) => {
 		const code = getZeroPaddingString(index + 1, 6)
 		const user = getAnyRow(users)
-		const userRecordReference = JSON.stringify({ entity: "user", id: user.id })
+		const userRecordReference = JSON.stringify({
+			entity_name: "user",
+			id: user.id,
+		})
 
 		const anyDate = getRandomDate(addYear(date(), -2), addYear(date(), 1))
 

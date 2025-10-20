@@ -53,11 +53,14 @@ export async function seedOpportunities(
 		const account = getAnyRow(accounts)
 		const campaign = getAnyRow(campaigns)
 		const contact = getAnyRow(contacts)
-		const userRecordReference = JSON.stringify({ entity: "user", id: user.id })
+		const userRecordReference = JSON.stringify({
+			entity_name: "user",
+			id: user.id,
+		})
 
 		return {
 			name: `商談 ${code}`,
-			account: JSON.stringify({ entity: "account", id: account.id }),
+			account: JSON.stringify({ entity_name: "account", id: account.id }),
 			phase: JSON.stringify([getAnyOption("phase").name]),
 			amount: getRandomBoolean(0.9) ? getRandomInteger(1, 1000) * 10000 : null,
 			probability: getRandomBoolean(0.9) ? getRandomInteger(1, 10) / 10 : null,
@@ -70,10 +73,10 @@ export async function seedOpportunities(
 				? JSON.stringify([getAnyOption("lead_source").name])
 				: null,
 			campaign: getRandomBoolean(0.9)
-				? JSON.stringify({ entity: "campaign", id: campaign.id })
+				? JSON.stringify({ entity_name: "campaign", id: campaign.id })
 				: null,
 			contact: getRandomBoolean(0.9)
-				? JSON.stringify({ entity: "contact", id: contact.id })
+				? JSON.stringify({ entity_name: "contact", id: contact.id })
 				: null,
 			is_closed: getRandomBoolean(0.2),
 			description: getRandomBoolean(0.9) ? `description ${code}` : null,

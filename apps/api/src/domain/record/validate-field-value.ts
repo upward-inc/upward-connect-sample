@@ -315,7 +315,7 @@ const validateReferenceValue = async (
 
 		// 項目に指定可能なエンティティかどうかのチェック
 		const validEntities = entityItem.reference_entities ?? []
-		const isValidEntity = validEntities.includes(referenceInput.entity)
+		const isValidEntity = validEntities.includes(referenceInput.entity_name)
 		if (!isValidEntity) {
 			const message = `Field '${entityItem.name}' must reference one of the allowed entities: ${validEntities.join(", ")}`
 			return { success: false, message }
@@ -323,7 +323,7 @@ const validateReferenceValue = async (
 
 		// レコードの存在確認
 		const isRecordExists = await getRecordExists(
-			referenceInput.entity,
+			referenceInput.entity_name,
 			referenceInput.id,
 		)
 		if (!isRecordExists) {
@@ -354,7 +354,7 @@ const validateReferenceValue = async (
 		for (const referenceInput of referenceInputs) {
 			// 項目に指定可能なエンティティかどうかのチェック
 			const validEntities = entityItem.reference_entities ?? []
-			const isValidEntity = validEntities.includes(referenceInput.entity)
+			const isValidEntity = validEntities.includes(referenceInput.entity_name)
 			if (!isValidEntity) {
 				const message = `Field '${entityItem.name}' must reference one of the allowed entities: ${validEntities.join(", ")}`
 				return { success: false, message }
@@ -362,7 +362,7 @@ const validateReferenceValue = async (
 
 			// レコードの存在確認
 			const isRecordExists = await getRecordExists(
-				referenceInput.entity,
+				referenceInput.entity_name,
 				referenceInput.id,
 			)
 			if (!isRecordExists) {

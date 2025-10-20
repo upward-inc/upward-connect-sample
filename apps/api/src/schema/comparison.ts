@@ -20,7 +20,7 @@ export const IsNotSchema = z.boolean().meta({ description: "条件の否定" })
 
 export const RecordReferenceValueSchema = z
 	.object({
-		entity: z.string().meta({ description: "エンティティ名" }),
+		entity_name: z.string().meta({ description: "エンティティ名" }),
 		id: z.string().meta({ description: "レコードID" }),
 	})
 	.meta({ description: "レコードへの参照" })
@@ -154,7 +154,7 @@ export const ReferenceFieldObjectComparisonSchema = z
 			.meta({ description: "演算子" }),
 		value: RecordReferenceValueSchema.meta({
 			description: "検索値",
-			example: { entity: "account", id: "account-00000001" },
+			example: { entity_name: "account", id: "account-00000001" },
 		}),
 		is_not: IsNotSchema.optional().default(false),
 	})
