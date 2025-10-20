@@ -1,5 +1,5 @@
 {
-	"name": "api",
+	"name": "backend",
 	"scripts": {
 		"dev": "bun run --hot src/index.ts",
 		"test": "vitest run --config vitest.config.ts",

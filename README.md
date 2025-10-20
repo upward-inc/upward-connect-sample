@@ -8,13 +8,13 @@
 2. パッケージ依存関係のインストール
    1. `bun install`
 3. 環境変数ファイルの作成
-   1. `apps/api/.env`（`apps/api/.env.template`をコピー）
+   1. `apps/backend/.env`（`apps/backend/.env.template`をコピー）
 4. ローカルデータベース（Docker）の起動
    1. `bun db#up`
 5. マイグレーションの実行（テーブルの作成）
    1. `bun db#migrate`
 6. ビューの作成
-   1. `apps/api/prisma/views/dbo`配下のビュー作成スクリプトを手動で実行
+   1. `apps/backend/prisma/views/dbo`配下のビュー作成スクリプトを手動で実行
 7. Prismaクライアントの最新化
    1. `bun prisma#generate`
 8. サンプルデータの投入
@@ -23,11 +23,11 @@
 ## コマンド
 
 ```bash
-# APIアプリケーションを開発モードで起動
-bun api#dev
+# バックエンドアプリケーションを開発モードで起動
+bun backend#dev
 
-# ログイン用Webアプリケーションを開発モードで起動
-bun login#dev
+# フロントエンドアプリケーションを開発モードで起動
+bun frontend#dev
 ```
 
 ## DBスキーマ変更手順

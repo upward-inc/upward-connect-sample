@@ -7,7 +7,7 @@ on:
     branches:
       [ develop ]
     paths:
-      - 'apps/api/**'
+      - 'apps/backend/**'
       - '.github/workflows/api_deploy_develop.yml'
 
   # Allow manually trigger
@@ -28,8 +28,8 @@ jobs:
       registry_domain: 'multipfdevjecr.azurecr.io'
       repository_name: 'multi-pf-api'
       tag: 'latest'
-      dockerfile_path: './apps/api/Dockerfile'
-      context_path: './apps/api'
+      dockerfile_path: './apps/backend/Dockerfile'
+      context_path: './apps/backend'
     secrets: inherit
 
   deploy:

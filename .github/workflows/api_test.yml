@@ -6,7 +6,7 @@ on:
     branches:
       - develop
     paths:
-      - 'apps/api/**'
+      - 'apps/backend/**'
       - '.github/workflows/api_test.yml'
       - '.github/workflows/call_api_lint.yml'
       - '.github/workflows/call_api_test.yml'
