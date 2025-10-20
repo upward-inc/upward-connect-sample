@@ -132,19 +132,19 @@ describe("Record Tests", () => {
 			// Additional checks for ownership fields
 			expect(createdAccount?.owner).toBe(
 				JSON.stringify({
-					entity: "user",
+					entity_name: "user",
 					id: testUser.id,
 				}),
 			)
 			expect(createdAccount?.created_by).toBe(
 				JSON.stringify({
-					entity: "user",
+					entity_name: "user",
 					id: testUser.id,
 				}),
 			)
 			expect(createdAccount?.modified_by).toBe(
 				JSON.stringify({
-					entity: "user",
+					entity_name: "user",
 					id: testUser.id,
 				}),
 			)
@@ -216,27 +216,27 @@ describe("Record Tests", () => {
 				"This is a test account created during testing.",
 			)
 			expect(createdAccount?.originating_lead).toBe(
-				JSON.stringify({ entity: "lead", id: testLead.id }),
+				JSON.stringify({ entity_name: "lead", id: testLead.id }),
 			)
 			expect(createdAccount?.parent).toBe(
-				JSON.stringify({ entity: "account", id: testAccount.id }),
+				JSON.stringify({ entity_name: "account", id: testAccount.id }),
 			)
 			// Additional checks for ownership fields
 			expect(createdAccount?.owner).toBe(
 				JSON.stringify({
-					entity: "user",
+					entity_name: "user",
 					id: testUser.id,
 				}),
 			)
 			expect(createdAccount?.created_by).toBe(
 				JSON.stringify({
-					entity: "user",
+					entity_name: "user",
 					id: testUser.id,
 				}),
 			)
 			expect(createdAccount?.modified_by).toBe(
 				JSON.stringify({
-					entity: "user",
+					entity_name: "user",
 					id: testUser.id,
 				}),
 			)
@@ -1643,8 +1643,8 @@ describe("Record Tests", () => {
 			const phoneCall = await createTestPhoneCall(
 				{
 					subject: "Customer Inquiry",
-					user: { entity: "user", id: testUser.id },
-					their: { entity: "account", id: testAccount.id },
+					user: { entity_name: "user", id: testUser.id },
+					their: { entity_name: "account", id: testAccount.id },
 					direction: "inbound",
 				},
 				testUser.id,
@@ -1674,12 +1674,12 @@ describe("Record Tests", () => {
 			expect(foundCall).toBeTruthy()
 			expect(foundCall.subject).toBe("test_Customer Inquiry")
 			expect(foundCall.user).toEqual({
-				entity: "user",
+				entity_name: "user",
 				id: testUser.id,
 				title: "EntityPhoneCall",
 			})
 			expect(foundCall.their).toEqual({
-				entity: "account",
+				entity_name: "account",
 				id: testAccount.id,
 				title: "test_Call Test Company",
 			})
@@ -1713,8 +1713,8 @@ describe("Record Tests", () => {
 			await createTestPhoneCall(
 				{
 					subject: "Target Call",
-					user: { entity: "user", id: targetUser.id },
-					their: { entity: "account", id: testAccount.id },
+					user: { entity_name: "user", id: targetUser.id },
+					their: { entity_name: "account", id: testAccount.id },
 					direction: "inbound",
 				},
 				targetUser.id,
@@ -1722,8 +1722,8 @@ describe("Record Tests", () => {
 			await createTestPhoneCall(
 				{
 					subject: "Another Call",
-					user: { entity: "user", id: anotherUser.id },
-					their: { entity: "account", id: testAccount.id },
+					user: { entity_name: "user", id: anotherUser.id },
+					their: { entity_name: "account", id: testAccount.id },
 					direction: "inbound",
 				},
 				targetUser.id,
@@ -1765,19 +1765,19 @@ describe("Record Tests", () => {
 
 			// Should find target phone call
 			const foundCall = data.data.find(
-				(record: { user: { entity: string; id: string } }) =>
+				(record: { user: { entity_name: string; id: string } }) =>
 					record.user.id === targetUser.id,
 			)
 			expect(foundCall).toBeTruthy()
 			expect(foundCall.user).toEqual({
-				entity: "user",
+				entity_name: "user",
 				id: targetUser.id,
 				title: "UserPhoneCall",
 			})
 
 			// Should not find another phone call
 			const shouldNotExist = data.data.find(
-				(record: { user: { entity: string; id: string } }) =>
+				(record: { user: { entity_name: string; id: string } }) =>
 					record.user.id === anotherUser.id,
 			)
 			expect(shouldNotExist).toBeUndefined()
@@ -1878,7 +1878,7 @@ describe("Record Tests", () => {
 			expect(foundOpportunity).toBeTruthy()
 			expect(foundOpportunity.name).toBe("test_Deal")
 			expect(foundOpportunity.account).toEqual({
-				entity: "account",
+				entity_name: "account",
 				id: testAccount.id,
 				title: "test_Opportunity Test Company",
 			})

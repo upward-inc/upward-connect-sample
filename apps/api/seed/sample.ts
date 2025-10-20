@@ -51,7 +51,7 @@ export async function seedSamples(
 		const code = getZeroPaddingString(index + 1, 6)
 		const user = getAnyRow(users)
 		const userRecordReference = JSON.stringify({
-			entity: "user",
+			entity_name: "user",
 			id: user.id,
 		})
 
@@ -92,7 +92,10 @@ export async function seedSamples(
 			if (getRandomBoolean(0.1)) {
 				return null
 			}
-			return JSON.stringify({ entity: "account", id: getAnyRow(accounts).id })
+			return JSON.stringify({
+				entity_name: "account",
+				id: getAnyRow(accounts).id,
+			})
 		}
 
 		const getReferenceSingleTargetMultiId = () => {
@@ -103,8 +106,8 @@ export async function seedSamples(
 				return "[]"
 			}
 			return JSON.stringify([
-				{ entity: "account", id: getAnyRow(accounts).id },
-				{ entity: "account", id: getAnyRow(accounts).id },
+				{ entity_name: "account", id: getAnyRow(accounts).id },
+				{ entity_name: "account", id: getAnyRow(accounts).id },
 			])
 		}
 
@@ -113,9 +116,12 @@ export async function seedSamples(
 				return null
 			}
 			if (getRandomBoolean(0.5)) {
-				return JSON.stringify({ entity: "account", id: getAnyRow(accounts).id })
+				return JSON.stringify({
+					entity_name: "account",
+					id: getAnyRow(accounts).id,
+				})
 			}
-			return JSON.stringify({ entity: "lead", id: getAnyRow(leads).id })
+			return JSON.stringify({ entity_name: "lead", id: getAnyRow(leads).id })
 		}
 
 		const getReferenceMultiTargetMultiId = () => {
@@ -128,12 +134,12 @@ export async function seedSamples(
 			return JSON.stringify(
 				distinctBy(
 					[
-						{ entity: "account", id: getAnyRow(accounts).id },
-						{ entity: "account", id: getAnyRow(accounts).id },
-						{ entity: "lead", id: getAnyRow(leads).id },
-						{ entity: "lead", id: getAnyRow(leads).id },
+						{ entity_name: "account", id: getAnyRow(accounts).id },
+						{ entity_name: "account", id: getAnyRow(accounts).id },
+						{ entity_name: "lead", id: getAnyRow(leads).id },
+						{ entity_name: "lead", id: getAnyRow(leads).id },
 					],
-					({ entity, id }) => `${entity}:${id}`,
+					({ entity_name, id }) => `${entity_name}:${id}`,
 				),
 			)
 		}

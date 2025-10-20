@@ -53,7 +53,10 @@ export async function seedActivities(
 		const account = getAnyRow(accounts)
 		const lead = getAnyRow(leads)
 		const contact = getAnyRow(contacts)
-		const userRecordReference = JSON.stringify({ entity: "user", id: user.id })
+		const userRecordReference = JSON.stringify({
+			entity_name: "user",
+			id: user.id,
+		})
 
 		const anyDate = getRandomDate(addYear(date(), -2), addYear(date(), 1))
 		const anyWorktimeHour = getRandomInteger(9, 18)
@@ -74,10 +77,10 @@ export async function seedActivities(
 			target: getRandomBoolean(0.9)
 				? JSON.stringify(
 						getRandomBoolean(0.5)
-							? { entity: "account", id: account.id }
+							? { entity_name: "account", id: account.id }
 							: getRandomBoolean(0.5)
-								? { entity: "lead", id: lead.id }
-								: { entity: "contact", id: contact.id },
+								? { entity_name: "lead", id: lead.id }
+								: { entity_name: "contact", id: contact.id },
 					)
 				: null,
 			start_date_time: startDateTime,

@@ -14,7 +14,7 @@ export async function createTestAccount(
 	},
 	userId: string,
 ) {
-	const userReference = JSON.stringify({ entity: "user", id: userId })
+	const userReference = JSON.stringify({ entity_name: "user", id: userId })
 	const account = await testPrisma.account.create({
 		data: {
 			name: `test_${accountData.name}`,
@@ -49,7 +49,7 @@ export async function createTestLead(
 	},
 	userId: string,
 ) {
-	const userReference = JSON.stringify({ entity: "user", id: userId })
+	const userReference = JSON.stringify({ entity_name: "user", id: userId })
 	const lead = await testPrisma.lead.create({
 		data: {
 			company: `test_${leadData.company}`,
@@ -79,7 +79,7 @@ export async function createTestActivity(
 	},
 	userId: string,
 ) {
-	const userReference = JSON.stringify({ entity: "user", id: userId })
+	const userReference = JSON.stringify({ entity_name: "user", id: userId })
 	const activity = await testPrisma.activity.create({
 		data: {
 			subject: `test_${activityData.subject}`,
@@ -103,13 +103,13 @@ export async function createTestActivity(
 export async function createTestPhoneCall(
 	phoneCallData: {
 		subject: string
-		user: { entity: string; id: string }
-		their: { entity: string; id: string }
+		user: { entity_name: string; id: string }
+		their: { entity_name: string; id: string }
 		direction: "inbound" | "outbound"
 	},
 	userId: string,
 ) {
-	const userReference = JSON.stringify({ entity: "user", id: userId })
+	const userReference = JSON.stringify({ entity_name: "user", id: userId })
 	const phoneCall = await testPrisma.phone_call.create({
 		data: {
 			subject: `test_${phoneCallData.subject}`,
@@ -138,7 +138,7 @@ export async function createTestContact(
 	},
 	userId: string,
 ) {
-	const userReference = JSON.stringify({ entity: "user", id: userId })
+	const userReference = JSON.stringify({ entity_name: "user", id: userId })
 	const contact = await testPrisma.contact.create({
 		data: {
 			last_name: `test_${contactData.last_name}`,
@@ -177,12 +177,12 @@ export async function createTestOpportunity(
 	},
 	userId: string,
 ) {
-	const userReference = JSON.stringify({ entity: "user", id: userId })
+	const userReference = JSON.stringify({ entity_name: "user", id: userId })
 	const opportunity = await testPrisma.opportunity.create({
 		data: {
 			name: `test_${opportunityData.name}`,
 			account: JSON.stringify({
-				entity: "account",
+				entity_name: "account",
 				id: opportunityData.account,
 			}),
 			phase: JSON.stringify([opportunityData.phase]),
@@ -210,7 +210,7 @@ export async function createTestCase(
 	},
 	userId: string,
 ) {
-	const userReference = JSON.stringify({ entity: "user", id: userId })
+	const userReference = JSON.stringify({ entity_name: "user", id: userId })
 	const testCase = await testPrisma.renamedcase.create({
 		data: {
 			case_number: `test_${caseData.case_number}`,
@@ -236,7 +236,7 @@ export async function createTestProduct(
 	},
 	userId: string,
 ) {
-	const userReference = JSON.stringify({ entity: "user", id: userId })
+	const userReference = JSON.stringify({ entity_name: "user", id: userId })
 	const product = await testPrisma.product.create({
 		data: {
 			name: `test_${productData.name}`,
@@ -261,7 +261,7 @@ export async function createTestCampaign(
 	},
 	userId: string,
 ) {
-	const userReference = JSON.stringify({ entity: "user", id: userId })
+	const userReference = JSON.stringify({ entity_name: "user", id: userId })
 	const campaign = await testPrisma.campaign.create({
 		data: {
 			name: `test_${campaignData.name}`,
@@ -286,7 +286,7 @@ export async function createTestSample(
 	},
 	userId: string,
 ) {
-	const userReference = JSON.stringify({ entity: "user", id: userId })
+	const userReference = JSON.stringify({ entity_name: "user", id: userId })
 	const sample = await testPrisma.sample.create({
 		data: {
 			name: `test_${sampleData.name}`,
