@@ -255,6 +255,10 @@ export const PostTokenParamSchema = z.discriminatedUnion("grant_type", [
 		redirect_uri: RedirectUriSchema,
 		client_id: ClientIdSchema,
 		client_secret: ClientSecretSchema,
+		code_verifier: z.string().min(43).max(128).meta({
+			description: "PKCE用コードベリファイア（最小43文字、最大128文字）",
+			example: "dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk",
+		}),
 	}),
 	z.object({
 		grant_type: z.literal("refresh_token"),
