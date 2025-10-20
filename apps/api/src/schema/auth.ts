@@ -266,6 +266,7 @@ export type PublishedAuthCode = z.infer<typeof PublishedAuthCodeSchema>
 export type LoggedInUser = z.infer<typeof LoggedInUserSchema>
 export type PostLoginParam = z.infer<typeof PostLoginParamSchema>
 export type PostLoginResult = z.infer<typeof PostLoginResultSchema>
+export type GetOAuthClientParam = z.infer<typeof GetOAuthClientParamSchema>
 export type GetOAuthClientResult = z.infer<typeof GetOAuthClientResultSchema>
 export type OidcConfigurationResult = z.infer<
 	typeof OidcConfigurationResultSchema
