@@ -2,6 +2,7 @@ import { type JwtPayload, verify } from "jsonwebtoken"
 import { afterAll, beforeAll, describe, expect, it } from "vitest"
 import { env } from "../../env"
 import { app } from "../../index"
+import { prisma } from "../../libs/prisma"
 import { createTestOAuthClient, createValidToken } from "../../test/utils/auth"
 import { cleanupTestData, createTestUser } from "../../test/utils/common"
 
@@ -61,6 +62,8 @@ describe("Internal Auth Tests", () => {
 					scope: "openid profile email",
 					state: stateValue,
 					nonce: "random_nonce_12345",
+					code_challenge: "E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM",
+					code_challenge_method: "S256",
 				}),
 			})
 
@@ -94,6 +97,8 @@ describe("Internal Auth Tests", () => {
 					scope: "openid profile email",
 					state: stateValue,
 					nonce: "random_nonce_12345",
+					code_challenge: "E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM",
+					code_challenge_method: "S256",
 				}),
 			})
 
@@ -137,6 +142,8 @@ describe("Internal Auth Tests", () => {
 					scope: "openid profile email",
 					state: stateValue,
 					nonce: "random_nonce_12345",
+					code_challenge: "E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM",
+					code_challenge_method: "S256",
 				}),
 			})
 
@@ -179,6 +186,8 @@ describe("Internal Auth Tests", () => {
 					scope: "openid profile email",
 					state: stateValue,
 					nonce: "random_nonce_12345",
+					code_challenge: "E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM",
+					code_challenge_method: "S256",
 				}),
 			})
 
@@ -221,6 +230,8 @@ describe("Internal Auth Tests", () => {
 					scope: "openid profile email",
 					state: "random_state_12345",
 					nonce: nonceValue,
+					code_challenge: "E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM",
+					code_challenge_method: "S256",
 				}),
 			})
 
@@ -294,6 +305,8 @@ describe("Internal Auth Tests", () => {
 					scope: "openid profile email",
 					state: "random_state_12345",
 					nonce: "", // Empty nonce
+					code_challenge: "E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM",
+					code_challenge_method: "S256",
 				}),
 			})
 
@@ -362,6 +375,8 @@ describe("Internal Auth Tests", () => {
 					scope: "openid profile email",
 					state: "random_state_12345",
 					nonce: specialNonce,
+					code_challenge: "E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM",
+					code_challenge_method: "S256",
 				}),
 			})
 
@@ -428,6 +443,8 @@ describe("Internal Auth Tests", () => {
 					scope: "openid profile email offline_access",
 					state: "random-state-value-12345",
 					nonce: "random-nonce-value-12345",
+					code_challenge: "E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM",
+					code_challenge_method: "S256",
 				}),
 			})
 
@@ -508,6 +525,8 @@ describe("Internal Auth Tests", () => {
 					scope: "openid",
 					state: "random-state-value-12345",
 					nonce: "random-nonce-value-12345",
+					code_challenge: "E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM",
+					code_challenge_method: "S256",
 				}),
 			})
 
@@ -586,6 +605,8 @@ describe("Internal Auth Tests", () => {
 					scope: "", // スコープが空
 					state: "random-state-value-12345",
 					nonce: "random-nonce-value-12345",
+					code_challenge: "E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM",
+					code_challenge_method: "S256",
 				}),
 			})
 
@@ -627,6 +648,8 @@ describe("Internal Auth Tests", () => {
 					// スコープパラメータがない
 					state: "random-state-value-12345",
 					nonce: "random-nonce-value-12345",
+					code_challenge: "E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM",
+					code_challenge_method: "S256",
 				}),
 			})
 			const data = await response.json()
@@ -665,6 +688,8 @@ describe("Internal Auth Tests", () => {
 					scope: "openid profile email", // emailスコープは登録されていない
 					state: "random-state-value-12345",
 					nonce: "random-nonce-value-12345",
+					code_challenge: "E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM",
+					code_challenge_method: "S256",
 				}),
 			})
 
@@ -706,6 +731,8 @@ describe("Internal Auth Tests", () => {
 					scope: "openid profile unknown_scope", // unknown_scopeは未認識
 					state: "random-state-value-12345",
 					nonce: "random-nonce-value-12345",
+					code_challenge: "E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM",
+					code_challenge_method: "S256",
 				}),
 			})
 
@@ -715,6 +742,137 @@ describe("Internal Auth Tests", () => {
 				error: "invalid_scope",
 				state: "random-state-value-12345",
 			})
+		})
+
+		it("200 OK - code_challengeとcode_challenge_methodが正しくDBに永続化された", async () => {
+			const testUser = await createTestUser({
+				user_name: "pkce_user",
+				first_name: "PKCE",
+				last_name: "User",
+				email: "pkce_user@example.com",
+			})
+
+			const testClient = await createTestOAuthClient({
+				name: "pkce_cli",
+				secret: "test_secret_12345",
+				redirect_uris: "https://example.com/callback",
+				scopes: "openid,profile,email",
+			})
+
+			const token = createValidToken(testUser.id)
+
+			const response = await app.request("/auth/authorize", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/x-www-form-urlencoded",
+					Authorization: `Bearer ${token}`,
+				},
+				body: new URLSearchParams({
+					response_type: "code",
+					client_id: testClient.id,
+					redirect_uri: "https://example.com/callback",
+					scope: "openid profile email",
+					state: "random-state-value-12345",
+					nonce: "random-nonce-value-12345",
+					code_challenge: "E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM",
+					code_challenge_method: "S256",
+				}),
+			})
+
+			const data = await response.json()
+			expect(response.status).toBe(200)
+
+			const authCode = await prisma.published_auth_code.findUnique({
+				where: { auth_code: data.code },
+			})
+
+			expect(authCode).not.toBeNull()
+			expect(authCode.code_challenge).toBe(
+				"E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM",
+			)
+			expect(authCode.code_challenge_method).toBe("S256")
+		})
+
+		it("400 Bad Request - code_challengeがない", async () => {
+			const testUser = await createTestUser({
+				user_name: "no_code_challenge_user",
+				first_name: "No",
+				last_name: "CodeChallenge",
+				email: "no_code_challenge@example.com",
+			})
+
+			const testClient = await createTestOAuthClient({
+				name: "no_cc_cli",
+				secret: "test_secret_12345",
+				redirect_uris: "https://example.com/callback",
+				scopes: "openid,profile,email",
+			})
+
+			const token = createValidToken(testUser.id)
+
+			const response = await app.request("/auth/authorize", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/x-www-form-urlencoded",
+					Authorization: `Bearer ${token}`,
+				},
+				body: new URLSearchParams({
+					response_type: "code",
+					client_id: testClient.id,
+					redirect_uri: "https://example.com/callback",
+					scope: "openid profile email",
+					state: "random-state-value-12345",
+					nonce: "random-nonce-value-12345",
+					// code_challengeパラメータがない
+					code_challenge_method: "S256",
+				}),
+			})
+
+			const data = await response.json()
+			expect(response.status).toBe(400)
+			// Zodの検証エラーはOAuth検証よりも前に来る
+			expect(data.success).toBe(false)
+		})
+
+		it("400 Bad Request - code_challenge_methodがない", async () => {
+			const testUser = await createTestUser({
+				user_name: "no_code_challenge_method_user",
+				first_name: "No",
+				last_name: "CodeChallengeMethod",
+				email: "no_code_challenge_method@example.com",
+			})
+
+			const testClient = await createTestOAuthClient({
+				name: "no_ccm_cli",
+				secret: "test_secret_12345",
+				redirect_uris: "https://example.com/callback",
+				scopes: "openid,profile,email",
+			})
+
+			const token = createValidToken(testUser.id)
+
+			const response = await app.request("/auth/authorize", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/x-www-form-urlencoded",
+					Authorization: `Bearer ${token}`,
+				},
+				body: new URLSearchParams({
+					response_type: "code",
+					client_id: testClient.id,
+					redirect_uri: "https://example.com/callback",
+					scope: "openid profile email",
+					state: "random-state-value-12345",
+					nonce: "random-nonce-value-12345",
+					code_challenge: "E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM",
+					// code_challenge_methodパラメータがない
+				}),
+			})
+
+			const data = await response.json()
+			expect(response.status).toBe(400)
+			// Zodの検証エラーはOAuth検証よりも前に来る
+			expect(data.success).toBe(false)
 		})
 	})
 })

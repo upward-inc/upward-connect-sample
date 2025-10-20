@@ -567,6 +567,8 @@ describe("Auth Tests", () => {
 					scope: "openid profile email",
 					state: "random_state_12345",
 					nonce: "random_nonce_12345",
+					code_challenge: "E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM",
+					code_challenge_method: "S256",
 				}),
 			})
 
@@ -650,6 +652,8 @@ describe("Auth Tests", () => {
 					scope: "openid profile email",
 					state: "random_state_12345",
 					nonce: "random_nonce_12345",
+					code_challenge: "E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM",
+					code_challenge_method: "S256",
 				}),
 			})
 
@@ -736,6 +740,8 @@ describe("Auth Tests", () => {
 					scope: "openid profile email",
 					state: "random_state_12345",
 					nonce: "random_nonce_12345",
+					code_challenge: "E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM",
+					code_challenge_method: "S256",
 				}),
 			})
 
@@ -808,6 +814,8 @@ describe("Auth Tests", () => {
 					scope: "openid profile email",
 					state: "random_state_12345",
 					nonce: "random_nonce_12345",
+					code_challenge: "E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM",
+					code_challenge_method: "S256",
 				}),
 			})
 
@@ -877,6 +885,8 @@ describe("Auth Tests", () => {
 					scope: "openid profile email offline_access",
 					state: "random_state_12345",
 					nonce: "random_nonce_12345",
+					code_challenge: "E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM",
+					code_challenge_method: "S256",
 				}),
 			})
 
@@ -1009,6 +1019,8 @@ describe("Auth Tests", () => {
 					scope: "openid profile email",
 					state: "random_state_12345",
 					nonce: "random_nonce_12345",
+					code_challenge: "E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM",
+					code_challenge_method: "S256",
 				}),
 			})
 
@@ -1091,6 +1103,8 @@ describe("Auth Tests", () => {
 					scope: "openid profile email",
 					state: "random_state_12345",
 					nonce: "random_nonce_12345",
+					code_challenge: "E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM",
+					code_challenge_method: "S256",
 				}),
 			})
 
