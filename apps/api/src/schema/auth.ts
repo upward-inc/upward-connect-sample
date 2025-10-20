@@ -46,6 +46,16 @@ export const NonceSchema = z.string().meta({
 	example: "cma33PzyycBFb3LA",
 })
 
+export const CodeChallengeSchema = z.string().min(43).max(128).meta({
+	description: "PKCE用コードチャレンジ（最小43文字、最大128文字）",
+	example: "E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM",
+})
+
+export const CodeChallengeMethodSchema = z.literal("S256").meta({
+	description: "PKCE用コードチャレンジメソッド",
+	example: "S256",
+})
+
 export const AccessTokenSchema = z.string().min(1).meta({
 	description: "アクセストークン",
 	example: "sample_access_token",
@@ -109,6 +119,8 @@ export const PublishedAuthCodeSchema = z
 		}),
 		state: StateSchema.nullable(),
 		nonce: NonceSchema.nullable(),
+		code_challenge: CodeChallengeSchema.nullable(),
+		code_challenge_method: CodeChallengeMethodSchema.nullable(),
 		published_at: z.date().meta({
 			description: "発行日時",
 		}),
@@ -224,6 +236,8 @@ export const PostAuthorizeParamSchema = z.object({
 	}),
 	state: StateSchema,
 	nonce: NonceSchema,
+	code_challenge: CodeChallengeSchema,
+	code_challenge_method: CodeChallengeMethodSchema,
 })
 
 export const PostAuthorizeResultSchema = z.object({
