@@ -58,7 +58,7 @@ export const oauth2Router = new OpenAPIHono<{ Variables: AuthContexts }>()
 				if (!publishedAuthCode) {
 					return c.json(
 						{
-							error: "invalid_grant",
+							error: "invalid_grant" as const,
 							error_description: "Invalid authorization code",
 						},
 						400,
@@ -74,7 +74,7 @@ export const oauth2Router = new OpenAPIHono<{ Variables: AuthContexts }>()
 				if (!user) {
 					return c.json(
 						{
-							error: "invalid_grant",
+							error: "invalid_grant" as const,
 							error_description: "Unknown user",
 						},
 						400,
@@ -87,7 +87,7 @@ export const oauth2Router = new OpenAPIHono<{ Variables: AuthContexts }>()
 				if (!validateResult.success) {
 					return c.json(
 						{
-							error: "invalid_grant",
+							error: "invalid_grant" as const,
 							error_description: validateResult.error_message,
 						},
 						400,
@@ -140,7 +140,7 @@ export const oauth2Router = new OpenAPIHono<{ Variables: AuthContexts }>()
 				if (!validateResult.success) {
 					return c.json(
 						{
-							error: "invalid_grant",
+							error: "invalid_grant" as const,
 							error_description: validateResult.error_message,
 						},
 						400,
@@ -176,7 +176,7 @@ export const oauth2Router = new OpenAPIHono<{ Variables: AuthContexts }>()
 			// grant_typeがサポート対象外の場合
 			return c.json(
 				{
-					error: "unsupported_grant_type",
+					error: "unsupported_grant_type" as const,
 					error_description: "The grant_type is not supported.",
 				},
 				400,
@@ -211,7 +211,7 @@ export const oauth2Router = new OpenAPIHono<{ Variables: AuthContexts }>()
 			if (!loggedInUser) {
 				return c.json(
 					{
-						error: "invalid_token",
+						error: "invalid_token" as const,
 						error_description:
 							"The user associated with the provided token does not exist.",
 					},
