@@ -1,7 +1,7 @@
 import { OpenAPIHono, createRoute } from "@hono/zod-openapi"
 import { createFile, getFile } from "../../../domain/file"
 import type { AuthContexts } from "../../../schema/auth"
-import { ApiErrorResultSchema } from "../../../schema/error"
+import { ResourceApiErrorResultSchema } from "../../../schema/error"
 import {
 	GetFileParamSchema,
 	PostFileFormSchema,
@@ -25,7 +25,7 @@ export const fileRouter = new OpenAPIHono<{ Variables: AuthContexts }>()
 				404: {
 					description: "File not found",
 					content: {
-						"application/json": { schema: ApiErrorResultSchema },
+						"application/json": { schema: ResourceApiErrorResultSchema },
 					},
 				},
 			},
@@ -71,7 +71,7 @@ export const fileRouter = new OpenAPIHono<{ Variables: AuthContexts }>()
 				400: {
 					description: "Bad Request",
 					content: {
-						"application/json": { schema: ApiErrorResultSchema },
+						"application/json": { schema: ResourceApiErrorResultSchema },
 					},
 				},
 			},

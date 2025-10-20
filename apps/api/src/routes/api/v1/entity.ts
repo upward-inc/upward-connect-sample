@@ -16,7 +16,7 @@ import {
 	GetEntityItemListParamSchema,
 	GetEntityItemParamSchema,
 } from "../../../schema/entity-item"
-import { ApiErrorResultSchema } from "../../../schema/error"
+import { ResourceApiErrorResultSchema } from "../../../schema/error"
 
 export const entityRouter = new OpenAPIHono()
 	.openapi(
@@ -56,7 +56,7 @@ export const entityRouter = new OpenAPIHono()
 				404: {
 					description: "Entity not found",
 					content: {
-						"application/json": { schema: ApiErrorResultSchema },
+						"application/json": { schema: ResourceApiErrorResultSchema },
 					},
 				},
 			},
@@ -109,7 +109,7 @@ export const entityRouter = new OpenAPIHono()
 				404: {
 					description: "Entity Item not found",
 					content: {
-						"application/json": { schema: ApiErrorResultSchema },
+						"application/json": { schema: ResourceApiErrorResultSchema },
 					},
 				},
 			},

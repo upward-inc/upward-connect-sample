@@ -11,7 +11,7 @@ import {
 	validateUpdateRecordBody,
 } from "../../../domain/record"
 import type { AuthContexts } from "../../../schema/auth"
-import { ApiErrorResultSchema } from "../../../schema/error"
+import { ResourceApiErrorResultSchema } from "../../../schema/error"
 import {
 	DeleteRecordParamSchema,
 	GetRecordListQuerySchema,
@@ -46,13 +46,13 @@ export const recordRouter = new OpenAPIHono<{ Variables: AuthContexts }>()
 				400: {
 					description: "Bad Request",
 					content: {
-						"application/json": { schema: ApiErrorResultSchema },
+						"application/json": { schema: ResourceApiErrorResultSchema },
 					},
 				},
 				404: {
 					description: "Entity not found",
 					content: {
-						"application/json": { schema: ApiErrorResultSchema },
+						"application/json": { schema: ResourceApiErrorResultSchema },
 					},
 				},
 			},
@@ -111,13 +111,13 @@ export const recordRouter = new OpenAPIHono<{ Variables: AuthContexts }>()
 				400: {
 					description: "Bad Request",
 					content: {
-						"application/json": { schema: ApiErrorResultSchema },
+						"application/json": { schema: ResourceApiErrorResultSchema },
 					},
 				},
 				404: {
 					description: "Entity not found",
 					content: {
-						"application/json": { schema: ApiErrorResultSchema },
+						"application/json": { schema: ResourceApiErrorResultSchema },
 					},
 				},
 			},
@@ -172,13 +172,13 @@ export const recordRouter = new OpenAPIHono<{ Variables: AuthContexts }>()
 				400: {
 					description: "Bad Request",
 					content: {
-						"application/json": { schema: ApiErrorResultSchema },
+						"application/json": { schema: ResourceApiErrorResultSchema },
 					},
 				},
 				404: {
 					description: "Entity or record not found",
 					content: {
-						"application/json": { schema: ApiErrorResultSchema },
+						"application/json": { schema: ResourceApiErrorResultSchema },
 					},
 				},
 			},
@@ -233,7 +233,7 @@ export const recordRouter = new OpenAPIHono<{ Variables: AuthContexts }>()
 				404: {
 					description: "Entity or record not found",
 					content: {
-						"application/json": { schema: ApiErrorResultSchema },
+						"application/json": { schema: ResourceApiErrorResultSchema },
 					},
 				},
 			},

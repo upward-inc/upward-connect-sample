@@ -1,6 +1,6 @@
 import { OpenAPIHono, createRoute } from "@hono/zod-openapi"
 import { getProfile, getProfileList } from "../../../domain/profile"
-import { ApiErrorResultSchema } from "../../../schema/error"
+import { ResourceApiErrorResultSchema } from "../../../schema/error"
 import {
 	GetProfileParamSchema,
 	ProfileListSchema,
@@ -45,7 +45,7 @@ export const profileRouter = new OpenAPIHono()
 				404: {
 					description: "Profile not found",
 					content: {
-						"application/json": { schema: ApiErrorResultSchema },
+						"application/json": { schema: ResourceApiErrorResultSchema },
 					},
 				},
 			},

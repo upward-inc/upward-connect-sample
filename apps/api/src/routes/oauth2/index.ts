@@ -16,7 +16,7 @@ import {
 	PostTokenParamSchema,
 	PostTokenResultSchema,
 } from "../../schema/auth"
-import { OAuthErrorResultSchema } from "../../schema/error"
+import { OAuthApiErrorResultSchema } from "../../schema/error"
 
 export const oauth2Router = new OpenAPIHono<{ Variables: AuthContexts }>()
 	.openapi(
@@ -44,7 +44,7 @@ export const oauth2Router = new OpenAPIHono<{ Variables: AuthContexts }>()
 				400: {
 					description: "Bad Request",
 					content: {
-						"application/json": { schema: OAuthErrorResultSchema },
+						"application/json": { schema: OAuthApiErrorResultSchema },
 					},
 				},
 			},
@@ -198,7 +198,7 @@ export const oauth2Router = new OpenAPIHono<{ Variables: AuthContexts }>()
 				401: {
 					description: "Unauthorized",
 					content: {
-						"application/json": { schema: OAuthErrorResultSchema },
+						"application/json": { schema: OAuthApiErrorResultSchema },
 					},
 				},
 			},

@@ -1,6 +1,6 @@
 import { OpenAPIHono, createRoute } from "@hono/zod-openapi"
 import { getSystemUser, getSystemUserList } from "../../../domain/system-user"
-import { ApiErrorResultSchema } from "../../../schema/error"
+import { ResourceApiErrorResultSchema } from "../../../schema/error"
 import {
 	GetSystemUserParamSchema,
 	SystemUserListSchema,
@@ -45,7 +45,7 @@ export const systemUserRouter = new OpenAPIHono()
 				404: {
 					description: "System user not found",
 					content: {
-						"application/json": { schema: ApiErrorResultSchema },
+						"application/json": { schema: ResourceApiErrorResultSchema },
 					},
 				},
 			},

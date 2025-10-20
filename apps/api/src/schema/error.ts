@@ -1,6 +1,6 @@
 import { z } from "../libs/zod"
 
-export const OAuthErrorResultSchema = z
+export const OAuthApiErrorResultSchema = z
 	.object({
 		error: z
 			.literal([
@@ -42,7 +42,7 @@ export const OAuthErrorResultSchema = z
 	})
 	.meta({ description: "OAuth2/OIDC エラー応答" })
 
-export const ApiErrorResultSchema = z.object({
+export const ResourceApiErrorResultSchema = z.object({
 	message: z.string().meta({
 		description: "エラーメッセージ",
 	}),

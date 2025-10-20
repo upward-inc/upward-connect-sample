@@ -1,6 +1,6 @@
 import { OpenAPIHono, createRoute } from "@hono/zod-openapi"
 import { getRole, getRoleList } from "../../../domain/role"
-import { ApiErrorResultSchema } from "../../../schema/error"
+import { ResourceApiErrorResultSchema } from "../../../schema/error"
 import {
 	GetRoleParamSchema,
 	RoleListSchema,
@@ -45,7 +45,7 @@ export const roleRouter = new OpenAPIHono()
 				404: {
 					description: "Role not found",
 					content: {
-						"application/json": { schema: ApiErrorResultSchema },
+						"application/json": { schema: ResourceApiErrorResultSchema },
 					},
 				},
 			},

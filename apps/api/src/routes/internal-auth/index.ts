@@ -19,8 +19,8 @@ import {
 	StateSchema,
 } from "../../schema/auth"
 import {
-	ApiErrorResultSchema,
-	OAuthErrorResultSchema,
+	OAuthApiErrorResultSchema,
+	ResourceApiErrorResultSchema,
 } from "../../schema/error"
 
 export const internalAuthRouter = new OpenAPIHono<{ Variables: AuthContexts }>()
@@ -48,7 +48,9 @@ export const internalAuthRouter = new OpenAPIHono<{ Variables: AuthContexts }>()
 				},
 				401: {
 					description: "Unauthorized",
-					content: { "application/json": { schema: ApiErrorResultSchema } },
+					content: {
+						"application/json": { schema: ResourceApiErrorResultSchema },
+					},
 				},
 			},
 		}),
@@ -87,7 +89,9 @@ export const internalAuthRouter = new OpenAPIHono<{ Variables: AuthContexts }>()
 				},
 				404: {
 					description: "Not Found",
-					content: { "application/json": { schema: ApiErrorResultSchema } },
+					content: {
+						"application/json": { schema: ResourceApiErrorResultSchema },
+					},
 				},
 			},
 		}),
@@ -129,7 +133,7 @@ export const internalAuthRouter = new OpenAPIHono<{ Variables: AuthContexts }>()
 					description: "Bad Request",
 					content: {
 						"application/json": {
-							schema: OAuthErrorResultSchema.extend({
+							schema: OAuthApiErrorResultSchema.extend({
 								state: StateSchema,
 							}),
 						},
