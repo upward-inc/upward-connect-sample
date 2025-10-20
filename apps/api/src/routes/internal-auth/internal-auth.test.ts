@@ -251,6 +251,7 @@ describe("Internal Auth Tests", () => {
 					redirect_uri: "https://example.com/callback",
 					client_id: testClient.id,
 					client_secret: testClient.secret,
+					code_verifier: "dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk",
 				}),
 			})
 
@@ -326,6 +327,7 @@ describe("Internal Auth Tests", () => {
 					redirect_uri: "https://example.com/callback",
 					client_id: testClient.id,
 					client_secret: testClient.secret,
+					code_verifier: "dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk",
 				}),
 			})
 
@@ -396,6 +398,7 @@ describe("Internal Auth Tests", () => {
 					redirect_uri: "https://example.com/callback",
 					client_id: testClient.id,
 					client_secret: testClient.secret,
+					code_verifier: "dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk",
 				}),
 			})
 
@@ -464,6 +467,7 @@ describe("Internal Auth Tests", () => {
 					redirect_uri: "https://example.com/callback",
 					client_id: testClient.id,
 					client_secret: testClient.secret,
+					code_verifier: "dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk",
 				}),
 			})
 
@@ -546,6 +550,7 @@ describe("Internal Auth Tests", () => {
 					redirect_uri: "https://example.com/callback",
 					client_id: testClient.id,
 					client_secret: testClient.secret,
+					code_verifier: "dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk",
 				}),
 			})
 

@@ -1,5 +1,6 @@
+import { createHash } from "node:crypto"
 import { isBefore } from "@formkit/tempo"
-import type { LoggedInUser, PublishedAuthCode } from "../../schema/auth"
+import type { PublishedAuthCode } from "../../schema/auth"
 
 interface TokenParams {
 	grant_type: string
@@ -7,6 +8,7 @@ interface TokenParams {
 	redirect_uri: string
 	client_id: string
 	client_secret: string
+	code_verifier: string
 }
 
 type ValidateResult = ValidateResultSuccess | ValidateResultFailure
@@ -55,6 +57,23 @@ export const validateTokenParams = (
 	// スコープの存在確認
 	if (!publishedAuthCode.scope) {
 		return { success: false, error_message: "No scope" }
+	}
+
+	// PKCEの検証
+	if (publishedAuthCode.code_challenge) {
+		// vitestの環境下ではBunのcreateHasherが使えないため、Node.jsのcryptoモジュールを使用する
+		// TODO: Bun.createHasher()に移行する
+		const hasher = createHash("sha256")
+		hasher.update(params.code_verifier)
+		const digest = hasher
+			.digest("base64")
+			.replace(/=/g, "")
+			.replace(/\+/g, "-")
+			.replace(/\//g, "_")
+
+		if (digest !== publishedAuthCode.code_challenge) {
+			return { success: false, error_message: "Invalid code_verifier" }
+		}
 	}
 
 	return {
