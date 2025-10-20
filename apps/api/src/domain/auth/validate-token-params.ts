@@ -60,20 +60,18 @@ export const validateTokenParams = (
 	}
 
 	// PKCEの検証
-	if (publishedAuthCode.code_challenge) {
-		// vitestの環境下ではBunのcreateHasherが使えないため、Node.jsのcryptoモジュールを使用する
-		// TODO: Bun.createHasher()に移行する
-		const hasher = createHash("sha256")
-		hasher.update(params.code_verifier)
-		const digest = hasher
-			.digest("base64")
-			.replace(/=/g, "")
-			.replace(/\+/g, "-")
-			.replace(/\//g, "_")
+	// vitestの環境下ではBunのcreateHasherが使えないため、Node.jsのcryptoモジュールを使用する
+	// TODO: Bun.createHasher()に移行する
+	const hasher = createHash("sha256")
+	hasher.update(params.code_verifier)
+	const digest = hasher
+		.digest("base64")
+		.replace(/=/g, "")
+		.replace(/\+/g, "-")
+		.replace(/\//g, "_")
 
-		if (digest !== publishedAuthCode.code_challenge) {
-			return { success: false, error_message: "Invalid code_verifier" }
-		}
+	if (digest !== publishedAuthCode.code_challenge) {
+		return { success: false, error_message: "Invalid code_verifier" }
 	}
 
 	return {
