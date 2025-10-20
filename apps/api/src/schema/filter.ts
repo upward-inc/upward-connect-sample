@@ -1,4 +1,4 @@
-import { z } from "zod"
+import { z } from "../libs/zod"
 import {
 	BooleanFieldComparisonSchema,
 	DateFieldComparisonSchema,

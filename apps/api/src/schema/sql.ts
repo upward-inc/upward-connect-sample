@@ -1,5 +1,5 @@
 import { format } from "@formkit/tempo"
-import { z } from "zod"
+import { z } from "../libs/zod"
 import type { RecordReferenceValue } from "./comparison"
 import { type EntityItem, EntityItemSchema } from "./entity-item"
 import {

@@ -1,4 +1,4 @@
-import { Hono } from "hono"
+import { OpenAPIHono, createRoute } from "@hono/zod-openapi"
 import {
 	deleteAuthorizationCode,
 	generateAccessToken,
@@ -10,23 +10,45 @@ import {
 	validateTokenParams,
 } from "../../domain/auth"
 import { env } from "../../env"
-import { describeRoute, validator } from "../../libs/hono-openapi"
 import {
 	type AuthContexts,
 	GetUserInfoResultSchema,
 	PostTokenParamSchema,
 	PostTokenResultSchema,
 } from "../../schema/auth"
+import { OAuthApiErrorResultSchema } from "../../schema/error"
 
-export const oauth2Router = new Hono<{ Variables: AuthContexts }>()
-	.post(
-		"/token",
-		describeRoute({
+export const oauth2Router = new OpenAPIHono<{ Variables: AuthContexts }>()
+	.openapi(
+		createRoute({
+			method: "post",
+			path: "/token",
 			description:
 				"OIDC 1.0 で定められた認可やトークン更新処理を行う（各種トークンを返却する）",
-			schema: PostTokenResultSchema,
+			request: {
+				body: {
+					content: {
+						"application/x-www-form-urlencoded": {
+							schema: PostTokenParamSchema,
+						},
+					},
+				},
+			},
+			responses: {
+				200: {
+					description: "Success",
+					content: {
+						"application/json": { schema: PostTokenResultSchema },
+					},
+				},
+				400: {
+					description: "Bad Request",
+					content: {
+						"application/json": { schema: OAuthApiErrorResultSchema },
+					},
+				},
+			},
 		}),
-		validator("form", PostTokenParamSchema),
 		async (c) => {
 			const params = c.req.valid("form")
 
@@ -36,7 +58,7 @@ export const oauth2Router = new Hono<{ Variables: AuthContexts }>()
 				if (!publishedAuthCode) {
 					return c.json(
 						{
-							error: "invalid_grant",
+							error: "invalid_grant" as const,
 							error_description: "Invalid authorization code",
 						},
 						400,
@@ -52,7 +74,7 @@ export const oauth2Router = new Hono<{ Variables: AuthContexts }>()
 				if (!user) {
 					return c.json(
 						{
-							error: "invalid_grant",
+							error: "invalid_grant" as const,
 							error_description: "Unknown user",
 						},
 						400,
@@ -65,7 +87,7 @@ export const oauth2Router = new Hono<{ Variables: AuthContexts }>()
 				if (!validateResult.success) {
 					return c.json(
 						{
-							error: "invalid_grant",
+							error: "invalid_grant" as const,
 							error_description: validateResult.error_message,
 						},
 						400,
@@ -99,13 +121,16 @@ export const oauth2Router = new Hono<{ Variables: AuthContexts }>()
 						})
 					: undefined
 
-				return c.json({
-					token_type: "Bearer",
-					access_token: accessToken,
-					id_token: idToken,
-					refresh_token: refreshToken,
-					expires_in: env.OIDC_TOKEN_EXPIRES_IN_MINUTE * 60,
-				})
+				return c.json(
+					{
+						token_type: "Bearer" as const,
+						access_token: accessToken,
+						id_token: idToken,
+						refresh_token: refreshToken,
+						expires_in: env.OIDC_TOKEN_EXPIRES_IN_MINUTE * 60,
+					},
+					200,
+				)
 			}
 
 			if (params.grant_type === "refresh_token") {
@@ -115,7 +140,7 @@ export const oauth2Router = new Hono<{ Variables: AuthContexts }>()
 				if (!validateResult.success) {
 					return c.json(
 						{
-							error: "invalid_grant",
+							error: "invalid_grant" as const,
 							error_description: validateResult.error_message,
 						},
 						400,
@@ -138,20 +163,45 @@ export const oauth2Router = new Hono<{ Variables: AuthContexts }>()
 
 				// `Upon successful validation of the Refresh Token, the response body is the Token Response of Section 3.1.3.3 except that it might not contain an id_token.`
 				// see: [Successful Refresh Response](https://openid.net/specs/openid-connect-core-1_0.html#RefreshTokenResponse)
-				return c.json({
-					token_type: "Bearer",
-					access_token: accessToken,
-					refresh_token: refreshToken,
-					expires_in: env.OIDC_TOKEN_EXPIRES_IN_MINUTE * 60,
-				})
+				return c.json(
+					{
+						token_type: "Bearer" as const,
+						access_token: accessToken,
+						refresh_token: refreshToken,
+						expires_in: env.OIDC_TOKEN_EXPIRES_IN_MINUTE * 60,
+					},
+					200,
+				)
 			}
+			// grant_typeがサポート対象外の場合
+			return c.json(
+				{
+					error: "unsupported_grant_type" as const,
+					error_description: "The grant_type is not supported.",
+				},
+				400,
+			)
 		},
 	)
-	.get(
-		"/userinfo",
-		describeRoute({
+	.openapi(
+		createRoute({
+			method: "get",
+			path: "/userinfo",
 			description: "OIDC 1.0 で定められたユーザー情報（UserInfo）を返却する",
-			schema: GetUserInfoResultSchema,
+			responses: {
+				200: {
+					description: "Success",
+					content: {
+						"application/json": { schema: GetUserInfoResultSchema },
+					},
+				},
+				401: {
+					description: "Unauthorized",
+					content: {
+						"application/json": { schema: OAuthApiErrorResultSchema },
+					},
+				},
+			},
 		}),
 		async (c) => {
 			const user = c.get("user")
@@ -161,7 +211,7 @@ export const oauth2Router = new Hono<{ Variables: AuthContexts }>()
 			if (!loggedInUser) {
 				return c.json(
 					{
-						error: "invalid_token",
+						error: "invalid_token" as const,
 						error_description:
 							"The user associated with the provided token does not exist.",
 					},
@@ -169,16 +219,19 @@ export const oauth2Router = new Hono<{ Variables: AuthContexts }>()
 				)
 			}
 
-			return c.json({
-				sub: loggedInUser.id,
-				user_id: loggedInUser.id, // custom claim
-				name: `${loggedInUser.last_name} ${loggedInUser.first_name}`,
-				given_name: loggedInUser.first_name,
-				family_name: loggedInUser.last_name ?? undefined,
-				email: loggedInUser.email ?? undefined,
-				// 下記のフィールドは必須なので、ファールバック値を設定する
-				zoneinfo: loggedInUser.timezone ?? "Asia/Tokyo",
-				locale: loggedInUser.locale ?? "ja-JP",
-			})
+			return c.json(
+				{
+					sub: loggedInUser.id,
+					user_id: loggedInUser.id, // custom claim
+					name: `${loggedInUser.last_name} ${loggedInUser.first_name}`,
+					given_name: loggedInUser.first_name,
+					family_name: loggedInUser.last_name ?? undefined,
+					email: loggedInUser.email ?? undefined,
+					// 下記のフィールドは必須なので、ファールバック値を設定する
+					zoneinfo: loggedInUser.timezone ?? "Asia/Tokyo",
+					locale: loggedInUser.locale ?? "ja-JP",
+				},
+				200,
+			)
 		},
 	)

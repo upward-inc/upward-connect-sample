@@ -1,4 +1,4 @@
-import { Hono } from "hono"
+import { OpenAPIHono } from "@hono/zod-openapi"
 import { v1Router } from "./v1"
 
-export const apiRouter = new Hono().route("/v1", v1Router)
+export const apiRouter = new OpenAPIHono().route("/v1", v1Router)

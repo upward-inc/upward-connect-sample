@@ -1,4 +1,4 @@
-import { z } from "zod"
+import { z } from "../libs/zod"
 
 export const FileIdSchema = z.string().meta({
 	description: "ファイルID",
@@ -25,7 +25,12 @@ export const GetFileParamSchema = z.object({
 })
 
 export const PostFileFormSchema = z.object({
-	file: z.file().meta({
+	// TODO: z.file() が使えるようになったらそちらに変更する
+	// @see https://github.com/honojs/middleware/issues/1316#issuecomment-3094398624
+	file: z.instanceof(File).meta({
+		type: "string",
+		format: "binary",
+		contentEncoding: "binary",
 		description: "ファイル",
 	}),
 })

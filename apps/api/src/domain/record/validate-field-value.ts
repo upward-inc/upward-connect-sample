@@ -1,5 +1,5 @@
 import { parse } from "@formkit/tempo"
-import { z } from "zod"
+import { z } from "../../libs/zod"
 
 import {
 	EMailSchema,

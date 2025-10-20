@@ -1,8 +1,8 @@
-import type { Hono } from "hono"
-import { generateOpenAPISpecs } from "../../libs/hono-openapi"
+import type { OpenAPIHono } from "@hono/zod-openapi"
+import { env } from "../../env"
 import { generateOpenAPISpecsPage } from "../../libs/scalar"
 
-export function setupOpenAPIEndpoints<T extends Hono>(
+export function setupOpenAPIEndpoints<T extends OpenAPIHono>(
 	router: T,
 	routerPath: string,
 	config: {
@@ -11,20 +11,21 @@ export function setupOpenAPIEndpoints<T extends Hono>(
 		description?: string
 	},
 ) {
-	router
-		// OpenAPI specification
-		.get(
-			"/openapi",
-			generateOpenAPISpecs(router, routerPath, {
-				version: config.version,
-				description: config.description,
-			}),
-		)
-		// OpenAPI documentation
-		.get(
-			"/docs",
-			generateOpenAPISpecsPage(config.pageTitle, {
-				spec: { url: `${routerPath === "/" ? "" : routerPath}/openapi` },
-			}),
-		)
+	// OpenAPI specification
+	router.doc("/openapi", {
+		openapi: "3.1.0",
+		info: {
+			title: env.APP_NAME,
+			version: config.version,
+			description: config.description,
+		},
+	})
+
+	// OpenAPI documentation
+	router.get(
+		"/docs",
+		generateOpenAPISpecsPage(config.pageTitle, {
+			spec: { url: `${routerPath === "/" ? "" : routerPath}/openapi` },
+		}),
+	)
 }

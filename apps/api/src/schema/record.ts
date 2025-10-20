@@ -1,4 +1,4 @@
-import { z } from "zod"
+import { z } from "../libs/zod"
 import { JsonObjectSchema } from "./common"
 import { NestableFilterQuerySchema } from "./filter"
 import {
@@ -8,8 +8,12 @@ import {
 } from "./paging"
 import { StringToArraySchema } from "./utility"
 
-export const RecordSchema = z.object({}).meta({
+// TODO: zod.lazy()はまだサポートしていないため、openapiの内容を上書きする
+// @see https://github.com/honojs/middleware/issues/643#issuecomment-2265271987
+export const RecordSchema = JsonObjectSchema.meta({
+	type: "object",
 	description: "レコード",
+	properties: {},
 })
 
 export const RecordListSchema = z.array(RecordSchema).meta({

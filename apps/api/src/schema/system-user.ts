@@ -1,4 +1,4 @@
-import { z } from "zod"
+import { z } from "../libs/zod"
 import { ToDateSchema } from "./utility"
 
 export const UserIdSchema = z.string().meta({
