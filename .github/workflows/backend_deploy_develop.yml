@@ -1,0 +1,45 @@
+name: backend deploy - develop
+
+# When this action will be executed
+on:
+  # Automatically trigger it when detected changes in repo
+  push:
+    branches:
+      [ develop ]
+    paths:
+      - 'apps/backend/**'
+      - '.github/workflows/backend_deploy_develop.yml'
+
+  # Allow manually trigger
+  workflow_dispatch:
+
+jobs:
+  lint:
+    uses: ./.github/workflows/call_backend_lint.yml
+
+  test:
+    uses: ./.github/workflows/call_backend_test.yml
+
+  build:
+    needs: [lint, test]
+    uses: ./.github/workflows/call_backend_build.yml
+    with:
+      environment: 'develop'
+      registry_domain: 'multipfdevjecr.azurecr.io'
+      repository_name: 'multi-pf-api'
+      tag: 'latest'
+      dockerfile_path: './apps/backend/Dockerfile'
+      context_path: './apps/backend'
+    secrets: inherit
+
+  deploy:
+    needs: build
+    uses: ./.github/workflows/call_backend_deploy.yml
+    with:
+      environment: 'develop'
+      container_app_name: 'multi-pf-dev-je-api'
+      resource_group: 'multi-pf-dev-je'
+      registry_domain: 'multipfdevjecr.azurecr.io'
+      repository_name: 'multi-pf-api'
+      tag: 'latest'
+    secrets: inherit
