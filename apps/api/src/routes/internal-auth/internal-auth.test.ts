@@ -791,11 +791,11 @@ describe("Internal Auth Tests", () => {
 				where: { auth_code: data.code },
 			})
 
-			expect(authCode).not.toBeNull()
-			expect(authCode.code_challenge).toBe(
+			expect(authCode).toBeTruthy()
+			expect(authCode?.code_challenge).toBe(
 				"E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM",
 			)
-			expect(authCode.code_challenge_method).toBe("S256")
+			expect(authCode?.code_challenge_method).toBe("S256")
 		})
 
 		it("400 Bad Request - code_challengeがない", async () => {
