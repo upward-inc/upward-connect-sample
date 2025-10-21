@@ -58,7 +58,7 @@ export interface SampleData
 }
 
 interface RecordReference {
-	entity: string
+	entity_name: string
 	id: string
 }
 
