@@ -1,4 +1,4 @@
-name: call api build
+name: call backend build
 
 on:
   workflow_call:

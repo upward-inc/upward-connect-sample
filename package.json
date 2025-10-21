@@ -2,19 +2,19 @@
 	"name": "multi-platform-sample",
 	"version": "1.0.0",
 	"scripts": {
-		"api#dev": "bun run --filter api dev",
-		"api#test": "bun run --filter api test",
-		"login#dev": "bun run --filter login-app dev",
-		"db#up": "bun run --filter api db#up",
-		"db#down": "bun run --filter api db#down",
-		"db#migrate": "bun run --filter api db#migrate",
-		"db#pull": "bun run --filter api db#pull",
-		"db#migratefile": "bun run --filter api db#migratefile",
-		"db#seed": "bun run --filter api db#seed",
-		"prisma#generate": "bun run --filter api prisma#generate",
-		"format": "bun run --filter api --filter login-app format",
-		"lint": "bun run --filter api --filter login-app lint",
-		"check": "bun run --filter api --filter login-app check"
+		"be#dev": "bun run --filter backend dev",
+		"be#test": "bun run --filter backend test",
+		"fe#dev": "bun run --filter frontend dev",
+		"db#up": "bun run --filter backend db#up",
+		"db#down": "bun run --filter backend db#down",
+		"db#migrate": "bun run --filter backend db#migrate",
+		"db#pull": "bun run --filter backend db#pull",
+		"db#migratefile": "bun run --filter backend db#migratefile",
+		"db#seed": "bun run --filter backend db#seed",
+		"prisma#generate": "bun run --filter backend prisma#generate",
+		"format": "bun run --filter backend --filter frontend format",
+		"lint": "bun run --filter backend --filter frontend lint",
+		"check": "bun run --filter backend --filter frontend check"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "^1.9.4"

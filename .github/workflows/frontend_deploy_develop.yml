@@ -1,4 +1,4 @@
-name: login deploy - develop
+name: frontend deploy - develop
 
 on:
   push:
@@ -30,22 +30,22 @@ jobs:
 
       # Install dependencies
       - name: Install dependencies
-        working-directory: ./apps/login-app
+        working-directory: ./apps/frontend
         run: bun install --frozen-lockfile
 
       # Lint
       - name: Lint
-        working-directory: ./apps/login-app
+        working-directory: ./apps/frontend
         run: bun run lint
 
       # Test
       - name: Test
-        working-directory: ./apps/login-app
+        working-directory: ./apps/frontend
         run: bun run test
 
       # Build
       - name: Build
-        working-directory: ./apps/login-app
+        working-directory: ./apps/frontend
         env:
           VARS_JSON: ${{ toJSON(vars) }}
         run: |
@@ -58,7 +58,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: publish-files
-          path: ./apps/login-app/dist
+          path: ./apps/frontend/dist
 
   deploy_job:
     name: Deploy Job
