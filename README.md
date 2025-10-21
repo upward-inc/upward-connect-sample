@@ -24,10 +24,10 @@
 
 ```bash
 # バックエンドアプリケーションを開発モードで起動
-bun backend#dev
+bun be#dev
 
 # フロントエンドアプリケーションを開発モードで起動
-bun frontend#dev
+bun fe#dev
 ```
 
 ## DBスキーマ変更手順

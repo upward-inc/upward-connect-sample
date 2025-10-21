@@ -2,9 +2,9 @@
 	"name": "multi-platform-sample",
 	"version": "1.0.0",
 	"scripts": {
-		"backend#dev": "bun run --filter backend dev",
-		"backend#test": "bun run --filter backend test",
-		"frontend#dev": "bun run --filter frontend dev",
+		"be#dev": "bun run --filter backend dev",
+		"be#test": "bun run --filter backend test",
+		"fe#dev": "bun run --filter frontend dev",
 		"db#up": "bun run --filter backend db#up",
 		"db#down": "bun run --filter backend db#down",
 		"db#migrate": "bun run --filter backend db#migrate",
