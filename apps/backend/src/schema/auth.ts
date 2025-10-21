@@ -47,12 +47,12 @@ export const NonceSchema = z.string().meta({
 })
 
 export const CodeChallengeSchema = z.string().min(43).max(128).meta({
-	description: "PKCE用コードチャレンジ（最小43文字、最大128文字）",
+	description: "認可コード横取り攻撃防止のために使用するハッシュ文字列",
 	example: "E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM",
 })
 
 export const CodeChallengeMethodSchema = z.literal("S256").meta({
-	description: "PKCE用コードチャレンジメソッド",
+	description: "PKCEで使用するアルゴリズム",
 	example: "S256",
 })
 
@@ -256,7 +256,7 @@ export const PostTokenParamSchema = z.discriminatedUnion("grant_type", [
 		client_id: ClientIdSchema,
 		client_secret: ClientSecretSchema,
 		code_verifier: z.string().min(43).max(128).meta({
-			description: "PKCE用コードベリファイア（最小43文字、最大128文字）",
+			description: "PKCEで使用するランダムな文字列",
 			example: "dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk",
 		}),
 	}),
