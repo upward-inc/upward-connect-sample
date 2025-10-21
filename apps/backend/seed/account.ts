@@ -47,7 +47,10 @@ export async function seedAccounts(
 	}).map((_, index) => {
 		const code = getZeroPaddingString(index + 1, 6)
 		const user = getAnyRow(users)
-		const userRecordReference = JSON.stringify({ entity: "user", id: user.id })
+		const userRecordReference = JSON.stringify({
+			entity_name: "user",
+			id: user.id,
+		})
 		const address = getAnyRow(addresses)
 
 		return {
@@ -84,7 +87,7 @@ export async function seedAccounts(
 				: null,
 			description: getRandomBoolean(0.9) ? `description ${code}` : null,
 			originating_lead: getRandomBoolean(0.1)
-				? JSON.stringify({ entity: "lead", id: getAnyRow(leads).id })
+				? JSON.stringify({ entity_name: "lead", id: getAnyRow(leads).id })
 				: null,
 			parent: null,
 			is_deleted: false,
@@ -130,7 +133,7 @@ export async function seedAccountsParent(prisma: Prisma.TransactionClient) {
 				},
 				data: {
 					parent: JSON.stringify({
-						entity: "account",
+						entity_name: "account",
 						id: getAnyRow(parentAccounts).id,
 					}),
 				},

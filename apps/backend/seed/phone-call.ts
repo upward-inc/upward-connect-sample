@@ -54,7 +54,10 @@ export async function seedPhoneCalls(
 		const account = getAnyRow(accounts)
 		const lead = getAnyRow(leads)
 		const contact = getAnyRow(contacts)
-		const userRecordReference = JSON.stringify({ entity: "user", id: user.id })
+		const userRecordReference = JSON.stringify({
+			entity_name: "user",
+			id: user.id,
+		})
 
 		const status = getAnyOption(
 			"status",
@@ -78,16 +81,16 @@ export async function seedPhoneCalls(
 
 		const their = getRandomBoolean(0.5)
 			? {
-					reference: { entity: "account", id: account.id },
+					reference: { entity_name: "account", id: account.id },
 					phoneNumber: account.main_phone_number,
 				}
 			: getRandomBoolean(0.5)
 				? {
-						reference: { entity: "lead", id: lead.id },
+						reference: { entity_name: "lead", id: lead.id },
 						phoneNumber: lead.phone_number,
 					}
 				: {
-						reference: { entity: "contact", id: contact.id },
+						reference: { entity_name: "contact", id: contact.id },
 						phoneNumber: contact.mobile_phone_number,
 					}
 

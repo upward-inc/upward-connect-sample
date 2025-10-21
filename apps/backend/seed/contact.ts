@@ -51,13 +51,16 @@ export async function seedContacts(
 		const user = getAnyRow(users)
 		const person = getAnyRow(persons)
 		const account = getAnyRow(accounts)
-		const userRecordReference = JSON.stringify({ entity: "user", id: user.id })
+		const userRecordReference = JSON.stringify({
+			entity_name: "user",
+			id: user.id,
+		})
 
 		return {
 			first_name: person.firstName.value,
 			last_name: person.lastName.value,
 			gender: JSON.stringify([getAnyOption("gender").name]),
-			account: JSON.stringify({ entity: "account", id: account.id }),
+			account: JSON.stringify({ entity_name: "account", id: account.id }),
 			business_unit: getRandomBoolean(0.9) ? `部署 ${code}` : null,
 			title: getRandomBoolean(0.9) ? `役職 ${code}` : null,
 			company_phone_number: getRandomBoolean(0.9)
@@ -69,7 +72,7 @@ export async function seedContacts(
 			email: getRandomBoolean(0.9) ? `mail@${code}.com` : null,
 			website: getRandomBoolean(0.9) ? `https://site.${code}.com` : null,
 			originating_lead: getRandomBoolean(0.1)
-				? JSON.stringify({ entity: "lead", id: getAnyRow(leads).id })
+				? JSON.stringify({ entity_name: "lead", id: getAnyRow(leads).id })
 				: null,
 			description: getRandomBoolean(0.9) ? `description ${code}` : null,
 			is_deleted: false,

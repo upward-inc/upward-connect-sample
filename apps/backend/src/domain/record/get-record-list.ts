@@ -22,7 +22,7 @@ type DBRecord = Record<
 >
 
 type Reference = {
-	entity: string
+	entity_name: string
 	id: string
 }
 
@@ -229,19 +229,19 @@ const covertRecords = async (
 				if (type === "reference") {
 					const references: Reference | Reference[] = JSON.parse(String(value))
 
-					const getValue = (entity: string, id: string) => {
+					const getValue = (entity_name: string, id: string) => {
 						return {
-							entity,
+							entity_name,
 							id,
-							title: referenceRecords.get(entity)?.get(id) ?? "",
+							title: referenceRecords.get(entity_name)?.get(id) ?? "",
 						}
 					}
 
 					if (!isArray(references)) {
-						value = getValue(references.entity, references.id)
+						value = getValue(references.entity_name, references.id)
 					} else {
 						value = references.map((reference) =>
-							getValue(reference.entity, reference.id),
+							getValue(reference.entity_name, reference.id),
 						)
 					}
 				}
@@ -290,11 +290,11 @@ const getReferenceRecords = async (
 
 	// エンティティ毎の参照されているID
 	const idsByEntity = new Map<string, Set<string>>()
-	for (const { entity, id } of references) {
-		if (!idsByEntity.has(entity)) {
-			idsByEntity.set(entity, new Set())
+	for (const { entity_name, id } of references) {
+		if (!idsByEntity.has(entity_name)) {
+			idsByEntity.set(entity_name, new Set())
 		}
-		idsByEntity.get(entity)?.add(id)
+		idsByEntity.get(entity_name)?.add(id)
 	}
 
 	// エンティティ毎にレコードを取得

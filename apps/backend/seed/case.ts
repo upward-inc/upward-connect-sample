@@ -50,7 +50,10 @@ export async function seedCases(
 		const user = getAnyRow(users)
 		const account = getAnyRow(accounts)
 		const contact = getAnyRow(contacts)
-		const userRecordReference = JSON.stringify({ entity: "user", id: user.id })
+		const userRecordReference = JSON.stringify({
+			entity_name: "user",
+			id: user.id,
+		})
 
 		const anyDate = getRandomDate(addYear(date(), -2), addYear(date(), 1))
 
@@ -58,8 +61,8 @@ export async function seedCases(
 			case_number: code,
 			subject: `ケース ${code}`,
 			detail: getRandomBoolean(0.9) ? `detail ${code}` : null,
-			contact: JSON.stringify({ entity: "contact", id: contact.id }),
-			account: JSON.stringify({ entity: "account", id: account.id }),
+			contact: JSON.stringify({ entity_name: "contact", id: contact.id }),
+			account: JSON.stringify({ entity_name: "account", id: account.id }),
 			parent: null,
 			type: getRandomBoolean(0.9)
 				? JSON.stringify([getAnyOption("type").name])
