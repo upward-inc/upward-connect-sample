@@ -1,5 +1,5 @@
 import { OpenAPIHono, createRoute } from "@hono/zod-openapi"
-import { getEntity } from "../../../domain/entity"
+import { getEntity } from "../../../../domain/entity"
 import {
 	createRecord,
 	deleteRecord,
@@ -9,9 +9,9 @@ import {
 	validateCreateRecordBody,
 	validateGetRecordListQuery,
 	validateUpdateRecordBody,
-} from "../../../domain/record"
-import type { AuthContexts } from "../../../schema/auth"
-import { ResourceApiErrorResultSchema } from "../../../schema/error"
+} from "../../../../domain/record"
+import type { AuthContexts } from "../../../../schema/auth"
+import { ResourceApiErrorResultSchema } from "../../../../schema/error"
 import {
 	DeleteRecordParamSchema,
 	GetRecordListQuerySchema,
@@ -23,7 +23,7 @@ import {
 	PostRecordBodySchema,
 	PostRecordParamSchema,
 	PostRecordResponseSchema,
-} from "../../../schema/record"
+} from "../../../../schema/record"
 
 export const recordRouter = new OpenAPIHono<{ Variables: AuthContexts }>()
 	.openapi(
