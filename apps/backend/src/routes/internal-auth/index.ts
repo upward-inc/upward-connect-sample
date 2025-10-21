@@ -167,8 +167,10 @@ export const internalAuthRouter = new OpenAPIHono<{ Variables: AuthContexts }>()
 				client_secret: validateResult.client_secret,
 				redirect_uri: validateResult.redirect_uri,
 				scopes: validateResult.scopes,
-				state: params.state ?? null,
-				nonce: validateResult.nonce ?? null,
+				state: params.state,
+				nonce: validateResult.nonce,
+				code_challenge: params.code_challenge,
+				code_challenge_method: params.code_challenge_method,
 				published_at: new Date(),
 				expire_at: new Date(
 					Date.now() + 1000 * 60 * env.OAUTH2_AUTH_CODE_EXPIRES_IN_MINUTE,

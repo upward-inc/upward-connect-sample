@@ -404,17 +404,19 @@ model user_access_control {
 }
 
 model published_auth_code {
-  auth_code     String   @id(map: "pk_published_auth_code") @db.NVarChar(255)
-  client_id     String   @db.NVarChar(Max)
-  client_secret String   @db.NVarChar(Max)
-  redirect_uri  String   @db.NVarChar(Max)
-  scope         String?  @db.NVarChar(Max)
-  state         String?  @db.NVarChar(Max)
-  nonce         String?  @db.NVarChar(Max)
-  published_at  DateTime @db.DateTime
-  expire_at     DateTime @db.DateTime
-  user_id       String   @db.UniqueIdentifier
-  user          user     @relation(fields: [user_id], references: [id], onUpdate: NoAction, map: "fk_published_auth_code_user_id")
+  auth_code             String   @id(map: "pk_published_auth_code") @db.NVarChar(255)
+  client_id             String   @db.NVarChar(Max)
+  client_secret         String   @db.NVarChar(Max)
+  redirect_uri          String   @db.NVarChar(Max)
+  scope                 String?  @db.NVarChar(Max)
+  state                 String?  @db.NVarChar(Max)
+  nonce                 String?  @db.NVarChar(Max)
+  code_challenge        String?  @db.NVarChar(128)
+  code_challenge_method String?  @db.NVarChar(10)
+  published_at          DateTime @db.DateTime
+  expire_at             DateTime @db.DateTime
+  user_id               String   @db.UniqueIdentifier
+  user                  user     @relation(fields: [user_id], references: [id], onUpdate: NoAction, map: "fk_published_auth_code_user_id")
 }
 
 model oauth_client {

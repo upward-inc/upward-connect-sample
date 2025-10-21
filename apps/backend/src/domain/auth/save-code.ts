@@ -16,6 +16,8 @@ export const saveAuthorizationCode = async (
 		scopes: string[]
 		state: string | null
 		nonce: string | null
+		code_challenge: string | null
+		code_challenge_method: string | null
 		published_at: Date
 		expire_at: Date
 	},

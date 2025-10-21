@@ -46,6 +46,16 @@ export const NonceSchema = z.string().meta({
 	example: "cma33PzyycBFb3LA",
 })
 
+export const CodeChallengeSchema = z.string().min(43).max(128).meta({
+	description: "認可コード横取り攻撃防止のために使用するハッシュ文字列",
+	example: "E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM",
+})
+
+export const CodeChallengeMethodSchema = z.literal("S256").meta({
+	description: "PKCEで使用するアルゴリズム",
+	example: "S256",
+})
+
 export const AccessTokenSchema = z.string().min(1).meta({
 	description: "アクセストークン",
 	example: "sample_access_token",
@@ -109,6 +119,8 @@ export const PublishedAuthCodeSchema = z
 		}),
 		state: StateSchema.nullable(),
 		nonce: NonceSchema.nullable(),
+		code_challenge: CodeChallengeSchema.nullable(),
+		code_challenge_method: CodeChallengeMethodSchema.nullable(),
 		published_at: z.date().meta({
 			description: "発行日時",
 		}),
@@ -224,6 +236,8 @@ export const PostAuthorizeParamSchema = z.object({
 	}),
 	state: StateSchema,
 	nonce: NonceSchema,
+	code_challenge: CodeChallengeSchema,
+	code_challenge_method: CodeChallengeMethodSchema,
 })
 
 export const PostAuthorizeResultSchema = z.object({
@@ -241,6 +255,10 @@ export const PostTokenParamSchema = z.discriminatedUnion("grant_type", [
 		redirect_uri: RedirectUriSchema,
 		client_id: ClientIdSchema,
 		client_secret: ClientSecretSchema,
+		code_verifier: z.string().min(43).max(128).meta({
+			description: "PKCEで使用するランダムな文字列",
+			example: "dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk",
+		}),
 	}),
 	z.object({
 		grant_type: z.literal("refresh_token"),

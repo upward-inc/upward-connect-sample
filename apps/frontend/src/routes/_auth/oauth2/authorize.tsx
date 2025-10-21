@@ -28,6 +28,8 @@ const ScopeSchema = z
 	)
 const StateSchema = z.string().min(1)
 const NonceSchema = z.string().min(1)
+const CodeChallengeSchema = z.string().min(43).max(128)
+const CodeChallengeMethodSchema = z.literal("S256")
 
 // 検索パラメータ一覧を表現するスキーマ
 // バリデーション実装の都合、すべてのパラメータをoptionalで定義
@@ -38,6 +40,8 @@ const SearchParamsSchema = z.object({
 	scope: z.string().optional(),
 	state: z.string().optional(),
 	nonce: z.string().optional(),
+	code_challenge: z.string().optional(),
+	code_challenge_method: z.string().optional(),
 })
 
 // OAuth2認可リクエストのパラメータ一覧を表現するスキーマ
@@ -48,6 +52,8 @@ const AuthorizeParamsSchema = z.object({
 	scope: ScopeSchema,
 	state: StateSchema,
 	nonce: NonceSchema,
+	code_challenge: CodeChallengeSchema,
+	code_challenge_method: CodeChallengeMethodSchema,
 })
 
 interface AuthorizeResultSuccess {
@@ -163,6 +169,21 @@ function useAuthorizeValidation(
 			redirectFail(redirectUri, { error: "invalid_request", state })
 		}
 
+		// `code_challenge`の検証
+		const { success: codeChallengeSuccess } = CodeChallengeSchema.safeParse(
+			searchParams.code_challenge,
+		)
+		if (!codeChallengeSuccess) {
+			redirectFail(redirectUri, { error: "invalid_request", state })
+		}
+
+		// `code_challenge_method`の検証
+		const { success: codeChallengeMethodSuccess } =
+			CodeChallengeMethodSchema.safeParse(searchParams.code_challenge_method)
+		if (!codeChallengeMethodSuccess) {
+			redirectFail(redirectUri, { error: "invalid_request", state })
+		}
+
 		setIsValidating(false)
 	}, [searchParams])
 
@@ -271,6 +292,11 @@ function AuthorizePage() {
 		formData.append("scope", strictQueryParams.scope)
 		formData.append("state", strictQueryParams.state)
 		formData.append("nonce", strictQueryParams.nonce)
+		formData.append("code_challenge", strictQueryParams.code_challenge)
+		formData.append(
+			"code_challenge_method",
+			strictQueryParams.code_challenge_method,
+		)
 
 		// サーバーサイドで検証
 		const response = await fetch(`${env.API_URL}/auth/authorize`, {

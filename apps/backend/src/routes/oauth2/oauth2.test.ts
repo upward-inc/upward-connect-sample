@@ -567,6 +567,8 @@ describe("Auth Tests", () => {
 					scope: "openid profile email",
 					state: "random_state_12345",
 					nonce: "random_nonce_12345",
+					code_challenge: "E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM",
+					code_challenge_method: "S256",
 				}),
 			})
 
@@ -586,6 +588,7 @@ describe("Auth Tests", () => {
 					redirect_uri: "https://example.com/callback",
 					client_id: testClient.id,
 					client_secret: testClient.secret,
+					code_verifier: "dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk",
 				}),
 			})
 
@@ -607,6 +610,7 @@ describe("Auth Tests", () => {
 					redirect_uri: "https://example.com/callback",
 					client_id: testClient.id,
 					client_secret: testClient.secret,
+					code_verifier: "dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk",
 				}),
 			})
 
@@ -650,6 +654,8 @@ describe("Auth Tests", () => {
 					scope: "openid profile email",
 					state: "random_state_12345",
 					nonce: "random_nonce_12345",
+					code_challenge: "E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM",
+					code_challenge_method: "S256",
 				}),
 			})
 
@@ -669,6 +675,7 @@ describe("Auth Tests", () => {
 					redirect_uri: "https://example.com/callback",
 					client_id: testClient.id,
 					client_secret: "wrong_secret", // Invalid secret
+					code_verifier: "dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk",
 				}),
 			})
 
@@ -691,6 +698,7 @@ describe("Auth Tests", () => {
 					redirect_uri: "https://example.com/callback",
 					client_id: testClient.id,
 					client_secret: testClient.secret, // Correct secret
+					code_verifier: "dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk",
 				}),
 			})
 
@@ -699,6 +707,71 @@ describe("Auth Tests", () => {
 			expect(validParamsData).toEqual({
 				error: "invalid_grant",
 				error_description: "Invalid authorization code",
+			})
+		})
+
+		it("400 Bad Request - code_verifierが不正", async () => {
+			// Create a test user and client
+			const testUser = await createTestUser({
+				user_name: "invalid_code_verifier_user",
+				first_name: "Invalid",
+				last_name: "CodeVerifier",
+				email: "invalid_code_verifier@example.com",
+			})
+
+			const testClient = await createTestOAuthClient({
+				name: "invalid_cv_cli",
+				secret: "test_secret_12345",
+				redirect_uris: "https://example.com/callback",
+				scopes: "openid,profile,email",
+			})
+
+			const token = createValidToken(testUser.id)
+
+			// ステップ1: 認可コードを取得
+			const authorizeResponse = await app.request("/auth/authorize", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/x-www-form-urlencoded",
+					Authorization: `Bearer ${token}`,
+				},
+				body: new URLSearchParams({
+					response_type: "code",
+					client_id: testClient.id,
+					redirect_uri: "https://example.com/callback",
+					scope: "openid profile email",
+					state: "random_state_12345",
+					nonce: "random_nonce_12345",
+					code_challenge: "E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM",
+					code_challenge_method: "S256",
+				}),
+			})
+
+			const authorizeData = await authorizeResponse.json()
+			expect(authorizeResponse.status).toBe(200)
+			expect(authorizeData).toHaveProperty("code")
+
+			// ステップ2: 不正なcode_verifierでトークンエンドポイントにアクセス
+			const tokenResponse = await app.request("/oauth2/token", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/x-www-form-urlencoded",
+				},
+				body: new URLSearchParams({
+					grant_type: "authorization_code",
+					code: authorizeData.code,
+					redirect_uri: "https://example.com/callback",
+					client_id: testClient.id,
+					client_secret: testClient.secret,
+					code_verifier: "this_is_an_invalid_code_verifier___________", // 不正なcode_verifier(43文字)
+				}),
+			})
+
+			const tokenData = await tokenResponse.json()
+			expect(tokenResponse.status).toBe(400)
+			expect(tokenData).toEqual({
+				error: "invalid_grant",
+				error_description: "Invalid code_verifier",
 			})
 		})
 	})
@@ -736,6 +809,8 @@ describe("Auth Tests", () => {
 					scope: "openid profile email",
 					state: "random_state_12345",
 					nonce: "random_nonce_12345",
+					code_challenge: "E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM",
+					code_challenge_method: "S256",
 				}),
 			})
 
@@ -755,6 +830,7 @@ describe("Auth Tests", () => {
 					redirect_uri: "https://example.com/callback",
 					client_id: testClient.id,
 					client_secret: testClient.secret,
+					code_verifier: "dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk",
 				}),
 			})
 
@@ -808,6 +884,8 @@ describe("Auth Tests", () => {
 					scope: "openid profile email",
 					state: "random_state_12345",
 					nonce: "random_nonce_12345",
+					code_challenge: "E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM",
+					code_challenge_method: "S256",
 				}),
 			})
 
@@ -827,6 +905,7 @@ describe("Auth Tests", () => {
 					redirect_uri: "https://example.com/callback",
 					client_id: testClient.id,
 					client_secret: testClient.secret,
+					code_verifier: "dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk",
 				}),
 			})
 
@@ -877,6 +956,8 @@ describe("Auth Tests", () => {
 					scope: "openid profile email offline_access",
 					state: "random_state_12345",
 					nonce: "random_nonce_12345",
+					code_challenge: "E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM",
+					code_challenge_method: "S256",
 				}),
 			})
 
@@ -894,6 +975,7 @@ describe("Auth Tests", () => {
 					redirect_uri: "https://example.com/callback",
 					client_id: testClient.id,
 					client_secret: testClient.secret,
+					code_verifier: "dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk",
 				}),
 			})
 
@@ -1009,6 +1091,8 @@ describe("Auth Tests", () => {
 					scope: "openid profile email",
 					state: "random_state_12345",
 					nonce: "random_nonce_12345",
+					code_challenge: "E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM",
+					code_challenge_method: "S256",
 				}),
 			})
 
@@ -1028,6 +1112,7 @@ describe("Auth Tests", () => {
 					redirect_uri: "https://example.com/callback",
 					client_id: testClient.id,
 					client_secret: testClient.secret,
+					code_verifier: "dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk",
 				}),
 			})
 
@@ -1091,6 +1176,8 @@ describe("Auth Tests", () => {
 					scope: "openid profile email",
 					state: "random_state_12345",
 					nonce: "random_nonce_12345",
+					code_challenge: "E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM",
+					code_challenge_method: "S256",
 				}),
 			})
 
@@ -1110,6 +1197,7 @@ describe("Auth Tests", () => {
 					redirect_uri: "https://example.com/callback",
 					client_id: testClient.id,
 					client_secret: testClient.secret,
+					code_verifier: "dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk",
 				}),
 			})
 			const tokenData = await tokenResponse.json()
