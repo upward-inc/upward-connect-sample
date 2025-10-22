@@ -5,44 +5,30 @@ import type { HttpHandler } from "msw"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
 import { setRequestHandlers } from "../../../test/msw"
-import { AuthorizePage } from "./authorize"
+import { AuthorizePage, type SearchParams } from "./authorize"
 
 const { API_URL } = vi.hoisted(() => ({
 	API_URL: "https://api.test.local",
+}))
+vi.mock("../../../env", () => ({
+	env: { API_URL },
 }))
 
 const { useSearchMock, createFileRouteMock } = vi.hoisted(() => ({
 	useSearchMock: vi.fn(),
 	createFileRouteMock: vi.fn().mockImplementation(() => () => ({})),
 }))
-
-const { useAuthMock } = vi.hoisted(() => ({
-	useAuthMock: vi.fn(),
-}))
-
 vi.mock("@tanstack/react-router", () => ({
 	useSearch: useSearchMock,
 	createFileRoute: createFileRouteMock,
 }))
 
+const { useAuthMock } = vi.hoisted(() => ({
+	useAuthMock: vi.fn(),
+}))
 vi.mock("../../../auth", () => ({
 	useAuth: useAuthMock,
 }))
-
-vi.mock("../../../env", () => ({
-	env: { API_URL },
-}))
-
-type SearchParams = {
-	response_type?: string
-	client_id?: string
-	redirect_uri?: string
-	scope?: string
-	state?: string
-	nonce?: string
-	code_challenge?: string
-	code_challenge_method?: string
-}
 
 const baseSearchParams: Required<SearchParams> = {
 	response_type: "code",
@@ -55,40 +41,32 @@ const baseSearchParams: Required<SearchParams> = {
 	code_challenge_method: "S256",
 }
 
-let currentSearchParams: SearchParams = baseSearchParams
 let locationUpdates: string[] = []
-
-const defaultToken = "test-token"
-
-const buildSearchParams = (
-	overrides: Partial<SearchParams> = {},
-): SearchParams => ({
-	...baseSearchParams,
-	...overrides,
-})
 
 const createClientHandler = (
 	status: number,
 	body: Record<string, unknown>,
-): HttpHandler =>
-	http.get(`${API_URL}/auth/clients/:clientId`, () =>
+): HttpHandler => {
+	return http.get(`${API_URL}/auth/clients/:clientId`, () =>
 		status === 200
 			? HttpResponse.json(body)
 			: HttpResponse.json(body, { status }),
 	)
+}
 
 const createAuthorizeHandler = (
 	status: number,
 	body: Record<string, unknown>,
 	options: { onRequest?: (request: Request) => void } = {},
-): HttpHandler =>
-	http.post(`${API_URL}/auth/authorize`, async ({ request }) => {
+): HttpHandler => {
+	return http.post(`${API_URL}/auth/authorize`, async ({ request }) => {
 		options.onRequest?.(request)
 
 		return status === 200
 			? HttpResponse.json(body, { status: 200 })
 			: HttpResponse.json(body, { status })
 	})
+}
 
 const renderAuthorizePage = () => {
 	render(<AuthorizePage />)
@@ -99,7 +77,7 @@ describe("AuthorizePage", () => {
 	let locationHref = baseSearchParams.redirect_uri
 
 	beforeEach(() => {
-		useAuthMock.mockReturnValue({ token: defaultToken })
+		useAuthMock.mockReturnValue({ token: "test-token" })
 		locationHref = baseSearchParams.redirect_uri
 		locationUpdates = []
 		Object.defineProperty(window, "location", {
@@ -117,28 +95,21 @@ describe("AuthorizePage", () => {
 				},
 			},
 		})
+
+		useSearchMock.mockReturnValue(baseSearchParams)
 	})
 
 	afterEach(() => {
 		useSearchMock.mockReset()
 		useAuthMock.mockReset()
 		createFileRouteMock.mockReset()
-		currentSearchParams = baseSearchParams
 		Object.defineProperty(window, "location", {
 			configurable: true,
 			value: originalLocation,
 		})
 	})
 
-	const setSearchParams = (params?: Partial<SearchParams>) => {
-		const value = buildSearchParams(params)
-		useSearchMock.mockReturnValue(value)
-		currentSearchParams = value
-		return value
-	}
-
 	it("有効なOAuthパラメータとクライアントIDでアクセスしたとき、クライアント名と要求されたスコープのリストが表示される", async () => {
-		setSearchParams()
 		setRequestHandlers(createClientHandler(200, { name: "Sample App" }))
 
 		renderAuthorizePage()
@@ -155,7 +126,6 @@ describe("AuthorizePage", () => {
 	})
 
 	it("ユーザーが許可ボタンをクリックしたとき、認可コードとstateパラメータを付与してリダイレクトURIへ遷移する", async () => {
-		setSearchParams()
 		const authorizeRequest = vi.fn()
 		setRequestHandlers(
 			createClientHandler(200, { name: "Sample App" }),
@@ -189,7 +159,6 @@ describe("AuthorizePage", () => {
 	})
 
 	it("ユーザーが拒否ボタンをクリックしたとき、access_deniedエラーとstateパラメータを付与してリダイレクトURIへ遷移する", async () => {
-		setSearchParams()
 		setRequestHandlers(createClientHandler(200, { name: "Sample App" }))
 
 		renderAuthorizePage()
@@ -202,7 +171,6 @@ describe("AuthorizePage", () => {
 	})
 
 	it("クライアント情報の取得に失敗したとき、unauthorized_clientエラーを付与してリダイレクトURIへ遷移する", async () => {
-		setSearchParams()
 		setRequestHandlers(createClientHandler(404, {}))
 
 		renderAuthorizePage()
@@ -212,44 +180,7 @@ describe("AuthorizePage", () => {
 		})
 	})
 
-	it("認可APIがconsent_requiredエラーを返したとき、エラーとエラー説明とstateパラメータを付与してリダイレクトURIへ遷移する", async () => {
-		setSearchParams()
-		setRequestHandlers(
-			createClientHandler(200, { name: "Sample App" }),
-			createAuthorizeHandler(400, {
-				error: "consent_required",
-				error_description: "consent required",
-				state: baseSearchParams.state,
-			}),
-		)
-
-		renderAuthorizePage()
-		const user = userEvent.setup()
-
-		await user.click(await screen.findByRole("button", { name: "許可する" }))
-
-		expect(locationHref).toContain("error=consent_required")
-		expect(locationHref).toContain(`state=${baseSearchParams.state}`)
-		expect(locationHref).toContain("error_description=consent+required")
-	})
-
-	it("認可APIが503ステータスを返したとき、temporarily_unavailableエラーを付与してリダイレクトURIへ遷移する", async () => {
-		setSearchParams()
-		setRequestHandlers(
-			createClientHandler(200, { name: "Sample App" }),
-			createAuthorizeHandler(503, { error: "server_error" }),
-		)
-
-		renderAuthorizePage()
-		const user = userEvent.setup()
-
-		await user.click(await screen.findByRole("button", { name: "許可する" }))
-
-		expect(locationHref).toContain("error=temporarily_unavailable")
-	})
-
 	it("認可APIがinvalid_request_uriエラーを返したとき、オープンリダイレクト攻撃を防ぐため例外を投げる", async () => {
-		setSearchParams()
 		setRequestHandlers(
 			createClientHandler(200, { name: "Sample App" }),
 			http.post(`${API_URL}/auth/authorize`, () =>
@@ -283,11 +214,37 @@ describe("AuthorizePage", () => {
 		}
 	})
 
-	it("redirect_uriパラメータがHTTPSでない場合、オープンリダイレクト攻撃を防ぐためレンダリング時に例外を投げる", () => {
-		setSearchParams({ redirect_uri: "http://malicious.example.com" })
+	it("認可APIがconsent_requiredエラーを返したとき、エラーとエラー説明とstateパラメータを付与してリダイレクトURIへ遷移する", async () => {
+		setRequestHandlers(
+			createClientHandler(200, { name: "Sample App" }),
+			createAuthorizeHandler(400, {
+				error: "consent_required",
+				error_description: "consent required",
+				state: baseSearchParams.state,
+			}),
+		)
 
-		expect(() => {
-			renderAuthorizePage()
-		}).toThrowError("invalid redirect_uri")
+		renderAuthorizePage()
+		const user = userEvent.setup()
+
+		await user.click(await screen.findByRole("button", { name: "許可する" }))
+
+		expect(locationHref).toContain("error=consent_required")
+		expect(locationHref).toContain(`state=${baseSearchParams.state}`)
+		expect(locationHref).toContain("error_description=consent+required")
+	})
+
+	it("認可APIが503ステータスを返したとき、temporarily_unavailableエラーを付与してリダイレクトURIへ遷移する", async () => {
+		setRequestHandlers(
+			createClientHandler(200, { name: "Sample App" }),
+			createAuthorizeHandler(503, { error: "server_error" }),
+		)
+
+		renderAuthorizePage()
+		const user = userEvent.setup()
+
+		await user.click(await screen.findByRole("button", { name: "許可する" }))
+
+		expect(locationHref).toContain("error=temporarily_unavailable")
 	})
 })

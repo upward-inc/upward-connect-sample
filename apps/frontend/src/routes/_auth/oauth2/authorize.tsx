@@ -56,6 +56,8 @@ const AuthorizeParamsSchema = z.object({
 	code_challenge_method: CodeChallengeMethodSchema,
 })
 
+export type SearchParams = z.output<typeof SearchParamsSchema>
+
 interface AuthorizeResultSuccess {
 	code: string
 	state?: string
