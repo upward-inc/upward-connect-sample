@@ -85,7 +85,7 @@ describe("GET /records/:entity_name - レコード一覧取得（検索）", () 
 			title: string
 			operator: string
 			value?: unknown
-			expexted: { data: Array<{ name: string }> }
+			expected: { data: Array<{ name: string }> }
 		}>,
 	) {
 		const allRecordNames = testRecords.map(({ name }) => ({ name }))
@@ -102,10 +102,10 @@ describe("GET /records/:entity_name - レコード一覧取得（検索）", () 
 					...testCase,
 					title: `${testCase.title} + is_not=true`,
 					is_not: true,
-					// `expexted.data`に含まれないレコードが`is_not: true`時の期待値となる
-					expexted: {
+					// `expected.data`に含まれないレコードが`is_not: true`時の期待値となる
+					expected: {
 						data: allRecordNames.filter(({ name }) => {
-							return !testCase.expexted.data.some((expected) => {
+							return !testCase.expected.data.some((expected) => {
 								return expected.name === name
 							})
 						}),
@@ -190,37 +190,37 @@ describe("GET /records/:entity_name - レコード一覧取得（検索）", () 
 						title: "eq",
 						operator: "eq",
 						value: "prefix A / text A-1 / suffix A",
-						expexted: { data: [{ name: "Record 1" }] },
+						expected: { data: [{ name: "Record 1" }] },
 					},
 					{
 						title: "contains",
 						operator: "contains",
 						value: "text B",
-						expexted: { data: [{ name: "Record 3" }, { name: "Record 4" }] },
+						expected: { data: [{ name: "Record 3" }, { name: "Record 4" }] },
 					},
 					{
 						title: "starts_with",
 						operator: "starts_with",
 						value: "prefix A",
-						expexted: { data: [{ name: "Record 1" }, { name: "Record 2" }] },
+						expected: { data: [{ name: "Record 1" }, { name: "Record 2" }] },
 					},
 					{
 						title: "ends_with",
 						operator: "ends_with",
 						value: "suffix B",
-						expexted: { data: [{ name: "Record 3" }, { name: "Record 4" }] },
+						expected: { data: [{ name: "Record 3" }, { name: "Record 4" }] },
 					},
 					{
 						title: "gt",
 						operator: "gt",
 						value: "prefix B / text B-2 / suffix B",
-						expexted: { data: [{ name: "Record 5" }, { name: "Record 6" }] },
+						expected: { data: [{ name: "Record 5" }, { name: "Record 6" }] },
 					},
 					{
 						title: "gte",
 						operator: "gte",
 						value: "prefix B / text B-2 / suffix B",
-						expexted: {
+						expected: {
 							data: [
 								{ name: "Record 4" },
 								{ name: "Record 5" },
@@ -232,7 +232,7 @@ describe("GET /records/:entity_name - レコード一覧取得（検索）", () 
 						title: "lt",
 						operator: "lt",
 						value: "prefix B / text B-2 / suffix B",
-						expexted: {
+						expected: {
 							data: [
 								{ name: "Record 1" },
 								{ name: "Record 2" },
@@ -245,7 +245,7 @@ describe("GET /records/:entity_name - レコード一覧取得（検索）", () 
 						title: "lte",
 						operator: "lte",
 						value: "prefix B / text B-2 / suffix B",
-						expexted: {
+						expected: {
 							data: [
 								{ name: "Record 1" },
 								{ name: "Record 2" },
@@ -258,7 +258,7 @@ describe("GET /records/:entity_name - レコード一覧取得（検索）", () 
 					{
 						title: "is_set",
 						operator: "is_set",
-						expexted: {
+						expected: {
 							data: [
 								{ name: "Record 1" },
 								{ name: "Record 2" },
@@ -275,7 +275,7 @@ describe("GET /records/:entity_name - レコード一覧取得（検索）", () 
 
 				it.each(testCases)(
 					"$title",
-					async ({ operator, value, is_not, expexted }) => {
+					async ({ operator, value, is_not, expected }) => {
 						// Arrange
 						await createManyTestSamples(testExecutionUser.id, testRecords)
 
@@ -290,7 +290,7 @@ describe("GET /records/:entity_name - レコード一覧取得（検索）", () 
 
 						// Assert
 						const { data } = await response.json()
-						expect(data).toStrictEqual(expexted.data)
+						expect(data).toStrictEqual(expected.data)
 					},
 				)
 			})
@@ -311,19 +311,19 @@ describe("GET /records/:entity_name - レコード一覧取得（検索）", () 
 						title: "eq",
 						operator: "eq",
 						value: 0,
-						expexted: { data: [{ name: "Record 3" }] },
+						expected: { data: [{ name: "Record 3" }] },
 					},
 					{
 						title: "gt",
 						operator: "gt",
 						value: 0,
-						expexted: { data: [{ name: "Record 4" }, { name: "Record 5" }] },
+						expected: { data: [{ name: "Record 4" }, { name: "Record 5" }] },
 					},
 					{
 						title: "gte",
 						operator: "gte",
 						value: 0,
-						expexted: {
+						expected: {
 							data: [
 								{ name: "Record 3" },
 								{ name: "Record 4" },
@@ -335,13 +335,13 @@ describe("GET /records/:entity_name - レコード一覧取得（検索）", () 
 						title: "lt",
 						operator: "lt",
 						value: 0,
-						expexted: { data: [{ name: "Record 1" }, { name: "Record 2" }] },
+						expected: { data: [{ name: "Record 1" }, { name: "Record 2" }] },
 					},
 					{
 						title: "lte",
 						operator: "lte",
 						value: 0,
-						expexted: {
+						expected: {
 							data: [
 								{ name: "Record 1" },
 								{ name: "Record 2" },
@@ -352,7 +352,7 @@ describe("GET /records/:entity_name - レコード一覧取得（検索）", () 
 					{
 						title: "is_set",
 						operator: "is_set",
-						expexted: {
+						expected: {
 							data: [
 								{ name: "Record 1" },
 								{ name: "Record 2" },
@@ -367,7 +367,7 @@ describe("GET /records/:entity_name - レコード一覧取得（検索）", () 
 
 				it.each(testCases)(
 					"$title",
-					async ({ operator, value, is_not, expexted }) => {
+					async ({ operator, value, is_not, expected }) => {
 						// Arrange
 						await createManyTestSamples(testExecutionUser.id, testRecords)
 
@@ -382,7 +382,7 @@ describe("GET /records/:entity_name - レコード一覧取得（検索）", () 
 
 						// Assert
 						const { data } = await response.json()
-						expect(data).toStrictEqual(expexted.data)
+						expect(data).toStrictEqual(expected.data)
 					},
 				)
 			})
@@ -400,18 +400,18 @@ describe("GET /records/:entity_name - レコード一覧取得（検索）", () 
 						title: "eq (true)",
 						operator: "eq",
 						value: true,
-						expexted: { data: [{ name: "Record 1" }] },
+						expected: { data: [{ name: "Record 1" }] },
 					},
 					{
 						title: "eq (false)",
 						operator: "eq",
 						value: false,
-						expexted: { data: [{ name: "Record 2" }] },
+						expected: { data: [{ name: "Record 2" }] },
 					},
 					{
 						title: "is_set",
 						operator: "is_set",
-						expexted: { data: [{ name: "Record 1" }] },
+						expected: { data: [{ name: "Record 1" }] },
 					},
 				]
 
@@ -419,7 +419,7 @@ describe("GET /records/:entity_name - レコード一覧取得（検索）", () 
 
 				it.each(testCases)(
 					"$title",
-					async ({ operator, value, is_not, expexted }) => {
+					async ({ operator, value, is_not, expected }) => {
 						// Arrange
 						await createManyTestSamples(testExecutionUser.id, testRecords)
 
@@ -434,7 +434,7 @@ describe("GET /records/:entity_name - レコード一覧取得（検索）", () 
 
 						// Assert
 						const { data } = await response.json()
-						expect(data).toStrictEqual(expexted.data)
+						expect(data).toStrictEqual(expected.data)
 					},
 				)
 			})
@@ -455,19 +455,19 @@ describe("GET /records/:entity_name - レコード一覧取得（検索）", () 
 						title: "eq",
 						operator: "eq",
 						value: "2025-01-03",
-						expexted: { data: [{ name: "Record 3" }] },
+						expected: { data: [{ name: "Record 3" }] },
 					},
 					{
 						title: "gt",
 						operator: "gt",
 						value: "2025-01-03",
-						expexted: { data: [{ name: "Record 4" }, { name: "Record 5" }] },
+						expected: { data: [{ name: "Record 4" }, { name: "Record 5" }] },
 					},
 					{
 						title: "gte",
 						operator: "gte",
 						value: "2025-01-03",
-						expexted: {
+						expected: {
 							data: [
 								{ name: "Record 3" },
 								{ name: "Record 4" },
@@ -479,13 +479,13 @@ describe("GET /records/:entity_name - レコード一覧取得（検索）", () 
 						title: "lt",
 						operator: "lt",
 						value: "2025-01-03",
-						expexted: { data: [{ name: "Record 1" }, { name: "Record 2" }] },
+						expected: { data: [{ name: "Record 1" }, { name: "Record 2" }] },
 					},
 					{
 						title: "lte",
 						operator: "lte",
 						value: "2025-01-03",
-						expexted: {
+						expected: {
 							data: [
 								{ name: "Record 1" },
 								{ name: "Record 2" },
@@ -496,7 +496,7 @@ describe("GET /records/:entity_name - レコード一覧取得（検索）", () 
 					{
 						title: "is_set",
 						operator: "is_set",
-						expexted: {
+						expected: {
 							data: [
 								{ name: "Record 1" },
 								{ name: "Record 2" },
@@ -512,7 +512,7 @@ describe("GET /records/:entity_name - レコード一覧取得（検索）", () 
 
 				it.each(testCases)(
 					"$title",
-					async ({ operator, value, is_not, expexted }) => {
+					async ({ operator, value, is_not, expected }) => {
 						// Arrange
 						await createManyTestSamples(testExecutionUser.id, testRecords)
 
@@ -527,7 +527,7 @@ describe("GET /records/:entity_name - レコード一覧取得（検索）", () 
 
 						// Assert
 						const { data } = await response.json()
-						expect(data).toStrictEqual(expexted.data)
+						expect(data).toStrictEqual(expected.data)
 					},
 				)
 			})
@@ -548,19 +548,19 @@ describe("GET /records/:entity_name - レコード一覧取得（検索）", () 
 						title: "eq",
 						operator: "eq",
 						value: "03:33:33",
-						expexted: { data: [{ name: "Record 3" }] },
+						expected: { data: [{ name: "Record 3" }] },
 					},
 					{
 						title: "gt",
 						operator: "gt",
 						value: "03:33:33",
-						expexted: { data: [{ name: "Record 4" }, { name: "Record 5" }] },
+						expected: { data: [{ name: "Record 4" }, { name: "Record 5" }] },
 					},
 					{
 						title: "gte",
 						operator: "gte",
 						value: "03:33:33",
-						expexted: {
+						expected: {
 							data: [
 								{ name: "Record 3" },
 								{ name: "Record 4" },
@@ -572,13 +572,13 @@ describe("GET /records/:entity_name - レコード一覧取得（検索）", () 
 						title: "lt",
 						operator: "lt",
 						value: "03:33:33",
-						expexted: { data: [{ name: "Record 1" }, { name: "Record 2" }] },
+						expected: { data: [{ name: "Record 1" }, { name: "Record 2" }] },
 					},
 					{
 						title: "lte",
 						operator: "lte",
 						value: "03:33:33",
-						expexted: {
+						expected: {
 							data: [
 								{ name: "Record 1" },
 								{ name: "Record 2" },
@@ -589,7 +589,7 @@ describe("GET /records/:entity_name - レコード一覧取得（検索）", () 
 					{
 						title: "is_set",
 						operator: "is_set",
-						expexted: {
+						expected: {
 							data: [
 								{ name: "Record 1" },
 								{ name: "Record 2" },
@@ -605,7 +605,7 @@ describe("GET /records/:entity_name - レコード一覧取得（検索）", () 
 
 				it.each(testCases)(
 					"$title",
-					async ({ operator, value, is_not, expexted }) => {
+					async ({ operator, value, is_not, expected }) => {
 						// Arrange
 						await createManyTestSamples(testExecutionUser.id, testRecords)
 
@@ -620,7 +620,7 @@ describe("GET /records/:entity_name - レコード一覧取得（検索）", () 
 
 						// Assert
 						const { data } = await response.json()
-						expect(data).toStrictEqual(expexted.data)
+						expect(data).toStrictEqual(expected.data)
 					},
 				)
 			})
@@ -641,19 +641,19 @@ describe("GET /records/:entity_name - レコード一覧取得（検索）", () 
 						title: "eq",
 						operator: "eq",
 						value: "2025-01-01T03:33:33Z",
-						expexted: { data: [{ name: "Record 3" }] },
+						expected: { data: [{ name: "Record 3" }] },
 					},
 					{
 						title: "gt",
 						operator: "gt",
 						value: "2025-01-01T03:33:33Z",
-						expexted: { data: [{ name: "Record 4" }, { name: "Record 5" }] },
+						expected: { data: [{ name: "Record 4" }, { name: "Record 5" }] },
 					},
 					{
 						title: "gte",
 						operator: "gte",
 						value: "2025-01-01T03:33:33Z",
-						expexted: {
+						expected: {
 							data: [
 								{ name: "Record 3" },
 								{ name: "Record 4" },
@@ -665,13 +665,13 @@ describe("GET /records/:entity_name - レコード一覧取得（検索）", () 
 						title: "lt",
 						operator: "lt",
 						value: "2025-01-01T03:33:33Z",
-						expexted: { data: [{ name: "Record 1" }, { name: "Record 2" }] },
+						expected: { data: [{ name: "Record 1" }, { name: "Record 2" }] },
 					},
 					{
 						title: "lte",
 						operator: "lte",
 						value: "2025-01-01T03:33:33Z",
-						expexted: {
+						expected: {
 							data: [
 								{ name: "Record 1" },
 								{ name: "Record 2" },
@@ -682,7 +682,7 @@ describe("GET /records/:entity_name - レコード一覧取得（検索）", () 
 					{
 						title: "is_set",
 						operator: "is_set",
-						expexted: {
+						expected: {
 							data: [
 								{ name: "Record 1" },
 								{ name: "Record 2" },
@@ -698,7 +698,7 @@ describe("GET /records/:entity_name - レコード一覧取得（検索）", () 
 
 				it.each(testCases)(
 					"$title",
-					async ({ operator, value, is_not, expexted }) => {
+					async ({ operator, value, is_not, expected }) => {
 						// Arrange
 						await createManyTestSamples(testExecutionUser.id, testRecords)
 
@@ -713,7 +713,7 @@ describe("GET /records/:entity_name - レコード一覧取得（検索）", () 
 
 						// Assert
 						const { data } = await response.json()
-						expect(data).toStrictEqual(expexted.data)
+						expect(data).toStrictEqual(expected.data)
 					},
 				)
 			})
@@ -732,12 +732,12 @@ describe("GET /records/:entity_name - レコード一覧取得（検索）", () 
 						title: "eq",
 						operator: "eq",
 						value: "option2",
-						expexted: { data: [{ name: "Record 2" }] },
+						expected: { data: [{ name: "Record 2" }] },
 					},
 					{
 						title: "is_set",
 						operator: "is_set",
-						expexted: {
+						expected: {
 							data: [
 								{ name: "Record 1" },
 								{ name: "Record 2" },
@@ -751,7 +751,7 @@ describe("GET /records/:entity_name - レコード一覧取得（検索）", () 
 
 				it.each(testCases)(
 					"$title",
-					async ({ operator, value, is_not, expexted }) => {
+					async ({ operator, value, is_not, expected }) => {
 						// Arrange
 						await createManyTestSamples(testExecutionUser.id, testRecords)
 
@@ -766,7 +766,7 @@ describe("GET /records/:entity_name - レコード一覧取得（検索）", () 
 
 						// Assert
 						const { data } = await response.json()
-						expect(data).toStrictEqual(expexted.data)
+						expect(data).toStrictEqual(expected.data)
 					},
 				)
 			})
@@ -787,18 +787,18 @@ describe("GET /records/:entity_name - レコード一覧取得（検索）", () 
 					// 	title: "eq",
 					// 	operator: "eq",
 					// 	value: "option1",
-					// 	expexted: [{ name: "Record 1" }],
+					// 	expected: [{ name: "Record 1" }],
 					// },
 					{
 						title: "includes",
 						operator: "includes",
 						value: "option2",
-						expexted: { data: [{ name: "Record 2" }, { name: "Record 3" }] },
+						expected: { data: [{ name: "Record 2" }, { name: "Record 3" }] },
 					},
 					{
 						title: "is_set",
 						operator: "is_set",
-						expexted: {
+						expected: {
 							data: [
 								{ name: "Record 1" },
 								{ name: "Record 2" },
@@ -812,7 +812,7 @@ describe("GET /records/:entity_name - レコード一覧取得（検索）", () 
 
 				it.each(testCases)(
 					"$title",
-					async ({ operator, value, is_not, expexted }) => {
+					async ({ operator, value, is_not, expected }) => {
 						// Arrange
 						await createManyTestSamples(testExecutionUser.id, testRecords)
 
@@ -827,7 +827,7 @@ describe("GET /records/:entity_name - レコード一覧取得（検索）", () 
 
 						// Assert
 						const { data } = await response.json()
-						expect(data).toStrictEqual(expexted.data)
+						expect(data).toStrictEqual(expected.data)
 					},
 				)
 			})
@@ -867,12 +867,12 @@ describe("GET /records/:entity_name - レコード一覧取得（検索）", () 
 						title: "eq",
 						operator: "eq",
 						value: { entity_name: "account", id: recordId2 },
-						expexted: { data: [{ name: "Record 2" }] },
+						expected: { data: [{ name: "Record 2" }] },
 					},
 					{
 						title: "is_set",
 						operator: "is_set",
-						expexted: {
+						expected: {
 							data: [
 								{ name: "Record 1" },
 								{ name: "Record 2" },
@@ -886,7 +886,7 @@ describe("GET /records/:entity_name - レコード一覧取得（検索）", () 
 
 				it.each(testCases)(
 					"$title",
-					async ({ operator, value, is_not, expexted }) => {
+					async ({ operator, value, is_not, expected }) => {
 						// Arrange
 						await createManyTestSamples(testExecutionUser.id, testRecords)
 
@@ -901,7 +901,7 @@ describe("GET /records/:entity_name - レコード一覧取得（検索）", () 
 
 						// Assert
 						const { data } = await response.json()
-						expect(data).toStrictEqual(expexted.data)
+						expect(data).toStrictEqual(expected.data)
 					},
 				)
 			})
@@ -952,19 +952,19 @@ describe("GET /records/:entity_name - レコード一覧取得（検索）", () 
 					// 	title: "eq",
 					// 	operator: "eq",
 					// 	value: { entity_name: "account", id: recordId1 },
-					// 	expexted: { data: [{ name: "Record 1" }] },
+					// 	expected: { data: [{ name: "Record 1" }] },
 					// },
 					{
 						title: "includes",
 						operator: "includes",
 						value: { entity_name: "lead", id: recordId1 },
-						expexted: { data: [{ name: "Record 2" }, { name: "Record 3" }] },
+						expected: { data: [{ name: "Record 2" }, { name: "Record 3" }] },
 					},
 					// TODO: 実装側の修正が必要
 					// {
 					// 	title: "is_set",
 					// 	operator: "is_set",
-					// 	expexted: { data: [{ name: "Record 6" }, { name: "Record 7" }] },
+					// 	expected: { data: [{ name: "Record 6" }, { name: "Record 7" }] },
 					// },
 				]
 
@@ -972,7 +972,7 @@ describe("GET /records/:entity_name - レコード一覧取得（検索）", () 
 
 				it.each(testCases)(
 					"$title",
-					async ({ operator, value, is_not, expexted }) => {
+					async ({ operator, value, is_not, expected }) => {
 						// Arrange
 						await createManyTestSamples(testExecutionUser.id, testRecords)
 
@@ -987,7 +987,7 @@ describe("GET /records/:entity_name - レコード一覧取得（検索）", () 
 
 						// Assert
 						const { data } = await response.json()
-						expect(data).toStrictEqual(expexted.data)
+						expect(data).toStrictEqual(expected.data)
 					},
 				)
 			})
