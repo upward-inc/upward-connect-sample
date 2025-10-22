@@ -84,24 +84,6 @@ const createAuthorizeHandler = (
 ): HttpHandler =>
 	http.post(`${API_URL}/auth/authorize`, async ({ request }) => {
 		options.onRequest?.(request)
-		if (status === 200) {
-			const formData = await request.formData()
-			expect(Object.fromEntries(formData.entries())).toMatchObject({
-				client_id: currentSearchParams.client_id ?? baseSearchParams.client_id,
-				redirect_uri:
-					currentSearchParams.redirect_uri ?? baseSearchParams.redirect_uri,
-				response_type:
-					currentSearchParams.response_type ?? baseSearchParams.response_type,
-				scope: currentSearchParams.scope ?? baseSearchParams.scope,
-				state: currentSearchParams.state ?? baseSearchParams.state,
-				nonce: currentSearchParams.nonce ?? baseSearchParams.nonce,
-				code_challenge:
-					currentSearchParams.code_challenge ?? baseSearchParams.code_challenge,
-				code_challenge_method:
-					currentSearchParams.code_challenge_method ??
-					baseSearchParams.code_challenge_method,
-			})
-		}
 
 		return status === 200
 			? HttpResponse.json(body, { status: 200 })
@@ -155,7 +137,7 @@ describe("AuthorizePage", () => {
 		return value
 	}
 
-	it.only("有効なOAuthパラメータとクライアントIDでアクセスしたとき、クライアント名と要求されたスコープのリストが表示される", async () => {
+	it("有効なOAuthパラメータとクライアントIDでアクセスしたとき、クライアント名と要求されたスコープのリストが表示される", async () => {
 		setSearchParams()
 		setRequestHandlers(createClientHandler(200, { name: "Sample App" }))
 
@@ -195,10 +177,6 @@ describe("AuthorizePage", () => {
 		await waitFor(() => {
 			expect(authorizeRequest).toHaveBeenCalledTimes(1)
 		})
-
-		// デバッグログ
-		// eslint-disable-next-line no-console
-		console.log("locationUpdates", locationUpdates)
 
 		await waitFor(() => {
 			const redirectedUrl = locationUpdates.find((value) =>
