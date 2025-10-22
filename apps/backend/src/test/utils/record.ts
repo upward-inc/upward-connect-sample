@@ -222,7 +222,7 @@ function toAccountCreateInput(
 	userId: string,
 	data: AccountData,
 ): Prisma.accountCreateInput {
-	const userReference = JSON.stringify({ entity: "user", id: userId })
+	const userReference = JSON.stringify({ entity_name: "user", id: userId })
 	return {
 		...data,
 		industry: data.industry ? JSON.stringify([data.industry]) : null,
@@ -244,7 +244,7 @@ function toLeadCreateInput(
 	userId: string,
 	data: LeadData,
 ): Prisma.leadCreateInput {
-	const userReference = JSON.stringify({ entity: "user", id: userId })
+	const userReference = JSON.stringify({ entity_name: "user", id: userId })
 	return {
 		...data,
 		lead_source: data.lead_source ? JSON.stringify([data.lead_source]) : null,
@@ -265,7 +265,7 @@ function toSampleCreateInput(
 	userId: string,
 	data: SampleData,
 ): Prisma.sampleCreateInput {
-	const userReference = JSON.stringify({ entity: "user", id: userId })
+	const userReference = JSON.stringify({ entity_name: "user", id: userId })
 	return {
 		...data,
 		time: data.time
