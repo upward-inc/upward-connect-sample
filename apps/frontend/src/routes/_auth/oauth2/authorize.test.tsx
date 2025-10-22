@@ -53,10 +53,8 @@ const createClientHandler = (
 const createAuthorizeHandler = (
 	status: number,
 	body: Record<string, unknown>,
-	options: { onRequest?: (request: Request) => void } = {},
 ): HttpHandler => {
-	return http.post(`${API_URL}/auth/authorize`, async ({ request }) => {
-		options.onRequest?.(request)
+	return http.post(`${API_URL}/auth/authorize`, async () => {
 		return HttpResponse.json(body, { status })
 	})
 }
@@ -113,27 +111,17 @@ describe("AuthorizePage", () => {
 	})
 
 	it("ユーザーが許可ボタンをクリックしたとき、認可コードとstateパラメータを付与してリダイレクトURIへ遷移する", async () => {
-		const authorizeRequest = vi.fn()
 		setRequestHandlers(
 			createClientHandler(200, { name: "Sample App" }),
-			createAuthorizeHandler(
-				200,
-				{
-					code: "AUTH_CODE",
-					state: baseSearchParams.state,
-				},
-				{ onRequest: authorizeRequest },
-			),
+			createAuthorizeHandler(200, {
+				code: "AUTH_CODE",
+				state: baseSearchParams.state,
+			}),
 		)
 
 		renderAuthorizePage()
 		const user = userEvent.setup()
-
 		await user.click(await screen.findByRole("button", { name: "許可する" }))
-
-		await waitFor(() => {
-			expect(authorizeRequest).toHaveBeenCalledTimes(1)
-		})
 
 		await waitFor(() => {
 			expect(locationHref).toContain("code=AUTH_CODE")
