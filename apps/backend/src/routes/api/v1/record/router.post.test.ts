@@ -332,6 +332,16 @@ describe("POST /records/:entity_name - レコード作成", () => {
 					value: true,
 				},
 				{
+					title: "文字列に対して配列を指定",
+					field: "text",
+					value: ["test1", "test2"],
+				},
+				{
+					title: "文字列に対してオブジェクトを指定",
+					field: "text",
+					value: { test: "test" },
+				},
+				{
 					title: "数値に対して文字列を指定",
 					field: "integer",
 					value: "invalid-integer",
@@ -342,6 +352,16 @@ describe("POST /records/:entity_name - レコード作成", () => {
 					value: true,
 				},
 				{
+					title: "数値に対して配列を指定",
+					field: "integer",
+					value: [1, 2],
+				},
+				{
+					title: "数値に対してオブジェクトを指定",
+					field: "integer",
+					value: { test: 1 },
+				},
+				{
 					title: "真偽値に対して文字列を指定",
 					field: "boolean",
 					value: "invalid-boolean",
@@ -350,6 +370,16 @@ describe("POST /records/:entity_name - レコード作成", () => {
 					title: "真偽値に対して数値を指定",
 					field: "boolean",
 					value: 1,
+				},
+				{
+					title: "真偽値に対して配列を指定",
+					field: "boolean",
+					value: [true, false],
+				},
+				{
+					title: "真偽値に対してオブジェクトを指定",
+					field: "boolean",
+					value: { test: true },
 				},
 			])("$title", async ({ field, value }) => {
 				// Act
