@@ -71,6 +71,8 @@ describe("AuthorizePage", () => {
 		useSearchMock.mockReturnValue(baseSearchParams)
 		useAuthMock.mockReturnValue({ token: "test-token" })
 
+		setRequestHandlers(createClientHandler(200, { name: "Sample App" }))
+
 		locationHref = baseSearchParams.redirect_uri
 		Object.defineProperty(window, "location", {
 			configurable: true,
@@ -96,7 +98,6 @@ describe("AuthorizePage", () => {
 	})
 
 	it("有効なOAuthパラメータとクライアントIDでアクセスしたとき、クライアント名と要求されたスコープのリストが表示される", async () => {
-		setRequestHandlers(createClientHandler(200, { name: "Sample App" }))
 		renderAuthorizePage()
 
 		await waitFor(() => {
@@ -112,7 +113,6 @@ describe("AuthorizePage", () => {
 
 	it("ユーザーが許可ボタンをクリックしたとき、認可コードとstateパラメータを付与してリダイレクトURIへ遷移する", async () => {
 		setRequestHandlers(
-			createClientHandler(200, { name: "Sample App" }),
 			createAuthorizeHandler(200, {
 				code: "AUTH_CODE",
 				state: baseSearchParams.state,
@@ -131,8 +131,6 @@ describe("AuthorizePage", () => {
 	})
 
 	it("ユーザーが拒否ボタンをクリックしたとき、access_deniedエラーとstateパラメータを付与してリダイレクトURIへ遷移する", async () => {
-		setRequestHandlers(createClientHandler(200, { name: "Sample App" }))
-
 		renderAuthorizePage()
 		const user = userEvent.setup()
 
@@ -157,7 +155,6 @@ describe("AuthorizePage", () => {
 
 	it("認可APIがinvalid_request_uriエラーを返したとき、オープンリダイレクト攻撃を防ぐため例外を投げる", async () => {
 		setRequestHandlers(
-			createClientHandler(200, { name: "Sample App" }),
 			http.post(`${API_URL}/auth/authorize`, () =>
 				HttpResponse.json({ error: "invalid_request_uri" }, { status: 400 }),
 			),
@@ -181,7 +178,6 @@ describe("AuthorizePage", () => {
 
 	it("認可APIがconsent_requiredエラーを返したとき、エラーとエラー説明とstateパラメータを付与してリダイレクトURIへ遷移する", async () => {
 		setRequestHandlers(
-			createClientHandler(200, { name: "Sample App" }),
 			createAuthorizeHandler(400, {
 				error: "consent_required",
 				error_description: "consent required",
@@ -200,10 +196,7 @@ describe("AuthorizePage", () => {
 	})
 
 	it("認可APIが503ステータスを返したとき、temporarily_unavailableエラーを付与してリダイレクトURIへ遷移する", async () => {
-		setRequestHandlers(
-			createClientHandler(200, { name: "Sample App" }),
-			createAuthorizeHandler(503, { error: "server_error" }),
-		)
+		setRequestHandlers(createAuthorizeHandler(503, { error: "server_error" }))
 
 		renderAuthorizePage()
 		const user = userEvent.setup()
