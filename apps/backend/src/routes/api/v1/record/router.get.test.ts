@@ -14,8 +14,6 @@ import {
 	createManyTestSamples,
 	createTestSample,
 	deleteAllTestSamples,
-	deleteTestAccountsByPrefix,
-	deleteTestLeadsByPrefix,
 } from "../../../../test/utils/record"
 
 describe("GET /records/:entity_name - レコード一覧取得（検索）", () => {
@@ -27,8 +25,8 @@ describe("GET /records/:entity_name - レコード一覧取得（検索）", () 
 		testExecutionUser = user
 	})
 
-	afterAll(async ({ id: taskId }) => {
-		await cleanup(taskId)
+	afterAll(async () => {
+		await cleanup()
 	})
 
 	afterEach(async () => {
@@ -48,13 +46,8 @@ describe("GET /records/:entity_name - レコード一覧取得（検索）", () 
 	}
 
 	// テストデータのクリーンアップ
-	async function cleanup(taskId: string) {
-		await Promise.all([
-			deleteTestAccountsByPrefix(taskId),
-			deleteTestLeadsByPrefix(taskId),
-			cleanupEntityMetadata(),
-		])
-
+	async function cleanup() {
+		await cleanupEntityMetadata()
 		await deleteTestExecutionUser(testExecutionUser.id)
 	}
 
