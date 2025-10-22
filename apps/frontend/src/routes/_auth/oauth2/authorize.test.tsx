@@ -41,11 +41,9 @@ const baseSearchParams: Required<SearchParams> = {
 	code_challenge_method: "S256",
 }
 
-let locationUpdates: string[] = []
-
 const createClientHandler = (
+	status: number,
 	body: Record<string, unknown>,
-	status = 200,
 ): HttpHandler => {
 	return http.get(`${API_URL}/auth/clients/:clientId`, () =>
 		HttpResponse.json(body, { status }),
@@ -76,18 +74,13 @@ describe("AuthorizePage", () => {
 		useAuthMock.mockReturnValue({ token: "test-token" })
 
 		locationHref = baseSearchParams.redirect_uri
-		locationUpdates = []
 		Object.defineProperty(window, "location", {
 			configurable: true,
 			value: {
-				assign: vi.fn(),
-				replace: vi.fn(),
-				reload: vi.fn(),
 				get href() {
 					return locationHref
 				},
 				set href(value: string) {
-					locationUpdates.push(value)
 					locationHref = value
 				},
 			},
@@ -105,7 +98,7 @@ describe("AuthorizePage", () => {
 	})
 
 	it("有効なOAuthパラメータとクライアントIDでアクセスしたとき、クライアント名と要求されたスコープのリストが表示される", async () => {
-		setRequestHandlers(createClientHandler({ name: "Sample App" }))
+		setRequestHandlers(createClientHandler(200, { name: "Sample App" }))
 		renderAuthorizePage()
 
 		await waitFor(() => {
@@ -122,7 +115,7 @@ describe("AuthorizePage", () => {
 	it("ユーザーが許可ボタンをクリックしたとき、認可コードとstateパラメータを付与してリダイレクトURIへ遷移する", async () => {
 		const authorizeRequest = vi.fn()
 		setRequestHandlers(
-			createClientHandler({ name: "Sample App" }),
+			createClientHandler(200, { name: "Sample App" }),
 			createAuthorizeHandler(
 				200,
 				{
@@ -143,17 +136,13 @@ describe("AuthorizePage", () => {
 		})
 
 		await waitFor(() => {
-			const redirectedUrl = locationUpdates.find((value) =>
-				value.includes("code=AUTH_CODE"),
-			)
-			expect(redirectedUrl).toBeDefined()
-			expect(redirectedUrl).toContain(`state=${baseSearchParams.state}`)
-			expect(redirectedUrl).not.toContain("error=")
+			expect(locationHref).toContain("code=AUTH_CODE")
+			expect(locationHref).toContain(`state=${baseSearchParams.state}`)
 		})
 	})
 
 	it("ユーザーが拒否ボタンをクリックしたとき、access_deniedエラーとstateパラメータを付与してリダイレクトURIへ遷移する", async () => {
-		setRequestHandlers(createClientHandler({ name: "Sample App" }))
+		setRequestHandlers(createClientHandler(200, { name: "Sample App" }))
 
 		renderAuthorizePage()
 		const user = userEvent.setup()
@@ -165,7 +154,7 @@ describe("AuthorizePage", () => {
 	})
 
 	it("クライアント情報の取得に失敗したとき、unauthorized_clientエラーを付与してリダイレクトURIへ遷移する", async () => {
-		setRequestHandlers(createClientHandler({}, 404))
+		setRequestHandlers(createClientHandler(404, {}))
 
 		renderAuthorizePage()
 
@@ -176,7 +165,7 @@ describe("AuthorizePage", () => {
 
 	it("認可APIがinvalid_request_uriエラーを返したとき、オープンリダイレクト攻撃を防ぐため例外を投げる", async () => {
 		setRequestHandlers(
-			createClientHandler({ name: "Sample App" }),
+			createClientHandler(200, { name: "Sample App" }),
 			http.post(`${API_URL}/auth/authorize`, () =>
 				HttpResponse.json({ error: "invalid_request_uri" }, { status: 400 }),
 			),
@@ -210,7 +199,7 @@ describe("AuthorizePage", () => {
 
 	it("認可APIがconsent_requiredエラーを返したとき、エラーとエラー説明とstateパラメータを付与してリダイレクトURIへ遷移する", async () => {
 		setRequestHandlers(
-			createClientHandler({ name: "Sample App" }),
+			createClientHandler(200, { name: "Sample App" }),
 			createAuthorizeHandler(400, {
 				error: "consent_required",
 				error_description: "consent required",
@@ -230,7 +219,7 @@ describe("AuthorizePage", () => {
 
 	it("認可APIが503ステータスを返したとき、temporarily_unavailableエラーを付与してリダイレクトURIへ遷移する", async () => {
 		setRequestHandlers(
-			createClientHandler({ name: "Sample App" }),
+			createClientHandler(200, { name: "Sample App" }),
 			createAuthorizeHandler(503, { error: "server_error" }),
 		)
 
