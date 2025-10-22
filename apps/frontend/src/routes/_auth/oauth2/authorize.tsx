@@ -266,7 +266,7 @@ const redirectFail = (url: string, result: AuthorizeResultFailure) => {
 	window.location.href = redirectUrl.toString()
 }
 
-function AuthorizePage() {
+export function AuthorizePage() {
 	const { token } = useAuth()
 
 	const searchParams = useSearch({ from: "/_auth/oauth2/authorize" })
