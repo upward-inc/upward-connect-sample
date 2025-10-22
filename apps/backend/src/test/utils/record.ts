@@ -184,7 +184,7 @@ export async function createTestSample(
 }
 
 /**
- * 取引先テストデータの一括作成
+ * サンプルテストデータの一括作成
  */
 export async function createManyTestSamples(
 	userId: string,
