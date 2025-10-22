@@ -124,8 +124,9 @@ describe("AuthorizePage", () => {
 		await user.click(await screen.findByRole("button", { name: "許可する" }))
 
 		await waitFor(() => {
-			expect(locationHref).toContain("code=AUTH_CODE")
-			expect(locationHref).toContain(`state=${baseSearchParams.state}`)
+			expect(locationHref).toBe(
+				`${baseSearchParams.redirect_uri}?code=AUTH_CODE&state=${baseSearchParams.state}`,
+			)
 		})
 	})
 
@@ -137,8 +138,9 @@ describe("AuthorizePage", () => {
 
 		await user.click(await screen.findByRole("button", { name: "拒否する" }))
 
-		expect(locationHref).toContain("error=access_denied")
-		expect(locationHref).toContain(`state=${baseSearchParams.state}`)
+		expect(locationHref).toBe(
+			`${baseSearchParams.redirect_uri}?error=access_denied&state=${baseSearchParams.state}`,
+		)
 	})
 
 	it("クライアント情報の取得に失敗したとき、unauthorized_clientエラーを付与してリダイレクトURIへ遷移する", async () => {
@@ -147,7 +149,9 @@ describe("AuthorizePage", () => {
 		renderAuthorizePage()
 
 		await waitFor(() => {
-			expect(locationHref).toContain("error=unauthorized_client")
+			expect(locationHref).toBe(
+				`${baseSearchParams.redirect_uri}?error=unauthorized_client&state=${baseSearchParams.state}`,
+			)
 		})
 	})
 
@@ -200,9 +204,9 @@ describe("AuthorizePage", () => {
 
 		await user.click(await screen.findByRole("button", { name: "許可する" }))
 
-		expect(locationHref).toContain("error=consent_required")
-		expect(locationHref).toContain(`state=${baseSearchParams.state}`)
-		expect(locationHref).toContain("error_description=consent+required")
+		expect(locationHref).toBe(
+			`${baseSearchParams.redirect_uri}?error=consent_required&error_description=consent+required&state=${baseSearchParams.state}`,
+		)
 	})
 
 	it("認可APIが503ステータスを返したとき、temporarily_unavailableエラーを付与してリダイレクトURIへ遷移する", async () => {
@@ -216,6 +220,8 @@ describe("AuthorizePage", () => {
 
 		await user.click(await screen.findByRole("button", { name: "許可する" }))
 
-		expect(locationHref).toContain("error=temporarily_unavailable")
+		expect(locationHref).toBe(
+			`${baseSearchParams.redirect_uri}?error=temporarily_unavailable`,
+		)
 	})
 })
