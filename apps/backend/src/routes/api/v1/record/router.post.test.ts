@@ -67,8 +67,8 @@ describe("POST /records/:entity_name - レコード作成", () => {
 	// テストデータのクリーンアップ
 	async function cleanup(taskId: string) {
 		await Promise.all([
-			deleteTestAccountsByPrefix(taskId),
-			deleteTestLeadsByPrefix(taskId),
+			deleteTestAccountsByPrefix(`${taskId}_`),
+			deleteTestLeadsByPrefix(`${taskId}_`),
 			cleanupEntityMetadata(),
 		])
 
@@ -488,32 +488,65 @@ describe("POST /records/:entity_name - レコード作成", () => {
 			})
 		})
 
-		describe("存在しない参照先", () => {
+		describe("無効な参照先", () => {
 			it.each([
 				{
 					title: "単一参照先",
-					field: "reference_single_target_single_id",
-					getValue: (nonexistent: RecordReference) => nonexistent,
+
+					field: "reference_single_target_single_id", // 参照先: account
+					getValue: (reference: RecordReference) => reference,
 				},
 				{
 					title: "複数参照先",
-					field: "reference_single_target_multi_id",
-					getValue: (nonexistent: RecordReference) => [
+					field: "reference_single_target_multi_id", // 参照先: account
+					getValue: (reference: RecordReference) => [
 						accountRecordReference,
-						nonexistent,
+						reference,
 					],
 				},
 			])("$title", async ({ field, getValue }) => {
 				// Arrange
-				const nonexistentAccountRecordReference = {
+				const invalidReference = leadRecordReference
+
+				// Act
+				const response = await requestPost("sample", {
+					name: "Test Invalid Reference",
+					[field]: getValue(invalidReference),
+				})
+
+				// Assert
+				const json = await response.json()
+				expect(response.status).toBe(400)
+				expect(json).toHaveProperty("message")
+			})
+		})
+
+		describe("存在しない参照先", () => {
+			it.each([
+				{
+					title: "単一参照先",
+					field: "reference_single_target_single_id", // 参照先: account
+					getValue: (reference: RecordReference) => reference,
+				},
+				{
+					title: "複数参照先",
+					field: "reference_single_target_multi_id", // 参照先: account
+					getValue: (reference: RecordReference) => [
+						accountRecordReference,
+						reference,
+					],
+				},
+			])("$title", async ({ field, getValue }) => {
+				// Arrange
+				const nonExistentReference = {
 					entity_name: "account",
 					id: crypto.randomUUID(),
 				}
 
 				// Act
 				const response = await requestPost("sample", {
-					name: "Test Invalid Reference",
-					[field]: getValue(nonexistentAccountRecordReference),
+					name: "Test Non Existent Reference",
+					[field]: getValue(nonExistentReference),
 				})
 
 				// Assert
