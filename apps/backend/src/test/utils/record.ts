@@ -1,303 +1,389 @@
+import type { Prisma } from "@prisma/client"
 import { testPrisma } from "../setup"
 
+export type Account = Awaited<
+	ReturnType<typeof testPrisma.account_view.findUniqueOrThrow>
+>
+export interface AccountData
+	extends Omit<
+		Prisma.accountCreateInput,
+		"originating_lead" | "parent" | "owner" | "created_by" | "modified_by"
+	> {
+	originating_lead?: RecordReference | null
+	parent?: RecordReference | null
+	owner?: RecordReference
+	created_by?: RecordReference
+	modified_by?: RecordReference
+}
+
+export type Lead = Awaited<
+	ReturnType<typeof testPrisma.lead_view.findUniqueOrThrow>
+>
+
+export interface LeadData
+	extends Omit<
+		Prisma.leadCreateInput,
+		"status" | "owner" | "created_by" | "modified_by"
+	> {
+	status?: string
+	owner?: RecordReference
+	created_by?: RecordReference
+	modified_by?: RecordReference
+}
+
+export type Contact = Awaited<
+	ReturnType<typeof testPrisma.contact_view.findUniqueOrThrow>
+>
+
+export interface ContactData
+	extends Omit<
+		Prisma.contactCreateInput,
+		"account" | "originating_lead" | "owner" | "created_by" | "modified_by"
+	> {
+	account?: RecordReference | null
+	originating_lead?: RecordReference | null
+	owner?: RecordReference
+	created_by?: RecordReference
+	modified_by?: RecordReference
+}
+
+export type Sample = Awaited<
+	ReturnType<typeof testPrisma.sample_view.findUniqueOrThrow>
+>
+
+export interface SampleData
+	extends Omit<
+		Prisma.sampleCreateInput,
+		| "option_multi"
+		| "reference_single_target_single_id"
+		| "reference_single_target_multi_id"
+		| "reference_multi_target_single_id"
+		| "reference_multi_target_multi_id"
+		| "owner"
+		| "created_by"
+		| "modified_by"
+	> {
+	option_multi?: string[] | null
+	reference_single_target_single_id?: RecordReference | null
+	reference_single_target_multi_id?: RecordReference[] | null
+	reference_multi_target_single_id?: RecordReference | null
+	reference_multi_target_multi_id?: RecordReference[] | null
+	owner?: RecordReference
+	created_by?: RecordReference
+	modified_by?: RecordReference
+}
+
+interface RecordReference {
+	entity_name: string
+	id: string
+}
+
 /**
- * Create a test account for tests
+ * 取引先テストデータの作成
  */
 export async function createTestAccount(
-	accountData: {
-		name: string
-		account_number?: string
-		main_phone_number?: string
-		website?: string
-		industry?: string
-		number_of_employees?: number
-	},
 	userId: string,
-) {
-	const userReference = JSON.stringify({ entity_name: "user", id: userId })
+	data: AccountData,
+): Promise<Account> {
 	const account = await testPrisma.account.create({
-		data: {
-			name: `test_${accountData.name}`,
-			account_number: accountData.account_number,
-			main_phone_number: accountData.main_phone_number,
-			website: accountData.website,
-			industry: accountData.industry
-				? JSON.stringify([accountData.industry])
-				: null,
-			number_of_employees: accountData.number_of_employees,
-			owner: userReference,
-			created_by: userReference,
-			modified_by: userReference,
-		},
-		select: {
-			id: true,
-		},
+		data: toAccountCreateInput(userId, data),
+		select: { id: true },
 	})
 
-	return account
+	return await testPrisma.account_view.findUniqueOrThrow({
+		where: { id: account.id },
+	})
 }
 
 /**
- * Create a test lead for tests
+ * 取引先テストデータの一括作成
+ */
+export async function createManyTestAccounts(
+	userId: string,
+	data: Array<AccountData>,
+): Promise<{ count: number }> {
+	return await testPrisma.account.createMany({
+		data: data.map((d) => toAccountCreateInput(userId, d)),
+	})
+}
+
+/**
+ * 取引先テストデータの全削除
+ */
+export async function deleteAllTestAccounts() {
+	await testPrisma.account.deleteMany()
+}
+
+/**
+ * 取引先テストデータの削除（レコードID指定）
+ */
+export async function deleteTestAccountById(id: string) {
+	await testPrisma.account.delete({ where: { id } })
+}
+
+/**
+ * 取引先テストデータの一括削除（Prefix指定）
+ */
+export async function deleteTestAccountsByPrefix(prefix: string) {
+	await testPrisma.account.deleteMany({
+		where: { name: { startsWith: prefix } },
+	})
+}
+
+/**
+ * リードテストデータの作成
  */
 export async function createTestLead(
-	leadData: {
-		company: string
-		first_name: string
-		last_name: string
-		status: "new" | "contacted" | "nurturing" | "qualified" | "unqualified"
-	},
 	userId: string,
-) {
-	const userReference = JSON.stringify({ entity_name: "user", id: userId })
+	data: LeadData,
+): Promise<Lead> {
 	const lead = await testPrisma.lead.create({
-		data: {
-			company: `test_${leadData.company}`,
-			first_name: leadData.first_name,
-			last_name: leadData.last_name,
-			status: JSON.stringify([leadData.status]),
-			owner: userReference,
-			created_by: userReference,
-			modified_by: userReference,
-		},
-		select: {
-			id: true,
-		},
+		data: toLeadCreateInput(userId, data),
+		select: { id: true },
 	})
 
-	return lead
+	return await testPrisma.lead_view.findUniqueOrThrow({
+		where: { id: lead.id },
+	})
 }
 
 /**
- * Create a test activity for tests
+ * リードテストデータの一括作成
  */
-export async function createTestActivity(
-	activityData: {
-		subject: string
-		is_all_day_event: boolean
-		is_archived: boolean
-	},
+export async function createManyTestLeads(
 	userId: string,
-) {
-	const userReference = JSON.stringify({ entity_name: "user", id: userId })
-	const activity = await testPrisma.activity.create({
-		data: {
-			subject: `test_${activityData.subject}`,
-			is_all_day_event: activityData.is_all_day_event,
-			is_archived: activityData.is_archived,
-			owner: userReference,
-			created_by: userReference,
-			modified_by: userReference,
-		},
-		select: {
-			id: true,
-		},
+	data: Array<LeadData>,
+): Promise<{ count: number }> {
+	return await testPrisma.lead.createMany({
+		data: data.map((d) => toLeadCreateInput(userId, d)),
 	})
-
-	return activity
 }
 
 /**
- * Create a test phone call for tests
+ * リードテストデータの全削除
  */
-export async function createTestPhoneCall(
-	phoneCallData: {
-		subject: string
-		user: { entity_name: string; id: string }
-		their: { entity_name: string; id: string }
-		direction: "inbound" | "outbound"
-	},
-	userId: string,
-) {
-	const userReference = JSON.stringify({ entity_name: "user", id: userId })
-	const phoneCall = await testPrisma.phone_call.create({
-		data: {
-			subject: `test_${phoneCallData.subject}`,
-			user: JSON.stringify(phoneCallData.user),
-			their: JSON.stringify(phoneCallData.their),
-			direction: JSON.stringify([phoneCallData.direction]),
-			status: JSON.stringify(["connected"]), // Add status field to avoid null/undefined issues
-			owner: userReference,
-			created_by: userReference,
-			modified_by: userReference,
-		},
-		select: {
-			id: true,
-		},
-	})
-
-	return phoneCall
+export async function deleteAllTestLeads() {
+	await testPrisma.lead.deleteMany()
 }
 
 /**
- * Create a test contact for tests
+ * リードテストデータの削除（レコードID指定）
+ */
+export async function deleteTestLeadById(id: string) {
+	await testPrisma.lead.delete({ where: { id } })
+}
+
+/**
+ * リードテストデータの一括削除（Prefix指定）
+ */
+export async function deleteTestLeadsByPrefix(prefix: string) {
+	await testPrisma.lead.deleteMany({
+		where: { company: { startsWith: prefix } },
+	})
+}
+
+/**
+ * 取引先担当者テストデータの作成
  */
 export async function createTestContact(
-	contactData: {
-		last_name: string
-	},
 	userId: string,
-) {
-	const userReference = JSON.stringify({ entity_name: "user", id: userId })
+	data: ContactData,
+): Promise<Contact> {
 	const contact = await testPrisma.contact.create({
-		data: {
-			last_name: `test_${contactData.last_name}`,
-			owner: userReference,
-			created_by: userReference,
-			modified_by: userReference,
-		},
-		select: {
-			id: true,
-		},
+		data: toContactCreateInput(userId, data),
+		select: { id: true },
 	})
 
-	return contact
+	return await testPrisma.contact_view.findUniqueOrThrow({
+		where: { id: contact.id },
+	})
 }
 
 /**
- * Create a test opportunity for tests
+ * 取引先担当者テストデータの一括作成
  */
-export async function createTestOpportunity(
-	opportunityData: {
-		name: string
-		account: string
-		phase:
-			| "contact"
-			| "evaluation"
-			| "need_assessment"
-			| "proposal"
-			| "budget_confirmation"
-			| "price_negotiation"
-			| "proposal_creation"
-			| "final_negotiation"
-			| "deal_won"
-			| "deal_lost"
-		close_date: Date
-		is_closed: boolean
-	},
+export async function createManyTestContacts(
 	userId: string,
-) {
-	const userReference = JSON.stringify({ entity_name: "user", id: userId })
-	const opportunity = await testPrisma.opportunity.create({
-		data: {
-			name: `test_${opportunityData.name}`,
-			account: JSON.stringify({
-				entity_name: "account",
-				id: opportunityData.account,
-			}),
-			phase: JSON.stringify([opportunityData.phase]),
-			close_date: opportunityData.close_date,
-			is_closed: opportunityData.is_closed,
-			owner: userReference,
-			created_by: userReference,
-			modified_by: userReference,
-		},
-		select: {
-			id: true,
-		},
+	data: Array<ContactData>,
+): Promise<{ count: number }> {
+	return await testPrisma.contact.createMany({
+		data: data.map((d) => toContactCreateInput(userId, d)),
 	})
-
-	return opportunity
 }
 
 /**
- * Create a test case for tests
+ * 取引先担当者テストデータの全削除
  */
-export async function createTestCase(
-	caseData: {
-		case_number: string
-		subject: string
-	},
-	userId: string,
-) {
-	const userReference = JSON.stringify({ entity_name: "user", id: userId })
-	const testCase = await testPrisma.renamedcase.create({
-		data: {
-			case_number: `test_${caseData.case_number}`,
-			subject: `test_${caseData.subject}`,
-			owner: userReference,
-			created_by: userReference,
-			modified_by: userReference,
-		},
-		select: {
-			id: true,
-		},
-	})
-
-	return testCase
+export async function deleteAllTestContacts() {
+	await testPrisma.contact.deleteMany()
 }
 
 /**
- * Create a test product for tests
+ * 取引先担当者テストデータの削除（レコードID指定）
  */
-export async function createTestProduct(
-	productData: {
-		name: string
-	},
-	userId: string,
-) {
-	const userReference = JSON.stringify({ entity_name: "user", id: userId })
-	const product = await testPrisma.product.create({
-		data: {
-			name: `test_${productData.name}`,
-			owner: userReference,
-			created_by: userReference,
-			modified_by: userReference,
-		},
-		select: {
-			id: true,
-		},
-	})
-
-	return product
+export async function deleteTestContactById(id: string) {
+	await testPrisma.contact.delete({ where: { id } })
 }
 
 /**
- * Create a test campaign for tests
+ * 取引先担当者テストデータの一括削除（Prefix指定）
  */
-export async function createTestCampaign(
-	campaignData: {
-		name: string
-	},
-	userId: string,
-) {
-	const userReference = JSON.stringify({ entity_name: "user", id: userId })
-	const campaign = await testPrisma.campaign.create({
-		data: {
-			name: `test_${campaignData.name}`,
-			owner: userReference,
-			created_by: userReference,
-			modified_by: userReference,
-		},
-		select: {
-			id: true,
-		},
+export async function deleteTestContactsByPrefix(prefix: string) {
+	await testPrisma.contact.deleteMany({
+		where: { last_name: { startsWith: prefix } },
 	})
-
-	return campaign
 }
 
 /**
- * Create a test sample for tests
+ * サンプルテストデータの作成
  */
 export async function createTestSample(
-	sampleData: {
-		name: string
-	},
 	userId: string,
-) {
-	const userReference = JSON.stringify({ entity_name: "user", id: userId })
+	data: SampleData,
+): Promise<Sample> {
 	const sample = await testPrisma.sample.create({
-		data: {
-			name: `test_${sampleData.name}`,
-			owner: userReference,
-			created_by: userReference,
-			modified_by: userReference,
-		},
-		select: {
-			id: true,
-		},
+		data: toSampleCreateInput(userId, data),
+		select: { id: true },
 	})
 
-	return sample
+	return await testPrisma.sample_view.findUniqueOrThrow({
+		where: { id: sample.id },
+	})
+}
+
+/**
+ * サンプルテストデータの一括作成
+ */
+export async function createManyTestSamples(
+	userId: string,
+	data: Array<SampleData>,
+): Promise<{ count: number }> {
+	return await testPrisma.sample.createMany({
+		data: data.map((d) => toSampleCreateInput(userId, d)),
+	})
+}
+
+/**
+ * サンプルテストデータの全削除
+ */
+export async function deleteAllTestSamples() {
+	await testPrisma.sample.deleteMany()
+}
+
+/**
+ * サンプルテストデータの削除（レコードID指定）
+ */
+export async function deleteTestSampleById(id: string) {
+	await testPrisma.sample.delete({ where: { id } })
+}
+
+/**
+ * サンプルテストデータの一括削除（Prefix指定）
+ */
+export async function deleteTestSamplesByPrefix(prefix: string) {
+	await testPrisma.sample.deleteMany({
+		where: { name: { startsWith: prefix } },
+	})
+}
+
+function toAccountCreateInput(
+	userId: string,
+	data: AccountData,
+): Prisma.accountCreateInput {
+	const userReference = JSON.stringify({ entity_name: "user", id: userId })
+	return {
+		...data,
+		industry: data.industry ? JSON.stringify([data.industry]) : null,
+		originating_lead: data.originating_lead
+			? JSON.stringify(data.originating_lead)
+			: null,
+		parent: data.parent ? JSON.stringify(data.parent) : null,
+		owner: data.owner ? JSON.stringify(data.owner) : userReference,
+		created_by: data.created_by
+			? JSON.stringify(data.created_by)
+			: userReference,
+		modified_by: data.modified_by
+			? JSON.stringify(data.modified_by)
+			: userReference,
+	}
+}
+
+function toLeadCreateInput(
+	userId: string,
+	data: LeadData,
+): Prisma.leadCreateInput {
+	const userReference = JSON.stringify({ entity_name: "user", id: userId })
+	return {
+		...data,
+		lead_source: data.lead_source ? JSON.stringify([data.lead_source]) : null,
+		status: data.status ? JSON.stringify([data.status]) : "new",
+		industry: data.industry ? JSON.stringify([data.industry]) : null,
+		rating: data.rating ? JSON.stringify([data.rating]) : null,
+		owner: data.owner ? JSON.stringify(data.owner) : userReference,
+		created_by: data.created_by
+			? JSON.stringify(data.created_by)
+			: userReference,
+		modified_by: data.modified_by
+			? JSON.stringify(data.modified_by)
+			: userReference,
+	}
+}
+
+function toContactCreateInput(
+	userId: string,
+	data: ContactData,
+): Prisma.contactCreateInput {
+	const userReference = JSON.stringify({ entity_name: "user", id: userId })
+	return {
+		...data,
+		account: data.account ? JSON.stringify(data.account) : null,
+		originating_lead: data.originating_lead
+			? JSON.stringify(data.originating_lead)
+			: null,
+		owner: data.owner ? JSON.stringify(data.owner) : userReference,
+		created_by: data.created_by
+			? JSON.stringify(data.created_by)
+			: userReference,
+		modified_by: data.modified_by
+			? JSON.stringify(data.modified_by)
+			: userReference,
+	}
+}
+
+function toSampleCreateInput(
+	userId: string,
+	data: SampleData,
+): Prisma.sampleCreateInput {
+	const userReference = JSON.stringify({ entity_name: "user", id: userId })
+	return {
+		...data,
+		time: data.time
+			? typeof data.time === "string"
+				? new Date(`1970-01-01T${data.time}Z`) // Dateオブジェクトでないとエラーになるので適当な日付に変換
+				: data.time
+			: null,
+		option_single: data.option_single
+			? JSON.stringify([data.option_single])
+			: null,
+		option_multi: data.option_multi ? JSON.stringify(data.option_multi) : null,
+		reference_single_target_single_id: data.reference_single_target_single_id
+			? JSON.stringify(data.reference_single_target_single_id)
+			: null,
+		reference_single_target_multi_id: data.reference_single_target_multi_id
+			? JSON.stringify(data.reference_single_target_multi_id)
+			: null,
+		reference_multi_target_single_id: data.reference_multi_target_single_id
+			? JSON.stringify(data.reference_multi_target_single_id)
+			: null,
+		reference_multi_target_multi_id: data.reference_multi_target_multi_id
+			? JSON.stringify(data.reference_multi_target_multi_id)
+			: null,
+		owner: data.owner ? JSON.stringify(data.owner) : userReference,
+		created_by: data.created_by
+			? JSON.stringify(data.created_by)
+			: userReference,
+		modified_by: data.modified_by
+			? JSON.stringify(data.modified_by)
+			: userReference,
+	}
 }

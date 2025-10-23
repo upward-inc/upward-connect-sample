@@ -31,5 +31,8 @@ export default defineConfig({
 		},
 		// Global setup for testcontainers
 		globals: true,
+		reporters: process.env.GITHUB_ACTIONS
+			? ["verbose", "github-actions"]
+			: ["verbose"],
 	},
 })
