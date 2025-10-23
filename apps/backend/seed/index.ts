@@ -11,6 +11,7 @@ import { seedLeads } from "./lead"
 import { seedOauthClients } from "./oauth-client"
 import { seedOpportunities } from "./opportunity"
 import { seedPhoneCalls } from "./phone-call"
+import { seedPrivateKeys } from "./private-key"
 import { seedProducts } from "./product"
 import { seedProfiles } from "./profile"
 import { seedRoles } from "./role"
@@ -102,6 +103,9 @@ try {
 
 			// サンプル
 			await seedSamples(txClient, users)
+
+			// 秘密鍵
+			await seedPrivateKeys(txClient)
 		},
 		{
 			timeout: 1000 * 60,
