@@ -1,3 +1,4 @@
+import { env } from "../env"
 import { z } from "../libs/zod"
 import {
 	EmailSchema,
@@ -10,6 +11,42 @@ import {
 	UserNameSchema,
 } from "./system-user"
 import { StringToArraySchema } from "./utility"
+
+export const PrivateKeySchema = z
+	.object({
+		id: z.uuid().meta({
+			description: "秘密鍵ID",
+			example: "b1a2b3c4-d5e6-7f89-0a1b-2c3d4e5f6a7b",
+		}),
+		base64_iv: z.string(),
+		encrypted_private_key_pem: z.string(),
+	})
+	.transform(async (obj) => {
+		const encryptedBuffer = Buffer.from(obj.encrypted_private_key_pem, "base64")
+		const key = await crypto.subtle.importKey(
+			"raw",
+			Buffer.from(env.OIDC_ENCRYPT_PRIVATE_KEY_SECRET),
+			"AES-GCM",
+			false,
+			["decrypt"],
+		)
+		const decryptedBuffer = await crypto.subtle.decrypt(
+			{
+				name: "AES-GCM",
+				iv: Buffer.from(obj.base64_iv, "base64"),
+			},
+			key,
+			encryptedBuffer,
+		)
+		return {
+			id: obj.id,
+			private_key_pem: Buffer.from(decryptedBuffer).toString("utf-8"),
+		}
+	})
+
+export const PrivateKeyListSchema = z.array(PrivateKeySchema).meta({
+	description: "秘密鍵一覧",
+})
 
 export const ClientIdSchema = z.string().min(1).meta({
 	description: "OAuth 2.0 クライアント識別子",
@@ -279,6 +316,8 @@ export const PostTokenResultSchema = z.object({
 	}),
 })
 
+export type PrivateKey = z.infer<typeof PrivateKeySchema>
+export type PrivateKeyList = z.infer<typeof PrivateKeyListSchema>
 export type OAuthClient = z.infer<typeof OAuthClientSchema>
 export type PublishedAuthCode = z.infer<typeof PublishedAuthCodeSchema>
 export type LoggedInUser = z.infer<typeof LoggedInUserSchema>
