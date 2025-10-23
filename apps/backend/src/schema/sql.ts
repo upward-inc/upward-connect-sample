@@ -207,7 +207,12 @@ const baseFilterToPredicate = (
 	) {
 		return withPredicatePrefix(
 			filter.is_not,
-			getOptionComparisonPredicate(filter.field, filter.operator, filter.value),
+			getOptionComparisonPredicate(
+				filter.field,
+				filter.operator,
+				filter.value,
+				item.sub_type,
+			),
 		)
 	}
 
@@ -227,7 +232,12 @@ const baseFilterToPredicate = (
 
 		return withPredicatePrefix(
 			filter.is_not,
-			getReferenceComparisonPredicate(filter.field, filter.operator, value),
+			getReferenceComparisonPredicate(
+				filter.field,
+				filter.operator,
+				value,
+				item.sub_type,
+			),
 		)
 	}
 
@@ -292,9 +302,8 @@ const getOptionComparisonPredicate = (
 	fieldName: string,
 	operator: EqualOperator | IncludesOperator,
 	value: string,
+	subType?: EntityItem["sub_type"],
 ) => {
-	// "対象の値を含む"検索クエリを生成
-	// 単一オプションのカラムには単一の値しか設定されない前提であるため、オペレーター（`eq` or `includes`）毎に処理を分ける必要なし
 	const safeColumnName = `[${fieldName}]`
 	const isNotNullExpression = `${safeColumnName} IS NOT NULL`
 	const jsonExpression = [
@@ -303,8 +312,16 @@ const getOptionComparisonPredicate = (
 		`ELSE '[' + ${safeColumnName} + ']'`,
 		"END",
 	].join(" ")
-	const subQuery = `SELECT * FROM OPENJSON(${jsonExpression}) WHERE value = '${value}'`
 
+	if (operator === "eq" && subType === "multi") {
+		// multi の eq: 配列の要素数が1で、その値が指定値と一致すること
+		const countSubQuery = `SELECT COUNT(*) FROM OPENJSON(${jsonExpression})`
+		const valueSubQuery = `SELECT * FROM OPENJSON(${jsonExpression}) WHERE value = '${value}'`
+		return `${isNotNullExpression} AND (${countSubQuery}) = 1 AND EXISTS (${valueSubQuery})`
+	}
+
+	// single の eq または includes: 対象の値を含む
+	const subQuery = `SELECT * FROM OPENJSON(${jsonExpression}) WHERE value = '${value}'`
 	return `${isNotNullExpression} AND EXISTS (${subQuery})`
 }
 
@@ -312,16 +329,27 @@ const getReferenceComparisonPredicate = (
 	fieldName: string,
 	operator: EqualOperator | IncludesOperator,
 	value: RecordReferenceValue,
+	subType?: EntityItem["sub_type"],
 ) => {
-	// "対象の値を含む"検索クエリを生成
-	// 単一参照のカラムには単一の値しか設定されない前提であるため、オペレーター（`eq` or `includes`）毎に処理を分ける必要なし
 	const safeColumnName = `[${fieldName}]`
+
+	if (operator === "eq" && subType === "multi") {
+		// multi の eq: 配列の要素数が1で、その値が指定値と一致すること
+		const countSubQuery = `SELECT COUNT(*) FROM OPENJSON(${safeColumnName})`
+		const valueSubQuery = [
+			`SELECT * FROM OPENJSON(${safeColumnName})`,
+			"WITH (entity_name NVARCHAR(MAX), id NVARCHAR(MAX))",
+			`WHERE entity_name = '${value.entity_name}' AND id = '${value.id}'`,
+		].join(" ")
+		return `(${countSubQuery}) = 1 AND EXISTS (${valueSubQuery})`
+	}
+
+	// single の eq または includes: 対象の値を含む（単一参照でも配列として保存されているため）
 	const subQuery = [
 		`SELECT * FROM OPENJSON(${safeColumnName})`,
 		"WITH (entity_name NVARCHAR(MAX), id NVARCHAR(MAX))",
 		`WHERE entity_name = '${value.entity_name}' AND id = '${value.id}'`,
 	].join(" ")
-
 	return `EXISTS (${subQuery})`
 }
 
