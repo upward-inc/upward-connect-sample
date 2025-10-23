@@ -360,22 +360,25 @@ const getIsSetComparisonPredicate = (
 ) => {
 	const safeColumnName = `[${fieldName}]`
 
-	// reference型の場合はsubTypeによって判定を分岐
-	if (itemType === "reference") {
+	const getReferenceIsSetPredicate = (
+		columnName: string,
+		subType?: EntityItem["sub_type"],
+	): string => {
 		if (subType === "multi") {
 			// multi: 空配列またはnullを検出（値が設定されていない）
-			return `${safeColumnName} IS NULL OR (SELECT COUNT(*) FROM OPENJSON(${safeColumnName})) = 0`
+			return `${columnName} IS NULL OR (SELECT COUNT(*) FROM OPENJSON(${columnName})) = 0`
 		}
 		// single: 配列に要素があるかを検出（値が設定されている）
-		return `(SELECT COUNT(*) FROM OPENJSON(${safeColumnName})) > 0`
+		return `(SELECT COUNT(*) FROM OPENJSON(${columnName})) > 0`
 	}
 
-	const predicates: Record<Exclude<EntityItem["type"], "reference">, string> = {
+	const predicates: Record<EntityItem["type"], string> = {
 		text: `TRIM(ISNULL(${safeColumnName}, '')) != ''`,
 		numeric: `ISNULL(${safeColumnName}, 0) != 0`,
 		boolean: `ISNULL(${safeColumnName}, 0) != 0`,
 		date: `ISNULL(${safeColumnName}, '') != ''`,
 		option: `(SELECT COUNT(*) FROM OPENJSON(CASE WHEN ISJSON(${safeColumnName}) = 1 THEN ${safeColumnName} ELSE '[' + ${safeColumnName} + ']' END)) > 0`,
+		reference: getReferenceIsSetPredicate(safeColumnName, subType),
 	}
 
 	return predicates[itemType]
