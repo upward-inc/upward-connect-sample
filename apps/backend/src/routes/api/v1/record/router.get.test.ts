@@ -782,13 +782,12 @@ describe("GET /records/:entity_name - レコード一覧取得（検索）", () 
 				]
 
 				const baseTestCases = [
-					// TODO: 実装側の修正が必要
-					// {
-					// 	title: "eq",
-					// 	operator: "eq",
-					// 	value: "option1",
-					// 	expected: [{ name: "Record 1" }],
-					// },
+					{
+						title: "eq",
+						operator: "eq",
+						value: "option1",
+						expected: { data: [{ name: "Record 1" }] },
+					},
 					{
 						title: "includes",
 						operator: "includes",
@@ -947,25 +946,23 @@ describe("GET /records/:entity_name - レコード一覧取得（検索）", () 
 				]
 
 				const baseTestCases = [
-					// TODO: 実装側の修正が必要
-					// {
-					// 	title: "eq",
-					// 	operator: "eq",
-					// 	value: { entity_name: "account", id: recordId1 },
-					// 	expected: { data: [{ name: "Record 1" }] },
-					// },
+					{
+						title: "eq",
+						operator: "eq",
+						value: { entity_name: "account", id: recordId1 },
+						expected: { data: [{ name: "Record 1" }] },
+					},
 					{
 						title: "includes",
 						operator: "includes",
 						value: { entity_name: "lead", id: recordId1 },
 						expected: { data: [{ name: "Record 2" }, { name: "Record 3" }] },
 					},
-					// TODO: 実装側の修正が必要
-					// {
-					// 	title: "is_set",
-					// 	operator: "is_set",
-					// 	expected: { data: [{ name: "Record 6" }, { name: "Record 7" }] },
-					// },
+					{
+						title: "is_set",
+						operator: "is_set",
+						expected: { data: [{ name: "Record 6" }, { name: "Record 7" }] },
+					},
 				]
 
 				const testCases = generateFilterTestCases(testRecords, baseTestCases)
