@@ -313,16 +313,13 @@ const getOptionComparisonPredicate = (
 		"END",
 	].join(" ")
 
+	const valueCondition = `WHERE value = '${value}'`
+
 	if (operator === "eq" && subType === "multi") {
-		// multi の eq: 配列の要素数が1で、その値が指定値と一致すること
-		const countSubQuery = `SELECT COUNT(*) FROM OPENJSON(${jsonExpression})`
-		const valueSubQuery = `SELECT * FROM OPENJSON(${jsonExpression}) WHERE value = '${value}'`
-		return `${isNotNullExpression} AND (${countSubQuery}) = 1 AND EXISTS (${valueSubQuery})`
+		return `${isNotNullExpression} AND ${getJsonArrayExactMatchPredicate(jsonExpression, valueCondition)}`
 	}
 
-	// single の eq または includes: 対象の値を含む
-	const subQuery = `SELECT * FROM OPENJSON(${jsonExpression}) WHERE value = '${value}'`
-	return `${isNotNullExpression} AND EXISTS (${subQuery})`
+	return `${isNotNullExpression} AND ${getJsonArrayIncludesPredicate(jsonExpression, valueCondition)}`
 }
 
 const getReferenceComparisonPredicate = (
@@ -332,25 +329,14 @@ const getReferenceComparisonPredicate = (
 	subType?: EntityItem["sub_type"],
 ) => {
 	const safeColumnName = `[${fieldName}]`
+	const withClause = "WITH (entity_name NVARCHAR(MAX), id NVARCHAR(MAX))"
+	const valueCondition = `${withClause} WHERE entity_name = '${value.entity_name}' AND id = '${value.id}'`
 
 	if (operator === "eq" && subType === "multi") {
-		// multi の eq: 配列の要素数が1で、その値が指定値と一致すること
-		const countSubQuery = `SELECT COUNT(*) FROM OPENJSON(${safeColumnName})`
-		const valueSubQuery = [
-			`SELECT * FROM OPENJSON(${safeColumnName})`,
-			"WITH (entity_name NVARCHAR(MAX), id NVARCHAR(MAX))",
-			`WHERE entity_name = '${value.entity_name}' AND id = '${value.id}'`,
-		].join(" ")
-		return `(${countSubQuery}) = 1 AND EXISTS (${valueSubQuery})`
+		return getJsonArrayExactMatchPredicate(safeColumnName, valueCondition)
 	}
 
-	// single の eq または includes: 対象の値を含む（単一参照でも配列として保存されているため）
-	const subQuery = [
-		`SELECT * FROM OPENJSON(${safeColumnName})`,
-		"WITH (entity_name NVARCHAR(MAX), id NVARCHAR(MAX))",
-		`WHERE entity_name = '${value.entity_name}' AND id = '${value.id}'`,
-	].join(" ")
-	return `EXISTS (${subQuery})`
+	return getJsonArrayIncludesPredicate(safeColumnName, valueCondition)
 }
 
 const getIsSetComparisonPredicate = (
@@ -391,4 +377,27 @@ const withPredicatePrefix = (isNot: boolean, predicate: string | null) => {
 
 	const predicatePrefix = isNot ? "NOT" : ""
 	return `${predicatePrefix} (${predicate})`
+}
+
+/**
+ * JSON配列が要素数1かつ指定条件を満たすことをチェックする条件式を生成
+ */
+const getJsonArrayExactMatchPredicate = (
+	columnExpression: string,
+	valueCondition: string,
+): string => {
+	const countSubQuery = `SELECT COUNT(*) FROM OPENJSON(${columnExpression})`
+	const valueSubQuery = `SELECT * FROM OPENJSON(${columnExpression}) ${valueCondition}`
+	return `(${countSubQuery}) = 1 AND EXISTS (${valueSubQuery})`
+}
+
+/**
+ * JSON配列が指定条件を満たす要素を含むことをチェックする条件式を生成
+ */
+const getJsonArrayIncludesPredicate = (
+	columnExpression: string,
+	valueCondition: string,
+): string => {
+	const subQuery = `SELECT * FROM OPENJSON(${columnExpression}) ${valueCondition}`
+	return `EXISTS (${subQuery})`
 }
