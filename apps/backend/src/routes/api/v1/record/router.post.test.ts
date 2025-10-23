@@ -13,6 +13,7 @@ import {
 import {
 	createTestAccount,
 	createTestLead,
+	deleteAllTestSamples,
 	deleteTestAccountsByPrefix,
 	deleteTestLeadsByPrefix,
 } from "../../../../test/utils/record"
@@ -69,6 +70,7 @@ describe("POST /records/:entity_name - レコード作成", () => {
 		await Promise.all([
 			deleteTestAccountsByPrefix(`${taskId}_`),
 			deleteTestLeadsByPrefix(`${taskId}_`),
+			deleteAllTestSamples(),
 			cleanupEntityMetadata(),
 		])
 
