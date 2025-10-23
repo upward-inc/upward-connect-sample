@@ -351,10 +351,10 @@ const getIsSetComparisonPredicate = (
 		subType?: EntityItem["sub_type"],
 	): string => {
 		if (subType === "multi") {
-			// multi: 値が設定されている = 空配列でもnullでもない
+			// multi: NULLではない && 配列に要素がある
 			return `${columnName} IS NOT NULL AND (SELECT COUNT(*) FROM OPENJSON(${columnName})) > 0`
 		}
-		// single: 値が設定されている = 配列に要素がある
+		// single: NULLではない
 		return `(SELECT COUNT(*) FROM OPENJSON(${columnName})) > 0`
 	}
 
