@@ -961,7 +961,15 @@ describe("GET /records/:entity_name - レコード一覧取得（検索）", () 
 					{
 						title: "is_set",
 						operator: "is_set",
-						expected: { data: [{ name: "Record 6" }, { name: "Record 7" }] },
+						expected: {
+							data: [
+								{ name: "Record 1" },
+								{ name: "Record 2" },
+								{ name: "Record 3" },
+								{ name: "Record 4" },
+								{ name: "Record 5" },
+							],
+						},
 					},
 				]
 
