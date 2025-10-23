@@ -9,9 +9,12 @@ import {
 	validateRefreshTokenParams,
 	validateTokenParams,
 } from "../../domain/auth"
+import { extractPublicKeyAsJwkFromPrivateKey } from "../../domain/auth/export-public-key-from-private-key"
+import { getNotClosedPrivateKeyList } from "../../domain/auth/get-private-key-list"
 import { env } from "../../env"
 import {
 	type AuthContexts,
+	GetJwksResultSchema,
 	GetUserInfoResultSchema,
 	PostTokenParamSchema,
 	PostTokenResultSchema,
@@ -233,5 +236,30 @@ export const oauth2Router = new OpenAPIHono<{ Variables: AuthContexts }>()
 				},
 				200,
 			)
+		},
+	)
+	.openapi(
+		createRoute({
+			method: "get",
+			path: "/jwks",
+			description: "id_tokenの署名を検証するための公開鍵群（JWKs）を返却する",
+			responses: {
+				200: {
+					description: "Success",
+					content: {
+						"application/json": { schema: GetJwksResultSchema },
+					},
+				},
+			},
+		}),
+		async (c) => {
+			const privateKeys = await getNotClosedPrivateKeyList()
+			const jwks = {
+				keys: privateKeys.map((key) =>
+					extractPublicKeyAsJwkFromPrivateKey(key),
+				),
+			}
+
+			return c.json(jwks, 200)
 		},
 	)
