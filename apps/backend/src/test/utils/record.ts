@@ -31,6 +31,22 @@ export interface LeadData
 	modified_by?: RecordReference
 }
 
+export type Contact = Awaited<
+	ReturnType<typeof testPrisma.contact_view.findUniqueOrThrow>
+>
+
+export interface ContactData
+	extends Omit<
+		Prisma.contactCreateInput,
+		"account" | "originating_lead" | "owner" | "created_by" | "modified_by"
+	> {
+	account?: RecordReference | null
+	originating_lead?: RecordReference | null
+	owner?: RecordReference
+	created_by?: RecordReference
+	modified_by?: RecordReference
+}
+
 export type Sample = Awaited<
 	ReturnType<typeof testPrisma.sample_view.findUniqueOrThrow>
 >
@@ -167,6 +183,58 @@ export async function deleteTestLeadsByPrefix(prefix: string) {
 }
 
 /**
+ * 取引先担当者テストデータの作成
+ */
+export async function createTestContact(
+	userId: string,
+	data: ContactData,
+): Promise<Contact> {
+	const contact = await testPrisma.contact.create({
+		data: toContactCreateInput(userId, data),
+		select: { id: true },
+	})
+
+	return await testPrisma.contact_view.findUniqueOrThrow({
+		where: { id: contact.id },
+	})
+}
+
+/**
+ * 取引先担当者テストデータの一括作成
+ */
+export async function createManyTestContacts(
+	userId: string,
+	data: Array<ContactData>,
+): Promise<{ count: number }> {
+	return await testPrisma.contact.createMany({
+		data: data.map((d) => toContactCreateInput(userId, d)),
+	})
+}
+
+/**
+ * 取引先担当者テストデータの全削除
+ */
+export async function deleteAllTestContacts() {
+	await testPrisma.contact.deleteMany()
+}
+
+/**
+ * 取引先担当者テストデータの削除（レコードID指定）
+ */
+export async function deleteTestContactById(id: string) {
+	await testPrisma.contact.delete({ where: { id } })
+}
+
+/**
+ * 取引先担当者テストデータの一括削除（Prefix指定）
+ */
+export async function deleteTestContactsByPrefix(prefix: string) {
+	await testPrisma.contact.deleteMany({
+		where: { last_name: { startsWith: prefix } },
+	})
+}
+
+/**
  * サンプルテストデータの作成
  */
 export async function createTestSample(
@@ -251,6 +319,27 @@ function toLeadCreateInput(
 		status: data.status ? JSON.stringify([data.status]) : "new",
 		industry: data.industry ? JSON.stringify([data.industry]) : null,
 		rating: data.rating ? JSON.stringify([data.rating]) : null,
+		owner: data.owner ? JSON.stringify(data.owner) : userReference,
+		created_by: data.created_by
+			? JSON.stringify(data.created_by)
+			: userReference,
+		modified_by: data.modified_by
+			? JSON.stringify(data.modified_by)
+			: userReference,
+	}
+}
+
+function toContactCreateInput(
+	userId: string,
+	data: ContactData,
+): Prisma.contactCreateInput {
+	const userReference = JSON.stringify({ entity_name: "user", id: userId })
+	return {
+		...data,
+		account: data.account ? JSON.stringify(data.account) : null,
+		originating_lead: data.originating_lead
+			? JSON.stringify(data.originating_lead)
+			: null,
 		owner: data.owner ? JSON.stringify(data.owner) : userReference,
 		created_by: data.created_by
 			? JSON.stringify(data.created_by)
