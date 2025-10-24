@@ -315,10 +315,12 @@ const getOptionComparisonPredicate = (
 
 	const valueCondition = `WHERE value = '${value}'`
 
+	// multi type + eqの場合のみ完全一致チェック（配列要素数1かつ値が一致）が必要
 	if (operator === "eq" && subType === "multi") {
 		return `${isNotNullExpression} AND ${getJsonArrayExactMatchPredicate(jsonExpression, valueCondition)}`
 	}
 
+	// それ以外（single + eq、または includes）は値が含まれているかのチェックで十分
 	return `${isNotNullExpression} AND ${getJsonArrayIncludesPredicate(jsonExpression, valueCondition)}`
 }
 
@@ -332,10 +334,12 @@ const getReferenceComparisonPredicate = (
 	const withClause = "WITH (entity_name NVARCHAR(MAX), id NVARCHAR(MAX))"
 	const valueCondition = `${withClause} WHERE entity_name = '${value.entity_name}' AND id = '${value.id}'`
 
+	// multi type + eqの場合のみ完全一致チェック（配列要素数1かつ値が一致）が必要
 	if (operator === "eq" && subType === "multi") {
 		return getJsonArrayExactMatchPredicate(safeColumnName, valueCondition)
 	}
 
+	// それ以外（single + eq、または includes）は値が含まれているかのチェックで十分
 	return getJsonArrayIncludesPredicate(safeColumnName, valueCondition)
 }
 
