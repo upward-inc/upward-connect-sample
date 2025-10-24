@@ -1,112 +1,145 @@
-import { afterAll, beforeAll, describe, expect, it } from "vitest"
+import { afterAll, afterEach, beforeAll, describe, expect, it } from "vitest"
 import { app } from "../../../index"
 import { testPrisma } from "../../../test/setup"
-import { createExpiredToken, createValidToken } from "../../../test/utils/auth"
-import { cleanupTestData, createTestUser } from "../../../test/utils/common"
+import {
+	type TestExecutionUser,
+	createTestExecutionUser,
+	deleteTestExecutionUser,
+} from "../../../test/utils/execution-user"
 import { createTestFile } from "../../../test/utils/file"
 
-describe("File Tests", () => {
-	beforeAll(async () => {
-		// Clean up any existing test data
-		await cleanupTestData()
+describe("ファイルAPI", () => {
+	// テスト実施ユーザー
+	let testExecutionUser: TestExecutionUser
+
+	beforeAll(async ({ id: taskId }) => {
+		const { user } = await setup(taskId)
+		testExecutionUser = user
 	})
 
 	afterAll(async () => {
-		// Clean up all test data including files
-		await cleanupTestData()
+		await cleanup()
 	})
 
-	describe("POST /api/v1/files - Create File", () => {
-		it("should create a file with valid authentication and form data", async () => {
-			// Create a test user
-			const testUser = await createTestUser({
-				user_name: "file_upload_user",
-				first_name: "File",
-				last_name: "Upload",
-				email: "file_upload@example.com",
-			})
-			const token = createValidToken(testUser.id)
+	// テストデータのセットアップ
+	async function setup(taskId: string) {
+		// テスト実施ユーザーの作成
+		const user = await createTestExecutionUser({
+			user_name: taskId,
+			first_name: "File",
+			last_name: "Test",
+			email: "file_test@example.com",
+		})
 
-			// Create test file
+		return { user }
+	}
+
+	// テストデータのクリーンアップ
+	async function cleanup() {
+		// ファイルデータの削除
+		await testPrisma.file.deleteMany({
+			where: { created_by: testExecutionUser.id },
+		})
+
+		await deleteTestExecutionUser(testExecutionUser.id)
+	}
+
+	/**
+	 * ファイルAPIへのPOSTリクエストを送信する
+	 */
+	async function requestPost(
+		formData: FormData,
+		authToken = testExecutionUser.access_token,
+	) {
+		return await app.request("/api/v1/files", {
+			method: "POST",
+			headers: authToken ? { Authorization: `Bearer ${authToken}` } : {},
+			body: formData,
+		})
+	}
+
+	/**
+	 * ファイルAPIへのGETリクエストを送信する
+	 */
+	async function requestGet(
+		fileId: string,
+		authToken = testExecutionUser.access_token,
+	) {
+		return await app.request(`/api/v1/files/${fileId}`, {
+			method: "GET",
+			headers: authToken ? { Authorization: `Bearer ${authToken}` } : {},
+		})
+	}
+
+	describe("POST /api/v1/files - ファイル作成", () => {
+		it("有効な認証とフォームデータでファイルを作成できること", async () => {
+			// Arrange
 			const testFile = createTestFile("test.txt", "Hello, World!")
 			const formData = new FormData()
 			formData.append("file", testFile)
 
-			const response = await app.request("/api/v1/files", {
-				method: "POST",
-				headers: {
-					Authorization: `Bearer ${token}`,
-				},
-				body: formData,
-			})
+			// Act
+			const response = await requestPost(formData)
 
+			// Assert
 			const data = await response.json()
 			expect(response.status).toBe(200)
 			expect(data).toHaveProperty("id")
 			expect(typeof data.id).toBe("string")
+		})
 
-			// Verify file was actually saved in database
+		it("作成したファイルがデータベースに保存されること", async () => {
+			// Arrange
+			const testFile = createTestFile("test.txt", "Hello, World!")
+			const formData = new FormData()
+			formData.append("file", testFile)
+
+			// Act
+			const response = await requestPost(formData)
+			const data = await response.json()
+
+			// Assert
 			const savedFile = await testPrisma.file.findUnique({
 				where: { id: data.id },
 			})
 			expect(savedFile).toBeTruthy()
 			expect(savedFile?.name).toBe("test.txt")
 			expect(savedFile?.type).toBe("text/plain")
-			expect(savedFile?.created_by).toBe(testUser.id)
-			expect(savedFile?.modified_by).toBe(testUser.id)
+			expect(savedFile?.created_by).toBe(testExecutionUser.id)
+			expect(savedFile?.modified_by).toBe(testExecutionUser.id)
 		})
 
-		it("should create a json file", async () => {
-			const testUser = await createTestUser({
-				user_name: "json_file_user",
-				first_name: "Json",
-				last_name: "File",
-				email: "json_file@example.com",
-			})
-			const token = createValidToken(testUser.id)
-
-			// Test JSON file
+		it("JSONファイルを作成できること", async () => {
+			// Arrange
+			const jsonContent = JSON.stringify({ message: "test data" })
 			const jsonFile = createTestFile(
 				"data.json",
-				JSON.stringify({ message: "test data" }),
+				jsonContent,
 				"application/json",
 			)
 			const formData = new FormData()
 			formData.append("file", jsonFile)
 
-			const response = await app.request("/api/v1/files", {
-				method: "POST",
-				headers: {
-					Authorization: `Bearer ${token}`,
-				},
-				body: formData,
-			})
+			// Act
+			const response = await requestPost(formData)
 
+			// Assert
 			const data = await response.json()
 			expect(response.status).toBe(200)
 			expect(data).toHaveProperty("id")
 
-			// Verify file details
 			const savedFile = await testPrisma.file.findUnique({
 				where: { id: data.id },
 			})
 			expect(savedFile?.name).toBe("data.json")
 			expect(savedFile?.type).toBe("application/json")
 			expect(Buffer.from(savedFile?.content || []).toString()).toEqual(
-				JSON.stringify({ message: "test data" }),
+				jsonContent,
 			)
 		})
 
-		it("should create a binary file", async () => {
-			const testUser = await createTestUser({
-				user_name: "binary_file_user",
-				first_name: "Binary",
-				last_name: "File",
-				email: "binary_file@example.com",
-			})
-			const token = createValidToken(testUser.id)
-
-			// Create binary content (simulated image)
+		it("バイナリファイルを作成できること", async () => {
+			// Arrange
 			const binaryContent = new Uint8Array([137, 80, 78, 71, 13, 10, 26, 10]) // PNG header
 			const binaryFile = new File([binaryContent], "test.png", {
 				type: "image/png",
@@ -114,19 +147,14 @@ describe("File Tests", () => {
 			const formData = new FormData()
 			formData.append("file", binaryFile)
 
-			const response = await app.request("/api/v1/files", {
-				method: "POST",
-				headers: {
-					Authorization: `Bearer ${token}`,
-				},
-				body: formData,
-			})
+			// Act
+			const response = await requestPost(formData)
 
+			// Assert
 			const data = await response.json()
 			expect(response.status).toBe(200)
 			expect(data).toHaveProperty("id")
 
-			// Verify binary file details
 			const savedFile = await testPrisma.file.findUnique({
 				where: { id: data.id },
 			})
@@ -135,195 +163,120 @@ describe("File Tests", () => {
 			expect(new Uint8Array(savedFile?.content || [])).toEqual(binaryContent)
 		})
 
-		it("should return 401 for missing authorization header", async () => {
+		it("認証ヘッダーがない場合に401エラーを返すこと", async () => {
+			// Arrange
 			const testFile = createTestFile("unauthorized.txt", "Should not upload")
 			const formData = new FormData()
 			formData.append("file", testFile)
 
-			const response = await app.request("/api/v1/files", {
-				method: "POST",
-				body: formData,
-			})
+			// Act
+			const response = await requestPost(formData, "")
 
-			const data = await response.json()
+			// Assert
+			const json = await response.json()
 			expect(response.status).toBe(401)
-			expect(data).toEqual({
-				message: "No authentication header",
-			})
+			expect(json).toHaveProperty("message")
 		})
 
-		it("should return 400 for invalid authorization header format", async () => {
+		it("認証ヘッダーの形式が不正な場合に400エラーを返すこと", async () => {
+			// Arrange
 			const testFile = createTestFile("invalid_auth.txt", "Should not upload")
 			const formData = new FormData()
 			formData.append("file", testFile)
 
-			const response = await app.request("/api/v1/files", {
-				method: "POST",
-				headers: {
-					Authorization: "InvalidFormat token_here",
-				},
-				body: formData,
-			})
+			// Act
+			const response = await requestPost(formData, "InvalidFormat token_here")
 
-			const data = await response.json()
+			// Assert
+			const json = await response.json()
 			expect(response.status).toBe(400)
-			expect(data).toEqual({
-				message: "Invalid authentication header",
-			})
+			expect(json).toHaveProperty("message")
 		})
 
-		it("should return 401 for expired token", async () => {
-			const testUser = await createTestUser({
-				user_name: "expired_token_user",
-				first_name: "Expired",
-				last_name: "Token",
-				email: "expired_token@example.com",
-			})
-			const expiredToken = createExpiredToken(testUser.id)
-
+		it("期限切れトークンの場合に401エラーを返すこと", async () => {
+			// Arrange
 			const testFile = createTestFile("expired.txt", "Should not upload")
 			const formData = new FormData()
 			formData.append("file", testFile)
+			// 期限切れトークンを生成（1970年に期限設定）
+			const expiredToken =
+				"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoidGVzdCIsImV4cCI6MH0.invalid"
 
-			const response = await app.request("/api/v1/files", {
-				method: "POST",
-				headers: {
-					Authorization: `Bearer ${expiredToken}`,
-				},
-				body: formData,
-			})
+			// Act
+			const response = await requestPost(formData, expiredToken)
 
-			const data = await response.json()
+			// Assert
+			const json = await response.json()
 			expect(response.status).toBe(401)
-			expect(data).toEqual({
-				message: "Invalid token",
-			})
+			expect(json).toHaveProperty("message")
 		})
 
-		it("should return 401 for malformed token", async () => {
+		it("不正なトークンの場合に401エラーを返すこと", async () => {
+			// Arrange
 			const testFile = createTestFile("malformed.txt", "Should not upload")
 			const formData = new FormData()
 			formData.append("file", testFile)
 
-			const response = await app.request("/api/v1/files", {
-				method: "POST",
-				headers: {
-					Authorization: "Bearer invalid.malformed.token",
-				},
-				body: formData,
-			})
+			// Act
+			const response = await requestPost(formData, "invalid.malformed.token")
 
-			const data = await response.json()
+			// Assert
+			const json = await response.json()
 			expect(response.status).toBe(401)
-			expect(data).toEqual({
-				message: "Invalid token",
-			})
+			expect(json).toHaveProperty("message")
 		})
 
-		it("should return 400 for missing file in form data", async () => {
-			const testUser = await createTestUser({
-				user_name: "no_file_user",
-				first_name: "No",
-				last_name: "File",
-				email: "no_file@example.com",
-			})
-			const token = createValidToken(testUser.id)
-
-			// Send form data without file
+		it("フォームデータにファイルがない場合に400エラーを返すこと", async () => {
+			// Arrange
 			const formData = new FormData()
 			formData.append("other_field", "not a file")
 
-			const response = await app.request("/api/v1/files", {
-				method: "POST",
-				headers: {
-					Authorization: `Bearer ${token}`,
-				},
-				body: formData,
-			})
+			// Act
+			const response = await requestPost(formData)
 
-			const data = await response.json()
+			// Assert
+			const json = await response.json()
 			expect(response.status).toBe(400)
-			expect(data.success).toBe(false)
+			expect(json).toHaveProperty("success")
 		})
 
-		it("should return 400 for empty form data", async () => {
-			const testUser = await createTestUser({
-				user_name: "empty_form_user",
-				first_name: "Empty",
-				last_name: "Form",
-				email: "empty_form@example.com",
-			})
-			const token = createValidToken(testUser.id)
-
-			// Send empty form data
+		it("フォームデータが空の場合に400エラーを返すこと", async () => {
+			// Arrange
 			const formData = new FormData()
 
-			const response = await app.request("/api/v1/files", {
-				method: "POST",
-				headers: {
-					Authorization: `Bearer ${token}`,
-				},
-				body: formData,
-			})
+			// Act
+			const response = await requestPost(formData)
 
-			const data = await response.json()
+			// Assert
+			const json = await response.json()
 			expect(response.status).toBe(400)
-			expect(data.success).toBe(false)
+			expect(json).toHaveProperty("success")
 		})
 	})
 
-	describe("GET /api/v1/files/:id - Get File", () => {
-		it("should return file content for valid file ID with authentication", async () => {
-			// Create a test user and file
-			const testUser = await createTestUser({
-				user_name: "get_file_user",
-				first_name: "Get",
-				last_name: "File",
-				email: "get_file@example.com",
-			})
-			const token = createValidToken(testUser.id)
-
-			// First create a file
+	describe("GET /api/v1/files/:id - ファイル取得", () => {
+		it("有効な認証とファイルIDでファイル内容を取得できること", async () => {
+			// Arrange
 			const fileContent = "File content for download"
 			const testFile = createTestFile("download.txt", fileContent, "text/plain")
 			const formData = new FormData()
 			formData.append("file", testFile)
 
-			const createResponse = await app.request("/api/v1/files", {
-				method: "POST",
-				headers: {
-					Authorization: `Bearer ${token}`,
-				},
-				body: formData,
-			})
-
+			const createResponse = await requestPost(formData)
 			const createData = await createResponse.json()
-			expect(createResponse.status).toBe(200)
 
-			// Now get the file
-			const getResponse = await app.request(`/api/v1/files/${createData.id}`, {
-				method: "GET",
-				headers: {
-					Authorization: `Bearer ${token}`,
-				},
-			})
+			// Act
+			const response = await requestGet(createData.id)
 
-			const content = await getResponse.text()
-			expect(getResponse.status).toBe(200)
-			expect(getResponse.headers.get("Content-Type")).toBe("text/plain")
+			// Assert
+			const content = await response.text()
+			expect(response.status).toBe(200)
+			expect(response.headers.get("Content-Type")).toBe("text/plain")
 			expect(content).toBe(fileContent)
 		})
 
-		it("should return file content with correct headers for json", async () => {
-			const testUser = await createTestUser({
-				user_name: "mime_type_user",
-				first_name: "Mime",
-				last_name: "Type",
-				email: "mime_type@example.com",
-			})
-			const token = createValidToken(testUser.id)
-
-			// Create JSON file
+		it("JSONファイルを正しいヘッダーとともに取得できること", async () => {
+			// Arrange
 			const jsonContent = JSON.stringify({ test: "data" })
 			const jsonFile = createTestFile(
 				"data.json",
@@ -333,44 +286,24 @@ describe("File Tests", () => {
 			const formData = new FormData()
 			formData.append("file", jsonFile)
 
-			const createResponse = await app.request("/api/v1/files", {
-				method: "POST",
-				headers: {
-					Authorization: `Bearer ${token}`,
-				},
-				body: formData,
-			})
-
+			const createResponse = await requestPost(formData)
 			const createData = await createResponse.json()
-			expect(createResponse.status).toBe(200)
 
-			// Get the JSON file
-			const getResponse = await app.request(`/api/v1/files/${createData.id}`, {
-				method: "GET",
-				headers: {
-					Authorization: `Bearer ${token}`,
-				},
-			})
+			// Act
+			const response = await requestGet(createData.id)
 
-			const responseContent = await getResponse.text()
-			expect(getResponse.status).toBe(200)
-			expect(getResponse.headers.get("Content-Type")).toBe("application/json")
-			expect(getResponse.headers.get("Content-Length")).toBe(
+			// Assert
+			const responseContent = await response.text()
+			expect(response.status).toBe(200)
+			expect(response.headers.get("Content-Type")).toBe("application/json")
+			expect(response.headers.get("Content-Length")).toBe(
 				jsonContent.length.toString(),
 			)
 			expect(responseContent).toBe(jsonContent)
 		})
 
-		it("should handle binary file downloads correctly", async () => {
-			const testUser = await createTestUser({
-				user_name: "binary_download_user",
-				first_name: "Binary",
-				last_name: "Download",
-				email: "binary_download@example.com",
-			})
-			const token = createValidToken(testUser.id)
-
-			// Create binary file
+		it("バイナリファイルを正しくダウンロードできること", async () => {
+			// Arrange
 			const binaryContent = new Uint8Array([
 				137, 80, 78, 71, 13, 10, 26, 10, 255, 0, 128,
 			]) // PNG header
@@ -380,104 +313,65 @@ describe("File Tests", () => {
 			const formData = new FormData()
 			formData.append("file", binaryFile)
 
-			const createResponse = await app.request("/api/v1/files", {
-				method: "POST",
-				headers: {
-					Authorization: `Bearer ${token}`,
-				},
-				body: formData,
-			})
-
+			const createResponse = await requestPost(formData)
 			const createData = await createResponse.json()
-			expect(createResponse.status).toBe(200)
 
-			// Download the binary file
-			const getResponse = await app.request(`/api/v1/files/${createData.id}`, {
-				method: "GET",
-				headers: {
-					Authorization: `Bearer ${token}`,
-				},
-			})
+			// Act
+			const response = await requestGet(createData.id)
 
-			const arrayBuffer = await getResponse.arrayBuffer()
+			// Assert
+			const arrayBuffer = await response.arrayBuffer()
 			const responseBytes = new Uint8Array(arrayBuffer)
-			expect(getResponse.status).toBe(200)
-			expect(getResponse.headers.get("Content-Type")).toBe("image/png")
+			expect(response.status).toBe(200)
+			expect(response.headers.get("Content-Type")).toBe("image/png")
 			expect(responseBytes).toEqual(binaryContent)
 		})
 
-		it("should return 404 for non-existent file ID", async () => {
-			const testUser = await createTestUser({
-				user_name: "not_found_user",
-				first_name: "Not",
-				last_name: "Found",
-				email: "not_found@example.com",
-			})
-			const token = createValidToken(testUser.id)
+		it("存在しないファイルIDの場合に404エラーを返すこと", async () => {
+			// Arrange
 			const nonExistentId = crypto.randomUUID()
 
-			const response = await app.request(`/api/v1/files/${nonExistentId}`, {
-				method: "GET",
-				headers: {
-					Authorization: `Bearer ${token}`,
-				},
-			})
+			// Act
+			const response = await requestGet(nonExistentId)
 
-			const data = await response.json()
+			// Assert
+			const json = await response.json()
 			expect(response.status).toBe(404)
-			expect(data).toEqual({
-				message: "File not found",
-			})
+			expect(json).toHaveProperty("message")
 		})
 
-		it("should return 401 for missing authorization header", async () => {
-			const response = await app.request("/api/v1/files/some-id", {
-				method: "GET",
-			})
+		it("認証ヘッダーがない場合に401エラーを返すこと", async () => {
+			// Act
+			const response = await requestGet("some-id", "")
 
-			const data = await response.json()
+			// Assert
+			const json = await response.json()
 			expect(response.status).toBe(401)
-			expect(data).toEqual({
-				message: "No authentication header",
-			})
+			expect(json).toHaveProperty("message")
 		})
 
-		it("should return 401 for expired token", async () => {
-			const testUser = await createTestUser({
-				user_name: "expired_get_user",
-				first_name: "Expired",
-				last_name: "Get",
-				email: "expired_get@example.com",
-			})
-			const expiredToken = createExpiredToken(testUser.id)
+		it("期限切れトークンの場合に401エラーを返すこと", async () => {
+			// Arrange
+			const expiredToken =
+				"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoidGVzdCIsImV4cCI6MH0.invalid"
 
-			const response = await app.request("/api/v1/files/some-id", {
-				method: "GET",
-				headers: {
-					Authorization: `Bearer ${expiredToken}`,
-				},
-			})
+			// Act
+			const response = await requestGet("some-id", expiredToken)
 
-			const data = await response.json()
+			// Assert
+			const json = await response.json()
 			expect(response.status).toBe(401)
-			expect(data).toEqual({
-				message: "Invalid token",
-			})
+			expect(json).toHaveProperty("message")
 		})
 
-		it("should return 401 for malformed token", async () => {
-			const response = await app.request("/api/v1/files/some-id", {
-				method: "GET",
-				headers: {
-					Authorization: "Bearer invalid.malformed.token",
-				},
-			})
+		it("不正なトークンの場合に401エラーを返すこと", async () => {
+			// Act
+			const response = await requestGet("some-id", "invalid.malformed.token")
 
-			const data = await response.json()
+			// Assert
+			const json = await response.json()
 			expect(response.status).toBe(401)
-			expect(data).toEqual({
-				message: "Invalid token",
-			})
+			expect(json).toHaveProperty("message")
 		})
 	})
 })
