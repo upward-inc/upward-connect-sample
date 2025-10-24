@@ -1,11 +1,11 @@
 import { OpenAPIHono, createRoute } from "@hono/zod-openapi"
-import { getSystemUser, getSystemUserList } from "../../../domain/system-user"
-import { ResourceApiErrorResultSchema } from "../../../schema/error"
+import { getSystemUser, getSystemUserList } from "../../../../domain/system-user"
+import { ResourceApiErrorResultSchema } from "../../../../schema/error"
 import {
 	GetSystemUserParamSchema,
 	SystemUserListSchema,
 	SystemUserSchema,
-} from "../../../schema/system-user"
+} from "../../../../schema/system-user"
 
 export const systemUserRouter = new OpenAPIHono()
 	.openapi(
