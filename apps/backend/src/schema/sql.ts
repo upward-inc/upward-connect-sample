@@ -350,7 +350,6 @@ const getIsSetComparisonPredicate = (
 	fieldName: string,
 ) => {
 	const safeColumnName = `[${fieldName}]`
-
 	const predicates: Record<EntityItem["type"], string> = {
 		text: `TRIM(ISNULL(${safeColumnName}, '')) != ''`,
 		numeric: `ISNULL(${safeColumnName}, 0) != 0`,
