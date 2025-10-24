@@ -320,7 +320,8 @@ const getOptionComparisonPredicate = (
 		return `${isNotNullExpression} AND ${getJsonArrayExactMatchPredicate(jsonExpression, valueCondition)}`
 	}
 
-	// それ以外（single + eq、または includes）は値が含まれているかのチェックで十分
+	// 単一オプションのカラムには単一の値しか設定されない前提であるため、
+	// （single + eq、または includes）は値が含まれているかのチェックで十分
 	return `${isNotNullExpression} AND ${getJsonArrayIncludesPredicate(jsonExpression, valueCondition)}`
 }
 
@@ -339,7 +340,8 @@ const getReferenceComparisonPredicate = (
 		return getJsonArrayExactMatchPredicate(safeColumnName, valueCondition)
 	}
 
-	// それ以外（single + eq、または includes）は値が含まれているかのチェックで十分
+	// 単一参照のカラムには単一の値しか設定されない前提であるため、
+	// （single + eq、または includes）は値が含まれているかのチェックで十分
 	return getJsonArrayIncludesPredicate(safeColumnName, valueCondition)
 }
 
