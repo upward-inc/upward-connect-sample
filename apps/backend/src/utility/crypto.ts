@@ -1,4 +1,5 @@
-import { type KeyObject, generateKeyPair } from "node:crypto"
+import { type KeyObject, createPublicKey, generateKeyPair } from "node:crypto"
+import type { Jwk } from "../schema/auth"
 
 export async function generatePrivateKeyPem(): Promise<string> {
 	return new Promise((resolve, reject) => {
@@ -67,4 +68,24 @@ export async function decryptAndDecodeByBase64(
 		Buffer.from(encodedTarget, "base64"),
 	)
 	return Buffer.from(decryptedBuffer).toString()
+}
+
+/**
+ * JWKをPEM形式に変換する
+ * @param jwk JWKオブジェクト
+ * @returns PEM形式の公開鍵
+ */
+export function convertJwkToPem(jwk: Jwk) {
+	const jwkObject = {
+		kty: jwk.kty,
+		n: jwk.n,
+		e: jwk.e,
+	}
+
+	const pem = createPublicKey({ key: jwkObject, format: "jwk" }).export({
+		type: "spki",
+		format: "pem",
+	})
+
+	return pem.toString()
 }
