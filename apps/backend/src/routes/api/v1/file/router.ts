@@ -1,12 +1,12 @@
 import { OpenAPIHono, createRoute } from "@hono/zod-openapi"
-import { createFile, getFile } from "../../../domain/file"
-import type { AuthContexts } from "../../../schema/auth"
-import { ResourceApiErrorResultSchema } from "../../../schema/error"
+import { createFile, getFile } from "../../../../domain/file"
+import type { AuthContexts } from "../../../../schema/auth"
+import { ResourceApiErrorResultSchema } from "../../../../schema/error"
 import {
 	GetFileParamSchema,
 	PostFileFormSchema,
 	PostFileResultSchema,
-} from "../../../schema/file"
+} from "../../../../schema/file"
 
 export const fileRouter = new OpenAPIHono<{ Variables: AuthContexts }>()
 	.openapi(
