@@ -125,7 +125,7 @@ const baseFilterToPredicate = (
 	if (filter.filter_type === "is_set") {
 		return withPredicatePrefix(
 			filter.is_not,
-			getIsSetComparisonPredicate(item.type, filter.field, item.sub_type),
+			getIsSetComparisonPredicate(item.type, filter.field),
 		)
 	}
 
@@ -348,21 +348,8 @@ const getReferenceComparisonPredicate = (
 const getIsSetComparisonPredicate = (
 	itemType: EntityItem["type"],
 	fieldName: string,
-	subType?: EntityItem["sub_type"],
 ) => {
 	const safeColumnName = `[${fieldName}]`
-
-	const getReferenceIsSetPredicate = (
-		columnName: string,
-		subType?: EntityItem["sub_type"],
-	): string => {
-		if (subType === "multi") {
-			// multi: NULLではない && 配列に要素がある
-			return `${columnName} IS NOT NULL AND (SELECT COUNT(*) FROM OPENJSON(${columnName})) > 0`
-		}
-		// single: NULLではない
-		return `(SELECT COUNT(*) FROM OPENJSON(${columnName})) > 0`
-	}
 
 	const predicates: Record<EntityItem["type"], string> = {
 		text: `TRIM(ISNULL(${safeColumnName}, '')) != ''`,
@@ -370,7 +357,7 @@ const getIsSetComparisonPredicate = (
 		boolean: `ISNULL(${safeColumnName}, 0) != 0`,
 		date: `ISNULL(${safeColumnName}, '') != ''`,
 		option: `(SELECT COUNT(*) FROM OPENJSON(CASE WHEN ISJSON(${safeColumnName}) = 1 THEN ${safeColumnName} ELSE '[' + ${safeColumnName} + ']' END)) > 0`,
-		reference: getReferenceIsSetPredicate(safeColumnName, subType),
+		reference: `(SELECT COUNT(*) FROM OPENJSON(${safeColumnName})) > 0`,
 	}
 
 	return predicates[itemType]
