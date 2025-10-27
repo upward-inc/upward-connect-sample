@@ -852,6 +852,9 @@ describe("POST /oauth2/token - トークンエンドポイント", () => {
 			expect(decodedIdToken).not.toHaveProperty("email")
 			expect(decodedIdToken).not.toHaveProperty("zoneinfo")
 			expect(decodedIdToken).not.toHaveProperty("locale")
+
+			// クリーンアップ
+			await deleteTestExecutionUser(userWithoutOptionalFields.id)
 		})
 	})
 })
