@@ -1,6 +1,6 @@
 import { env } from "../env"
 import { z } from "../libs/zod"
-import { decryptAndDecodeByBase64 } from "../utility/crypto"
+import { decryptAndDecodeByBase64, toCryptoKey } from "../utility/crypto"
 import {
 	EmailSchema,
 	FirstNameSchema,
@@ -13,12 +13,9 @@ import {
 } from "./system-user"
 import { StringToArraySchema } from "./utility"
 
-const encryptPrivateKeySecret = await crypto.subtle.importKey(
-	"raw",
-	Buffer.from(env.OIDC_ENCRYPT_PRIVATE_KEY_SECRET),
-	"AES-GCM",
-	false,
-	["decrypt"],
+const encryptPrivateKeySecret = await toCryptoKey(
+	env.OIDC_ENCRYPT_PRIVATE_KEY_SECRET,
+	"decrypt",
 )
 
 export const PrivateKeySchema = z
