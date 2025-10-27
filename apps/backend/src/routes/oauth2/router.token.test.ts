@@ -853,7 +853,7 @@ describe("POST /oauth2/token - トークンエンドポイント", () => {
 			expect(decodedIdToken).not.toHaveProperty("zoneinfo")
 			expect(decodedIdToken).not.toHaveProperty("locale")
 
-			// クリーンアップ
+			// Cleanup
 			await deleteTestExecutionUser(userWithoutOptionalFields.id)
 		})
 	})

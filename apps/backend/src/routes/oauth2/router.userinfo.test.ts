@@ -99,6 +99,9 @@ describe("GET /oauth2/userinfo - ユーザー情報取得", () => {
 			zoneinfo: userWithoutEmail.timezone,
 			locale: userWithoutEmail.locale,
 		})
+
+		// Cleanup
+		await deleteTestExecutionUser(userWithoutEmail.id)
 	})
 
 	it("不正な認証ヘッダーフォーマットの場合に400エラーを返すこと", async () => {
