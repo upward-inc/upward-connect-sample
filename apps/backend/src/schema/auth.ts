@@ -13,7 +13,7 @@ import {
 } from "./system-user"
 import { StringToArraySchema } from "./utility"
 
-const encryptPrivateKeySecret = await toCryptoKey(
+const decryptPrivateKeySecret = await toCryptoKey(
 	env.OIDC_ENCRYPT_PRIVATE_KEY_SECRET,
 	"decrypt",
 )
@@ -32,7 +32,7 @@ export const PrivateKeySchema = z
 			id: obj.id,
 			private_key_pem: await decryptAndDecodeByBase64(
 				obj.encrypted_private_key_pem,
-				encryptPrivateKeySecret,
+				decryptPrivateKeySecret,
 				Buffer.from(obj.base64_iv, "base64"),
 			),
 		}
