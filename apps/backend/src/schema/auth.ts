@@ -1,5 +1,6 @@
 import { env } from "../env"
 import { z } from "../libs/zod"
+import { decryptAndDecodeByBase64 } from "../utility/crypto"
 import {
 	EmailSchema,
 	FirstNameSchema,
@@ -12,6 +13,14 @@ import {
 } from "./system-user"
 import { StringToArraySchema } from "./utility"
 
+const encryptPrivateKeySecret = await crypto.subtle.importKey(
+	"raw",
+	Buffer.from(env.OIDC_ENCRYPT_PRIVATE_KEY_SECRET),
+	"AES-GCM",
+	false,
+	["decrypt"],
+)
+
 export const PrivateKeySchema = z
 	.object({
 		id: z.uuid().meta({
@@ -22,25 +31,13 @@ export const PrivateKeySchema = z
 		encrypted_private_key_pem: z.string(),
 	})
 	.transform(async (obj) => {
-		const encryptedBuffer = Buffer.from(obj.encrypted_private_key_pem, "base64")
-		const key = await crypto.subtle.importKey(
-			"raw",
-			Buffer.from(env.OIDC_ENCRYPT_PRIVATE_KEY_SECRET),
-			"AES-GCM",
-			false,
-			["decrypt"],
-		)
-		const decryptedBuffer = await crypto.subtle.decrypt(
-			{
-				name: "AES-GCM",
-				iv: Buffer.from(obj.base64_iv, "base64"),
-			},
-			key,
-			encryptedBuffer,
-		)
 		return {
 			id: obj.id,
-			private_key_pem: Buffer.from(decryptedBuffer).toString("utf-8"),
+			private_key_pem: await decryptAndDecodeByBase64(
+				obj.encrypted_private_key_pem,
+				encryptPrivateKeySecret,
+				Buffer.from(obj.base64_iv, "base64"),
+			),
 		}
 	})
 
