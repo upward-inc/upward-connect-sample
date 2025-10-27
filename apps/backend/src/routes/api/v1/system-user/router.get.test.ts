@@ -64,53 +64,53 @@ describe("GET /api/v1/system-users - システムユーザー一覧取得", () =
 		})
 	}
 
-	// describe("GET /api/v1/system-users - 一覧取得", () => {
-	// 	it("システムユーザー一覧を正常に取得できること", async () => {
-	// 		// Act
-	// 		const response = await requestGetList()
+	describe("GET /api/v1/system-users - 一覧取得", () => {
+		it("システムユーザー一覧を正常に取得できること", async () => {
+			// Act
+			const response = await requestGetList()
 
-	// 		// Assert
-	// 		expect(response.status).toBe(200)
-	// 		const data = await response.json()
-	// 		expect(Array.isArray(data)).toBe(true)
-	// 		expect(data.length).toBeGreaterThan(0)
-	// 	})
+			// Assert
+			expect(response.status).toBe(200)
+			const data = await response.json()
+			expect(Array.isArray(data)).toBe(true)
+			expect(data.length).toBeGreaterThan(0)
+		})
 
-	// 	it("レスポンスに作成したテストユーザーが含まれること", async () => {
-	// 		// Act
-	// 		const response = await requestGetList()
+		it("レスポンスに作成したテストユーザーが含まれること", async () => {
+			// Act
+			const response = await requestGetList()
 
-	// 		// Assert
-	// 		const data = await response.json()
-	// 		const testUserInResponse = data.find(
-	// 			(user: SystemUser) => user.id === testExecutionUser.id,
-	// 		)
-	// 		expect(testUserInResponse).toBeTruthy()
-	// 		expect(testUserInResponse.id).toBe(testExecutionUser.id)
-	// 		expect(testUserInResponse.user_name).toBe(testExecutionUser.user_name)
-	// 		expect(testUserInResponse.first_name).toBe("System")
-	// 		expect(testUserInResponse.last_name).toBe("UserTest")
-	// 		expect(testUserInResponse.email).toBe("system_user_test@example.com")
-	// 	})
+			// Assert
+			const data = await response.json()
+			const testUserInResponse = data.find(
+				(user: SystemUser) => user.id === testExecutionUser.id,
+			)
+			expect(testUserInResponse).toBeTruthy()
+			expect(testUserInResponse.id).toBe(testExecutionUser.id)
+			expect(testUserInResponse.user_name).toBe(testExecutionUser.user_name)
+			expect(testUserInResponse.first_name).toBe("System")
+			expect(testUserInResponse.last_name).toBe("UserTest")
+			expect(testUserInResponse.email).toBe("system_user_test@example.com")
+		})
 
-	// 	it("レスポンスに必要なプロパティが含まれること", async () => {
-	// 		// Act
-	// 		const response = await requestGetList()
+		it("レスポンスに必要なプロパティが含まれること", async () => {
+			// Act
+			const response = await requestGetList()
 
-	// 		// Assert
-	// 		const data = await response.json()
-	// 		const testUserInResponse = data.find(
-	// 			(user: SystemUser) => user.id === testExecutionUser.id,
-	// 		)
-	// 		expect(testUserInResponse).toHaveProperty("profile_name")
-	// 		expect(testUserInResponse).toHaveProperty("timezone")
-	// 		expect(testUserInResponse).toHaveProperty("locale")
-	// 		expect(testUserInResponse).toHaveProperty("role_name")
-	// 		expect(testUserInResponse).toHaveProperty("is_active")
-	// 		expect(testUserInResponse).toHaveProperty("created_at")
-	// 		expect(testUserInResponse).toHaveProperty("modified_at")
-	// 	})
-	// })
+			// Assert
+			const data = await response.json()
+			const testUserInResponse = data.find(
+				(user: SystemUser) => user.id === testExecutionUser.id,
+			)
+			expect(testUserInResponse).toHaveProperty("profile_name")
+			expect(testUserInResponse).toHaveProperty("timezone")
+			expect(testUserInResponse).toHaveProperty("locale")
+			expect(testUserInResponse).toHaveProperty("role_name")
+			expect(testUserInResponse).toHaveProperty("is_active")
+			expect(testUserInResponse).toHaveProperty("created_at")
+			expect(testUserInResponse).toHaveProperty("modified_at")
+		})
+	})
 
 	describe("GET /api/v1/system-users/:id - 個別取得", () => {
 		it("指定したIDのシステムユーザー情報を正常に取得できること", async () => {
