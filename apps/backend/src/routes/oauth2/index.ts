@@ -108,7 +108,7 @@ export const oauth2Router = new OpenAPIHono<{ Variables: AuthContexts }>()
 
 				// IDトークンを生成 (openidスコープが含まれている場合のみ)
 				const idToken = scopes.includes("openid")
-					? generateIdToken({
+					? await generateIdToken({
 							user: user,
 							clientId: client_id,
 							scopes: scopes,

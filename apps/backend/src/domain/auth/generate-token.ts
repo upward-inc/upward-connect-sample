@@ -1,6 +1,7 @@
 import { sign } from "jsonwebtoken"
 import { env } from "../../env"
 import type { LoggedInUser } from "../../schema/auth"
+import { getNotExpiredPrivateKeyList } from "./get-private-key-list"
 
 /**
  * ユーザー情報からアクセストークンを生成する
@@ -26,12 +27,17 @@ export const generateAccessToken = (payload: {
  * ユーザー情報からIDトークンを生成する
  * @see: [Requesting Claims using Scope Values](https://openid.net/specs/openid-connect-core-1_0.html#ScopeClaims)
  */
-export const generateIdToken = (payload: {
+export const generateIdToken = async (payload: {
 	user: LoggedInUser
 	clientId: string
 	scopes: string[]
 	nonce?: string
 }) => {
+	// 有効な秘密鍵一覧を取得し、ランダムに1つ選択
+	const privateKeys = await getNotExpiredPrivateKeyList()
+	const randomIndex = Math.floor(Math.random() * privateKeys.length)
+	const privateKey = privateKeys[randomIndex]
+
 	const profileClaims = payload.scopes.includes("profile")
 		? {
 				name: `${payload.user.last_name} ${payload.user.first_name}`,
@@ -53,9 +59,10 @@ export const generateIdToken = (payload: {
 			...profileClaims,
 			...emailClaims,
 		},
-		env.OIDC_TOKEN_SECRET,
+		privateKey.private_key_pem,
 		{
-			algorithm: "HS256",
+			keyid: privateKey.id,
+			algorithm: "RS256",
 			issuer: env.OIDC_ISSUER,
 			subject: payload.user.id,
 			audience: payload.clientId,
