@@ -11,7 +11,6 @@ export async function seedPrivateKeys(prisma: Prisma.TransactionClient) {
 	const privateKeysPromises = Array.from({
 		length: 30,
 	}).map(async (_, index) => {
-		const iv = crypto.getRandomValues(new Uint8Array(16))
 		const validate_at = addDays(
 			new Date(),
 			(index - 1) * env.OIDC_KEY_ROTATION_PERIOD_IN_DAY, // 旧鍵も生成したいため(index-1)で調整
@@ -21,18 +20,22 @@ export async function seedPrivateKeys(prisma: Prisma.TransactionClient) {
 			"encrypt",
 		)
 		return Promise.all(
-			Array.from({ length: 3 }).map(async () => ({
-				encrypted_private_key_pem: await generatePrivateKeyPem().then(
-					(privateKey) => encryptAndEncodeByBase64(privateKey, key, iv),
-				),
-				base64_iv: Buffer.from(iv).toString("base64"),
-				validate_at: validate_at,
-				expire_at: addDays(validate_at, env.OIDC_KEY_ROTATION_PERIOD_IN_DAY),
-				closed_at: addDays(
-					validate_at,
-					env.OIDC_KEY_ROTATION_PERIOD_IN_DAY * 2,
-				),
-			})),
+			Array.from({ length: 3 }).map(async () => {
+				const iv = crypto.getRandomValues(new Uint8Array(16))
+
+				return {
+					encrypted_private_key_pem: await generatePrivateKeyPem().then(
+						(privateKey) => encryptAndEncodeByBase64(privateKey, key, iv),
+					),
+					base64_iv: Buffer.from(iv).toString("base64"),
+					validate_at: validate_at,
+					expire_at: addDays(validate_at, env.OIDC_KEY_ROTATION_PERIOD_IN_DAY),
+					closed_at: addDays(
+						validate_at,
+						env.OIDC_KEY_ROTATION_PERIOD_IN_DAY * 2,
+					),
+				}
+			}),
 		)
 	})
 
