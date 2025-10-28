@@ -247,37 +247,59 @@ export const PostAuthorizeResultSchema = z.object({
 
 // トークンリクエスト用のスキーマ
 export const PostTokenParamSchema = z.discriminatedUnion("grant_type", [
-	z.object({
-		grant_type: z.literal("authorization_code"),
-		code: AuthCodeSchema.meta({
-			description: "認可処理でクライアントが取得した認可コード",
+	z
+		.object({
+			grant_type: z.literal("authorization_code"),
+			code: AuthCodeSchema.meta({
+				description: "認可処理でクライアントが取得した認可コード",
+			}),
+			redirect_uri: RedirectUriSchema,
+			client_id: ClientIdSchema,
+			client_secret: ClientSecretSchema,
+			code_verifier: z.string().min(43).max(128).meta({
+				description: "PKCEで使用するランダムな文字列",
+				example: "dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk",
+			}),
+		})
+		.meta({
+			description: 'grant_type: "authorization_code" の場合',
 		}),
-		redirect_uri: RedirectUriSchema,
-		client_id: ClientIdSchema,
-		client_secret: ClientSecretSchema,
-		code_verifier: z.string().min(43).max(128).meta({
-			description: "PKCEで使用するランダムな文字列",
-			example: "dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk",
+	z
+		.object({
+			grant_type: z.literal("refresh_token"),
+			refresh_token: RefreshTokenSchema,
+			client_id: ClientIdSchema,
+			client_secret: ClientSecretSchema,
+		})
+		.meta({
+			description: 'grant_type: "refresh_token" の場合',
 		}),
-	}),
-	z.object({
-		grant_type: z.literal("refresh_token"),
-		refresh_token: RefreshTokenSchema,
-		client_id: ClientIdSchema,
-		client_secret: ClientSecretSchema,
-	}),
 ])
 
-export const PostTokenResultSchema = z.object({
-	token_type: z.literal("Bearer"),
-	access_token: AccessTokenSchema,
-	id_token: IdTokenSchema.optional(),
-	refresh_token: RefreshTokenSchema.optional(),
-	expires_in: z.number().min(1).meta({
-		description: "有効期限（秒）",
-		example: 600,
-	}),
-})
+export const PostTokenAuthorizationCodeResultSchema = z
+	.object({
+		token_type: z.literal("Bearer"),
+		access_token: AccessTokenSchema,
+		id_token: IdTokenSchema.optional(),
+		refresh_token: RefreshTokenSchema.optional(),
+		expires_in: z.number().min(1).meta({
+			description: "有効期限（秒）",
+			example: 600,
+		}),
+	})
+	.meta({
+		description: 'grant_type: "authorization_code" の場合',
+	})
+
+export const PostTokenRefreshTokenResultSchema =
+	PostTokenAuthorizationCodeResultSchema.omit({ id_token: true }).meta({
+		description: 'grant_type: "refresh_token" の場合',
+	})
+
+export const PostTokenResultSchema = z.union([
+	PostTokenAuthorizationCodeResultSchema,
+	PostTokenRefreshTokenResultSchema,
+])
 
 export type OAuthClient = z.infer<typeof OAuthClientSchema>
 export type PublishedAuthCode = z.infer<typeof PublishedAuthCodeSchema>
