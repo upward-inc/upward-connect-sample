@@ -3,7 +3,7 @@ import { z } from "../libs/zod"
 import type { RecordReferenceValue } from "./comparison"
 import { type EntityItem, EntityItemSchema } from "./entity-item"
 import {
-	type BaseFilterSchema,
+	BaseFilterSchema,
 	NestableFilterSchema,
 	isAndFilter,
 	isBaseFilter,
@@ -40,9 +40,16 @@ export const WhereClauseSchema = z
 		return `WHERE ${predicates}`
 	})
 
+const getWherePredicatesFilterSchema = z.union([
+	NestableFilterSchema,
+	BaseFilterSchema,
+])
+
+type getWherePredicatesFilter = z.infer<typeof getWherePredicatesFilterSchema>
+
 const getWherePredicates = (
 	items: EntityItem[],
-	filter?: z.infer<typeof NestableFilterSchema>,
+	filter?: getWherePredicatesFilter,
 ): string | null => {
 	if (!filter) {
 		return null
