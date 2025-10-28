@@ -120,64 +120,54 @@ describe("POST /auth/authorize - 認可エンドポイント", () => {
 		expect(data).toHaveProperty("state", stateValue)
 	})
 
-	it("不正なclient_idの場合にstateパラメータを含むエラーレスポンスを返すこと", async () => {
-		// Arrange
-		const stateValue = "state-for-error-test"
+	describe("不正なパラメータ(state付きエラー)の場合にエラーレスポンスを返すこと", () => {
+		it.each([
+			{
+				title: "不正なclient_idの場合",
+				clientIdOverride: crypto.randomUUID(),
+				redirectUri: "https://example.com/callback",
+				expectedError: "unauthorized_client",
+			},
+			{
+				title: "不正なredirect_uriの場合",
+				clientIdOverride: null,
+				redirectUri: "https://malicious-site.com/callback",
+				expectedError: "invalid_request_uri",
+			},
+		])("$title", async ({ clientIdOverride, redirectUri, expectedError }) => {
+			// Arrange
+			const testClient = await createTestOAuthClient({
+				name: "param_validation",
+				secret: "test_secret_12345",
+				redirect_uris: "https://example.com/callback",
+				scopes: "openid,profile,email",
+			})
 
-		// Act
-		const response = await requestAuthorize({
-			response_type: "code",
-			client_id: crypto.randomUUID(), // 存在しないclient ID
-			redirect_uri: "https://example.com/callback",
-			scope: "openid profile email",
-			state: stateValue,
-			nonce: "random_nonce_12345",
-			code_challenge: "E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM",
-			code_challenge_method: "S256",
-		})
+			const stateValue = "state-for-error-test"
 
-		// Assert
-		const data = await response.json()
-		expect(response.status).toBe(400)
-		expect(data).toEqual({
-			error: "unauthorized_client",
-			state: stateValue,
-		})
-	})
+			// Act
+			const response = await requestAuthorize({
+				response_type: "code",
+				client_id: clientIdOverride || testClient.id,
+				redirect_uri: redirectUri,
+				scope: "openid profile email",
+				state: stateValue,
+				nonce: "random_nonce_12345",
+				code_challenge: "E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM",
+				code_challenge_method: "S256",
+			})
 
-	it("不正なredirect_uriの場合にstateパラメータを含むエラーレスポンスを返すこと", async () => {
-		// Arrange
-		const testClient = await createTestOAuthClient({
-			name: "inv_red",
-			secret: "test_secret_12345",
-			redirect_uris: "https://example.com/callback",
-			scopes: "openid,profile,email",
-		})
-
-		const stateValue = "state-for-redirect-error"
-
-		// Act
-		const response = await requestAuthorize({
-			response_type: "code",
-			client_id: testClient.id,
-			redirect_uri: "https://malicious-site.com/callback", // 登録されたURIと異なる
-			scope: "openid profile email",
-			state: stateValue,
-			nonce: "random_nonce_12345",
-			code_challenge: "E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM",
-			code_challenge_method: "S256",
-		})
-
-		// Assert
-		const data = await response.json()
-		expect(response.status).toBe(400)
-		expect(data).toEqual({
-			error: "invalid_request_uri",
-			state: stateValue,
+			// Assert
+			const data = await response.json()
+			expect(response.status).toBe(400)
+			expect(data).toEqual({
+				error: expectedError,
+				state: stateValue,
+			})
 		})
 	})
 
-	it("不正なresponse_typeの場合にstateパラメータを含むエラーレスポンスを返すこと", async () => {
+	it("不正なresponse_typeの場合に400エラー(Zodエラー)を返すこと", async () => {
 		// Arrange
 		const testClient = await createTestOAuthClient({
 			name: "inv_resp",
@@ -501,33 +491,24 @@ describe("POST /auth/authorize - 認可エンドポイント", () => {
 		expect(decodedIdToken).not.toHaveProperty("email_verified")
 	})
 
-	describe("スコープエラーの場合に400エラーを返すこと", () => {
+	describe("スコープエラー(state付きエラー)の場合に400エラーを返すこと", () => {
 		it.each([
 			{
 				title: "スコープが空の場合",
 				clientScopes: "openid,profile,email",
 				scope: "",
-				validateWithState: true,
-			},
-			{
-				title: "スコープが未定義の場合",
-				clientScopes: "openid,profile,email,address,phone",
-				scope: undefined,
-				validateWithState: false,
 			},
 			{
 				title: "OAuthクライアントに未登録のスコープを要求した場合",
 				clientScopes: "openid,profile",
 				scope: "openid profile email",
-				validateWithState: true,
 			},
 			{
 				title: "未認識のスコープ値を要求した場合",
 				clientScopes: "openid,profile,email",
 				scope: "openid profile unknown_scope",
-				validateWithState: true,
 			},
-		])("$title", async ({ clientScopes, scope, validateWithState }) => {
+		])("$title", async ({ clientScopes, scope }) => {
 			// Arrange
 			const testClient = await createTestOAuthClient({
 				name: "scope_test",
@@ -536,33 +517,54 @@ describe("POST /auth/authorize - 認可エンドポイント", () => {
 				scopes: clientScopes,
 			})
 
-			const params: Record<string, string> = {
+			// Act
+			const response = await requestAuthorize({
 				response_type: "code",
 				client_id: testClient.id,
 				redirect_uri: "https://example.com/callback",
+				scope,
 				state: "random-state-value-12345",
 				nonce: "random-nonce-value-12345",
 				code_challenge: "E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM",
 				code_challenge_method: "S256",
-				...(scope === undefined ? {} : { scope }),
-			}
-
-			// Act
-			const response = await requestAuthorize(params)
+			})
 
 			// Assert
 			const data = await response.json()
 			expect(response.status).toBe(400)
-
-			if (validateWithState) {
-				expect(data).toEqual({
-					error: "invalid_scope",
-					state: "random-state-value-12345",
-				})
-			} else {
-				expect(data.success).toBe(false)
-			}
+			expect(data).toEqual({
+				error: "invalid_scope",
+				state: "random-state-value-12345",
+			})
 		})
+	})
+
+	it("スコープが未定義の場合に400エラー(Zodエラー)を返すこと", async () => {
+		// Arrange
+		const testClient = await createTestOAuthClient({
+			name: "no_scope_cli",
+			secret: "test_secret_12345",
+			redirect_uris: "https://example.com/callback",
+			scopes: "openid,profile,email,address,phone",
+		})
+
+		// Act
+		const response = await requestAuthorize({
+			response_type: "code",
+			client_id: testClient.id,
+			redirect_uri: "https://example.com/callback",
+			// スコープパラメータがない
+			state: "random-state-value-12345",
+			nonce: "random-nonce-value-12345",
+			code_challenge: "E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM",
+			code_challenge_method: "S256",
+		})
+
+		// Assert
+		const data = await response.json()
+		expect(response.status).toBe(400)
+		// Zodの検証エラーはOAuth検証よりも前に来る
+		expect(data.success).toBe(false)
 	})
 
 	it("code_challengeとcode_challenge_methodが正しくDBに永続化されること", async () => {

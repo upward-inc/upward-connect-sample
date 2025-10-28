@@ -57,7 +57,7 @@ describe("GET /api/v1/files/:id - ファイル取得", () => {
 		})
 	}
 
-	it("有効な認証とファイルIDでファイル内容を取得できること", async () => {
+	it("有効な認証とファイルIDでテキストファイル内容を取得できること", async () => {
 		// Arrange
 		const fileContent = "File content for download"
 		const file = await createTestFileInDB(
