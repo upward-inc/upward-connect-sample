@@ -136,37 +136,40 @@ describe("POST /auth/authorize - 認可エンドポイント", () => {
 				redirectUri: "https://malicious-site.com/callback",
 				expectedError: "invalid_request_uri",
 			},
-		])("$title", async ({ clientName, clientIdOverride, redirectUri, expectedError }) => {
-			// Arrange
-			const testClient = await createTestOAuthClient({
-				name: clientName,
-				secret: "test_secret_12345",
-				redirect_uris: "https://example.com/callback",
-				scopes: "openid,profile,email",
-			})
+		])(
+			"$title",
+			async ({ clientName, clientIdOverride, redirectUri, expectedError }) => {
+				// Arrange
+				const testClient = await createTestOAuthClient({
+					name: clientName,
+					secret: "test_secret_12345",
+					redirect_uris: "https://example.com/callback",
+					scopes: "openid,profile,email",
+				})
 
-			const stateValue = "state-for-error-test"
+				const stateValue = "state-for-error-test"
 
-			// Act
-			const response = await requestAuthorize({
-				response_type: "code",
-				client_id: clientIdOverride || testClient.id,
-				redirect_uri: redirectUri,
-				scope: "openid profile email",
-				state: stateValue,
-				nonce: "random_nonce_12345",
-				code_challenge: "E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM",
-				code_challenge_method: "S256",
-			})
+				// Act
+				const response = await requestAuthorize({
+					response_type: "code",
+					client_id: clientIdOverride || testClient.id,
+					redirect_uri: redirectUri,
+					scope: "openid profile email",
+					state: stateValue,
+					nonce: "random_nonce_12345",
+					code_challenge: "E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM",
+					code_challenge_method: "S256",
+				})
 
-			// Assert
-			const data = await response.json()
-			expect(response.status).toBe(400)
-			expect(data).toEqual({
-				error: expectedError,
-				state: stateValue,
-			})
-		})
+				// Assert
+				const data = await response.json()
+				expect(response.status).toBe(400)
+				expect(data).toEqual({
+					error: expectedError,
+					state: stateValue,
+				})
+			},
+		)
 	})
 
 	// TODO: 実装側の修正が必要
@@ -211,7 +214,6 @@ describe("POST /auth/authorize - 認可エンドポイント", () => {
 		const nonceValue = "random-nonce-value-12345"
 
 		// ステップ1: nonceを含めて認可
-		// Act
 		const authorizeResponse = await requestAuthorize({
 			response_type: "code",
 			client_id: testClient.id,
@@ -223,13 +225,11 @@ describe("POST /auth/authorize - 認可エンドポイント", () => {
 			code_challenge_method: "S256",
 		})
 
-		// Assert
 		const authorizeData = await authorizeResponse.json()
 		expect(authorizeResponse.status).toBe(200)
 		expect(authorizeData).toHaveProperty("code")
 
 		// ステップ2: 認可コードをトークンに交換
-		// Act
 		const tokenResponse = await requestToken({
 			grant_type: "authorization_code",
 			code: authorizeData.code,
@@ -239,7 +239,6 @@ describe("POST /auth/authorize - 認可エンドポイント", () => {
 			code_verifier: "dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk",
 		})
 
-		// Assert
 		const tokenData = await tokenResponse.json()
 		expect(tokenResponse.status).toBe(200)
 		expect(tokenData).toHaveProperty("access_token")
@@ -247,8 +246,7 @@ describe("POST /auth/authorize - 認可エンドポイント", () => {
 		expect(tokenData).not.toHaveProperty("refresh_token")
 		expect(tokenData).toHaveProperty("token_type", "Bearer")
 
-		// ステップ3: IDトークンにnonceが含まれていることを検証
-		// Assert
+		// Assert - IDトークンにnonceが含まれていることを検証
 		const decodedIdToken = verify(
 			tokenData.id_token,
 			tokenSecret,
@@ -269,7 +267,7 @@ describe("POST /auth/authorize - 認可エンドポイント", () => {
 			scopes: "openid,profile,email",
 		})
 
-		// Act - 空のnonceで認可
+		// 空のnonceで認可
 		const authorizeResponse = await requestAuthorize({
 			response_type: "code",
 			client_id: testClient.id,
@@ -281,12 +279,11 @@ describe("POST /auth/authorize - 認可エンドポイント", () => {
 			code_challenge_method: "S256",
 		})
 
-		// Assert
 		const authorizeData = await authorizeResponse.json()
 		expect(authorizeResponse.status).toBe(200)
 		expect(authorizeData).toHaveProperty("code")
 
-		// Act - 認可コードをトークンに交換
+		// 認可コードをトークンに交換
 		const tokenResponse = await requestToken({
 			grant_type: "authorization_code",
 			code: authorizeData.code,
@@ -296,7 +293,6 @@ describe("POST /auth/authorize - 認可エンドポイント", () => {
 			code_verifier: "dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk",
 		})
 
-		// Assert
 		const tokenData = await tokenResponse.json()
 		expect(tokenResponse.status).toBe(200)
 
@@ -321,7 +317,7 @@ describe("POST /auth/authorize - 認可エンドポイント", () => {
 		// 特殊文字を含むnonceを作成（URLセーフ）
 		const specialNonce = "nonce-123_ABC.xyz~!@#$%^&*()+=[]{}|;':\",./<>?"
 
-		// Act - 特殊文字のnonceで認可
+		// 特殊文字のnonceで認可
 		const authorizeResponse = await requestAuthorize({
 			response_type: "code",
 			client_id: testClient.id,
@@ -333,12 +329,11 @@ describe("POST /auth/authorize - 認可エンドポイント", () => {
 			code_challenge_method: "S256",
 		})
 
-		// Assert
 		const authorizeData = await authorizeResponse.json()
 		expect(authorizeResponse.status).toBe(200)
 		expect(authorizeData).toHaveProperty("code")
 
-		// Act - 認可コードをトークンに交換
+		// 認可コードをトークンに交換
 		const tokenResponse = await requestToken({
 			grant_type: "authorization_code",
 			code: authorizeData.code,
@@ -348,7 +343,6 @@ describe("POST /auth/authorize - 認可エンドポイント", () => {
 			code_verifier: "dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk",
 		})
 
-		// Assert
 		const tokenData = await tokenResponse.json()
 		expect(tokenResponse.status).toBe(200)
 
@@ -370,7 +364,6 @@ describe("POST /auth/authorize - 認可エンドポイント", () => {
 		})
 
 		// ステップ1: 有効なスコープで認可を行う
-		// Act
 		const authorizeResponse = await requestAuthorize({
 			response_type: "code",
 			client_id: testClient.id,
@@ -382,13 +375,11 @@ describe("POST /auth/authorize - 認可エンドポイント", () => {
 			code_challenge_method: "S256",
 		})
 
-		// Assert
 		const authorizeData = await authorizeResponse.json()
 		expect(authorizeResponse.status).toBe(200)
 		expect(authorizeData).toHaveProperty("code")
 
 		// ステップ2: 認可コードをトークンに交換する
-		// Act
 		const tokenResponse = await requestToken({
 			grant_type: "authorization_code",
 			code: authorizeData.code,
@@ -398,7 +389,6 @@ describe("POST /auth/authorize - 認可エンドポイント", () => {
 			code_verifier: "dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk",
 		})
 
-		// Assert
 		const tokenData = await tokenResponse.json()
 		expect(tokenResponse.status).toBe(200)
 		expect(tokenData).toHaveProperty("access_token")
@@ -406,8 +396,7 @@ describe("POST /auth/authorize - 認可エンドポイント", () => {
 		// offline_accessによりリフレッシュトークンが発行されるべき
 		expect(tokenData).toHaveProperty("refresh_token")
 
-		// ステップ3: IDトークンを検証する
-		// Assert
+		// Assert -IDトークンを検証する
 		const decodedIdToken = verify(
 			tokenData.id_token,
 			tokenSecret,
@@ -437,7 +426,6 @@ describe("POST /auth/authorize - 認可エンドポイント", () => {
 		})
 
 		// ステップ1: 有効なスコープで認可を行う
-		// Act
 		const authorizeResponse = await requestAuthorize({
 			response_type: "code",
 			client_id: testClient.id,
@@ -449,13 +437,11 @@ describe("POST /auth/authorize - 認可エンドポイント", () => {
 			code_challenge_method: "S256",
 		})
 
-		// Assert
 		const authorizeData = await authorizeResponse.json()
 		expect(authorizeResponse.status).toBe(200)
 		expect(authorizeData).toHaveProperty("code")
 
 		// ステップ2: 認可コードをトークンに交換する
-		// Act
 		const tokenResponse = await requestToken({
 			grant_type: "authorization_code",
 			code: authorizeData.code,
@@ -465,7 +451,6 @@ describe("POST /auth/authorize - 認可エンドポイント", () => {
 			code_verifier: "dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk",
 		})
 
-		// Assert
 		const tokenData = await tokenResponse.json()
 		expect(tokenResponse.status).toBe(200)
 		expect(tokenData).toHaveProperty("access_token")
@@ -473,8 +458,7 @@ describe("POST /auth/authorize - 認可エンドポイント", () => {
 		// offline_accessを要求していないためリフレッシュトークンは発行されない
 		expect(tokenData).not.toHaveProperty("refresh_token")
 
-		// ステップ3: IDトークンを検証する
-		// Assert
+		// Assert -IDトークンを検証する
 		const decodedIdToken = verify(
 			tokenData.id_token,
 			tokenSecret,
