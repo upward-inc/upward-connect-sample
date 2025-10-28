@@ -211,9 +211,10 @@ describe("GET /records/:entity_name - レコード一覧取得（検索）", () 
 						expected: { data: [{ name: "Record 3" }, { name: "Record 4" }] },
 					},
 					{
+						// 複数のワイルドカードを使用して、文字が順序通りに出現することを確認
 						title: "like (順序検索)",
 						operator: "like",
-						value: "%A%A%A%",
+						value: "%fix%A%fix%",
 						expected: { data: [{ name: "Record 1" }, { name: "Record 2" }] },
 					},
 					{
