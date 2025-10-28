@@ -124,20 +124,22 @@ describe("POST /auth/authorize - 認可エンドポイント", () => {
 		it.each([
 			{
 				title: "不正なclient_idの場合",
+				clientName: "inv_cid",
 				clientIdOverride: crypto.randomUUID(),
 				redirectUri: "https://example.com/callback",
 				expectedError: "unauthorized_client",
 			},
 			{
 				title: "不正なredirect_uriの場合",
+				clientName: "inv_uri",
 				clientIdOverride: null,
 				redirectUri: "https://malicious-site.com/callback",
 				expectedError: "invalid_request_uri",
 			},
-		])("$title", async ({ clientIdOverride, redirectUri, expectedError }) => {
+		])("$title", async ({ clientName, clientIdOverride, redirectUri, expectedError }) => {
 			// Arrange
 			const testClient = await createTestOAuthClient({
-				name: "param_validation",
+				name: clientName,
 				secret: "test_secret_12345",
 				redirect_uris: "https://example.com/callback",
 				scopes: "openid,profile,email",
