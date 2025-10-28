@@ -1,4 +1,4 @@
-import { type KeyObject, createPublicKey, generateKeyPair } from "node:crypto"
+import { createPublicKey, generateKeyPair } from "node:crypto"
 import type { Jwk } from "../schema/auth"
 
 export async function generatePrivateKeyPem(): Promise<string> {
