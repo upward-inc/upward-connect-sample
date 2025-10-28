@@ -82,26 +82,29 @@ describe("GET /oauth2/userinfo - ユーザー情報取得", () => {
 			timezone: "Asia/Tokyo",
 			locale: "ja-JP",
 		})
-		const token = createValidToken(userWithoutEmail.id)
 
-		// Act
-		const response = await requestUserInfo(token)
+		try {
+			const token = createValidToken(userWithoutEmail.id)
 
-		// Assert
-		const data = await response.json()
-		expect(response.status).toBe(200)
-		expect(data).toEqual({
-			sub: userWithoutEmail.id,
-			user_id: userWithoutEmail.id,
-			name: `${userWithoutEmail.last_name} ${userWithoutEmail.first_name}`,
-			given_name: userWithoutEmail.first_name,
-			family_name: userWithoutEmail.last_name,
-			zoneinfo: userWithoutEmail.timezone,
-			locale: userWithoutEmail.locale,
-		})
+			// Act
+			const response = await requestUserInfo(token)
 
-		// Cleanup
-		await deleteTestExecutionUser(userWithoutEmail.id)
+			// Assert
+			const data = await response.json()
+			expect(response.status).toBe(200)
+			expect(data).toEqual({
+				sub: userWithoutEmail.id,
+				user_id: userWithoutEmail.id,
+				name: `${userWithoutEmail.last_name} ${userWithoutEmail.first_name}`,
+				given_name: userWithoutEmail.first_name,
+				family_name: userWithoutEmail.last_name,
+				zoneinfo: userWithoutEmail.timezone,
+				locale: userWithoutEmail.locale,
+			})
+		} finally {
+			// Cleanup
+			await deleteTestExecutionUser(userWithoutEmail.id)
+		}
 	})
 
 	describe("認証エラーの場合に適切なエラーを返すこと", () => {
