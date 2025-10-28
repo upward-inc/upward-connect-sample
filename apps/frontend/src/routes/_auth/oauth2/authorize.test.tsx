@@ -155,9 +155,7 @@ describe("AuthorizePage", () => {
 
 	it("認可APIがinvalid_request_uriエラーを返したとき、オープンリダイレクト攻撃を防ぐため例外を投げる", async () => {
 		setRequestHandlers(
-			http.post(`${API_URL}/auth/authorize`, () =>
-				HttpResponse.json({ error: "invalid_request_uri" }, { status: 400 }),
-			),
+			createAuthorizeHandler(400, { error: "invalid_request_uri" }),
 		)
 
 		renderAuthorizePage()
