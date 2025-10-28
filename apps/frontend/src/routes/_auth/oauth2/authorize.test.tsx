@@ -71,7 +71,13 @@ describe("AuthorizePage", () => {
 		useSearchMock.mockReturnValue(baseSearchParams)
 		useAuthMock.mockReturnValue({ token: "test-token" })
 
-		setRequestHandlers(createClientHandler(200, { name: "Sample App" }))
+		setRequestHandlers(
+			createClientHandler(200, { name: "Sample App" }),
+			createAuthorizeHandler(200, {
+				code: "AUTH_CODE",
+				state: baseSearchParams.state,
+			}),
+		)
 
 		locationHref = baseSearchParams.redirect_uri
 		Object.defineProperty(window, "location", {
@@ -112,13 +118,6 @@ describe("AuthorizePage", () => {
 	})
 
 	it("ユーザーが許可ボタンをクリックしたとき、認可コードとstateパラメータを付与してリダイレクトURIへ遷移する", async () => {
-		setRequestHandlers(
-			createAuthorizeHandler(200, {
-				code: "AUTH_CODE",
-				state: baseSearchParams.state,
-			}),
-		)
-
 		renderAuthorizePage()
 		const user = userEvent.setup()
 		await user.click(await screen.findByRole("button", { name: "許可する" }))
@@ -142,7 +141,7 @@ describe("AuthorizePage", () => {
 	})
 
 	it("クライアント情報の取得に失敗したとき、unauthorized_clientエラーを付与してリダイレクトURIへ遷移する", async () => {
-		// クライアント情報の取得に失敗するように設定
+		// クライアント情報の取得に失敗するように上書き
 		setRequestHandlers(createClientHandler(404, {}))
 
 		renderAuthorizePage()
@@ -189,6 +188,7 @@ describe("AuthorizePage", () => {
 	})
 
 	it("認可APIがconsent_requiredエラーを返したとき、エラーとエラー説明とstateパラメータを付与してリダイレクトURIへ遷移する", async () => {
+		// ユーザーの同意が必要である旨のエラーを返すように上書き
 		setRequestHandlers(
 			createAuthorizeHandler(400, {
 				error: "consent_required",
@@ -208,6 +208,7 @@ describe("AuthorizePage", () => {
 	})
 
 	it("認可APIが503ステータスを返したとき、temporarily_unavailableエラーを付与してリダイレクトURIへ遷移する", async () => {
+		// サーバーエラーを返すように上書き
 		setRequestHandlers(createAuthorizeHandler(503, { error: "server_error" }))
 
 		renderAuthorizePage()
