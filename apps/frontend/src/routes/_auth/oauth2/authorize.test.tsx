@@ -142,6 +142,7 @@ describe("AuthorizePage", () => {
 	})
 
 	it("クライアント情報の取得に失敗したとき、unauthorized_clientエラーを付与してリダイレクトURIへ遷移する", async () => {
+		// クライアント情報の取得に失敗するように設定
 		setRequestHandlers(createClientHandler(404, {}))
 
 		renderAuthorizePage()
