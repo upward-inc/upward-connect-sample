@@ -7,7 +7,7 @@ import {
 } from "../src/utility/crypto"
 import { addDays } from "../src/utility/date"
 
-export async function seedPrivateKeys(prisma: Prisma.TransactionClient) {
+export async function seedJwkPrivateKeys(prisma: Prisma.TransactionClient) {
 	const privateKeysPromises = Array.from({
 		length: 30,
 	}).map(async (_, index) => {
@@ -41,11 +41,11 @@ export async function seedPrivateKeys(prisma: Prisma.TransactionClient) {
 
 	const privateKeys = (await Promise.all(privateKeysPromises)).flat()
 
-	const records = await prisma.private_key.createMany({
+	const records = await prisma.jwk_private_key.createMany({
 		data: privateKeys,
 	})
 
-	console.info(`>> private_key records created: ${records.count}`)
+	console.info(`>> jwk_private_key records created: ${records.count}`)
 
 	return records
 }

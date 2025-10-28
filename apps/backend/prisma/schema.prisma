@@ -429,7 +429,7 @@ model oauth_client {
   modified_at   DateTime @default(dbgenerated("getutcdate()"), map: "DF__oauth_cli__modif__15D01CBC") @db.DateTime
 }
 
-model private_key {
+model jwk_private_key {
   id                        String   @id(map: "pk_private_key") @default(dbgenerated("newid()"), map: "DF__private_key__id__7C255952") @db.UniqueIdentifier
   encrypted_private_key_pem String   @db.NVarChar(Max)
   base64_iv                 String   @db.NVarChar(64)

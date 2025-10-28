@@ -7,11 +7,11 @@ import { seedContacts } from "./contact"
 import { seedEntities } from "./entity"
 import { seedEntityItems } from "./entity-item"
 import { seedEntityItemOptions } from "./entity-item-option"
+import { seedJwkPrivateKeys } from "./jwk-private-key"
 import { seedLeads } from "./lead"
 import { seedOauthClients } from "./oauth-client"
 import { seedOpportunities } from "./opportunity"
 import { seedPhoneCalls } from "./phone-call"
-import { seedPrivateKeys } from "./private-key"
 import { seedProducts } from "./product"
 import { seedProfiles } from "./profile"
 import { seedRoles } from "./role"
@@ -105,7 +105,7 @@ try {
 			await seedSamples(txClient, users)
 
 			// 秘密鍵
-			await seedPrivateKeys(txClient)
+			await seedJwkPrivateKeys(txClient)
 		},
 		{
 			timeout: 1000 * 60,

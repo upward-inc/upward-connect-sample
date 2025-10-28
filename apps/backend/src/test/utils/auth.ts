@@ -12,7 +12,7 @@ import { testPrisma } from "../setup"
 
 export interface PrivateKeyData
 	extends Omit<
-		Prisma.private_keyCreateInput,
+		Prisma.jwk_private_keyCreateInput,
 		| "encrypted_private_key_pem"
 		| "base64_iv"
 		| "validate_at"
@@ -121,12 +121,12 @@ export function createExpiredRefreshToken(userId: string) {
  * が設定される
  */
 export async function createTestPrivateKey(data?: PrivateKeyData) {
-	const privateKey = await testPrisma.private_key.create({
+	const privateKey = await testPrisma.jwk_private_key.create({
 		data: await toPrivateKeyCreateInput(data),
 		select: { id: true },
 	})
 
-	return await testPrisma.private_key.findUniqueOrThrow({
+	return await testPrisma.jwk_private_key.findUniqueOrThrow({
 		where: { id: privateKey.id },
 	})
 }
@@ -135,7 +135,7 @@ export async function createTestPrivateKey(data?: PrivateKeyData) {
  * 秘密鍵データの一括作成
  */
 export async function createManyTestPrivateKeys(data: Array<PrivateKeyData>) {
-	return await testPrisma.private_key.createMany({
+	return await testPrisma.jwk_private_key.createMany({
 		data: await Promise.all(data.map((d) => toPrivateKeyCreateInput(d))),
 	})
 }
@@ -144,19 +144,19 @@ export async function createManyTestPrivateKeys(data: Array<PrivateKeyData>) {
  * 秘密鍵データの全削除
  */
 export async function deleteAllTestPrivateKeys() {
-	await testPrisma.private_key.deleteMany()
+	await testPrisma.jwk_private_key.deleteMany()
 }
 
 /**
  * 秘密鍵データの削除（レコードID指定）
  */
 export async function deleteTestPrivateKeyById(id: string) {
-	await testPrisma.private_key.delete({ where: { id } })
+	await testPrisma.jwk_private_key.delete({ where: { id } })
 }
 
 async function toPrivateKeyCreateInput(
 	data?: PrivateKeyData,
-): Promise<Prisma.private_keyCreateInput> {
+): Promise<Prisma.jwk_private_keyCreateInput> {
 	const key = await toCryptoKey(env.OIDC_ENCRYPT_PRIVATE_KEY_SECRET, "encrypt")
 	const iv = data?.iv ?? crypto.getRandomValues(new Uint8Array(16))
 	return {

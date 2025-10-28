@@ -2,9 +2,9 @@ BEGIN TRY
 
 BEGIN TRAN;
 
-DROP TABLE IF EXISTS [private_key];
+DROP TABLE IF EXISTS [jwk_private_key];
 
-CREATE TABLE [private_key]
+CREATE TABLE [jwk_private_key]
 (
   [id] UNIQUEIDENTIFIER NOT NULL DEFAULT NEWID(),
   [encrypted_private_key_pem] NVARCHAR(max) NOT NULL,
