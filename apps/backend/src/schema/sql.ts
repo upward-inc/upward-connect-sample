@@ -40,16 +40,16 @@ export const WhereClauseSchema = z
 		return `WHERE ${predicates}`
 	})
 
-const getWherePredicatesFilterSchema = z.union([
+const GetWherePredicatesFilterSchema = z.union([
 	NestableFilterSchema,
 	BaseFilterSchema,
 ])
 
-type getWherePredicatesFilter = z.infer<typeof getWherePredicatesFilterSchema>
+type GetWherePredicatesFilter = z.infer<typeof GetWherePredicatesFilterSchema>
 
 const getWherePredicates = (
 	items: EntityItem[],
-	filter?: getWherePredicatesFilter,
+	filter?: GetWherePredicatesFilter,
 ): string | null => {
 	if (!filter) {
 		return null
