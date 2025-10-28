@@ -45,8 +45,13 @@ try {
 			await txClient.profile.deleteMany()
 			await txClient.user.deleteMany()
 			await txClient.oauth_client.deleteMany()
+			await txClient.jwk_private_key.deleteMany()
 
+			// OAuthクライアント
 			await seedOauthClients(txClient)
+
+			// Jwk秘密鍵
+			await seedJwkPrivateKeys(txClient)
 
 			// system users
 			const users = await seedUsers(txClient)
@@ -103,9 +108,6 @@ try {
 
 			// サンプル
 			await seedSamples(txClient, users)
-
-			// 秘密鍵
-			await seedJwkPrivateKeys(txClient)
 		},
 		{
 			timeout: 1000 * 60,
