@@ -207,7 +207,12 @@ const baseFilterToPredicate = (
 	) {
 		return withPredicatePrefix(
 			filter.is_not,
-			getOptionComparisonPredicate(filter.field, filter.operator, filter.value),
+			getOptionComparisonPredicate(
+				filter.field,
+				filter.operator,
+				filter.value,
+				item.sub_type,
+			),
 		)
 	}
 
@@ -227,7 +232,12 @@ const baseFilterToPredicate = (
 
 		return withPredicatePrefix(
 			filter.is_not,
-			getReferenceComparisonPredicate(filter.field, filter.operator, value),
+			getReferenceComparisonPredicate(
+				filter.field,
+				filter.operator,
+				value,
+				item.sub_type,
+			),
 		)
 	}
 
@@ -292,9 +302,8 @@ const getOptionComparisonPredicate = (
 	fieldName: string,
 	operator: EqualOperator | IncludesOperator,
 	value: string,
+	subType?: EntityItem["sub_type"],
 ) => {
-	// "対象の値を含む"検索クエリを生成
-	// 単一オプションのカラムには単一の値しか設定されない前提であるため、オペレーター（`eq` or `includes`）毎に処理を分ける必要なし
 	const safeColumnName = `[${fieldName}]`
 	const isNotNullExpression = `${safeColumnName} IS NOT NULL`
 	const jsonExpression = [
@@ -303,26 +312,37 @@ const getOptionComparisonPredicate = (
 		`ELSE '[' + ${safeColumnName} + ']'`,
 		"END",
 	].join(" ")
-	const subQuery = `SELECT * FROM OPENJSON(${jsonExpression}) WHERE value = '${value}'`
 
-	return `${isNotNullExpression} AND EXISTS (${subQuery})`
+	const valueCondition = `WHERE value = '${value}'`
+
+	// multi type + eqの場合のみ完全一致チェック（配列要素数1かつ値が一致）が必要
+	if (operator === "eq" && subType === "multi") {
+		return `${isNotNullExpression} AND ${getJsonArrayExactMatchPredicate(jsonExpression, valueCondition)}`
+	}
+
+	// 単一オプションのカラムには単一の値しか設定されない前提であるため、
+	// （single + eq、または includes）は値が含まれているかのチェックで十分
+	return `${isNotNullExpression} AND ${getJsonArrayIncludesPredicate(jsonExpression, valueCondition)}`
 }
 
 const getReferenceComparisonPredicate = (
 	fieldName: string,
 	operator: EqualOperator | IncludesOperator,
 	value: RecordReferenceValue,
+	subType?: EntityItem["sub_type"],
 ) => {
-	// "対象の値を含む"検索クエリを生成
-	// 単一参照のカラムには単一の値しか設定されない前提であるため、オペレーター（`eq` or `includes`）毎に処理を分ける必要なし
 	const safeColumnName = `[${fieldName}]`
-	const subQuery = [
-		`SELECT * FROM OPENJSON(${safeColumnName})`,
-		"WITH (entity_name NVARCHAR(MAX), id NVARCHAR(MAX))",
-		`WHERE entity_name = '${value.entity_name}' AND id = '${value.id}'`,
-	].join(" ")
+	const withClause = "WITH (entity_name NVARCHAR(MAX), id NVARCHAR(MAX))"
+	const valueCondition = `${withClause} WHERE entity_name = '${value.entity_name}' AND id = '${value.id}'`
 
-	return `EXISTS (${subQuery})`
+	// multi type + eqの場合のみ完全一致チェック（配列要素数1かつ値が一致）が必要
+	if (operator === "eq" && subType === "multi") {
+		return getJsonArrayExactMatchPredicate(safeColumnName, valueCondition)
+	}
+
+	// 単一参照のカラムには単一の値しか設定されない前提であるため、
+	// （single + eq、または includes）は値が含まれているかのチェックで十分
+	return getJsonArrayIncludesPredicate(safeColumnName, valueCondition)
 }
 
 const getIsSetComparisonPredicate = (
@@ -349,4 +369,27 @@ const withPredicatePrefix = (isNot: boolean, predicate: string | null) => {
 
 	const predicatePrefix = isNot ? "NOT" : ""
 	return `${predicatePrefix} (${predicate})`
+}
+
+/**
+ * JSON配列が要素数1かつ指定条件を満たすことをチェックする条件式を生成
+ */
+const getJsonArrayExactMatchPredicate = (
+	columnExpression: string,
+	valueCondition: string,
+): string => {
+	const countSubQuery = `SELECT COUNT(*) FROM OPENJSON(${columnExpression})`
+	const valueSubQuery = `SELECT * FROM OPENJSON(${columnExpression}) ${valueCondition}`
+	return `(${countSubQuery}) = 1 AND EXISTS (${valueSubQuery})`
+}
+
+/**
+ * JSON配列が指定条件を満たす要素を含むことをチェックする条件式を生成
+ */
+const getJsonArrayIncludesPredicate = (
+	columnExpression: string,
+	valueCondition: string,
+): string => {
+	const subQuery = `SELECT * FROM OPENJSON(${columnExpression}) ${valueCondition}`
+	return `EXISTS (${subQuery})`
 }
