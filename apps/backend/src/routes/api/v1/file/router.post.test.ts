@@ -149,93 +149,70 @@ describe("POST /api/v1/files - ファイル作成", () => {
 		expect(new Uint8Array(savedFile?.content || [])).toEqual(binaryContent)
 	})
 
-	it("認証ヘッダーがない場合に401エラーを返すこと", async () => {
-		// Arrange
-		const testFile = createTestFile("unauthorized.txt", "Should not upload")
-		const formData = new FormData()
-		formData.append("file", testFile)
+	describe("認証エラーの場合に適切なエラーを返すこと", () => {
+		it.each([
+			{
+				title: "認証ヘッダーがない場合",
+				token: "",
+				expectedStatus: 401,
+			},
+			{
+				title: "認証ヘッダーの形式が不正な場合",
+				token: "InvalidFormat token_here",
+				expectedStatus: 400,
+			},
+			{
+				title: "期限切れトークンの場合",
+				token:
+					"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoidGVzdCIsImV4cCI6MH0.invalid",
+				expectedStatus: 401,
+			},
+			{
+				title: "不正なトークンの場合",
+				token: "invalid.malformed.token",
+				expectedStatus: 401,
+			},
+		])("$title", async ({ token, expectedStatus }) => {
+			// Arrange
+			const testFile = createTestFile("test.txt", "Should not upload")
+			const formData = new FormData()
+			formData.append("file", testFile)
 
-		// Act
-		const response = await requestPost(formData, "")
+			// Act
+			const response = await requestPost(formData, token)
 
-		// Assert
-		const json = await response.json()
-		expect(response.status).toBe(401)
-		expect(json).toHaveProperty("message")
+			// Assert
+			const json = await response.json()
+			expect(response.status).toBe(expectedStatus)
+			expect(json).toHaveProperty("message")
+		})
 	})
 
-	it("認証ヘッダーの形式が不正な場合に400エラーを返すこと", async () => {
-		// Arrange
-		const testFile = createTestFile("invalid_auth.txt", "Should not upload")
-		const formData = new FormData()
-		formData.append("file", testFile)
+	describe("バリデーションエラーの場合に400エラーを返すこと", () => {
+		it.each([
+			{
+				title: "フォームデータにファイルがない場合",
+				formDataBuilder: () => {
+					const formData = new FormData()
+					formData.append("other_field", "not a file")
+					return formData
+				},
+			},
+			{
+				title: "フォームデータが空の場合",
+				formDataBuilder: () => new FormData(),
+			},
+		])("$title", async ({ formDataBuilder }) => {
+			// Arrange
+			const formData = formDataBuilder()
 
-		// Act
-		const response = await requestPost(formData, "InvalidFormat token_here")
+			// Act
+			const response = await requestPost(formData)
 
-		// Assert
-		const json = await response.json()
-		expect(response.status).toBe(400)
-		expect(json).toHaveProperty("message")
-	})
-
-	it("期限切れトークンの場合に401エラーを返すこと", async () => {
-		// Arrange
-		const testFile = createTestFile("expired.txt", "Should not upload")
-		const formData = new FormData()
-		formData.append("file", testFile)
-		// 期限切れトークンを生成（1970年に期限設定）
-		const expiredToken =
-			"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoidGVzdCIsImV4cCI6MH0.invalid"
-
-		// Act
-		const response = await requestPost(formData, expiredToken)
-
-		// Assert
-		const json = await response.json()
-		expect(response.status).toBe(401)
-		expect(json).toHaveProperty("message")
-	})
-
-	it("不正なトークンの場合に401エラーを返すこと", async () => {
-		// Arrange
-		const testFile = createTestFile("malformed.txt", "Should not upload")
-		const formData = new FormData()
-		formData.append("file", testFile)
-
-		// Act
-		const response = await requestPost(formData, "invalid.malformed.token")
-
-		// Assert
-		const json = await response.json()
-		expect(response.status).toBe(401)
-		expect(json).toHaveProperty("message")
-	})
-
-	it("フォームデータにファイルがない場合に400エラーを返すこと", async () => {
-		// Arrange
-		const formData = new FormData()
-		formData.append("other_field", "not a file")
-
-		// Act
-		const response = await requestPost(formData)
-
-		// Assert
-		const json = await response.json()
-		expect(response.status).toBe(400)
-		expect(json).toHaveProperty("success")
-	})
-
-	it("フォームデータが空の場合に400エラーを返すこと", async () => {
-		// Arrange
-		const formData = new FormData()
-
-		// Act
-		const response = await requestPost(formData)
-
-		// Assert
-		const json = await response.json()
-		expect(response.status).toBe(400)
-		expect(json).toHaveProperty("success")
+			// Assert
+			const json = await response.json()
+			expect(response.status).toBe(400)
+			expect(json).toHaveProperty("success")
+		})
 	})
 })

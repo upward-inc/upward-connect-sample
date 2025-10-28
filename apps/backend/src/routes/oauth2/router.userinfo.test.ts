@@ -104,116 +104,92 @@ describe("GET /oauth2/userinfo - ユーザー情報取得", () => {
 		await deleteTestExecutionUser(userWithoutEmail.id)
 	})
 
-	it("不正な認証ヘッダーフォーマットの場合に400エラーを返すこと", async () => {
-		// Act
-		const response = await requestUserInfo("InvalidFormat token_here")
+	describe("認証エラーの場合に適切なエラーを返すこと", () => {
+		it.each([
+			{
+				title: "認証ヘッダーがない場合",
+				tokenBuilder: () => "",
+				expectedStatus: 401,
+				validateError: false,
+			},
+			{
+				title: "不正な認証ヘッダーフォーマットの場合",
+				tokenBuilder: () => "InvalidFormat token_here",
+				expectedStatus: 400,
+				validateError: false,
+			},
+			{
+				title: "期限切れトークンの場合",
+				tokenBuilder: (userId: string) => createExpiredToken(userId),
+				expectedStatus: 401,
+				validateError: false,
+			},
+			{
+				title: "不正な形式のトークンの場合",
+				tokenBuilder: () => "invalid.malformed.token",
+				expectedStatus: 401,
+				validateError: false,
+			},
+			{
+				title: "不正な署名のトークンの場合",
+				tokenBuilder: (userId: string) =>
+					sign({}, "wrong-secret-key", {
+						algorithm: "HS256",
+						issuer: process.env.OIDC_ISSUER,
+						subject: userId,
+						audience: "wrong-audience",
+						expiresIn: "1h",
+					}),
+				expectedStatus: 401,
+				validateError: false,
+			},
+			{
+				title: "subjectがないトークンの場合",
+				tokenBuilder: () =>
+					sign({}, tokenSecret, {
+						algorithm: "HS256",
+						issuer: process.env.OIDC_ISSUER,
+						audience: "no-subject-audience",
+						expiresIn: "1h",
+					}),
+				expectedStatus: 401,
+				validateError: false,
+			},
+			{
+				title: "空のsubjectのトークンの場合",
+				tokenBuilder: () =>
+					sign({}, tokenSecret, {
+						algorithm: "HS256",
+						issuer: process.env.OIDC_ISSUER,
+						subject: "",
+						audience: "empty-subject-audience",
+						expiresIn: "1h",
+					}),
+				expectedStatus: 401,
+				validateError: false,
+			},
+			{
+				title: "非アクティブなユーザーの場合",
+				tokenBuilder: () => createValidToken(crypto.randomUUID()),
+				expectedStatus: 401,
+				validateError: true,
+			},
+		])("$title", async ({ tokenBuilder, expectedStatus, validateError }) => {
+			// Arrange
+			const token = tokenBuilder(testExecutionUser.id)
 
-		// Assert
-		const json = await response.json()
-		expect(response.status).toBe(400)
-		expect(json).toHaveProperty("message")
-	})
+			// Act
+			const response = await requestUserInfo(token)
 
-	it("認証ヘッダーがない場合に401エラーを返すこと", async () => {
-		// Act
-		const response = await requestUserInfo("")
+			// Assert
+			const data = await response.json()
+			expect(response.status).toBe(expectedStatus)
 
-		// Assert
-		const json = await response.json()
-		expect(response.status).toBe(401)
-		expect(json).toHaveProperty("message")
-	})
-
-	it("期限切れトークンの場合に401エラーを返すこと", async () => {
-		// Arrange
-		const expiredToken = createExpiredToken(testExecutionUser.id)
-
-		// Act
-		const response = await requestUserInfo(expiredToken)
-
-		// Assert
-		const json = await response.json()
-		expect(response.status).toBe(401)
-		expect(json).toHaveProperty("message")
-	})
-
-	it("不正な形式のトークンの場合に401エラーを返すこと", async () => {
-		// Act
-		const response = await requestUserInfo("invalid.malformed.token")
-
-		// Assert
-		const json = await response.json()
-		expect(response.status).toBe(401)
-		expect(json).toHaveProperty("message")
-	})
-
-	it("不正な署名のトークンの場合に401エラーを返すこと", async () => {
-		// Arrange
-		const wrongSecretToken = sign({}, "wrong-secret-key", {
-			algorithm: "HS256",
-			issuer: process.env.OIDC_ISSUER,
-			subject: testExecutionUser.id,
-			audience: "wrong-audience",
-			expiresIn: "1h",
+			if (validateError) {
+				expect(data.error).toBe("invalid_token")
+			} else {
+				expect(data).toHaveProperty("message")
+			}
 		})
-
-		// Act
-		const response = await requestUserInfo(wrongSecretToken)
-
-		// Assert
-		const json = await response.json()
-		expect(response.status).toBe(401)
-		expect(json).toHaveProperty("message")
-	})
-
-	it("subjectがないトークンの場合に401エラーを返すこと", async () => {
-		// Arrange
-		const noSubjectToken = sign({}, tokenSecret, {
-			algorithm: "HS256",
-			issuer: process.env.OIDC_ISSUER,
-			audience: "no-subject-audience",
-			expiresIn: "1h",
-		})
-
-		// Act
-		const response = await requestUserInfo(noSubjectToken)
-
-		// Assert
-		const json = await response.json()
-		expect(response.status).toBe(401)
-		expect(json).toHaveProperty("message")
-	})
-
-	it("空のsubjectのトークンの場合に401エラーを返すこと", async () => {
-		// Arrange
-		const emptySubjectToken = sign({}, tokenSecret, {
-			algorithm: "HS256",
-			issuer: process.env.OIDC_ISSUER,
-			subject: "", // 空のsubject
-			audience: "empty-subject-audience",
-			expiresIn: "1h",
-		})
-
-		// Act
-		const response = await requestUserInfo(emptySubjectToken)
-
-		// Assert
-		const json = await response.json()
-		expect(response.status).toBe(401)
-		expect(json).toHaveProperty("message")
-	})
-
-	it("非アクティブなユーザーの場合に401エラーを返すこと", async () => {
-		// Arrange
-		const nonExistentUserId = crypto.randomUUID()
-		const token = createValidToken(nonExistentUserId)
-
-		// Act
-		const response = await requestUserInfo(token)
-
-		// Assert
-		const data = await response.json()
-		expect(response.status).toBe(401)
-		expect(data.error).toBe("invalid_token")
 	})
 })

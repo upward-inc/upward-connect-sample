@@ -136,37 +136,29 @@ describe("GET /api/v1/files/:id - ファイル取得", () => {
 		expect(json).toHaveProperty("message")
 	})
 
-	it("認証ヘッダーがない場合に401エラーを返すこと", async () => {
-		// Act
-		const response = await requestGet("some-id", "")
+	describe("認証エラーの場合に401エラーを返すこと", () => {
+		it.each([
+			{
+				title: "認証ヘッダーがない",
+				token: "",
+			},
+			{
+				title: "期限切れトークン",
+				token:
+					"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoidGVzdCIsImV4cCI6MH0.invalid",
+			},
+			{
+				title: "不正なトークン",
+				token: "invalid.malformed.token",
+			},
+		])("$title", async ({ token }) => {
+			// Act
+			const response = await requestGet("some-id", token)
 
-		// Assert
-		const json = await response.json()
-		expect(response.status).toBe(401)
-		expect(json).toHaveProperty("message")
-	})
-
-	it("期限切れトークンの場合に401エラーを返すこと", async () => {
-		// Arrange
-		const expiredToken =
-			"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoidGVzdCIsImV4cCI6MH0.invalid"
-
-		// Act
-		const response = await requestGet("some-id", expiredToken)
-
-		// Assert
-		const json = await response.json()
-		expect(response.status).toBe(401)
-		expect(json).toHaveProperty("message")
-	})
-
-	it("不正なトークンの場合に401エラーを返すこと", async () => {
-		// Act
-		const response = await requestGet("some-id", "invalid.malformed.token")
-
-		// Assert
-		const json = await response.json()
-		expect(response.status).toBe(401)
-		expect(json).toHaveProperty("message")
+			// Assert
+			const json = await response.json()
+			expect(response.status).toBe(401)
+			expect(json).toHaveProperty("message")
+		})
 	})
 })
