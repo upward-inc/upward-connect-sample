@@ -4,16 +4,8 @@ export const EqualOperatorSchema = z.literal("eq").meta({
 	description: "Equal (=)",
 })
 
-export const ContainsOperatorSchema = z.literal("contains").meta({
-	description: "Contains (LIKE '%abc%')",
-})
-
-export const StartsWithOperatorSchema = z.literal("starts_with").meta({
-	description: "Starts With (LIKE 'abc%')",
-})
-
-export const EndsWithOperatorSchema = z.literal("ends_with").meta({
-	description: "Ends With (LIKE '%abc')",
+export const LikeOperatorSchema = z.literal("like").meta({
+	description: "Like (LIKE pattern) - 曖昧検索",
 })
 
 export const GraterThanOperatorSchema = z.literal("gt").meta({
@@ -42,9 +34,7 @@ export const IsSetOperatorSchema = z.literal("is_set").meta({
 
 export const OperatorSchema = z.union([
 	EqualOperatorSchema,
-	ContainsOperatorSchema,
-	StartsWithOperatorSchema,
-	EndsWithOperatorSchema,
+	LikeOperatorSchema,
 	GraterThanOperatorSchema,
 	GraterThanOrEqualOperatorSchema,
 	LessThanOperatorSchema,
@@ -54,9 +44,7 @@ export const OperatorSchema = z.union([
 ])
 
 export type EqualOperator = z.infer<typeof EqualOperatorSchema>
-export type ContainsOperator = z.infer<typeof ContainsOperatorSchema>
-export type StartsWithOperator = z.infer<typeof StartsWithOperatorSchema>
-export type EndsWithOperator = z.infer<typeof EndsWithOperatorSchema>
+export type LikeOperator = z.infer<typeof LikeOperatorSchema>
 export type GraterThanOperator = z.infer<typeof GraterThanOperatorSchema>
 export type GraterThanOrEqualOperator = z.infer<
 	typeof GraterThanOrEqualOperatorSchema

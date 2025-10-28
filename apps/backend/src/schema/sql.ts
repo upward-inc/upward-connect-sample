@@ -10,15 +10,13 @@ import {
 	isOrFilter,
 } from "./filter"
 import type {
-	ContainsOperator,
-	EndsWithOperator,
 	EqualOperator,
 	GraterThanOperator,
 	GraterThanOrEqualOperator,
 	IncludesOperator,
 	LessThanOperator,
 	LessThanOrEqualOperator,
-	StartsWithOperator,
+	LikeOperator,
 } from "./operator"
 import { LimitSchema, OffsetSchema, OrderBySchema } from "./paging"
 
@@ -249,9 +247,7 @@ const getSimpleComparisonPredicate = (
 	itemType: EntityItem["type"],
 	operator:
 		| EqualOperator
-		| ContainsOperator
-		| StartsWithOperator
-		| EndsWithOperator
+		| LikeOperator
 		| GraterThanOperator
 		| GraterThanOrEqualOperator
 		| LessThanOperator
@@ -267,26 +263,23 @@ const getSimpleComparisonPredicate = (
 		typeof operator,
 		{
 			operator: string
-			wildcard?: { prefix?: string; suffix?: string }
 		}
 	> = {
 		eq: { operator: "=" },
-		contains: { operator: "LIKE", wildcard: { prefix: "%", suffix: "%" } },
-		starts_with: { operator: "LIKE", wildcard: { suffix: "%" } },
-		ends_with: { operator: "LIKE", wildcard: { prefix: "%" } },
+		like: { operator: "LIKE" },
 		gt: { operator: ">" },
 		gte: { operator: ">=" },
 		lt: { operator: "<" },
 		lte: { operator: "<=" },
 	}
 
-	const { operator: sqlOperator, wildcard } = operators[operator]
+	const { operator: sqlOperator } = operators[operator]
 
 	const valueExpressions: Record<
 		"text" | "numeric" | "boolean" | "date",
 		string | number
 	> = {
-		text: `'${wildcard?.prefix ?? ""}${value}${wildcard?.suffix ?? ""}'`,
+		text: `'${value}'`,
 		numeric: Number(value),
 		boolean: value ? 1 : 0,
 		date: `'${value}'`,

@@ -1,7 +1,5 @@
 import { z } from "../libs/zod"
 import {
-	ContainsOperatorSchema,
-	EndsWithOperatorSchema,
 	EqualOperatorSchema,
 	GraterThanOperatorSchema,
 	GraterThanOrEqualOperatorSchema,
@@ -9,7 +7,7 @@ import {
 	IsSetOperatorSchema,
 	LessThanOperatorSchema,
 	LessThanOrEqualOperatorSchema,
-	StartsWithOperatorSchema,
+	LikeOperatorSchema,
 } from "./operator"
 
 export const FieldSchema = z
@@ -32,9 +30,7 @@ export const TextFieldComparisonSchema = z
 		operator: z
 			.union([
 				EqualOperatorSchema,
-				ContainsOperatorSchema,
-				StartsWithOperatorSchema,
-				EndsWithOperatorSchema,
+				LikeOperatorSchema,
 				GraterThanOperatorSchema,
 				GraterThanOrEqualOperatorSchema,
 				LessThanOperatorSchema,
