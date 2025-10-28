@@ -11,8 +11,8 @@ import {
 } from "./filter"
 import type {
 	EqualOperator,
-	GraterThanOperator,
-	GraterThanOrEqualOperator,
+	GreaterThanOperator,
+	GreaterThanOrEqualOperator,
 	IncludesOperator,
 	LessThanOperator,
 	LessThanOrEqualOperator,
@@ -255,8 +255,8 @@ const getSimpleComparisonPredicate = (
 	operator:
 		| EqualOperator
 		| LikeOperator
-		| GraterThanOperator
-		| GraterThanOrEqualOperator
+		| GreaterThanOperator
+		| GreaterThanOrEqualOperator
 		| LessThanOperator
 		| LessThanOrEqualOperator,
 	value: string | number | boolean,

@@ -8,12 +8,12 @@ export const LikeOperatorSchema = z.literal("like").meta({
 	description: "Like (LIKE pattern) - 曖昧検索",
 })
 
-export const GraterThanOperatorSchema = z.literal("gt").meta({
-	description: "Grater Than (>)",
+export const GreaterThanOperatorSchema = z.literal("gt").meta({
+	description: "Greater Than (>)",
 })
 
-export const GraterThanOrEqualOperatorSchema = z.literal("gte").meta({
-	description: "Grater Than Or Equal (>=)",
+export const GreaterThanOrEqualOperatorSchema = z.literal("gte").meta({
+	description: "Greater Than Or Equal (>=)",
 })
 
 export const LessThanOperatorSchema = z.literal("lt").meta({
@@ -35,8 +35,8 @@ export const IsSetOperatorSchema = z.literal("is_set").meta({
 export const OperatorSchema = z.union([
 	EqualOperatorSchema,
 	LikeOperatorSchema,
-	GraterThanOperatorSchema,
-	GraterThanOrEqualOperatorSchema,
+	GreaterThanOperatorSchema,
+	GreaterThanOrEqualOperatorSchema,
 	LessThanOperatorSchema,
 	LessThanOrEqualOperatorSchema,
 	IncludesOperatorSchema,
@@ -45,9 +45,9 @@ export const OperatorSchema = z.union([
 
 export type EqualOperator = z.infer<typeof EqualOperatorSchema>
 export type LikeOperator = z.infer<typeof LikeOperatorSchema>
-export type GraterThanOperator = z.infer<typeof GraterThanOperatorSchema>
-export type GraterThanOrEqualOperator = z.infer<
-	typeof GraterThanOrEqualOperatorSchema
+export type GreaterThanOperator = z.infer<typeof GreaterThanOperatorSchema>
+export type GreaterThanOrEqualOperator = z.infer<
+	typeof GreaterThanOrEqualOperatorSchema
 >
 export type LessThanOperator = z.infer<typeof LessThanOperatorSchema>
 export type LessThanOrEqualOperator = z.infer<

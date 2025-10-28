@@ -1,8 +1,8 @@
 import { z } from "../libs/zod"
 import {
 	EqualOperatorSchema,
-	GraterThanOperatorSchema,
-	GraterThanOrEqualOperatorSchema,
+	GreaterThanOperatorSchema,
+	GreaterThanOrEqualOperatorSchema,
 	IncludesOperatorSchema,
 	IsSetOperatorSchema,
 	LessThanOperatorSchema,
@@ -31,8 +31,8 @@ export const TextFieldComparisonSchema = z
 			.union([
 				EqualOperatorSchema,
 				LikeOperatorSchema,
-				GraterThanOperatorSchema,
-				GraterThanOrEqualOperatorSchema,
+				GreaterThanOperatorSchema,
+				GreaterThanOrEqualOperatorSchema,
 				LessThanOperatorSchema,
 				LessThanOrEqualOperatorSchema,
 			])
@@ -53,8 +53,8 @@ export const NumericFieldComparisonSchema = z
 		operator: z
 			.union([
 				EqualOperatorSchema,
-				GraterThanOperatorSchema,
-				GraterThanOrEqualOperatorSchema,
+				GreaterThanOperatorSchema,
+				GreaterThanOrEqualOperatorSchema,
 				LessThanOperatorSchema,
 				LessThanOrEqualOperatorSchema,
 			])
@@ -89,8 +89,8 @@ export const DateFieldComparisonSchema = z
 		operator: z
 			.union([
 				EqualOperatorSchema,
-				GraterThanOperatorSchema,
-				GraterThanOrEqualOperatorSchema,
+				GreaterThanOperatorSchema,
+				GreaterThanOrEqualOperatorSchema,
 				LessThanOperatorSchema,
 				LessThanOrEqualOperatorSchema,
 			])
