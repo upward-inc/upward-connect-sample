@@ -9,7 +9,7 @@ import { addDays } from "../src/utility/date"
 
 export async function seedJwkPrivateKeys(prisma: Prisma.TransactionClient) {
 	const privateKeysPromises = Array.from({
-		length: 30,
+		length: 120,
 	}).map(async (_, index) => {
 		const validate_at = addDays(
 			new Date(),
