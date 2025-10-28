@@ -162,18 +162,29 @@ describe("AuthorizePage", () => {
 
 		renderAuthorizePage()
 
-		const listener = (thrownError: Error) => {
-			expect(thrownError.message).toBe("invalid redirect_uri")
-		}
-		process.on("unhandledRejection", listener)
-
 		const user = userEvent.setup()
 		const authorizeButton = await screen.findByRole("button", {
 			name: "許可する",
 		})
 
+		// エラーハンドリングを適切に処理
+		const errorPromise = new Promise<Error>((resolve) => {
+			const listener = (reason: unknown) => {
+				if (
+					reason instanceof Error &&
+					reason.message === "invalid redirect_uri"
+				) {
+					process.off("unhandledRejection", listener)
+					resolve(reason)
+				}
+			}
+			process.on("unhandledRejection", listener)
+		})
+
 		await user.click(authorizeButton)
-		expect.assertions(1)
+
+		const thrownError = await errorPromise
+		expect(thrownError.message).toBe("invalid redirect_uri")
 	})
 
 	it("認可APIがconsent_requiredエラーを返したとき、エラーとエラー説明とstateパラメータを付与してリダイレクトURIへ遷移する", async () => {
