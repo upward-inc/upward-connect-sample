@@ -207,7 +207,7 @@ describe("AuthorizePage", () => {
 
 	it("認可APIが503ステータスを返したとき、temporarily_unavailableエラーを付与してリダイレクトURIへ遷移する", async () => {
 		// サーバーエラーを返すように上書き
-		setRequestHandlers(createAuthorizeHandler(503, { error: "server_error" }))
+		setRequestHandlers(createAuthorizeHandler(503, {}))
 
 		renderAuthorizePage()
 		const user = userEvent.setup()
