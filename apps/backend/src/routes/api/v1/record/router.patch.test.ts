@@ -411,54 +411,49 @@ describe("PATCH /records/:entity_name/:id - レコード更新", () => {
 		expect(json).toHaveProperty("message")
 	})
 
-	it("空のJSONオブジェクトでも200ステータスを返すこと（部分更新の仕様）", async () => {
-		// Arrange
-		const sample = await createTestSample(testExecutionUser.id, {
-			name: "Test Sample",
-		})
-
-		// Act
-		const response = await requestPatch("sample", sample.id, {})
-
-		// Assert
-		expect(response.status).toBe(200)
-	})
-
-	it("有効なフィールドが含まれていない場合でも200ステータスを返すこと（部分更新の仕様）", async () => {
-		// Arrange
-		const sample = await createTestSample(testExecutionUser.id, {
-			name: "Test Sample",
-		})
-
-		// Act
-		const response = await requestPatch("sample", sample.id, {
-			unknown_field: "test",
-		})
-
-		// Assert
-		expect(response.status).toBe(200)
-	})
-
-	describe("リクエストボディのバリデーションに失敗する場合に400エラーを返すこと", () => {
-		it.each([
-			{
-				title: "JSONオブジェクトでない",
-				entity_name: "sample",
-				body: "Invalid JSON Body",
-			},
-			{
-				title: "必須項目がnull",
-				entity_name: "sample",
-				body: { name: null },
-			},
-		])("$title", async ({ entity_name, body }) => {
+	it.each([
+		{
+			title: "空のJSONオブジェクト",
+			body: {},
+		},
+		{
+			title: "有効なフィールドが含まれていない",
+			body: { unknown_field: "test" },
+		},
+	])(
+		"$titleでも200ステータスを返すこと（部分更新の仕様）",
+		async ({ body }) => {
 			// Arrange
 			const sample = await createTestSample(testExecutionUser.id, {
 				name: "Test Sample",
 			})
 
 			// Act
-			const response = await requestPatch(entity_name, sample.id, body)
+			const response = await requestPatch("sample", sample.id, body)
+
+			// Assert
+			expect(response.status).toBe(200)
+		},
+	)
+
+	describe("リクエストボディのバリデーションに失敗する場合に400エラーを返すこと", () => {
+		it.each([
+			{
+				title: "JSONオブジェクトでない",
+				body: "Invalid JSON Body",
+			},
+			{
+				title: "必須項目がnull",
+				body: { name: null },
+			},
+		])("$title", async ({ body }) => {
+			// Arrange
+			const sample = await createTestSample(testExecutionUser.id, {
+				name: "Test Sample",
+			})
+
+			// Act
+			const response = await requestPatch("sample", sample.id, body)
 
 			// Assert
 			const json = await response.json()
