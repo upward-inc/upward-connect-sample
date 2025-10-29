@@ -24,6 +24,31 @@ import { OAuthApiErrorResultSchema } from "../../schema/error"
 export const oauth2Router = new OpenAPIHono<{ Variables: AuthContexts }>()
 	.openapi(
 		createRoute({
+			method: "get",
+			path: "/jwks",
+			description: "id_tokenの署名を検証するための公開鍵群（JWKs）を返却する",
+			responses: {
+				200: {
+					description: "Success",
+					content: {
+						"application/json": { schema: GetJwksResultSchema },
+					},
+				},
+			},
+		}),
+		async (c) => {
+			const privateKeys = await getNotClosedJwkPrivateKeyList()
+			const jwks = {
+				keys: privateKeys.map((key) =>
+					extractPublicKeyAsJwkFromPrivateKey(key),
+				),
+			}
+
+			return c.json(jwks, 200)
+		},
+	)
+	.openapi(
+		createRoute({
 			method: "post",
 			path: "/token",
 			description:
@@ -236,30 +261,5 @@ export const oauth2Router = new OpenAPIHono<{ Variables: AuthContexts }>()
 				},
 				200,
 			)
-		},
-	)
-	.openapi(
-		createRoute({
-			method: "get",
-			path: "/jwks",
-			description: "id_tokenの署名を検証するための公開鍵群（JWKs）を返却する",
-			responses: {
-				200: {
-					description: "Success",
-					content: {
-						"application/json": { schema: GetJwksResultSchema },
-					},
-				},
-			},
-		}),
-		async (c) => {
-			const privateKeys = await getNotClosedJwkPrivateKeyList()
-			const jwks = {
-				keys: privateKeys.map((key) =>
-					extractPublicKeyAsJwkFromPrivateKey(key),
-				),
-			}
-
-			return c.json(jwks, 200)
 		},
 	)
