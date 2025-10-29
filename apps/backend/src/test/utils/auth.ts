@@ -1,3 +1,4 @@
+import { addDay, date } from "@formkit/tempo"
 import type { Prisma } from "@prisma/client"
 import { sign } from "jsonwebtoken"
 import type * as ms from "ms"
@@ -7,7 +8,6 @@ import {
 	generatePrivateKeyPem,
 	toCryptoKey,
 } from "../../utility/crypto"
-import { addDays } from "../../utility/date"
 import { testPrisma } from "../setup"
 
 export interface PrivateKeyData
@@ -159,6 +159,7 @@ async function toPrivateKeyCreateInput(
 ): Promise<Prisma.jwk_private_keyCreateInput> {
 	const key = await toCryptoKey(env.OIDC_ENCRYPT_PRIVATE_KEY_SECRET, "encrypt")
 	const iv = data?.iv ?? crypto.getRandomValues(new Uint8Array(16))
+	const now = date()
 	return {
 		encrypted_private_key_pem: await encryptAndEncodeByBase64(
 			data?.private_key_pem ?? (await generatePrivateKeyPem()),
@@ -166,12 +167,10 @@ async function toPrivateKeyCreateInput(
 			iv,
 		),
 		base64_iv: Buffer.from(iv).toString("base64"),
-		validate_at: data?.validate_at ?? new Date(),
+		validate_at: data?.validate_at ?? now,
 		expire_at:
-			data?.expire_at ??
-			addDays(new Date(), env.OIDC_KEY_ROTATION_PERIOD_IN_DAY),
+			data?.expire_at ?? addDay(now, env.OIDC_KEY_ROTATION_PERIOD_IN_DAY),
 		closed_at:
-			data?.closed_at ??
-			addDays(new Date(), env.OIDC_KEY_ROTATION_PERIOD_IN_DAY * 2),
+			data?.closed_at ?? addDay(now, env.OIDC_KEY_ROTATION_PERIOD_IN_DAY * 2),
 	}
 }
