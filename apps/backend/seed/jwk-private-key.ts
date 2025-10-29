@@ -40,13 +40,12 @@ export async function seedJwkPrivateKeys(prisma: Prisma.TransactionClient) {
 			const validateAt = dayStart(baseDate)
 
 			// 鍵が失効となる日時
-			const expireAt = addDay(
-				dayEnd(validateAt),
-				KEY_ROTATION_PERIOD_IN_DAY - 1,
+			const expireAt = dayEnd(
+				addDay(validateAt, KEY_ROTATION_PERIOD_IN_DAY - 1),
 			)
 
 			// jwksエンドポイントで鍵の公開が停止される日時
-			const closedAt = addDay(dayEnd(validateAt), OPEN_PERIOD_IN_DAY - 1)
+			const closedAt = dayEnd(addDay(validateAt, OPEN_PERIOD_IN_DAY - 1))
 
 			return Promise.all(
 				Array.from({ length: KEYS_PER_PERIOD }).map(async () => {

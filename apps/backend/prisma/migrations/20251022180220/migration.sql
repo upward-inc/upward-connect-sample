@@ -9,9 +9,9 @@ CREATE TABLE [jwk_private_key]
   [id] UNIQUEIDENTIFIER NOT NULL DEFAULT NEWID(),
   [encrypted_private_key_pem] NVARCHAR(max) NOT NULL,
   [base64_iv] NVARCHAR(64) NOT NULL,
-  [validate_at] DATETIME NOT NULL,
-  [expire_at] DATETIME NOT NULL,
-  [closed_at] DATETIME NOT NULL,
+  [validate_at] DATETIME2 NOT NULL,
+  [expire_at] DATETIME2 NOT NULL,
+  [closed_at] DATETIME2 NOT NULL,
   [created_at] DATETIME NOT NULL DEFAULT GETUTCDATE(),
   CONSTRAINT [pk_private_key] PRIMARY KEY ([id]),
 );

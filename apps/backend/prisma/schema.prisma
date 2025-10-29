@@ -433,9 +433,9 @@ model jwk_private_key {
   id                        String   @id(map: "pk_private_key") @default(dbgenerated("newid()"), map: "DF__private_key__id__7C255952") @db.UniqueIdentifier
   encrypted_private_key_pem String   @db.NVarChar(Max)
   base64_iv                 String   @db.NVarChar(64)
-  validate_at               DateTime @db.DateTime
-  expire_at                 DateTime @db.DateTime
-  closed_at                 DateTime @db.DateTime
+  validate_at               DateTime
+  expire_at                 DateTime
+  closed_at                 DateTime
   created_at                DateTime @default(dbgenerated("getutcdate()"), map: "DF__private_k__creat__7D197D8B") @db.DateTime
 }
 
