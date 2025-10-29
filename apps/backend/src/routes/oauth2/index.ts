@@ -1,16 +1,16 @@
 import { OpenAPIHono, createRoute } from "@hono/zod-openapi"
 import {
 	deleteAuthorizationCode,
+	extractPublicKeyAsJwkFromPrivateKey,
 	generateAccessToken,
 	generateIdToken,
 	generateRefreshToken,
 	getActiveUserById,
 	getAuthorizationCode,
+	getNotClosedJwkPrivateKeyList,
 	validateRefreshTokenParams,
 	validateTokenParams,
 } from "../../domain/auth"
-import { extractPublicKeyAsJwkFromPrivateKey } from "../../domain/auth/export-public-key-from-private-key"
-import { getNotClosedJwkPrivateKeyList } from "../../domain/auth/get-jwk-private-key-list"
 import { env } from "../../env"
 import {
 	type AuthContexts,
