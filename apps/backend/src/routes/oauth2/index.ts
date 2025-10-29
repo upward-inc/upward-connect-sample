@@ -10,7 +10,7 @@ import {
 	validateTokenParams,
 } from "../../domain/auth"
 import { extractPublicKeyAsJwkFromPrivateKey } from "../../domain/auth/export-public-key-from-private-key"
-import { getNotClosedPrivateKeyList } from "../../domain/auth/get-private-key-list"
+import { getNotClosedJwkPrivateKeyList } from "../../domain/auth/get-jwk-private-key-list"
 import { env } from "../../env"
 import {
 	type AuthContexts,
@@ -253,7 +253,7 @@ export const oauth2Router = new OpenAPIHono<{ Variables: AuthContexts }>()
 			},
 		}),
 		async (c) => {
-			const privateKeys = await getNotClosedPrivateKeyList()
+			const privateKeys = await getNotClosedJwkPrivateKeyList()
 			const jwks = {
 				keys: privateKeys.map((key) =>
 					extractPublicKeyAsJwkFromPrivateKey(key),

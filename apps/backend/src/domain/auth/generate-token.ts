@@ -1,7 +1,7 @@
 import { sign } from "jsonwebtoken"
 import { env } from "../../env"
 import type { LoggedInUser } from "../../schema/auth"
-import { getNotExpiredPrivateKeyList } from "./get-private-key-list"
+import { getNotExpiredJwkPrivateKeyList } from "./get-jwk-private-key-list"
 
 /**
  * ユーザー情報からアクセストークンを生成する
@@ -34,7 +34,7 @@ export const generateIdToken = async (payload: {
 	nonce?: string
 }) => {
 	// 有効な秘密鍵一覧を取得し、ランダムに1つ選択
-	const privateKeys = await getNotExpiredPrivateKeyList()
+	const privateKeys = await getNotExpiredJwkPrivateKeyList()
 	const randomIndex = Math.floor(Math.random() * privateKeys.length)
 	const privateKey = privateKeys[randomIndex]
 

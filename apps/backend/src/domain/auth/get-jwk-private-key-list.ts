@@ -1,18 +1,19 @@
 import { prisma } from "../../libs/prisma"
 import { type PrivateKeyList, PrivateKeyListSchema } from "../../schema/auth"
 
-export const getNotClosedPrivateKeyList = async (): Promise<PrivateKeyList> => {
-	const result = await prisma.jwk_private_key.findMany({
-		where: {
-			validate_at: { lte: new Date() },
-			closed_at: { gt: new Date() },
-		},
-	})
+export const getNotClosedJwkPrivateKeyList =
+	async (): Promise<PrivateKeyList> => {
+		const result = await prisma.jwk_private_key.findMany({
+			where: {
+				validate_at: { lte: new Date() },
+				closed_at: { gt: new Date() },
+			},
+		})
 
-	return PrivateKeyListSchema.parseAsync(result)
-}
+		return PrivateKeyListSchema.parseAsync(result)
+	}
 
-export const getNotExpiredPrivateKeyList =
+export const getNotExpiredJwkPrivateKeyList =
 	async (): Promise<PrivateKeyList> => {
 		const result = await prisma.jwk_private_key.findMany({
 			where: {
