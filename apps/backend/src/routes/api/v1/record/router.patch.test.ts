@@ -385,6 +385,24 @@ describe("PATCH /records/:entity_name/:id - レコード更新", () => {
 		expect(record?.boolean).toBeNull()
 	})
 
+	it("必須項目に対してnullを指定した場合に400エラーを返すこと", async () => {
+		// Arrange
+		const sample = await createTestSample(testExecutionUser.id, {
+			name: "Test Sample",
+		})
+
+		// Act - nameは必須項目（is_required: true, is_updatable: true）
+		const response = await requestPatch("sample", sample.id, {
+			name: null,
+		})
+
+		// Assert
+		expect(response.status).toBe(400)
+		const json = await response.json()
+		expect(json).toHaveProperty("message")
+		expect(json.message).toContain("cannot be null")
+	})
+
 	it("存在しないエンティティを指定した場合に404エラーを返すこと", async () => {
 		// Act
 		const response = await requestPatch(
