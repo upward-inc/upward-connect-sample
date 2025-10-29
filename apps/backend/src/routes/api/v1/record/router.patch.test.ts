@@ -458,20 +458,18 @@ describe("PATCH /records/:entity_name/:id - レコード更新", () => {
 	})
 
 	describe("リクエストボディのバリデーションに失敗する場合に400エラーを返すこと", () => {
-		it.each([
-			{
-				title: "JSONオブジェクトでない",
-				entity_name: "sample",
-				body: "Invalid JSON Body",
-			},
-		])("$title", async ({ entity_name, body }) => {
+		it("JSONオブジェクトでない場合", async () => {
 			// Arrange
 			const sample = await createTestSample(testExecutionUser.id, {
 				name: "Test Sample",
 			})
 
 			// Act
-			const response = await requestPatch(entity_name, sample.id, body)
+			const response = await requestPatch(
+				"sample",
+				sample.id,
+				"Invalid JSON Body",
+			)
 
 			// Assert
 			const json = await response.json()
