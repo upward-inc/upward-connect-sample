@@ -1,6 +1,10 @@
 import { createPublicKey, generateKeyPair } from "node:crypto"
 import type { Jwk } from "../schema/auth"
 
+/**
+ * 秘密鍵をPEM形式で生成する
+ * @returns PEM形式の秘密鍵
+ */
 export async function generatePrivateKeyPem(): Promise<string> {
 	return new Promise((resolve, reject) => {
 		generateKeyPair(
@@ -28,6 +32,12 @@ export async function generatePrivateKeyPem(): Promise<string> {
 	})
 }
 
+/**
+ * keyをusageによってCryptoKeyオブジェクトに変換する
+ * @param key 文字列形式のキー
+ * @param usage "encrypt"または"decrypt"
+ * @returns CryptoKeyオブジェクト
+ */
 export async function toCryptoKey(key: string, usage: "encrypt" | "decrypt") {
 	return await crypto.subtle.importKey(
 		"raw",
@@ -38,6 +48,13 @@ export async function toCryptoKey(key: string, usage: "encrypt" | "decrypt") {
 	)
 }
 
+/**
+ * targetをAES-GCMで暗号化し、Base64エンコードする
+ * @param target 暗号化対象の文字列
+ * @param key CryptoKeyオブジェクト
+ * @param iv 初期化ベクトル
+ * @returns Base64エンコードされた暗号文
+ */
 export async function encryptAndEncodeByBase64(
 	target: string,
 	key: CryptoKey,
@@ -54,6 +71,13 @@ export async function encryptAndEncodeByBase64(
 	return Buffer.from(encryptedBuffer).toString("base64")
 }
 
+/**
+ * Base64エンコードされた暗号文をAES-GCMで復号化する
+ * @param encodedTarget Base64エンコードされた暗号文
+ * @param key CryptoKeyオブジェクト
+ * @param iv 初期化ベクトル
+ * @returns 復号化された文字列
+ */
 export async function decryptAndDecodeByBase64(
 	encodedTarget: string,
 	key: CryptoKey,
