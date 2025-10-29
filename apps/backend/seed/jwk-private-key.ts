@@ -51,7 +51,7 @@ export async function seedJwkPrivateKeys(prisma: Prisma.TransactionClient) {
 			// jwksエンドポイントで鍵の公開が停止される日時
 			const closedAt = addDay(
 				dayEnd(validateAt),
-				(KEY_ROTATION_PERIOD_IN_DAY - 1) * CLOSED_AT_OFFSET_IN_TERM,
+				KEY_ROTATION_PERIOD_IN_DAY * CLOSED_AT_OFFSET_IN_TERM - 1,
 			)
 
 			return Promise.all(
