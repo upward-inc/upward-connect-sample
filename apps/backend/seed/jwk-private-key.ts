@@ -7,47 +7,65 @@ import {
 } from "../src/utility/crypto"
 import { addDays } from "../src/utility/date"
 
-export async function seedJwkPrivateKeys(prisma: Prisma.TransactionClient) {
-	const privateKeysPromises = Array.from({
-		length: 120, // periodが90日の場合に90*120=10800日=約30年分となる
-	}).map(async (_, index) => {
-		const validate_at = addDays(
-			new Date(),
-			(index - 1) * env.OIDC_KEY_ROTATION_PERIOD_IN_DAY, // 旧鍵も生成したいため(index-1)で調整
-		)
-		const key = await toCryptoKey(
-			env.OIDC_ENCRYPT_PRIVATE_KEY_SECRET,
-			"encrypt",
-		)
-		return Promise.all(
-			Array.from({ length: 3 }).map(async () => {
-				// セキュリティを強化するためのランダムな初期値としてivを使用
-				// これにより、同じ秘密鍵データでも毎回異なる暗号化結果が生成され、セキュリティが向上
-				const iv = crypto.getRandomValues(new Uint8Array(16))
+// 鍵のローテーション期間（有効期限）
+const KEY_ROTATION_PERIOD_IN_DAY = env.OIDC_KEY_ROTATION_PERIOD_IN_DAY
 
-				return {
-					// 以下のステップで値を生成
-					// 1. PEM形式で秘密鍵を生成
-					// 2. `env.OIDC_ENCRYPT_PRIVATE_KEY_SECRET,`を用いて1.で生成した秘密鍵を暗号化
-					// 3. 2.で生成した暗号化データをBase64エンコード
-					encrypted_private_key_pem: await generatePrivateKeyPem().then(
-						(privateKey) => encryptAndEncodeByBase64(privateKey, key, iv),
-					),
-					// ivをBase64エンコード
-					base64_iv: Buffer.from(iv).toString("base64"),
-					// 鍵が有効となる日時
-					validate_at: validate_at,
-					// 鍵が失効となる日時
-					expire_at: addDays(validate_at, env.OIDC_KEY_ROTATION_PERIOD_IN_DAY),
-					// jwksエンドポイントに鍵の公開が停止される日時
-					closed_at: addDays(
-						validate_at,
-						env.OIDC_KEY_ROTATION_PERIOD_IN_DAY * 2,
-					),
-				}
-			}),
-		)
-	})
+// 生成する期間の数
+const TOTAL_PERIODS = 120
+
+// 1つの期間内に生成する鍵の数
+const KEYS_PER_PERIOD = 3
+
+// 鍵の失効から公開停止までの猶予期間
+const CLOSED_AT_OFFSET_IN_TERM = 2
+
+export async function seedJwkPrivateKeys(prisma: Prisma.TransactionClient) {
+	const privateKeysPromises = Array.from({ length: TOTAL_PERIODS }).map(
+		async (_, index) => {
+			const validate_at = addDays(
+				new Date(),
+				// indexから1を引いた値とローテーション期間を乗算することで一つ前の期間（= 旧鍵）からレコードを生成
+				(index - 1) * KEY_ROTATION_PERIOD_IN_DAY,
+			)
+			const key = await toCryptoKey(
+				env.OIDC_ENCRYPT_PRIVATE_KEY_SECRET,
+				"encrypt",
+			)
+			return Promise.all(
+				Array.from({ length: KEYS_PER_PERIOD }).map(async () => {
+					// セキュリティを強化するためのランダムな初期値としてivを使用
+					// これにより、同じ秘密鍵データでも毎回異なる暗号化結果が生成され、セキュリティが向上
+					const iv = crypto.getRandomValues(new Uint8Array(16))
+					// iv（Base64エンコード）
+					const base64Iv = Buffer.from(iv).toString("base64")
+
+					// PEM形式の秘密鍵
+					const privateKeyPem = await generatePrivateKeyPem()
+
+					// 秘密鍵（暗号化 + Base64エンコード）
+					const encryptedPrivateKeyPem = await encryptAndEncodeByBase64(
+						privateKeyPem,
+						key,
+						iv,
+					)
+
+					return {
+						encrypted_private_key_pem: encryptedPrivateKeyPem,
+						base64_iv: base64Iv,
+						// 鍵が有効となる日時
+						validate_at: validate_at,
+						// 鍵が失効となる日時
+						expire_at: addDays(validate_at, KEY_ROTATION_PERIOD_IN_DAY),
+						// jwksエンドポイントで鍵の公開が停止される日時
+						closed_at: addDays(
+							validate_at,
+							KEY_ROTATION_PERIOD_IN_DAY * CLOSED_AT_OFFSET_IN_TERM,
+						),
+					}
+				}),
+			)
+		},
+	)
 
 	const privateKeys = (await Promise.all(privateKeysPromises)).flat()
 
