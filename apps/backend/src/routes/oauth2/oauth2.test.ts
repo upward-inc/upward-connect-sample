@@ -7,8 +7,8 @@ import {
 	createExpiredRefreshToken,
 	createExpiredToken,
 	createRefreshToken,
+	createTestJwkPrivateKey,
 	createTestOAuthClient,
-	createTestPrivateKey,
 	createValidToken,
 } from "../../test/utils/auth"
 import { cleanupTestData, createTestUser } from "../../test/utils/common"
@@ -32,7 +32,7 @@ describe("Auth Tests", () => {
 		await cleanupTestData()
 
 		// 秘密鍵を準備
-		await createTestPrivateKey()
+		await createTestJwkPrivateKey()
 	})
 
 	afterAll(async () => {

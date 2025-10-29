@@ -120,9 +120,9 @@ export function createExpiredRefreshToken(userId: string) {
  * - closed_at: 現在日時 + env.OIDC_KEY_ROTATION_PERIOD_IN_DAY * 2
  * が設定される
  */
-export async function createTestPrivateKey(data?: PrivateKeyData) {
+export async function createTestJwkPrivateKey(data?: PrivateKeyData) {
 	const privateKey = await testPrisma.jwk_private_key.create({
-		data: await toPrivateKeyCreateInput(data),
+		data: await toJwkPrivateKeyCreateInput(data),
 		select: { id: true },
 	})
 
@@ -134,27 +134,29 @@ export async function createTestPrivateKey(data?: PrivateKeyData) {
 /**
  * 秘密鍵データの一括作成
  */
-export async function createManyTestPrivateKeys(data: Array<PrivateKeyData>) {
+export async function createManyTestJwkPrivateKeys(
+	data: Array<PrivateKeyData>,
+) {
 	return await testPrisma.jwk_private_key.createMany({
-		data: await Promise.all(data.map((d) => toPrivateKeyCreateInput(d))),
+		data: await Promise.all(data.map((d) => toJwkPrivateKeyCreateInput(d))),
 	})
 }
 
 /**
  * 秘密鍵データの全削除
  */
-export async function deleteAllTestPrivateKeys() {
+export async function deleteAllTestJwkPrivateKeys() {
 	await testPrisma.jwk_private_key.deleteMany()
 }
 
 /**
  * 秘密鍵データの削除（レコードID指定）
  */
-export async function deleteTestPrivateKeyById(id: string) {
+export async function deleteTestJwkPrivateKeyById(id: string) {
 	await testPrisma.jwk_private_key.delete({ where: { id } })
 }
 
-async function toPrivateKeyCreateInput(
+async function toJwkPrivateKeyCreateInput(
 	data?: PrivateKeyData,
 ): Promise<Prisma.jwk_private_keyCreateInput> {
 	const key = await toCryptoKey(env.OIDC_ENCRYPT_PRIVATE_KEY_SECRET, "encrypt")

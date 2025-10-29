@@ -4,8 +4,8 @@ import { app } from "../../index"
 import { prisma } from "../../libs/prisma"
 import type { Jwk } from "../../schema/auth"
 import {
+	createTestJwkPrivateKey,
 	createTestOAuthClient,
-	createTestPrivateKey,
 	createValidToken,
 } from "../../test/utils/auth"
 import { cleanupTestData, createTestUser } from "../../test/utils/common"
@@ -28,7 +28,7 @@ describe("Internal Auth Tests", () => {
 		await cleanupTestData()
 
 		// 秘密鍵を準備
-		await createTestPrivateKey()
+		await createTestJwkPrivateKey()
 	})
 
 	afterAll(async () => {
