@@ -16,8 +16,8 @@ const TOTAL_PERIODS = 120
 // 1つの期間内に生成する鍵の数
 const KEYS_PER_PERIOD = 3
 
-// 鍵の公開停止までの期間
-const CLOSED_AT_OFFSET_IN_TERM = 2
+// 鍵の公開期間（ローテーション期間の2倍）
+const OPEN_PERIOD_IN_DAY = KEY_ROTATION_PERIOD_IN_DAY * 2
 
 export async function seedJwkPrivateKeys(prisma: Prisma.TransactionClient) {
 	const now = date()
@@ -46,10 +46,7 @@ export async function seedJwkPrivateKeys(prisma: Prisma.TransactionClient) {
 			)
 
 			// jwksエンドポイントで鍵の公開が停止される日時
-			const closedAt = addDay(
-				dayEnd(validateAt),
-				KEY_ROTATION_PERIOD_IN_DAY * CLOSED_AT_OFFSET_IN_TERM - 1,
-			)
+			const closedAt = addDay(dayEnd(validateAt), OPEN_PERIOD_IN_DAY - 1)
 
 			return Promise.all(
 				Array.from({ length: KEYS_PER_PERIOD }).map(async () => {
