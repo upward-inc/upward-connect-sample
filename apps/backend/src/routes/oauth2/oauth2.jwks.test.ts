@@ -1,7 +1,7 @@
 import { sign, verify } from "jsonwebtoken"
 import { afterEach, describe, expect, it } from "vitest"
 import { app } from "../.."
-import { type Jwk, JwkSchema, PrivateKeySchema } from "../../schema/auth"
+import { type Jwk, JwkPrivateKeySchema, JwkSchema } from "../../schema/auth"
 import {
 	createTestJwkPrivateKey,
 	deleteAllTestJwkPrivateKeys,
@@ -88,7 +88,7 @@ describe("GET /oauth2/jwks - OIDC 1.0 公開鍵群の取得", () => {
 
 	it("正しい公開鍵が返されること", async () => {
 		// Arrange
-		const privateKey = await PrivateKeySchema.parseAsync(
+		const privateKey = await JwkPrivateKeySchema.parseAsync(
 			await createTestJwkPrivateKey(),
 		)
 		const encrypted = sign({ test: "test" }, privateKey.private_key_pem, {

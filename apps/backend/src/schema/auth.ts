@@ -13,15 +13,15 @@ import {
 } from "./system-user"
 import { StringToArraySchema } from "./utility"
 
-const decryptPrivateKeySecret = await toCryptoKey(
+const decryptJwkPrivateKeySecret = await toCryptoKey(
 	env.OIDC_ENCRYPT_PRIVATE_KEY_SECRET,
 	"decrypt",
 )
 
-export const PrivateKeySchema = z
+export const JwkPrivateKeySchema = z
 	.object({
 		id: z.uuid().meta({
-			description: "秘密鍵ID",
+			description: "JWKの秘密鍵ID",
 			example: "b1a2b3c4-d5e6-7f89-0a1b-2c3d4e5f6a7b",
 		}),
 		base64_iv: z.string(),
@@ -32,14 +32,14 @@ export const PrivateKeySchema = z
 			id: obj.id,
 			private_key_pem: await decryptAndDecodeByBase64(
 				obj.encrypted_private_key_pem,
-				decryptPrivateKeySecret,
+				decryptJwkPrivateKeySecret,
 				Buffer.from(obj.base64_iv, "base64"),
 			),
 		}
 	})
 
-export const PrivateKeyListSchema = z.array(PrivateKeySchema).meta({
-	description: "秘密鍵一覧",
+export const JwkPrivateKeyListSchema = z.array(JwkPrivateKeySchema).meta({
+	description: "JWKの秘密鍵一覧",
 })
 
 export const ClientIdSchema = z.string().min(1).meta({
@@ -348,8 +348,8 @@ export const GetJwksResultSchema = z.object({
 	}),
 })
 
-export type PrivateKey = z.infer<typeof PrivateKeySchema>
-export type PrivateKeyList = z.infer<typeof PrivateKeyListSchema>
+export type JwkPrivateKey = z.infer<typeof JwkPrivateKeySchema>
+export type JwkPrivateKeyList = z.infer<typeof JwkPrivateKeyListSchema>
 export type OAuthClient = z.infer<typeof OAuthClientSchema>
 export type PublishedAuthCode = z.infer<typeof PublishedAuthCodeSchema>
 export type LoggedInUser = z.infer<typeof LoggedInUserSchema>

@@ -1,9 +1,12 @@
 import { date } from "@formkit/tempo"
 import { prisma } from "../../libs/prisma"
-import { type PrivateKeyList, PrivateKeyListSchema } from "../../schema/auth"
+import {
+	type JwkPrivateKeyList,
+	JwkPrivateKeyListSchema,
+} from "../../schema/auth"
 
 export const getNotClosedJwkPrivateKeyList =
-	async (): Promise<PrivateKeyList> => {
+	async (): Promise<JwkPrivateKeyList> => {
 		const now = date()
 		const result = await prisma.jwk_private_key.findMany({
 			where: {
@@ -12,11 +15,11 @@ export const getNotClosedJwkPrivateKeyList =
 			},
 		})
 
-		return PrivateKeyListSchema.parseAsync(result)
+		return JwkPrivateKeyListSchema.parseAsync(result)
 	}
 
 export const getNotExpiredJwkPrivateKeyList =
-	async (): Promise<PrivateKeyList> => {
+	async (): Promise<JwkPrivateKeyList> => {
 		const now = date()
 		const result = await prisma.jwk_private_key.findMany({
 			where: {
@@ -24,5 +27,5 @@ export const getNotExpiredJwkPrivateKeyList =
 				expire_at: { gte: now },
 			},
 		})
-		return PrivateKeyListSchema.parseAsync(result)
+		return JwkPrivateKeyListSchema.parseAsync(result)
 	}

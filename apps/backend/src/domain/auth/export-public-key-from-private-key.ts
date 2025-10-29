@@ -1,5 +1,5 @@
 import { createPublicKey } from "node:crypto"
-import type { Jwk, PrivateKey } from "../../schema/auth"
+import type { Jwk, JwkPrivateKey } from "../../schema/auth"
 
 /**
  * 秘密鍵から公開鍵を抽出してJWK形式で返す
@@ -7,7 +7,7 @@ import type { Jwk, PrivateKey } from "../../schema/auth"
  * @returns JWK形式の公開鍵
  */
 export const extractPublicKeyAsJwkFromPrivateKey = (
-	privateKey: PrivateKey,
+	privateKey: JwkPrivateKey,
 ): Jwk => {
 	const kid = privateKey.id
 	const key = privateKey.private_key_pem
