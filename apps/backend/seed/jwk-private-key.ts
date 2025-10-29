@@ -1,3 +1,4 @@
+import { addDay, date, dayEnd, dayStart } from "@formkit/tempo"
 import type { Prisma } from "@prisma/client"
 import { env } from "../src/env"
 import {
@@ -5,7 +6,6 @@ import {
 	generatePrivateKeyPem,
 	toCryptoKey,
 } from "../src/utility/crypto"
-import { addDays } from "../src/utility/date"
 
 // 鍵のローテーション期間（有効期限）
 const KEY_ROTATION_PERIOD_IN_DAY = env.OIDC_KEY_ROTATION_PERIOD_IN_DAY
@@ -20,47 +20,62 @@ const KEYS_PER_PERIOD = 3
 const CLOSED_AT_OFFSET_IN_TERM = 2
 
 export async function seedJwkPrivateKeys(prisma: Prisma.TransactionClient) {
+	const now = date()
+
+	// PEM形式の秘密鍵
+	const privateKeyPem = await generatePrivateKeyPem()
+
+	// 暗号化用のキー
+	const encryptKey = await toCryptoKey(
+		env.OIDC_ENCRYPT_PRIVATE_KEY_SECRET,
+		"encrypt",
+	)
+
 	const privateKeysPromises = Array.from({ length: TOTAL_PERIODS }).map(
 		async (_, index) => {
-			const validate_at = addDays(
-				new Date(),
+			const baseDate = addDay(
+				now,
 				// indexから1を引いた値とローテーション期間を乗算することで一つ前の期間（= 旧鍵）からレコードを生成
 				(index - 1) * KEY_ROTATION_PERIOD_IN_DAY,
 			)
-			const key = await toCryptoKey(
-				env.OIDC_ENCRYPT_PRIVATE_KEY_SECRET,
-				"encrypt",
+
+			// 鍵が有効となる日時
+			const validateAt = dayStart(baseDate)
+
+			// 鍵が失効となる日時
+			const expireAt = addDay(
+				dayEnd(validateAt),
+				KEY_ROTATION_PERIOD_IN_DAY - 1,
 			)
+
+			// jwksエンドポイントで鍵の公開が停止される日時
+			const closedAt = addDay(
+				dayEnd(validateAt),
+				(KEY_ROTATION_PERIOD_IN_DAY - 1) * CLOSED_AT_OFFSET_IN_TERM,
+			)
+
 			return Promise.all(
 				Array.from({ length: KEYS_PER_PERIOD }).map(async () => {
 					// セキュリティを強化するためのランダムな初期値としてivを使用
 					// これにより、同じ秘密鍵データでも毎回異なる暗号化結果が生成され、セキュリティが向上
 					const iv = crypto.getRandomValues(new Uint8Array(16))
-					// iv（Base64エンコード）
-					const base64Iv = Buffer.from(iv).toString("base64")
-
-					// PEM形式の秘密鍵
-					const privateKeyPem = await generatePrivateKeyPem()
 
 					// 秘密鍵（暗号化 + Base64エンコード）
 					const encryptedPrivateKeyPem = await encryptAndEncodeByBase64(
 						privateKeyPem,
-						key,
+						encryptKey,
 						iv,
 					)
+
+					// iv（Base64エンコード）
+					const base64Iv = Buffer.from(iv).toString("base64")
 
 					return {
 						encrypted_private_key_pem: encryptedPrivateKeyPem,
 						base64_iv: base64Iv,
-						// 鍵が有効となる日時
-						validate_at: validate_at,
-						// 鍵が失効となる日時
-						expire_at: addDays(validate_at, KEY_ROTATION_PERIOD_IN_DAY),
-						// jwksエンドポイントで鍵の公開が停止される日時
-						closed_at: addDays(
-							validate_at,
-							KEY_ROTATION_PERIOD_IN_DAY * CLOSED_AT_OFFSET_IN_TERM,
-						),
+						validate_at: validateAt,
+						expire_at: expireAt,
+						closed_at: closedAt,
 					}
 				}),
 			)
