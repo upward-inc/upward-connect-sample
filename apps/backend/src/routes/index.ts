@@ -32,6 +32,7 @@ export const router = new OpenAPIHono<{ Variables: AuthContexts }>()
 			"/.well-known/openid-configuration",
 			"/auth/login",
 			"/oauth2/token",
+			"/oauth2/jwks",
 		]
 
 		const normalizedPath = c.req.path.replace(/\/$/, "")

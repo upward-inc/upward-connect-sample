@@ -28,6 +28,8 @@ export default defineConfig({
 			OIDC_TOKEN_EXPIRES_IN_MINUTE: "10",
 			OIDC_REFRESH_TOKEN_SECRET: "test-refresh-secret-key-for-tests-12345",
 			OIDC_REFRESH_TOKEN_EXPIRES_IN_DAY: "180",
+			OIDC_KEY_ROTATION_PERIOD_IN_DAY: "90",
+			OIDC_ENCRYPT_PRIVATE_KEY_SECRET: "test-encryption-secret-for-tests",
 		},
 		// Global setup for testcontainers
 		globals: true,

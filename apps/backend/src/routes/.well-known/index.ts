@@ -26,7 +26,7 @@ export const wellKnownRouter = new OpenAPIHono().openapi(
 				authorization_endpoint: `${env.OIDC_ISSUER}/oauth2/authorize`,
 				token_endpoint: `${env.OIDC_ISSUER}/oauth2/token`,
 				userinfo_endpoint: `${env.OIDC_ISSUER}/oauth2/userinfo`,
-				jwks_uri: `${env.OIDC_ISSUER}/oauth2/jwks.json`,
+				jwks_uri: `${env.OIDC_ISSUER}/oauth2/jwks`,
 				response_types_supported: ["code" as const],
 				subject_types_supported: ["public" as const],
 				id_token_signing_alg_values_supported: ["RS256" as const],
