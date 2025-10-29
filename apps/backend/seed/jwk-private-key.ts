@@ -16,14 +16,11 @@ const TOTAL_PERIODS = 120
 // 1つの期間内に生成する鍵の数
 const KEYS_PER_PERIOD = 3
 
-// 鍵の失効から公開停止までの猶予期間
+// 鍵の公開停止までの期間
 const CLOSED_AT_OFFSET_IN_TERM = 2
 
 export async function seedJwkPrivateKeys(prisma: Prisma.TransactionClient) {
 	const now = date()
-
-	// PEM形式の秘密鍵
-	const privateKeyPem = await generatePrivateKeyPem()
 
 	// 暗号化用のキー
 	const encryptKey = await toCryptoKey(
@@ -59,6 +56,9 @@ export async function seedJwkPrivateKeys(prisma: Prisma.TransactionClient) {
 					// セキュリティを強化するためのランダムな初期値としてivを使用
 					// これにより、同じ秘密鍵データでも毎回異なる暗号化結果が生成され、セキュリティが向上
 					const iv = crypto.getRandomValues(new Uint8Array(16))
+
+					// PEM形式の秘密鍵
+					const privateKeyPem = await generatePrivateKeyPem()
 
 					// 秘密鍵（暗号化 + Base64エンコード）
 					const encryptedPrivateKeyPem = await encryptAndEncodeByBase64(
