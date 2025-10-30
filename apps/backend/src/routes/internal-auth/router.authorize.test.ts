@@ -3,12 +3,17 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest"
 import { env } from "../../env"
 import { app } from "../../index"
 import { prisma } from "../../libs/prisma"
-import { createTestOAuthClient } from "../../test/utils/auth"
+import type { Jwk } from "../../schema/auth"
+import {
+	createTestJwkPrivateKey,
+	createTestOAuthClient,
+} from "../../test/utils/auth"
 import {
 	type TestExecutionUser,
 	createTestExecutionUser,
 	deleteTestExecutionUser,
 } from "../../test/utils/execution-user"
+import { convertJwkToPem } from "../../utility/crypto"
 
 describe("POST /auth/authorize - 認可エンドポイント", () => {
 	const tokenSecret = env.OIDC_TOKEN_SECRET
@@ -37,6 +42,9 @@ describe("POST /auth/authorize - 認可エンドポイント", () => {
 
 	// テストデータのセットアップ
 	async function setup(taskId: string) {
+		// 秘密鍵を準備
+		await createTestJwkPrivateKey()
+
 		// テスト実施ユーザーの作成
 		const user = await createTestExecutionUser({
 			user_name: taskId,
@@ -246,11 +254,27 @@ describe("POST /auth/authorize - 認可エンドポイント", () => {
 		expect(tokenData).not.toHaveProperty("refresh_token")
 		expect(tokenData).toHaveProperty("token_type", "Bearer")
 
-		// Assert - IDトークンにnonceが含まれていることを検証
+		// ステップ3: Jwksエンドポイントから公開鍵群を取得
+		const jwksResponse = await app.request("/oauth2/jwks", {
+			method: "GET",
+		})
+		expect(jwksResponse.status).toBe(200)
+		const jwksData = await jwksResponse.json()
+		expect(jwksData).toHaveProperty("keys")
+
+		// ステップ4: 公開鍵群からIDトークンの署名検証に使われた鍵を取得
+		const kid = JSON.parse(atob(tokenData.id_token.split(".")[0])).kid
+		const jwkPublicKey = jwksData.keys.find((key: Jwk) => key.kid === kid)
+		expect(jwkPublicKey).toBeTruthy()
+		const publicKey = convertJwkToPem(jwkPublicKey)
+
+		// ステップ5: IDトークンの署名検証とデコード
 		const decodedIdToken = verify(
 			tokenData.id_token,
-			tokenSecret,
+			publicKey,
 		) as DecodedIdToken
+
+		// Assert - IDトークンにnonceが含まれていることを検証
 		expect(decodedIdToken.nonce).toBe(nonceValue)
 		expect(decodedIdToken.name).toBe(
 			`${testExecutionUser.last_name} ${testExecutionUser.first_name}`,
@@ -267,7 +291,7 @@ describe("POST /auth/authorize - 認可エンドポイント", () => {
 			scopes: "openid,profile,email",
 		})
 
-		// 空のnonceで認可
+		// ステップ1: 空のnonceで認可
 		const authorizeResponse = await requestAuthorize({
 			response_type: "code",
 			client_id: testClient.id,
@@ -283,7 +307,7 @@ describe("POST /auth/authorize - 認可エンドポイント", () => {
 		expect(authorizeResponse.status).toBe(200)
 		expect(authorizeData).toHaveProperty("code")
 
-		// 認可コードをトークンに交換
+		// ステップ2: 認可コードをトークンに交換
 		const tokenResponse = await requestToken({
 			grant_type: "authorization_code",
 			code: authorizeData.code,
@@ -296,12 +320,27 @@ describe("POST /auth/authorize - 認可エンドポイント", () => {
 		const tokenData = await tokenResponse.json()
 		expect(tokenResponse.status).toBe(200)
 
-		// Assert - 空のnonceが処理されることを検証（空文字列として扱われるべき）
+		// ステップ3: Jwksエンドポイントから公開鍵群を取得
+		const jwksResponse = await app.request("/oauth2/jwks", {
+			method: "GET",
+		})
+		expect(jwksResponse.status).toBe(200)
+		const jwksData = await jwksResponse.json()
+		expect(jwksData).toHaveProperty("keys")
+
+		// ステップ4: 公開鍵群からIDトークンの署名検証に使われた鍵を取得
+		const kid = JSON.parse(atob(tokenData.id_token.split(".")[0])).kid
+		const jwkPublicKey = jwksData.keys.find((key: Jwk) => key.kid === kid)
+		expect(jwkPublicKey).toBeTruthy()
+		const publicKey = convertJwkToPem(jwkPublicKey)
+
+		// ステップ5: IDトークンの署名検証とデコード
 		const decodedIdToken = verify(
 			tokenData.id_token,
-			tokenSecret,
+			publicKey,
 		) as DecodedIdToken
-		// nonceは空文字列であるべき
+
+		// Assert - 空のnonceが処理されることを検証（空文字列として扱われるべき）
 		expect(decodedIdToken.nonce).toBe("")
 	})
 
@@ -317,7 +356,7 @@ describe("POST /auth/authorize - 認可エンドポイント", () => {
 		// 特殊文字を含むnonceを作成（URLセーフ）
 		const specialNonce = "nonce-123_ABC.xyz~!@#$%^&*()+=[]{}|;':\",./<>?"
 
-		// 特殊文字のnonceで認可
+		// ステップ1: 特殊文字のnonceで認可
 		const authorizeResponse = await requestAuthorize({
 			response_type: "code",
 			client_id: testClient.id,
@@ -333,7 +372,7 @@ describe("POST /auth/authorize - 認可エンドポイント", () => {
 		expect(authorizeResponse.status).toBe(200)
 		expect(authorizeData).toHaveProperty("code")
 
-		// 認可コードをトークンに交換
+		// ステップ2: 認可コードをトークンに交換
 		const tokenResponse = await requestToken({
 			grant_type: "authorization_code",
 			code: authorizeData.code,
@@ -346,11 +385,27 @@ describe("POST /auth/authorize - 認可エンドポイント", () => {
 		const tokenData = await tokenResponse.json()
 		expect(tokenResponse.status).toBe(200)
 
-		// Assert - 特殊文字のnonceが保持されていることを検証
+		// ステップ3: Jwksエンドポイントから公開鍵群を取得
+		const jwksResponse = await app.request("/oauth2/jwks", {
+			method: "GET",
+		})
+		expect(jwksResponse.status).toBe(200)
+		const jwksData = await jwksResponse.json()
+		expect(jwksData).toHaveProperty("keys")
+
+		// ステップ4: 公開鍵群からIDトークンの署名検証に使われた鍵を取得
+		const kid = JSON.parse(atob(tokenData.id_token.split(".")[0])).kid
+		const jwkPublicKey = jwksData.keys.find((key: Jwk) => key.kid === kid)
+		expect(jwkPublicKey).toBeTruthy()
+		const publicKey = convertJwkToPem(jwkPublicKey)
+
+		// ステップ5: IDトークンの署名検証とデコード
 		const decodedIdToken = verify(
 			tokenData.id_token,
-			tokenSecret,
+			publicKey,
 		) as DecodedIdToken
+
+		// Assert - 特殊文字のnonceが保持されていることを検証
 		expect(decodedIdToken.nonce).toBe(specialNonce)
 	})
 
@@ -396,11 +451,27 @@ describe("POST /auth/authorize - 認可エンドポイント", () => {
 		// offline_accessによりリフレッシュトークンが発行されるべき
 		expect(tokenData).toHaveProperty("refresh_token")
 
-		// Assert -IDトークンを検証する
+		// ステップ3: Jwksエンドポイントから公開鍵群を取得
+		const jwksResponse = await app.request("/oauth2/jwks", {
+			method: "GET",
+		})
+		expect(jwksResponse.status).toBe(200)
+		const jwksData = await jwksResponse.json()
+		expect(jwksData).toHaveProperty("keys")
+
+		// ステップ4: 公開鍵群からIDトークンの署名検証に使われた鍵を取得
+		const kid = JSON.parse(atob(tokenData.id_token.split(".")[0])).kid
+		const jwkPublicKey = jwksData.keys.find((key: Jwk) => key.kid === kid)
+		expect(jwkPublicKey).toBeTruthy()
+		const publicKey = convertJwkToPem(jwkPublicKey)
+
+		// ステップ5: IDトークンの署名検証とデコード
 		const decodedIdToken = verify(
 			tokenData.id_token,
-			tokenSecret,
+			publicKey,
 		) as DecodedIdToken
+
+		// Assert -IDトークンを検証する
 		expect(decodedIdToken.sub).toBe(testExecutionUser.id)
 		// カスタムクレームは必須
 		expect(decodedIdToken.user_id).toBe(testExecutionUser.id)
@@ -458,11 +529,27 @@ describe("POST /auth/authorize - 認可エンドポイント", () => {
 		// offline_accessを要求していないためリフレッシュトークンは発行されない
 		expect(tokenData).not.toHaveProperty("refresh_token")
 
-		// Assert -IDトークンを検証する
+		// ステップ3: Jwksエンドポイントから公開鍵群を取得
+		const jwksResponse = await app.request("/oauth2/jwks", {
+			method: "GET",
+		})
+		expect(jwksResponse.status).toBe(200)
+		const jwksData = await jwksResponse.json()
+		expect(jwksData).toHaveProperty("keys")
+
+		// ステップ4: 公開鍵群からIDトークンの署名検証に使われた鍵を取得
+		const kid = JSON.parse(atob(tokenData.id_token.split(".")[0])).kid
+		const jwkPublicKey = jwksData.keys.find((key: Jwk) => key.kid === kid)
+		expect(jwkPublicKey).toBeTruthy()
+		const publicKey = convertJwkToPem(jwkPublicKey)
+
+		// ステップ5: IDトークンの署名検証とデコード
 		const decodedIdToken = verify(
 			tokenData.id_token,
-			tokenSecret,
+			publicKey,
 		) as DecodedIdToken
+
+		// Assert -IDトークンを検証する
 		expect(decodedIdToken.sub).toBe(testExecutionUser.id)
 		// カスタムクレームは必須
 		expect(decodedIdToken.user_id).toBe(testExecutionUser.id)
