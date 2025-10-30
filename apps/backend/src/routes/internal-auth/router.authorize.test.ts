@@ -16,7 +16,6 @@ import {
 import { convertJwkToPem } from "../../utility/crypto"
 
 describe("POST /auth/authorize - 認可エンドポイント", () => {
-	const tokenSecret = env.OIDC_TOKEN_SECRET
 	interface DecodedIdToken extends JwtPayload {
 		nonce: string
 		user_id: string
