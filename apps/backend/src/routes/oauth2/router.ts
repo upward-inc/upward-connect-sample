@@ -1,17 +1,20 @@
 import { OpenAPIHono, createRoute } from "@hono/zod-openapi"
 import {
 	deleteAuthorizationCode,
+	extractPublicKeyAsJwkFromPrivateKey,
 	generateAccessToken,
 	generateIdToken,
 	generateRefreshToken,
 	getActiveUserById,
 	getAuthorizationCode,
+	getNotClosedJwkPrivateKeyList,
 	validateRefreshTokenParams,
 	validateTokenParams,
 } from "../../domain/auth"
 import { env } from "../../env"
 import {
 	type AuthContexts,
+	GetJwksResultSchema,
 	GetUserInfoResultSchema,
 	PostTokenParamSchema,
 	PostTokenResultSchema,
@@ -19,6 +22,31 @@ import {
 import { OAuthApiErrorResultSchema } from "../../schema/error"
 
 export const oauth2Router = new OpenAPIHono<{ Variables: AuthContexts }>()
+	.openapi(
+		createRoute({
+			method: "get",
+			path: "/jwks",
+			description: "id_tokenの署名を検証するための公開鍵群（JWKs）を返却する",
+			responses: {
+				200: {
+					description: "Success",
+					content: {
+						"application/json": { schema: GetJwksResultSchema },
+					},
+				},
+			},
+		}),
+		async (c) => {
+			const privateKeys = await getNotClosedJwkPrivateKeyList()
+			const jwks = {
+				keys: privateKeys.map((key) =>
+					extractPublicKeyAsJwkFromPrivateKey(key),
+				),
+			}
+
+			return c.json(jwks, 200)
+		},
+	)
 	.openapi(
 		createRoute({
 			method: "post",
@@ -105,7 +133,7 @@ export const oauth2Router = new OpenAPIHono<{ Variables: AuthContexts }>()
 
 				// IDトークンを生成 (openidスコープが含まれている場合のみ)
 				const idToken = scopes.includes("openid")
-					? generateIdToken({
+					? await generateIdToken({
 							user: user,
 							clientId: client_id,
 							scopes: scopes,

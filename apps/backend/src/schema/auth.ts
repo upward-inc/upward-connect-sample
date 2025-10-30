@@ -1,4 +1,6 @@
+import { env } from "../env"
 import { z } from "../libs/zod"
+import { decryptAndDecodeByBase64, toCryptoKey } from "../utility/crypto"
 import {
 	EmailSchema,
 	FirstNameSchema,
@@ -10,6 +12,35 @@ import {
 	UserNameSchema,
 } from "./system-user"
 import { StringToArraySchema } from "./utility"
+
+const decryptJwkPrivateKeySecret = await toCryptoKey(
+	env.OIDC_ENCRYPT_PRIVATE_KEY_SECRET,
+	"decrypt",
+)
+
+export const JwkPrivateKeySchema = z
+	.object({
+		id: z.uuid().meta({
+			description: "JWKの秘密鍵ID",
+			example: "b1a2b3c4-d5e6-7f89-0a1b-2c3d4e5f6a7b",
+		}),
+		base64_iv: z.string(),
+		encrypted_private_key_pem: z.string(),
+	})
+	.transform(async (obj) => {
+		return {
+			id: obj.id,
+			private_key_pem: await decryptAndDecodeByBase64(
+				obj.encrypted_private_key_pem,
+				decryptJwkPrivateKeySecret,
+				Buffer.from(obj.base64_iv, "base64"),
+			),
+		}
+	})
+
+export const JwkPrivateKeyListSchema = z.array(JwkPrivateKeySchema).meta({
+	description: "JWKの秘密鍵一覧",
+})
 
 export const ClientIdSchema = z.string().min(1).meta({
 	description: "OAuth 2.0 クライアント識別子",
@@ -247,38 +278,100 @@ export const PostAuthorizeResultSchema = z.object({
 
 // トークンリクエスト用のスキーマ
 export const PostTokenParamSchema = z.discriminatedUnion("grant_type", [
-	z.object({
-		grant_type: z.literal("authorization_code"),
-		code: AuthCodeSchema.meta({
-			description: "認可処理でクライアントが取得した認可コード",
+	z
+		.object({
+			grant_type: z.literal("authorization_code"),
+			code: AuthCodeSchema.meta({
+				description: "認可処理でクライアントが取得した認可コード",
+			}),
+			redirect_uri: RedirectUriSchema,
+			client_id: ClientIdSchema,
+			client_secret: ClientSecretSchema,
+			code_verifier: z.string().min(43).max(128).meta({
+				description: "PKCEで使用するランダムな文字列",
+				example: "dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk",
+			}),
+		})
+		.meta({
+			description: 'grant_type: "authorization_code" の場合',
 		}),
-		redirect_uri: RedirectUriSchema,
-		client_id: ClientIdSchema,
-		client_secret: ClientSecretSchema,
-		code_verifier: z.string().min(43).max(128).meta({
-			description: "PKCEで使用するランダムな文字列",
-			example: "dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk",
+	z
+		.object({
+			grant_type: z.literal("refresh_token"),
+			refresh_token: RefreshTokenSchema,
+			client_id: ClientIdSchema,
+			client_secret: ClientSecretSchema,
+		})
+		.meta({
+			description: 'grant_type: "refresh_token" の場合',
 		}),
-	}),
-	z.object({
-		grant_type: z.literal("refresh_token"),
-		refresh_token: RefreshTokenSchema,
-		client_id: ClientIdSchema,
-		client_secret: ClientSecretSchema,
-	}),
 ])
 
-export const PostTokenResultSchema = z.object({
-	token_type: z.literal("Bearer"),
-	access_token: AccessTokenSchema,
-	id_token: IdTokenSchema.optional(),
-	refresh_token: RefreshTokenSchema.optional(),
-	expires_in: z.number().min(1).meta({
-		description: "有効期限（秒）",
-		example: 600,
+export const PostTokenAuthorizationCodeResultSchema = z
+	.object({
+		token_type: z.literal("Bearer"),
+		access_token: AccessTokenSchema,
+		id_token: IdTokenSchema.optional(),
+		refresh_token: RefreshTokenSchema.optional(),
+		expires_in: z.number().min(1).meta({
+			description: "有効期限（秒）",
+			example: 600,
+		}),
+	})
+	.meta({
+		description: 'grant_type: "authorization_code" の場合',
+	})
+
+export const PostTokenRefreshTokenResultSchema =
+	PostTokenAuthorizationCodeResultSchema.omit({ id_token: true }).meta({
+		description: 'grant_type: "refresh_token" の場合',
+	})
+
+export const PostTokenResultSchema = z.union([
+	PostTokenAuthorizationCodeResultSchema,
+	PostTokenRefreshTokenResultSchema,
+])
+
+export const JwkSchema = z
+	.object({
+		kty: z.string().meta({
+			description: "JWAで定義したアルゴリズムファミリー名",
+			example: "RSA",
+		}),
+		use: z.string().meta({
+			description: "公開鍵の用途",
+			example: "sig",
+		}),
+		alg: z.string().meta({
+			description: "署名検証用のJWAで定義したアルゴリズム名",
+			example: "RS256",
+		}),
+		kid: z.string().meta({
+			description: "公開鍵ID",
+			example: "key-00000001",
+		}),
+		n: z.string().meta({
+			description: "modulus\n公開鍵を復元するための公開鍵の絶対値",
+			example:
+				"w76VbIRgafxBJyL9lmeCG-ZuQyTD0-wvV-Ruaf8M6cMbkh5mC9S23GsT7ttnhjh0Xb8JmblHDS-M9_f0euwmTkXd7I49-_vde6_ysjk7Q8HnOWvIaUgEiNHH6J7-NQ-NREkPOQ3bRz8wtFEpOkqZFPNATyhgOs3MW_iYUE5McQs9dMTg5xBB_JeIIDe-IxKjAKMgsus4pxbk4QeoXjjgtJkqjl9Y_-fUJiyWDjIAv9ijMpmMqzhEwfMx41gHS-FMEHs9IwHl358ecFsaoWYevyX4g0F_Vv9zeggmkPt3gk26w0fAlnkP13--7BrwBLJvDWmUxwANzStVKyB6crv5IvMrm0g4y7SNpmjh_dmJO8cjytKn1Vts783rf1vQgGCIGfIQMljIFIcHLEEG8t4P65lCQVvflBXypDGCdVagBsubSsZNVzwpLA9zXqoa-Zv_5XOerdgfSlle5ry443x46sU-hDVexps48Ql3XPAljbDF42YscWUDLV0vQtaUUCBVpO-zrI_6kePkQ62bSeaJ3GIVcn4Zhs5ddG1OoqifxTxDzyTikguvNyaZFfeawI8sXitJoC2weD9QYaxlaeWaIYYZuXcu6IneN7z1Kxg6-XEni0waccd24ggkrAQl5ghxhXLF_RuPC5uKDARXP2bT6kSB2DVK-Ie-LGWhTWsqiGs",
+		}),
+		e: z.string().meta({
+			description: "exponent\n公開鍵を復元するための指数値",
+			example: "AQAB",
+		}),
+	})
+	.meta({
+		description: "JSON Web Key (JWK)",
+	})
+
+export const GetJwksResultSchema = z.object({
+	keys: z.array(JwkSchema).meta({
+		description: "id_tokenの署名を検証するための公開鍵の配列",
 	}),
 })
 
+export type JwkPrivateKey = z.infer<typeof JwkPrivateKeySchema>
+export type JwkPrivateKeyList = z.infer<typeof JwkPrivateKeyListSchema>
 export type OAuthClient = z.infer<typeof OAuthClientSchema>
 export type PublishedAuthCode = z.infer<typeof PublishedAuthCodeSchema>
 export type LoggedInUser = z.infer<typeof LoggedInUserSchema>
@@ -294,6 +387,8 @@ export type PostAuthorizeParam = z.infer<typeof PostAuthorizeParamSchema>
 export type PostAuthorizeResult = z.infer<typeof PostAuthorizeResultSchema>
 export type PostTokenParam = z.infer<typeof PostTokenParamSchema>
 export type PostTokenResult = z.infer<typeof PostTokenResultSchema>
+export type Jwk = z.infer<typeof JwkSchema>
+export type GetJwksResult = z.infer<typeof GetJwksResultSchema>
 
 // 認証ルート用コンテキスト（認証済みユーザー情報）
 export type AuthContexts = {

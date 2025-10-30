@@ -7,6 +7,7 @@ import { seedContacts } from "./contact"
 import { seedEntities } from "./entity"
 import { seedEntityItems } from "./entity-item"
 import { seedEntityItemOptions } from "./entity-item-option"
+import { seedJwkPrivateKeys } from "./jwk-private-key"
 import { seedLeads } from "./lead"
 import { seedOauthClients } from "./oauth-client"
 import { seedOpportunities } from "./opportunity"
@@ -44,8 +45,13 @@ try {
 			await txClient.profile.deleteMany()
 			await txClient.user.deleteMany()
 			await txClient.oauth_client.deleteMany()
+			await txClient.jwk_private_key.deleteMany()
 
+			// OAuthクライアント
 			await seedOauthClients(txClient)
+
+			// Jwk秘密鍵
+			await seedJwkPrivateKeys(txClient)
 
 			// system users
 			const users = await seedUsers(txClient)
