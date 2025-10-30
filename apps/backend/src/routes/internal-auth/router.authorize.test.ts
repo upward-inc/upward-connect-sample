@@ -98,6 +98,15 @@ describe("POST /auth/authorize - 認可エンドポイント", () => {
 		})
 	}
 
+	/**
+	 * /oauth2/jwksへのGETリクエストを送信する
+	 */
+	async function requestJwks() {
+		return await app.request("/oauth2/jwks", {
+			method: "GET",
+		})
+	}
+
 	it("有効な認可リクエストでstateとcodeを返却すること", async () => {
 		// Arrange
 		const testClient = await createTestOAuthClient({
@@ -256,9 +265,7 @@ describe("POST /auth/authorize - 認可エンドポイント", () => {
 		expect(tokenData).toHaveProperty("token_type", "Bearer")
 
 		// ステップ3: Jwksエンドポイントから公開鍵群を取得
-		const jwksResponse = await app.request("/oauth2/jwks", {
-			method: "GET",
-		})
+		const jwksResponse = await requestJwks()
 		expect(jwksResponse.status).toBe(200)
 		const jwksData = await jwksResponse.json()
 		expect(jwksData).toHaveProperty("keys")
@@ -323,9 +330,7 @@ describe("POST /auth/authorize - 認可エンドポイント", () => {
 		expect(tokenResponse.status).toBe(200)
 
 		// ステップ3: Jwksエンドポイントから公開鍵群を取得
-		const jwksResponse = await app.request("/oauth2/jwks", {
-			method: "GET",
-		})
+		const jwksResponse = await requestJwks()
 		expect(jwksResponse.status).toBe(200)
 		const jwksData = await jwksResponse.json()
 		expect(jwksData).toHaveProperty("keys")
@@ -389,9 +394,7 @@ describe("POST /auth/authorize - 認可エンドポイント", () => {
 		expect(tokenResponse.status).toBe(200)
 
 		// ステップ3: Jwksエンドポイントから公開鍵群を取得
-		const jwksResponse = await app.request("/oauth2/jwks", {
-			method: "GET",
-		})
+		const jwksResponse = await requestJwks()
 		expect(jwksResponse.status).toBe(200)
 		const jwksData = await jwksResponse.json()
 		expect(jwksData).toHaveProperty("keys")
@@ -456,9 +459,7 @@ describe("POST /auth/authorize - 認可エンドポイント", () => {
 		expect(tokenData).toHaveProperty("refresh_token")
 
 		// ステップ3: Jwksエンドポイントから公開鍵群を取得
-		const jwksResponse = await app.request("/oauth2/jwks", {
-			method: "GET",
-		})
+		const jwksResponse = await requestJwks()
 		expect(jwksResponse.status).toBe(200)
 		const jwksData = await jwksResponse.json()
 		expect(jwksData).toHaveProperty("keys")
@@ -535,9 +536,7 @@ describe("POST /auth/authorize - 認可エンドポイント", () => {
 		expect(tokenData).not.toHaveProperty("refresh_token")
 
 		// ステップ3: Jwksエンドポイントから公開鍵群を取得
-		const jwksResponse = await app.request("/oauth2/jwks", {
-			method: "GET",
-		})
+		const jwksResponse = await requestJwks()
 		expect(jwksResponse.status).toBe(200)
 		const jwksData = await jwksResponse.json()
 		expect(jwksData).toHaveProperty("keys")
