@@ -221,6 +221,7 @@ describe("POST /auth/authorize - 認可エンドポイント", () => {
 
 		const nonceValue = "random-nonce-value-12345"
 
+		// Act
 		// ステップ1: nonceを含めて認可
 		const authorizeResponse = await requestAuthorize({
 			response_type: "code",
@@ -291,6 +292,7 @@ describe("POST /auth/authorize - 認可エンドポイント", () => {
 			scopes: "openid,profile,email",
 		})
 
+		// Act
 		// ステップ1: 空のnonceで認可
 		const authorizeResponse = await requestAuthorize({
 			response_type: "code",
@@ -356,6 +358,7 @@ describe("POST /auth/authorize - 認可エンドポイント", () => {
 		// 特殊文字を含むnonceを作成（URLセーフ）
 		const specialNonce = "nonce-123_ABC.xyz~!@#$%^&*()+=[]{}|;':\",./<>?"
 
+		// Act
 		// ステップ1: 特殊文字のnonceで認可
 		const authorizeResponse = await requestAuthorize({
 			response_type: "code",
@@ -418,6 +421,7 @@ describe("POST /auth/authorize - 認可エンドポイント", () => {
 			scopes: "openid,profile,email,offline_access",
 		})
 
+		// Act
 		// ステップ1: 有効なスコープで認可を行う
 		const authorizeResponse = await requestAuthorize({
 			response_type: "code",
@@ -496,6 +500,7 @@ describe("POST /auth/authorize - 認可エンドポイント", () => {
 			scopes: "openid,profile,email",
 		})
 
+		// Act
 		// ステップ1: 有効なスコープで認可を行う
 		const authorizeResponse = await requestAuthorize({
 			response_type: "code",
