@@ -348,7 +348,8 @@ describe("POST /oauth2/token - トークンエンドポイント", () => {
 				scopes: "openid,profile,email",
 			})
 
-			// Act - ステップ1: 認可コードを取得
+			// Act
+			// ステップ1: 認可コードを取得
 			const authorizeResponse = await requestAuthorize({
 				response_type: "code",
 				client_id: testClient.id,
@@ -365,7 +366,8 @@ describe("POST /oauth2/token - トークンエンドポイント", () => {
 			expect(authorizeResponse.status).toBe(200)
 			expect(authorizeData).toHaveProperty("code")
 
-			// Act - ステップ2: 認可コードをトークンに交換（1回目 - 成功するべき）
+			// Act
+			// ステップ2: 認可コードをトークンに交換（1回目 - 成功するべき）
 			const firstTokenResponse = await requestToken({
 				grant_type: "authorization_code",
 				code: authorizeData.code,
@@ -382,7 +384,8 @@ describe("POST /oauth2/token - トークンエンドポイント", () => {
 			expect(firstTokenData).toHaveProperty("id_token")
 			expect(firstTokenData).not.toHaveProperty("refresh_token")
 
-			// Act - ステップ3: 同じ認可コードを再利用しようとする（失敗するべき）
+			// Act
+			// ステップ3: 同じ認可コードを再利用しようとする（失敗するべき）
 			const secondTokenResponse = await requestToken({
 				grant_type: "authorization_code",
 				code: authorizeData.code,
@@ -410,7 +413,8 @@ describe("POST /oauth2/token - トークンエンドポイント", () => {
 				scopes: "openid,profile,email",
 			})
 
-			// Act - ステップ1: 認可コードを取得
+			// Act
+			// ステップ1: 認可コードを取得
 			const authorizeResponse = await requestAuthorize({
 				response_type: "code",
 				client_id: testClient.id,
@@ -427,7 +431,8 @@ describe("POST /oauth2/token - トークンエンドポイント", () => {
 			expect(authorizeResponse.status).toBe(200)
 			expect(authorizeData).toHaveProperty("code")
 
-			// Act - ステップ2: 不正なclient_secretでトークン交換を試みる（失敗するがコードは無効化されるべき）
+			// Act
+			// ステップ2: 不正なclient_secretでトークン交換を試みる（失敗するがコードは無効化されるべき）
 			const invalidSecretResponse = await requestToken({
 				grant_type: "authorization_code",
 				code: authorizeData.code,
@@ -445,7 +450,8 @@ describe("POST /oauth2/token - トークンエンドポイント", () => {
 				error_description: "Invalid client_secret",
 			})
 
-			// Act - ステップ3: 正しいパラメータでトークン交換を試みる（コードが既に無効化されているため失敗するべき）
+			// Act
+			// ステップ3: 正しいパラメータでトークン交換を試みる（コードが既に無効化されているため失敗するべき）
 			const validParamsResponse = await requestToken({
 				grant_type: "authorization_code",
 				code: authorizeData.code,
@@ -473,7 +479,8 @@ describe("POST /oauth2/token - トークンエンドポイント", () => {
 				scopes: "openid,profile,email",
 			})
 
-			// Act - ステップ1: 認可コードを取得
+			// Act
+			// ステップ1: 認可コードを取得
 			const authorizeResponse = await requestAuthorize({
 				response_type: "code",
 				client_id: testClient.id,
@@ -490,7 +497,8 @@ describe("POST /oauth2/token - トークンエンドポイント", () => {
 			expect(authorizeResponse.status).toBe(200)
 			expect(authorizeData).toHaveProperty("code")
 
-			// Act - ステップ2: 不正なcode_verifierでトークンエンドポイントにアクセス
+			// Act
+			// ステップ2: 不正なcode_verifierでトークンエンドポイントにアクセス
 			const tokenResponse = await requestToken({
 				grant_type: "authorization_code",
 				code: authorizeData.code,
@@ -520,7 +528,8 @@ describe("POST /oauth2/token - トークンエンドポイント", () => {
 				scopes: "openid,profile,email",
 			})
 
-			// Act - ステップ1: 認可リクエスト
+			// Act
+			// ステップ1: 認可リクエスト
 			const authorizeResponse = await requestAuthorize({
 				response_type: "code",
 				client_id: testClient.id,
@@ -532,12 +541,11 @@ describe("POST /oauth2/token - トークンエンドポイント", () => {
 				code_challenge_method: "S256",
 			})
 
-			// Assert - ステップ1
 			const authorizeData = await authorizeResponse.json()
 			expect(authorizeResponse.status).toBe(200)
 			expect(authorizeData).toHaveProperty("code")
 
-			// Act - ステップ2: 認可コードをトークンに交換
+			// ステップ2: 認可コードをトークンに交換
 			const tokenResponse = await requestToken({
 				grant_type: "authorization_code",
 				code: authorizeData.code,
@@ -547,7 +555,6 @@ describe("POST /oauth2/token - トークンエンドポイント", () => {
 				code_verifier: "dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk",
 			})
 
-			// Assert - ステップ2
 			const tokenData = await tokenResponse.json()
 			expect(tokenResponse.status).toBe(200)
 			expect(tokenData).toHaveProperty("id_token")
@@ -567,7 +574,7 @@ describe("POST /oauth2/token - トークンエンドポイント", () => {
 				publicKey,
 			) as DecodedIdToken
 
-			// Assert - ステップ5
+			// Assert
 			// audクレームはclient_idと一致するべき
 			expect(decodedIdToken.aud).toBe(testClient.id)
 			expect(decodedIdToken.sub).toBe(testExecutionUser.id)
@@ -585,7 +592,8 @@ describe("POST /oauth2/token - トークンエンドポイント", () => {
 				scopes: "openid,profile,email",
 			})
 
-			// Act - ステップ1: 認可リクエスト
+			// Act
+			// ステップ1: 認可リクエスト
 			const authorizeResponse = await requestAuthorize({
 				response_type: "code",
 				client_id: testClient.id,
@@ -597,12 +605,11 @@ describe("POST /oauth2/token - トークンエンドポイント", () => {
 				code_challenge_method: "S256",
 			})
 
-			// Assert - ステップ1
 			const authorizeData = await authorizeResponse.json()
 			expect(authorizeResponse.status).toBe(200)
 			expect(authorizeData).toHaveProperty("code")
 
-			// Act - ステップ2: 認可コードをトークンに交換
+			// ステップ2: 認可コードをトークンに交換
 			const tokenResponse = await requestToken({
 				grant_type: "authorization_code",
 				code: authorizeData.code,
@@ -612,18 +619,17 @@ describe("POST /oauth2/token - トークンエンドポイント", () => {
 				code_verifier: "dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk",
 			})
 
-			// Assert - ステップ2
 			const tokenData = await tokenResponse.json()
 			expect(tokenResponse.status).toBe(200)
 			expect(tokenData).toHaveProperty("access_token")
 
-			// Act - ステップ3: アクセストークンのaudクレームを検証
+			// ステップ3: アクセストークンのaudクレームを検証
 			const decodedAccessToken = verify(
 				tokenData.access_token,
 				tokenSecret,
 			) as JwtPayload
 
-			// Assert - ステップ3
+			// Assert
 			// audクレームはclient_idと一致するべき
 			expect(decodedAccessToken.aud).toBe(testClient.id)
 			expect(decodedAccessToken.sub).toBe(testExecutionUser.id)
@@ -638,7 +644,8 @@ describe("POST /oauth2/token - トークンエンドポイント", () => {
 				scopes: "openid,profile,email,offline_access",
 			})
 
-			// Act - ステップ1: 認可コードフローで初回トークンを取得
+			// Act
+			// ステップ1: 認可コードフローで初回トークンを取得
 			const authorizeResponse = await requestAuthorize({
 				response_type: "code",
 				client_id: testClient.id,
@@ -650,7 +657,6 @@ describe("POST /oauth2/token - トークンエンドポイント", () => {
 				code_challenge_method: "S256",
 			})
 
-			// Assert - ステップ1
 			const authorizeData = await authorizeResponse.json()
 			expect(authorizeResponse.status).toBe(200)
 
@@ -666,7 +672,7 @@ describe("POST /oauth2/token - トークンエンドポイント", () => {
 			const tokenData = await tokenResponse.json()
 			expect(tokenResponse.status).toBe(200)
 
-			// Act - ステップ2: リフレッシュトークンを使用して新しいアクセストークンを取得
+			// ステップ2: リフレッシュトークンを使用して新しいアクセストークンを取得
 			const refreshResponse = await requestToken({
 				grant_type: "refresh_token",
 				refresh_token: tokenData.refresh_token,
@@ -674,18 +680,17 @@ describe("POST /oauth2/token - トークンエンドポイント", () => {
 				client_secret: testClient.secret,
 			})
 
-			// Assert - ステップ2
 			const refreshData = await refreshResponse.json()
 			expect(refreshResponse.status).toBe(200)
 			expect(refreshData).toHaveProperty("access_token")
 
-			// Act - ステップ3: リフレッシュされたアクセストークンのaudクレームを検証
+			// ステップ3: リフレッシュされたアクセストークンのaudクレームを検証
 			const decodedRefreshedToken = verify(
 				refreshData.access_token,
 				tokenSecret,
 			) as JwtPayload
 
-			// Assert - ステップ3
+			// Assert
 			// audクレームは引き続きclient_idと一致するべき
 			expect(decodedRefreshedToken.aud).toBe(testClient.id)
 			expect(decodedRefreshedToken.sub).toBe(testExecutionUser.id)
@@ -739,7 +744,8 @@ describe("POST /oauth2/token - トークンエンドポイント", () => {
 				scopes: "openid,profile,email",
 			})
 
-			// Act - ステップ1: 認可リクエスト
+			// Act
+			// ステップ1: 認可リクエスト
 			const authorizeResponse = await requestAuthorize({
 				response_type: "code",
 				client_id: testClient.id,
@@ -751,12 +757,11 @@ describe("POST /oauth2/token - トークンエンドポイント", () => {
 				code_challenge_method: "S256",
 			})
 
-			// Assert - ステップ1
 			const authorizeData = await authorizeResponse.json()
 			expect(authorizeResponse.status).toBe(200)
 			expect(authorizeData).toHaveProperty("code")
 
-			// Act - ステップ2: 認可コードをトークンに交換
+			// ステップ2: 認可コードをトークンに交換
 			const tokenResponse = await requestToken({
 				grant_type: "authorization_code",
 				code: authorizeData.code,
@@ -766,7 +771,6 @@ describe("POST /oauth2/token - トークンエンドポイント", () => {
 				code_verifier: "dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk",
 			})
 
-			// Assert - ステップ2
 			const tokenData = await tokenResponse.json()
 			expect(tokenResponse.status).toBe(200)
 			expect(tokenData).toHaveProperty("id_token")
@@ -780,14 +784,13 @@ describe("POST /oauth2/token - トークンエンドポイント", () => {
 			// ステップ4: 公開鍵群からIDトークンの署名検証に使われた鍵を取得
 			const publicKey = getPublicKeyFromIdToken(tokenData.id_token, jwksData)
 
-			// Act - ステップ3: IDトークンの検証
+			// ステップ5: IDトークンの署名検証とデコード
 			const decodedIdToken = verify(
 				tokenData.id_token,
 				publicKey,
 			) as DecodedIdToken
 
-			// Assert - ステップ3
-			// IDトークンに全項目が含まれていることを検証
+			// Assert - IDトークンに全項目が含まれていることを検証
 			expect(decodedIdToken).toHaveProperty("iss", env.OIDC_ISSUER)
 			expect(decodedIdToken).toHaveProperty("sub", testExecutionUser.id)
 			expect(decodedIdToken).toHaveProperty("aud", testClient.id)
@@ -831,7 +834,8 @@ describe("POST /oauth2/token - トークンエンドポイント", () => {
 					scopes: "openid,profile,email",
 				})
 
-				// Act - ステップ1: 認可リクエスト
+				// Act
+				// ステップ1: 認可リクエスト
 				const authorizeResponse = await requestAuthorize(
 					{
 						response_type: "code",
@@ -846,12 +850,11 @@ describe("POST /oauth2/token - トークンエンドポイント", () => {
 					userWithoutOptionalFields.access_token,
 				)
 
-				// Assert - ステップ1
 				const authorizeData = await authorizeResponse.json()
 				expect(authorizeResponse.status).toBe(200)
 				expect(authorizeData).toHaveProperty("code")
 
-				// Act - ステップ2: 認可コードをトークンに交換
+				// ステップ2: 認可コードをトークンに交換
 				const tokenResponse = await requestToken({
 					grant_type: "authorization_code",
 					code: authorizeData.code,
@@ -861,7 +864,6 @@ describe("POST /oauth2/token - トークンエンドポイント", () => {
 					code_verifier: "dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk",
 				})
 
-				// Assert - ステップ2
 				const tokenData = await tokenResponse.json()
 				expect(tokenResponse.status).toBe(200)
 				expect(tokenData).toHaveProperty("id_token")
@@ -875,14 +877,13 @@ describe("POST /oauth2/token - トークンエンドポイント", () => {
 				// ステップ4: 公開鍵群からIDトークンの署名検証に使われた鍵を取得
 				const publicKey = getPublicKeyFromIdToken(tokenData.id_token, jwksData)
 
-				// Act - ステップ3: IDトークンの検証
+				// ステップ5: IDトークンの署名検証とデコード
 				const decodedIdToken = verify(
 					tokenData.id_token,
 					publicKey,
 				) as DecodedIdToken
 
-				// Assert - ステップ3
-				// IDトークンに必須項目のみが含まれていることを検証
+				// Assert - IDトークンに必須項目のみが含まれていることを検証
 				expect(decodedIdToken).toHaveProperty("iss", env.OIDC_ISSUER)
 				expect(decodedIdToken).toHaveProperty(
 					"sub",
