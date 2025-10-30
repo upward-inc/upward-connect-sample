@@ -107,6 +107,20 @@ describe("POST /auth/authorize - 認可エンドポイント", () => {
 		})
 	}
 
+	/**
+	 * IDトークンのヘッダーからkidを取得し、対応する公開鍵をPEM形式で返す
+	 */
+	function getPublicKeyFromIdToken(
+		idToken: string,
+		jwksData: { keys: Jwk[] },
+	): string {
+		const kid = JSON.parse(atob(idToken.split(".")[0])).kid
+		const jwkPublicKey = jwksData.keys.find((key: Jwk) => key.kid === kid)
+		expect(jwkPublicKey).toBeTruthy()
+		const publicKey = convertJwkToPem(jwkPublicKey as Jwk)
+		return publicKey
+	}
+
 	it("有効な認可リクエストでstateとcodeを返却すること", async () => {
 		// Arrange
 		const testClient = await createTestOAuthClient({
@@ -271,10 +285,7 @@ describe("POST /auth/authorize - 認可エンドポイント", () => {
 		expect(jwksData).toHaveProperty("keys")
 
 		// ステップ4: 公開鍵群からIDトークンの署名検証に使われた鍵を取得
-		const kid = JSON.parse(atob(tokenData.id_token.split(".")[0])).kid
-		const jwkPublicKey = jwksData.keys.find((key: Jwk) => key.kid === kid)
-		expect(jwkPublicKey).toBeTruthy()
-		const publicKey = convertJwkToPem(jwkPublicKey)
+		const publicKey = getPublicKeyFromIdToken(tokenData.id_token, jwksData)
 
 		// ステップ5: IDトークンの署名検証とデコード
 		const decodedIdToken = verify(
@@ -336,10 +347,7 @@ describe("POST /auth/authorize - 認可エンドポイント", () => {
 		expect(jwksData).toHaveProperty("keys")
 
 		// ステップ4: 公開鍵群からIDトークンの署名検証に使われた鍵を取得
-		const kid = JSON.parse(atob(tokenData.id_token.split(".")[0])).kid
-		const jwkPublicKey = jwksData.keys.find((key: Jwk) => key.kid === kid)
-		expect(jwkPublicKey).toBeTruthy()
-		const publicKey = convertJwkToPem(jwkPublicKey)
+		const publicKey = getPublicKeyFromIdToken(tokenData.id_token, jwksData)
 
 		// ステップ5: IDトークンの署名検証とデコード
 		const decodedIdToken = verify(
@@ -400,10 +408,7 @@ describe("POST /auth/authorize - 認可エンドポイント", () => {
 		expect(jwksData).toHaveProperty("keys")
 
 		// ステップ4: 公開鍵群からIDトークンの署名検証に使われた鍵を取得
-		const kid = JSON.parse(atob(tokenData.id_token.split(".")[0])).kid
-		const jwkPublicKey = jwksData.keys.find((key: Jwk) => key.kid === kid)
-		expect(jwkPublicKey).toBeTruthy()
-		const publicKey = convertJwkToPem(jwkPublicKey)
+		const publicKey = getPublicKeyFromIdToken(tokenData.id_token, jwksData)
 
 		// ステップ5: IDトークンの署名検証とデコード
 		const decodedIdToken = verify(
@@ -465,10 +470,7 @@ describe("POST /auth/authorize - 認可エンドポイント", () => {
 		expect(jwksData).toHaveProperty("keys")
 
 		// ステップ4: 公開鍵群からIDトークンの署名検証に使われた鍵を取得
-		const kid = JSON.parse(atob(tokenData.id_token.split(".")[0])).kid
-		const jwkPublicKey = jwksData.keys.find((key: Jwk) => key.kid === kid)
-		expect(jwkPublicKey).toBeTruthy()
-		const publicKey = convertJwkToPem(jwkPublicKey)
+		const publicKey = getPublicKeyFromIdToken(tokenData.id_token, jwksData)
 
 		// ステップ5: IDトークンの署名検証とデコード
 		const decodedIdToken = verify(
@@ -542,10 +544,7 @@ describe("POST /auth/authorize - 認可エンドポイント", () => {
 		expect(jwksData).toHaveProperty("keys")
 
 		// ステップ4: 公開鍵群からIDトークンの署名検証に使われた鍵を取得
-		const kid = JSON.parse(atob(tokenData.id_token.split(".")[0])).kid
-		const jwkPublicKey = jwksData.keys.find((key: Jwk) => key.kid === kid)
-		expect(jwkPublicKey).toBeTruthy()
-		const publicKey = convertJwkToPem(jwkPublicKey)
+		const publicKey = getPublicKeyFromIdToken(tokenData.id_token, jwksData)
 
 		// ステップ5: IDトークンの署名検証とデコード
 		const decodedIdToken = verify(
