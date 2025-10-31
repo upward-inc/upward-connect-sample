@@ -56,6 +56,45 @@ describe("POST /api/v1/files - ファイル作成", () => {
 		})
 	}
 
+	describe("認証エラーの場合に適切なエラーを返すこと", () => {
+		it.each([
+			{
+				title: "認証ヘッダーがない場合",
+				tokenBuilder: () => "",
+				expectedStatus: 401,
+			},
+			{
+				title: "認証ヘッダーの形式が不正な場合",
+				tokenBuilder: () => "InvalidFormat token_here",
+				expectedStatus: 400,
+			},
+			{
+				title: "期限切れトークンの場合",
+				tokenBuilder: (userId: string) => createExpiredToken(userId),
+				expectedStatus: 401,
+			},
+			{
+				title: "不正なトークンの場合",
+				tokenBuilder: () => "invalid.malformed.token",
+				expectedStatus: 401,
+			},
+		])("$title", async ({ tokenBuilder, expectedStatus }) => {
+			// Arrange
+			const token = tokenBuilder(testExecutionUser.id)
+			const testFile = createTestFile("test.txt", "Should not upload")
+			const formData = new FormData()
+			formData.append("file", testFile)
+
+			// Act
+			const response = await requestPost(formData, token)
+
+			// Assert
+			const json = await response.json()
+			expect(response.status).toBe(expectedStatus)
+			expect(json).toHaveProperty("message")
+		})
+	})
+
 	it("有効な認証とフォームデータでファイルを作成できること", async () => {
 		// Arrange
 		const testFile = createTestFile("test.txt", "Hello, World!")
@@ -145,45 +184,6 @@ describe("POST /api/v1/files - ファイル作成", () => {
 		expect(savedFile?.name).toBe("test.png")
 		expect(savedFile?.type).toBe("image/png")
 		expect(new Uint8Array(savedFile?.content || [])).toEqual(binaryContent)
-	})
-
-	describe("認証エラーの場合に適切なエラーを返すこと", () => {
-		it.each([
-			{
-				title: "認証ヘッダーがない場合",
-				tokenBuilder: () => "",
-				expectedStatus: 401,
-			},
-			{
-				title: "認証ヘッダーの形式が不正な場合",
-				tokenBuilder: () => "InvalidFormat token_here",
-				expectedStatus: 400,
-			},
-			{
-				title: "期限切れトークンの場合",
-				tokenBuilder: (userId: string) => createExpiredToken(userId),
-				expectedStatus: 401,
-			},
-			{
-				title: "不正なトークンの場合",
-				tokenBuilder: () => "invalid.malformed.token",
-				expectedStatus: 401,
-			},
-		])("$title", async ({ tokenBuilder, expectedStatus }) => {
-			// Arrange
-			const token = tokenBuilder(testExecutionUser.id)
-			const testFile = createTestFile("test.txt", "Should not upload")
-			const formData = new FormData()
-			formData.append("file", testFile)
-
-			// Act
-			const response = await requestPost(formData, token)
-
-			// Assert
-			const json = await response.json()
-			expect(response.status).toBe(expectedStatus)
-			expect(json).toHaveProperty("message")
-		})
 	})
 
 	describe("バリデーションエラーの場合に400エラーを返すこと", () => {

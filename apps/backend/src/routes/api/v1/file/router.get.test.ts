@@ -55,6 +55,34 @@ describe("GET /api/v1/files/:id - ファイル取得", () => {
 		})
 	}
 
+	describe("認証エラーの場合に401エラーを返すこと", () => {
+		it.each([
+			{
+				title: "認証ヘッダーがない",
+				tokenBuilder: () => "",
+			},
+			{
+				title: "期限切れトークン",
+				tokenBuilder: (userId: string) => createExpiredToken(userId),
+			},
+			{
+				title: "不正なトークン",
+				tokenBuilder: () => "invalid.malformed.token",
+			},
+		])("$title", async ({ tokenBuilder }) => {
+			// Arrange
+			const token = tokenBuilder(testExecutionUser.id)
+
+			// Act
+			const response = await requestGet("some-id", token)
+
+			// Assert
+			const json = await response.json()
+			expect(response.status).toBe(401)
+			expect(json).toHaveProperty("message")
+		})
+	})
+
 	it("有効な認証とファイルIDでテキストファイル内容を取得できること", async () => {
 		// Arrange
 		const fileContent = "File content for download"
@@ -132,33 +160,5 @@ describe("GET /api/v1/files/:id - ファイル取得", () => {
 		const json = await response.json()
 		expect(response.status).toBe(404)
 		expect(json).toHaveProperty("message")
-	})
-
-	describe("認証エラーの場合に401エラーを返すこと", () => {
-		it.each([
-			{
-				title: "認証ヘッダーがない",
-				tokenBuilder: () => "",
-			},
-			{
-				title: "期限切れトークン",
-				tokenBuilder: (userId: string) => createExpiredToken(userId),
-			},
-			{
-				title: "不正なトークン",
-				tokenBuilder: () => "invalid.malformed.token",
-			},
-		])("$title", async ({ tokenBuilder }) => {
-			// Arrange
-			const token = tokenBuilder(testExecutionUser.id)
-
-			// Act
-			const response = await requestGet("some-id", token)
-
-			// Assert
-			const json = await response.json()
-			expect(response.status).toBe(401)
-			expect(json).toHaveProperty("message")
-		})
 	})
 })

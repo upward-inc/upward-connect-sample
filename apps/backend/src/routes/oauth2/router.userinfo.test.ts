@@ -52,55 +52,6 @@ describe("GET /oauth2/userinfo - ユーザー情報取得", () => {
 		})
 	}
 
-	it("有効なトークンでユーザー情報を取得できること", async () => {
-		// Act
-		const response = await requestUserInfo()
-
-		// Assert
-		const data = await response.json()
-		expect(response.status).toBe(200)
-		expect(data).toEqual({
-			sub: testExecutionUser.id,
-			user_id: testExecutionUser.id,
-			name: `${testExecutionUser.last_name} ${testExecutionUser.first_name}`,
-			given_name: testExecutionUser.first_name,
-			family_name: testExecutionUser.last_name,
-			email: testExecutionUser.email,
-			zoneinfo: testExecutionUser.timezone,
-			locale: testExecutionUser.locale,
-		})
-	})
-
-	it("メールがないユーザーのユーザー情報にemailが含まれないこと", async () => {
-		// Arrange
-		const userWithoutEmail = await createTestExecutionUser({
-			user_name: `${testExecutionUser.user_name}_no_email`,
-		})
-
-		try {
-			const token = createValidToken(userWithoutEmail.id)
-
-			// Act
-			const response = await requestUserInfo(token)
-
-			// Assert
-			const data = await response.json()
-			expect(response.status).toBe(200)
-			expect(data).toEqual({
-				sub: userWithoutEmail.id,
-				user_id: userWithoutEmail.id,
-				name: `${userWithoutEmail.last_name} ${userWithoutEmail.first_name}`,
-				given_name: userWithoutEmail.first_name,
-				family_name: userWithoutEmail.last_name,
-				zoneinfo: "Asia/Tokyo",
-				locale: "ja-JP",
-			})
-		} finally {
-			// Cleanup
-			await deleteTestExecutionUser(userWithoutEmail.id)
-		}
-	})
-
 	describe("認証エラーの場合に適切なエラーを返すこと", () => {
 		it.each([
 			{
@@ -170,6 +121,55 @@ describe("GET /oauth2/userinfo - ユーザー情報取得", () => {
 			expect(response.status).toBe(expectedStatus)
 			expect(data).toHaveProperty("message")
 		})
+	})
+
+	it("有効なトークンでユーザー情報を取得できること", async () => {
+		// Act
+		const response = await requestUserInfo()
+
+		// Assert
+		const data = await response.json()
+		expect(response.status).toBe(200)
+		expect(data).toEqual({
+			sub: testExecutionUser.id,
+			user_id: testExecutionUser.id,
+			name: `${testExecutionUser.last_name} ${testExecutionUser.first_name}`,
+			given_name: testExecutionUser.first_name,
+			family_name: testExecutionUser.last_name,
+			email: testExecutionUser.email,
+			zoneinfo: testExecutionUser.timezone,
+			locale: testExecutionUser.locale,
+		})
+	})
+
+	it("メールがないユーザーのユーザー情報にemailが含まれないこと", async () => {
+		// Arrange
+		const userWithoutEmail = await createTestExecutionUser({
+			user_name: `${testExecutionUser.user_name}_no_email`,
+		})
+
+		try {
+			const token = createValidToken(userWithoutEmail.id)
+
+			// Act
+			const response = await requestUserInfo(token)
+
+			// Assert
+			const data = await response.json()
+			expect(response.status).toBe(200)
+			expect(data).toEqual({
+				sub: userWithoutEmail.id,
+				user_id: userWithoutEmail.id,
+				name: `${userWithoutEmail.last_name} ${userWithoutEmail.first_name}`,
+				given_name: userWithoutEmail.first_name,
+				family_name: userWithoutEmail.last_name,
+				zoneinfo: "Asia/Tokyo",
+				locale: "ja-JP",
+			})
+		} finally {
+			// Cleanup
+			await deleteTestExecutionUser(userWithoutEmail.id)
+		}
 	})
 
 	// TODO: 実装側の修正が必要
