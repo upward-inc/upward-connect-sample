@@ -5,7 +5,7 @@ export const EqualOperatorSchema = z.literal("eq").meta({
 })
 
 export const LikeOperatorSchema = z.literal("like").meta({
-	description: "Like (LIKE pattern) - 曖昧検索",
+	description: "Like (LIKE pattern)",
 })
 
 export const GreaterThanOperatorSchema = z.literal("gt").meta({
