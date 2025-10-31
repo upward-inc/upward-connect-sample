@@ -709,7 +709,7 @@ CREATE TABLE [dbo].[published_auth_code]
   [expire_at] DATETIME2 NOT NULL,
   [user_id] UNIQUEIDENTIFIER NOT NULL,
   CONSTRAINT [pk_published_auth_code] PRIMARY KEY ([auth_code]),
-  CONSTRAINT[fk_published_auth_code_user_id] FOREIGN KEY([user_id]) REFERENCES [user]([id]),
+  CONSTRAINT [fk_published_auth_code_user_id] FOREIGN KEY([user_id]) REFERENCES [user]([id]),
 );
 
 /* 5. 一時テーブルからデータを復元 */
