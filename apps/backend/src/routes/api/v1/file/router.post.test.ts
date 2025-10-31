@@ -1,6 +1,7 @@
 import { afterAll, beforeAll, describe, expect, it } from "vitest"
 import { app } from "../../../../index"
 import { testPrisma } from "../../../../test/setup"
+import { createExpiredToken } from "../../../../test/utils/auth"
 import {
 	type TestExecutionUser,
 	createTestExecutionUser,
@@ -160,8 +161,7 @@ describe("POST /api/v1/files - ファイル作成", () => {
 			},
 			{
 				title: "期限切れトークンの場合",
-				token:
-					"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoidGVzdCIsImV4cCI6MH0.invalid",
+				token: createExpiredToken(testExecutionUser.id),
 				expectedStatus: 401,
 			},
 			{
