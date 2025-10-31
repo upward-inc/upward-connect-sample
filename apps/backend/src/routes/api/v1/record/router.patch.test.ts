@@ -391,18 +391,17 @@ describe("PATCH /records/:entity_name/:id - レコード更新", () => {
 		expect(json).toHaveProperty("message")
 	})
 
-	it.each([
-		{
-			title: "空のJSONオブジェクト",
-			body: {},
-		},
-		{
-			title: "有効なフィールドが含まれていない",
-			body: { unknown_field: "test" },
-		},
-	])(
-		"$titleでも200ステータスを返すこと（部分更新の仕様）",
-		async ({ body }) => {
+	describe("更新対象のフィールドが含まれていない場合でも200ステータスを返すこと", () => {
+		it.each([
+			{
+				title: "空のJSONオブジェクト",
+				body: {},
+			},
+			{
+				title: "有効なフィールドが含まれていない",
+				body: { unknown_field: "test" },
+			},
+		])("$title", async ({ body }) => {
 			// Arrange
 			const sample = await createTestSample(testExecutionUser.id, {
 				name: "Test Sample",
@@ -413,8 +412,8 @@ describe("PATCH /records/:entity_name/:id - レコード更新", () => {
 
 			// Assert
 			expect(response.status).toBe(200)
-		},
-	)
+		})
+	})
 
 	describe("リクエストボディのバリデーションに失敗する場合に400エラーを返すこと", () => {
 		it.each([
