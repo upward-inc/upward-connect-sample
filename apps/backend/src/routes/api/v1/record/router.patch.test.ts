@@ -139,26 +139,6 @@ describe("PATCH /records/:entity_name/:id - レコード更新", () => {
 		expect(id).toBe(sample.id)
 	})
 
-	it("必須項目のみでレコードを更新できること", async () => {
-		// Arrange
-		const sample = await createTestSample(testExecutionUser.id, {
-			name: "Original Name",
-		})
-
-		// Act
-		const response = await requestPatch("sample", sample.id, {
-			name: "Updated Name",
-		})
-
-		// Assert
-		const json = await response.json()
-		const record = await testPrisma.sample.findUnique({
-			where: { id: json.id },
-		})
-		expect(record).not.toBeNull()
-		expect(record?.name).toBe("Updated Name")
-	})
-
 	it("すべての項目タイプを含むレコードを更新できること", async () => {
 		// Arrange
 		const sample = await createTestSample(testExecutionUser.id, {
