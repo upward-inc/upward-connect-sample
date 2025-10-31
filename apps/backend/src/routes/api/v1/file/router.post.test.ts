@@ -151,26 +151,27 @@ describe("POST /api/v1/files - ファイル作成", () => {
 		it.each([
 			{
 				title: "認証ヘッダーがない場合",
-				token: "",
+				tokenBuilder: () => "",
 				expectedStatus: 401,
 			},
 			{
 				title: "認証ヘッダーの形式が不正な場合",
-				token: "InvalidFormat token_here",
+				tokenBuilder: () => "InvalidFormat token_here",
 				expectedStatus: 400,
 			},
 			{
 				title: "期限切れトークンの場合",
-				token: createExpiredToken(testExecutionUser.id),
+				tokenBuilder: (userId: string) => createExpiredToken(userId),
 				expectedStatus: 401,
 			},
 			{
 				title: "不正なトークンの場合",
-				token: "invalid.malformed.token",
+				tokenBuilder: () => "invalid.malformed.token",
 				expectedStatus: 401,
 			},
-		])("$title", async ({ token, expectedStatus }) => {
+		])("$title", async ({ tokenBuilder, expectedStatus }) => {
 			// Arrange
+			const token = tokenBuilder(testExecutionUser.id)
 			const testFile = createTestFile("test.txt", "Should not upload")
 			const formData = new FormData()
 			formData.append("file", testFile)

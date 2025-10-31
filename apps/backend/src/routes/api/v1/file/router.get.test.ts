@@ -138,17 +138,20 @@ describe("GET /api/v1/files/:id - ファイル取得", () => {
 		it.each([
 			{
 				title: "認証ヘッダーがない",
-				token: "",
+				tokenBuilder: () => "",
 			},
 			{
 				title: "期限切れトークン",
-				token: createExpiredToken(testExecutionUser.id),
+				tokenBuilder: (userId: string) => createExpiredToken(userId),
 			},
 			{
 				title: "不正なトークン",
-				token: "invalid.malformed.token",
+				tokenBuilder: () => "invalid.malformed.token",
 			},
-		])("$title", async ({ token }) => {
+		])("$title", async ({ tokenBuilder }) => {
+			// Arrange
+			const token = tokenBuilder(testExecutionUser.id)
+
 			// Act
 			const response = await requestGet("some-id", token)
 
