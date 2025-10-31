@@ -137,7 +137,7 @@ describe("GET /api/v1/system-users - システムユーザー一覧取得", () =
 			expect(data).toHaveProperty("modified_at")
 		})
 
-		it("存在しないユーザーIDの場合に404エラーを返すこと", async () => {
+		it("存在しないユーザーIDを指定した場合に404エラーを返すこと", async () => {
 			// Arrange
 			const nonExistentId = crypto.randomUUID()
 

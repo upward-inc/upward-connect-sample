@@ -121,7 +121,7 @@ describe("GET /api/v1/files/:id - ファイル取得", () => {
 		expect(responseBytes).toEqual(binaryContent)
 	})
 
-	it("存在しないファイルIDの場合に404エラーを返すこと", async () => {
+	it("存在しないファイルIDを指定した場合に404エラーを返すこと", async () => {
 		// Arrange
 		const nonExistentId = crypto.randomUUID()
 
