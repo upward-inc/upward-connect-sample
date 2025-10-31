@@ -70,5 +70,5 @@ bun fe#dev
 - DEFAULT
    - `df_[table_name]_[column_name]`
 - UNIQUEキー
-   - `uk_[table_name]_[番号]`
-   - 番号は`1`, `2`, `3`, ... と想定
+   - `uk_[table_name]_[連番]`
+   - `[連番]`の部分は`1`, `2`, `3`, ... と想定
