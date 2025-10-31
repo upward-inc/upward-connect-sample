@@ -47,8 +47,6 @@ describe("POST /auth/authorize - 認可エンドポイント", () => {
 		// テスト実施ユーザーの作成
 		const user = await createTestExecutionUser({
 			user_name: taskId,
-			first_name: "InternalAuth",
-			last_name: "Test",
 			email: "internal_auth_test@example.com",
 			timezone: "Asia/Tokyo",
 			locale: "ja-JP",

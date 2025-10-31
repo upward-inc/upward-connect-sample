@@ -29,8 +29,6 @@ describe("GET /oauth2/userinfo - ユーザー情報取得", () => {
 		// テスト実施ユーザーの作成
 		const user = await createTestExecutionUser({
 			user_name: taskId,
-			first_name: "UserInfo",
-			last_name: "Test",
 			email: "userinfo_test@example.com",
 			timezone: "Asia/Tokyo",
 			locale: "ja-JP",
@@ -77,10 +75,6 @@ describe("GET /oauth2/userinfo - ユーザー情報取得", () => {
 		// Arrange
 		const userWithoutEmail = await createTestExecutionUser({
 			user_name: `${testExecutionUser.user_name}_no_email`,
-			first_name: "No",
-			last_name: "Email",
-			timezone: "Asia/Tokyo",
-			locale: "ja-JP",
 		})
 
 		try {
@@ -98,8 +92,8 @@ describe("GET /oauth2/userinfo - ユーザー情報取得", () => {
 				name: `${userWithoutEmail.last_name} ${userWithoutEmail.first_name}`,
 				given_name: userWithoutEmail.first_name,
 				family_name: userWithoutEmail.last_name,
-				zoneinfo: userWithoutEmail.timezone,
-				locale: userWithoutEmail.locale,
+				zoneinfo: "Asia/Tokyo",
+				locale: "ja-JP",
 			})
 		} finally {
 			// Cleanup

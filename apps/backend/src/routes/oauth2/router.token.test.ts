@@ -50,8 +50,6 @@ describe("POST /oauth2/token - トークンエンドポイント", () => {
 		// テスト実施ユーザーの作成
 		const user = await createTestExecutionUser({
 			user_name: taskId,
-			first_name: "Token",
-			last_name: "Test",
 			email: "token_test@example.com",
 			timezone: "Asia/Tokyo",
 			locale: "ja-JP",

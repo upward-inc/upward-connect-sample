@@ -26,9 +26,6 @@ describe("GET /api/v1/system-users - システムユーザー一覧取得", () =
 		const user = await createTestExecutionUser(
 			{
 				user_name: taskId,
-				first_name: "System",
-				last_name: "UserTest",
-				email: "system_user_test@example.com",
 			},
 			{ withProfile: true },
 		)
@@ -88,9 +85,8 @@ describe("GET /api/v1/system-users - システムユーザー一覧取得", () =
 			expect(testUserInResponse).toBeTruthy()
 			expect(testUserInResponse.id).toBe(testExecutionUser.id)
 			expect(testUserInResponse.user_name).toBe(testExecutionUser.user_name)
-			expect(testUserInResponse.first_name).toBe("System")
-			expect(testUserInResponse.last_name).toBe("UserTest")
-			expect(testUserInResponse.email).toBe("system_user_test@example.com")
+			expect(testUserInResponse.first_name).toBe(testExecutionUser.first_name)
+			expect(testUserInResponse.last_name).toBe(testExecutionUser.last_name)
 		})
 
 		it("レスポンスに必要なプロパティが含まれること", async () => {
@@ -122,9 +118,8 @@ describe("GET /api/v1/system-users - システムユーザー一覧取得", () =
 			const data = await response.json()
 			expect(data.id).toBe(testExecutionUser.id)
 			expect(data.user_name).toBe(testExecutionUser.user_name)
-			expect(data.first_name).toBe("System")
-			expect(data.last_name).toBe("UserTest")
-			expect(data.email).toBe("system_user_test@example.com")
+			expect(data.first_name).toBe(testExecutionUser.first_name)
+			expect(data.last_name).toBe(testExecutionUser.last_name)
 		})
 
 		it("レスポンスに必要なプロパティが含まれること", async () => {

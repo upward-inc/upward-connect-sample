@@ -26,9 +26,6 @@ describe("GET /api/v1/files/:id - ファイル取得", () => {
 		// テスト実施ユーザーの作成
 		const user = await createTestExecutionUser({
 			user_name: taskId,
-			first_name: "File",
-			last_name: "Test",
-			email: "file_test@example.com",
 		})
 
 		return { user }
