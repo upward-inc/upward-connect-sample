@@ -35,7 +35,7 @@ const baseSearchParams: Required<SearchParams> = {
 	client_id: "client-123",
 	redirect_uri: "https://client.example.com/callback",
 	scope: "openid profile email offline_access",
-	state: "state-xyz",
+	state: "state-value",
 	nonce: "nonce-value",
 	code_challenge: "a".repeat(43),
 	code_challenge_method: "S256",
