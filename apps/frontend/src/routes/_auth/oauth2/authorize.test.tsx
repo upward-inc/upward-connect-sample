@@ -222,4 +222,72 @@ describe("AuthorizePage", () => {
 			`${baseSearchParams.redirect_uri}?error=temporarily_unavailable`,
 		)
 	})
+
+	describe("不正パラメータの場合に適切なエラーでリダイレクトされること", () => {
+		it("redirect_uriが未指定のとき、オープンリダイレクト攻撃を防ぐため例外を投げる", () => {
+			// redirect_uriを未指定にする
+			useSearchMock.mockReturnValue({
+				...baseSearchParams,
+				redirect_uri: undefined,
+			})
+
+			// コンポーネントのレンダリングで例外がスローされることを期待
+			expect(() => renderAuthorizePage()).toThrow("invalid redirect_uri")
+		})
+
+		it("client_idが未指定のとき、unauthorized_clientエラーとstateパラメータを付与してリダイレクトURIへ遷移する", () => {
+			// client_idを未指定にする
+			useSearchMock.mockReturnValue({
+				...baseSearchParams,
+				client_id: undefined,
+			})
+
+			// 本来location.hrefでリダイレクトが発生するが、テスト環境ではモックしておりZodErrorがスローされるためtry-catchで捕捉
+			try {
+				renderAuthorizePage()
+			} catch {}
+
+			expect(locationHref).toBe(
+				`${baseSearchParams.redirect_uri}?error=unauthorized_client&state=${baseSearchParams.state}`,
+			)
+		})
+
+		it.each([
+			{
+				title: "scopeが未指定",
+				paramKey: "scope",
+				expectedUrl: `${baseSearchParams.redirect_uri}?error=invalid_scope&state=${baseSearchParams.state}`,
+			},
+			{
+				title: "stateが未指定",
+				paramKey: "state",
+				expectedUrl: `${baseSearchParams.redirect_uri}?error=invalid_request`,
+			},
+			{
+				title: "nonceが未指定",
+				paramKey: "nonce",
+				expectedUrl: `${baseSearchParams.redirect_uri}?error=invalid_request&state=${baseSearchParams.state}`,
+			},
+			{
+				title: "code_challengeが未指定",
+				paramKey: "code_challenge",
+				expectedUrl: `${baseSearchParams.redirect_uri}?error=invalid_request&state=${baseSearchParams.state}`,
+			},
+		])(
+			"$titleの場合、適切なエラーを付与してリダイレクトURIへ遷移する",
+			async ({ paramKey, expectedUrl }) => {
+				// 該当パラメータを未指定にする
+				useSearchMock.mockReturnValue({
+					...baseSearchParams,
+					[paramKey]: undefined,
+				})
+
+				renderAuthorizePage()
+
+				await waitFor(() => {
+					expect(locationHref).toBe(expectedUrl)
+				})
+			},
+		)
+	})
 })
