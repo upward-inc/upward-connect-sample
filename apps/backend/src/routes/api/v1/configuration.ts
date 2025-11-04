@@ -28,6 +28,7 @@ export const configurationRouter = new OpenAPIHono().openapi(
 				activity: "activity",
 				phone_call: "phone_call",
 			},
+			location_entities: ["account", "lead"],
 		}
 
 		return c.json(configuration, 200)

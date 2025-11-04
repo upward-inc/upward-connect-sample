@@ -37,6 +37,10 @@ export const ConfigurationSchema = z
 					examples: ["phone_call", "call_history", "task"],
 				}),
 		}),
+		location_entities: z.array(z.string()).meta({
+			description: "ロケーション検索が可能なエンティティ",
+			examples: [["account", "lead"]],
+		}),
 	})
 	.meta({
 		description: "UPWARDとの連携のために必要な構成データ（静的情報）",
