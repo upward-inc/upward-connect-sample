@@ -56,6 +56,8 @@ const AuthorizeParamsSchema = z.object({
 	code_challenge_method: CodeChallengeMethodSchema,
 })
 
+export type SearchParams = z.output<typeof SearchParamsSchema>
+
 interface AuthorizeResultSuccess {
 	code: string
 	state?: string
@@ -266,7 +268,7 @@ const redirectFail = (url: string, result: AuthorizeResultFailure) => {
 	window.location.href = redirectUrl.toString()
 }
 
-function AuthorizePage() {
+export function AuthorizePage() {
 	const { token } = useAuth()
 
 	const searchParams = useSearch({ from: "/_auth/oauth2/authorize" })
