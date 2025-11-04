@@ -115,6 +115,10 @@ describe("AuthorizePage", () => {
 		})
 		expect(screen.getByText("openid（IDトークン発行）")).toBeVisible()
 		expect(screen.getByText("profile（プロフィール情報）")).toBeVisible()
+		expect(screen.getByText("email（メールアドレス）")).toBeVisible()
+		expect(
+			screen.getByText("offline_access（リフレッシュトークン発行）"),
+		).toBeVisible()
 	})
 
 	it("ユーザーが許可ボタンをクリックしたとき、認可コードとstateパラメータを付与してリダイレクトURIへ遷移する", async () => {
