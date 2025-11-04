@@ -284,9 +284,7 @@ describe("AuthorizePage", () => {
 
 				renderAuthorizePage()
 
-				await waitFor(() => {
-					expect(locationHref).toBe(expectedUrl)
-				})
+				expect(locationHref).toBe(expectedUrl)
 			},
 		)
 	})
