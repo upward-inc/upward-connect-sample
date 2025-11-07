@@ -249,7 +249,7 @@ CREATE TABLE [jwk_private_key]
     [expire_at] DATETIME2 NOT NULL,
     [closed_at] DATETIME2 NOT NULL,
     [created_at] DATETIME2 NOT NULL CONSTRAINT [df_jwk_private_key_created_at] DEFAULT GETUTCDATE(),
-    CONSTRAINT [pk_private_key] PRIMARY KEY ([id]),
+    CONSTRAINT [pk_jwk_private_key] PRIMARY KEY ([id]),
 );
 
 -- oauth_clientテーブル
