@@ -59,16 +59,13 @@ bun fe#dev
 4. Prismaクライアントの最新化
    1. `bun prisma#generate`
 
-## カラムに制約(CONSTRAINT)を追加する際の注意事項
-**絶対に制約名(constraint name)を以下の命名ルールで追加してください**
+### カラムに制約(CONSTRAINT)を追加する際の注意事項
 
-### 制約の命名規則
-- 主キー
-   - `pk_[table_name]`
-- 外部キー
-   - `fk_[table_name]_[column_name]`
-- DEFAULT
-   - `df_[table_name]_[column_name]`
-- UNIQUEキー
-   - `uk_[table_name]_[連番]`
-   - `[連番]`の部分は`1`, `2`, `3`, ... と想定
+**制約名(constraint name)は以下の命名ルールで追加すること**
+
+| 種別 | 命名規則 |
+|:--|:--|
+| 主キー | `pk_[table_name]` |
+| 外部キー | `fk_[table_name]_[column_name]` |
+| デフォルト値 | `df_[table_name]_[column_name]` |
+| UNIQUEキー | `uk_[table_name]_[連番(1, 2, ...)]` |
