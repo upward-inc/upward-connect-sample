@@ -41,9 +41,11 @@ bun fe#dev
    1. `bun db#up`
 4. マイグレーションを実施
    1. `bun db#migrate`
-5. `prisma/schema.prisma`にDBの状態を反映
+5. ビューの作成
+   1. `apps/backend/prisma/views/dbo`配下のビュー作成スクリプトを手動で実行
+6. `prisma/schema.prisma`にDBの状態を反映
    1. `bun db#pull`
-6. Prismaクライアントの最新化
+7. Prismaクライアントの最新化
    1. `bun prisma#generate`
 
 ### 他の開発者が実施した変更を取り込む場合
@@ -56,3 +58,14 @@ bun fe#dev
    1. `bun db#migrate`
 4. Prismaクライアントの最新化
    1. `bun prisma#generate`
+
+### カラムに制約(CONSTRAINT)を追加する際の注意事項
+
+**制約名(constraint name)は以下の命名ルールで追加すること**
+
+| 種別 | 命名規則 |
+|:--|:--|
+| 主キー | `pk_[table_name]` |
+| 外部キー | `fk_[table_name]_[column_name]` |
+| デフォルト値 | `df_[table_name]_[column_name]` |
+| UNIQUEキー | `uk_[table_name]_[連番(1, 2, ...)]` |
