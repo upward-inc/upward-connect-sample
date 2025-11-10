@@ -37,7 +37,7 @@ export const ConfigurationSchema = z
 					examples: ["phone_call", "call_history", "task"],
 				}),
 		}),
-		location_entities: z.array(z.string()).meta({
+		location_entities: z.array(z.enum(["account", "lead"])).meta({
 			description: "ロケーション検索が可能なエンティティ",
 			examples: [["account", "lead"]],
 		}),
