@@ -430,7 +430,7 @@ model oauth_client {
 }
 
 model jwk_private_key {
-  id                        String   @id(map: "pk_private_key") @default(dbgenerated("newid()"), map: "df_jwk_private_key_id") @db.UniqueIdentifier
+  id                        String   @id(map: "pk_jwk_private_key") @default(dbgenerated("newid()"), map: "df_jwk_private_key_id") @db.UniqueIdentifier
   encrypted_private_key_pem String   @db.NVarChar(Max)
   base64_iv                 String   @db.NVarChar(64)
   validate_at               DateTime
