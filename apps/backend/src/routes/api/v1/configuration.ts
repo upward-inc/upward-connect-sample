@@ -1,4 +1,5 @@
 import { OpenAPIHono, createRoute } from "@hono/zod-openapi"
+import { configuration as config } from "../../../configuration"
 import {
 	type Configuration,
 	ConfigurationSchema,
@@ -28,7 +29,7 @@ export const configurationRouter = new OpenAPIHono().openapi(
 				activity: "activity",
 				phone_call: "phone_call",
 			},
-			location_entities: ["account", "lead"],
+			location_entities: config.LOCATION_ENTITIES,
 		}
 
 		return c.json(configuration, 200)

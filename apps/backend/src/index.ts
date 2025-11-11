@@ -1,7 +1,7 @@
 import { OpenAPIHono } from "@hono/zod-openapi"
 import { secureHeaders } from "hono/secure-headers"
 import { trimTrailingSlash } from "hono/trailing-slash"
-import { env } from "./env"
+import { configuration } from "./configuration"
 import { handleError, handleNotFound } from "./error-handler"
 import { router } from "./routes"
 
@@ -20,6 +20,6 @@ app.onError(handleError)
 app.notFound(handleNotFound)
 
 export default {
-	port: env.PORT,
+	port: configuration.PORT,
 	fetch: app.fetch,
 }

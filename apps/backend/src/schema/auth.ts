@@ -1,4 +1,4 @@
-import { env } from "../env"
+import { configuration } from "../configuration"
 import { z } from "../libs/zod"
 import { decryptAndDecodeByBase64, toCryptoKey } from "../utility/crypto"
 import {
@@ -14,7 +14,7 @@ import {
 import { StringToArraySchema } from "./utility"
 
 const decryptJwkPrivateKeySecret = await toCryptoKey(
-	env.OIDC_ENCRYPT_PRIVATE_KEY_SECRET,
+	configuration.OIDC_ENCRYPT_PRIVATE_KEY_SECRET,
 	"decrypt",
 )
 

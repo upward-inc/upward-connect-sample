@@ -1,5 +1,5 @@
 import { verify } from "jsonwebtoken"
-import { env } from "../../env"
+import { configuration } from "../../configuration"
 import { getOAuthClientById } from "./get-oauth-client"
 import { getActiveUserById } from "./get-user"
 
@@ -49,7 +49,10 @@ export const validateRefreshTokenParams = async (
 
 	// リフレッシュトークンの検証
 	try {
-		const decoded = verify(params.refresh_token, env.OIDC_REFRESH_TOKEN_SECRET)
+		const decoded = verify(
+			params.refresh_token,
+			configuration.OIDC_REFRESH_TOKEN_SECRET,
+		)
 
 		// トークンの構造を確認
 		if (typeof decoded !== "object" || !decoded.sub) {

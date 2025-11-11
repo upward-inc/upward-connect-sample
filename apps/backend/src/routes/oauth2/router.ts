@@ -1,4 +1,5 @@
 import { OpenAPIHono, createRoute } from "@hono/zod-openapi"
+import { configuration } from "../../configuration"
 import {
 	deleteAuthorizationCode,
 	extractPublicKeyAsJwkFromPrivateKey,
@@ -11,7 +12,6 @@ import {
 	validateRefreshTokenParams,
 	validateTokenParams,
 } from "../../domain/auth"
-import { env } from "../../env"
 import {
 	type AuthContexts,
 	GetJwksResultSchema,
@@ -155,7 +155,7 @@ export const oauth2Router = new OpenAPIHono<{ Variables: AuthContexts }>()
 						access_token: accessToken,
 						id_token: idToken,
 						refresh_token: refreshToken,
-						expires_in: env.OIDC_TOKEN_EXPIRES_IN_MINUTE * 60,
+						expires_in: configuration.OIDC_TOKEN_EXPIRES_IN_MINUTE * 60,
 					},
 					200,
 				)
@@ -196,7 +196,7 @@ export const oauth2Router = new OpenAPIHono<{ Variables: AuthContexts }>()
 						token_type: "Bearer" as const,
 						access_token: accessToken,
 						refresh_token: refreshToken,
-						expires_in: env.OIDC_TOKEN_EXPIRES_IN_MINUTE * 60,
+						expires_in: configuration.OIDC_TOKEN_EXPIRES_IN_MINUTE * 60,
 					},
 					200,
 				)

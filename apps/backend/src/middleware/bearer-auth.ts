@@ -1,7 +1,7 @@
 import { bearerAuth as honoBearerAuth } from "hono/bearer-auth"
 import { createMiddleware } from "hono/factory"
 import { verify } from "jsonwebtoken"
-import { env } from "../env"
+import { configuration } from "../configuration"
 import type { AuthContexts } from "../schema/auth"
 
 export const bearerAuth = createMiddleware<{
@@ -11,7 +11,7 @@ export const bearerAuth = createMiddleware<{
 		verifyToken: async (token, c) => {
 			try {
 				// トークンの検証
-				const result = verify(token, env.OIDC_TOKEN_SECRET)
+				const result = verify(token, configuration.OIDC_TOKEN_SECRET)
 				if (!(typeof result.sub === "string" && result.sub.length > 0)) {
 					return false
 				}

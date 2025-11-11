@@ -1,5 +1,5 @@
 import type { OpenAPIHono } from "@hono/zod-openapi"
-import { env } from "../../env"
+import { configuration } from "../../configuration"
 import { generateOpenAPISpecsPage } from "../../libs/scalar"
 
 export function setupOpenAPIEndpoints<T extends OpenAPIHono>(
@@ -15,7 +15,7 @@ export function setupOpenAPIEndpoints<T extends OpenAPIHono>(
 	router.doc("/openapi", {
 		openapi: "3.1.0",
 		info: {
-			title: env.APP_NAME,
+			title: configuration.APP_NAME,
 			version: config.version,
 			description: config.description,
 		},

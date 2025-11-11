@@ -1,6 +1,6 @@
 import { type JwtPayload, verify } from "jsonwebtoken"
 import { afterAll, beforeAll, describe, expect, it } from "vitest"
-import { env } from "../../env"
+import { configuration } from "../../configuration"
 import { app } from "../../index"
 import { prisma } from "../../libs/prisma"
 import type { Jwk } from "../../schema/auth"

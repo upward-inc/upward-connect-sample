@@ -1,6 +1,6 @@
 import { addDay, date, dayEnd, dayStart } from "@formkit/tempo"
 import type { Prisma } from "@prisma/client"
-import { env } from "../src/env"
+import { configuration } from "../src/configuration"
 import {
 	encryptAndEncodeByBase64,
 	generatePrivateKeyPem,
@@ -8,7 +8,7 @@ import {
 } from "../src/utility/crypto"
 
 // 鍵のローテーション期間（有効期限）
-const KEY_ROTATION_PERIOD_IN_DAY = env.OIDC_KEY_ROTATION_PERIOD_IN_DAY
+const KEY_ROTATION_PERIOD_IN_DAY = configuration.OIDC_KEY_ROTATION_PERIOD_IN_DAY
 
 // 生成する期間の数
 const TOTAL_PERIODS = 120
@@ -24,7 +24,7 @@ export async function seedJwkPrivateKeys(prisma: Prisma.TransactionClient) {
 
 	// 暗号化用のキー
 	const encryptKey = await toCryptoKey(
-		env.OIDC_ENCRYPT_PRIVATE_KEY_SECRET,
+		configuration.OIDC_ENCRYPT_PRIVATE_KEY_SECRET,
 		"encrypt",
 	)
 
