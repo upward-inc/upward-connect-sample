@@ -8,6 +8,11 @@ import {
 	getZeroPaddingString,
 } from "./utility"
 
+interface leadCreateInput extends Prisma.leadCreateInput {
+	latitude?: number
+	longitude?: number
+}
+
 export async function seedLeads(
 	prisma: Prisma.TransactionClient,
 	users: user[],
@@ -43,7 +48,7 @@ export async function seedLeads(
 
 	const persons = getUniquePersons(1000)
 
-	const leads: Prisma.leadCreateManyInput[] = Array.from({ length: 100 }).map(
+	const leads: leadCreateInput[] = Array.from({ length: 100 }).map(
 		(_, index) => {
 			const code = getZeroPaddingString(index + 1, 6)
 			const user = getAnyRow(users)
@@ -101,9 +106,25 @@ export async function seedLeads(
 		},
 	)
 
-	const records = await prisma.lead.createMany({ data: leads })
+	const records = await Promise.all(
+		leads.map(async (lead) => {
+			return create(lead, prisma)
+		}),
+	)
 
-	console.info(`>> lead records created: ${records.count}`)
+	console.info(`>> lead records created: ${records.length}`)
 
 	return records
+}
+
+async function create(data: leadCreateInput, prisma: Prisma.TransactionClient) {
+	const { longitude, latitude, ...lead } = data
+	const record = await prisma.lead.create({ data: lead })
+	if (longitude && latitude) {
+		await prisma.$executeRaw`
+			UPDATE [lead]
+			SET [location] = geography::Point(${latitude}, ${longitude}, 4326)
+			WHERE [id] = ${record.id}`
+	}
+	return record
 }

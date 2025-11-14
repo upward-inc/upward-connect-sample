@@ -7,6 +7,11 @@ import {
 	getZeroPaddingString,
 } from "./utility"
 
+interface accountCreateInput extends Prisma.accountCreateInput {
+	latitude?: number
+	longitude?: number
+}
+
 export async function seedAccounts(
 	prisma: Prisma.TransactionClient,
 	users: user[],
@@ -42,7 +47,7 @@ export async function seedAccounts(
 		return option
 	}
 
-	const accounts: Prisma.accountCreateManyInput[] = Array.from({
+	const accounts: accountCreateInput[] = Array.from({
 		length: 2000,
 	}).map((_, index) => {
 		const code = getZeroPaddingString(index + 1, 6)
@@ -97,11 +102,30 @@ export async function seedAccounts(
 		}
 	})
 
-	const records = await prisma.account.createMany({ data: accounts })
+	const records = await Promise.all(
+		accounts.map(async (account) => {
+			return create(account, prisma)
+		}),
+	)
 
-	console.log(`>> account records created: ${records.count}`)
+	console.log(`>> account records created: ${records.length}`)
 
 	return records
+}
+
+async function create(
+	data: accountCreateInput,
+	prisma: Prisma.TransactionClient,
+) {
+	const { longitude, latitude, ...account } = data
+	const record = await prisma.account.create({ data: account })
+	if (longitude && latitude) {
+		await prisma.$executeRaw`
+            UPDATE [account]
+            SET [location] = geography::Point(${latitude}, ${longitude}, 4326)
+            WHERE [id] = ${record.id}`
+	}
+	return record
 }
 
 export async function seedAccountsParent(prisma: Prisma.TransactionClient) {

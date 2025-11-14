@@ -1,5 +1,6 @@
 import { addYear, date, format } from "@formkit/tempo"
 import type { Prisma, user } from "@prisma/client"
+import { addresses } from "./static/address"
 import {
 	distinctBy,
 	getAnyRow,
@@ -8,6 +9,11 @@ import {
 	getRandomInteger,
 	getZeroPaddingString,
 } from "./utility"
+
+interface sampleCreateInput extends Prisma.sampleCreateInput {
+	latitude?: number
+	longitude?: number
+}
 
 export async function seedSamples(
 	prisma: Prisma.TransactionClient,
@@ -45,7 +51,7 @@ export async function seedSamples(
 		return option
 	}
 
-	const samples: Prisma.sampleCreateManyInput[] = Array.from({
+	const samples: sampleCreateInput[] = Array.from({
 		length: 100,
 	}).map((_, index) => {
 		const code = getZeroPaddingString(index + 1, 6)
@@ -144,6 +150,8 @@ export async function seedSamples(
 			)
 		}
 
+		const address = getAnyRow(addresses)
+
 		return {
 			name: `Sample ${code}`,
 			text: getRandomBoolean(0.9) ? "text" : null,
@@ -186,15 +194,44 @@ export async function seedSamples(
 			reference_single_target_multi_id: getReferenceSingleTargetMultiId(),
 			reference_multi_target_single_id: getReferenceMultiTargetSingleId(),
 			reference_multi_target_multi_id: getReferenceMultiTargetMultiId(),
+			...(getRandomBoolean(0.9)
+				? {
+						address_zipcode: address.zipcode,
+						address_prefecture: address.prefecture,
+						address_municipality: address.municipality,
+						address_street: address.street,
+						latitude: address.latitude,
+						longitude: address.longitude,
+					}
+				: {}),
 			owner: userRecordReference,
 			created_by: userRecordReference,
 			modified_by: userRecordReference,
 		}
 	})
 
-	const records = await prisma.sample.createMany({ data: samples })
+	const records = await Promise.all(
+		samples.map(async (sample) => {
+			return create(sample, prisma)
+		}),
+	)
 
-	console.info(`>> sample records created: ${records.count}`)
+	console.info(`>> sample records created: ${records.length}`)
 
 	return records
+}
+
+async function create(
+	data: sampleCreateInput,
+	prisma: Prisma.TransactionClient,
+) {
+	const { longitude, latitude, ...sample } = data
+	const record = await prisma.sample.create({ data: sample })
+	if (longitude && latitude) {
+		await prisma.$executeRaw`
+			UPDATE [sample]
+			SET [location] = geography::Point(${latitude}, ${longitude}, 4326)
+			WHERE [id] = ${record.id}`
+	}
+	return record
 }
