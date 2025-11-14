@@ -1,4 +1,5 @@
 import { afterAll, beforeAll, describe, expect, it } from "vitest"
+import { ad } from "vitest/dist/chunks/reporters.d.BFLkQcL6"
 import { app } from "../../../../index"
 import { testPrisma } from "../../../../test/setup"
 import {
@@ -170,6 +171,12 @@ describe("PATCH /records/:entity_name/:id - レコード更新", () => {
 				accountRecordReference,
 				leadRecordReference,
 			],
+			address_zipcode: "1000001",
+			address_prefecture: "東京都",
+			address_municipality: "千代田区",
+			address_street: "千代田1-1",
+			latitude: 35.6938403,
+			longitude: 139.7535965,
 		})
 
 		// Assert
@@ -205,6 +212,26 @@ describe("PATCH /records/:entity_name/:id - レコード更新", () => {
 		expect(record?.reference_multi_target_multi_id).toBe(
 			JSON.stringify([accountRecordReference, leadRecordReference]),
 		)
+		expect(record?.address_zipcode).toBe("1000001")
+		expect(record?.address_prefecture).toBe("東京都")
+		expect(record?.address_municipality).toBe("千代田区")
+		expect(record?.address_street).toBe("千代田1-1")
+
+		// 位置情報の確認
+		const locationRecord = await testPrisma.$queryRawUnsafe<
+			{ latitude: number; longitude: number }[]
+		>(
+			`
+			SELECT
+				[location].Lat AS latitude,
+				[location].Long AS longitude
+			FROM [sample]
+			WHERE id = '${record?.id}'
+		`,
+		)
+		expect(locationRecord.length).toBe(1)
+		expect(locationRecord[0].latitude).toBe(35.6938403)
+		expect(locationRecord[0].longitude).toBe(139.7535965)
 	})
 
 	it("一部の項目のみ更新できること", async () => {
