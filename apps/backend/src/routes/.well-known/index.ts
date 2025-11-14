@@ -1,5 +1,5 @@
 import { OpenAPIHono, createRoute } from "@hono/zod-openapi"
-import { env } from "../../env"
+import { configuration } from "../../configuration"
 import { OidcConfigurationResultSchema } from "../../schema/auth"
 
 export const wellKnownRouter = new OpenAPIHono().openapi(
@@ -22,11 +22,11 @@ export const wellKnownRouter = new OpenAPIHono().openapi(
 		// https://openid.net/specs/openid-connect-discovery-1_0.html
 		return c.json(
 			{
-				issuer: env.OIDC_ISSUER,
-				authorization_endpoint: `${env.OIDC_ISSUER}/oauth2/authorize`,
-				token_endpoint: `${env.OIDC_ISSUER}/oauth2/token`,
-				userinfo_endpoint: `${env.OIDC_ISSUER}/oauth2/userinfo`,
-				jwks_uri: `${env.OIDC_ISSUER}/oauth2/jwks`,
+				issuer: configuration.OIDC_ISSUER,
+				authorization_endpoint: `${configuration.OIDC_ISSUER}/oauth2/authorize`,
+				token_endpoint: `${configuration.OIDC_ISSUER}/oauth2/token`,
+				userinfo_endpoint: `${configuration.OIDC_ISSUER}/oauth2/userinfo`,
+				jwks_uri: `${configuration.OIDC_ISSUER}/oauth2/jwks`,
 				response_types_supported: ["code" as const],
 				subject_types_supported: ["public" as const],
 				id_token_signing_alg_values_supported: ["RS256" as const],

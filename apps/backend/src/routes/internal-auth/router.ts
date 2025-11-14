@@ -1,5 +1,6 @@
 import { OpenAPIHono, createRoute } from "@hono/zod-openapi"
 import { nanoid } from "nanoid"
+import { configuration } from "../../configuration"
 import {
 	generateAccessToken,
 	getActiveUserByUsernameAndPassword,
@@ -7,7 +8,6 @@ import {
 	saveAuthorizationCode,
 	validateAuthorizeParams,
 } from "../../domain/auth"
-import { env } from "../../env"
 import {
 	type AuthContexts,
 	GetOAuthClientParamSchema,
@@ -173,7 +173,8 @@ export const internalAuthRouter = new OpenAPIHono<{ Variables: AuthContexts }>()
 				code_challenge_method: params.code_challenge_method,
 				published_at: new Date(),
 				expire_at: new Date(
-					Date.now() + 1000 * 60 * env.OAUTH2_AUTH_CODE_EXPIRES_IN_MINUTE,
+					Date.now() +
+						1000 * 60 * configuration.OAUTH2_AUTH_CODE_EXPIRES_IN_MINUTE,
 				),
 			})
 

@@ -1,5 +1,5 @@
 import { sign } from "jsonwebtoken"
-import { env } from "../../env"
+import { configuration } from "../../configuration"
 import type { LoggedInUser } from "../../schema/auth"
 import { getNotExpiredJwkPrivateKeyList } from "./get-jwk-private-key-list"
 
@@ -12,12 +12,12 @@ export const generateAccessToken = (payload: {
 	clientId: string
 	nonce?: string
 }) => {
-	const accessToken = sign({}, env.OIDC_TOKEN_SECRET, {
+	const accessToken = sign({}, configuration.OIDC_TOKEN_SECRET, {
 		algorithm: "HS256",
-		issuer: env.OIDC_ISSUER,
+		issuer: configuration.OIDC_ISSUER,
 		subject: payload.userId,
 		audience: payload.clientId,
-		expiresIn: `${env.OIDC_TOKEN_EXPIRES_IN_MINUTE} minutes`,
+		expiresIn: `${configuration.OIDC_TOKEN_EXPIRES_IN_MINUTE} minutes`,
 	})
 
 	return accessToken
@@ -63,10 +63,10 @@ export const generateIdToken = async (payload: {
 		{
 			keyid: privateKey.id,
 			algorithm: "RS256",
-			issuer: env.OIDC_ISSUER,
+			issuer: configuration.OIDC_ISSUER,
 			subject: payload.user.id,
 			audience: payload.clientId,
-			expiresIn: `${env.OIDC_TOKEN_EXPIRES_IN_MINUTE} minutes`,
+			expiresIn: `${configuration.OIDC_TOKEN_EXPIRES_IN_MINUTE} minutes`,
 		},
 	)
 	return idToken
@@ -79,12 +79,12 @@ export const generateRefreshToken = (payload: {
 	userId: string
 	clientId: string
 }) => {
-	const refreshToken = sign({}, env.OIDC_REFRESH_TOKEN_SECRET, {
+	const refreshToken = sign({}, configuration.OIDC_REFRESH_TOKEN_SECRET, {
 		algorithm: "HS256",
-		issuer: env.OIDC_ISSUER,
+		issuer: configuration.OIDC_ISSUER,
 		subject: payload.userId,
 		audience: payload.clientId,
-		expiresIn: `${env.OIDC_REFRESH_TOKEN_EXPIRES_IN_DAY} days`,
+		expiresIn: `${configuration.OIDC_REFRESH_TOKEN_EXPIRES_IN_DAY} days`,
 	})
 
 	return refreshToken

@@ -2,7 +2,7 @@ import { addDay, date } from "@formkit/tempo"
 import type { Prisma } from "@prisma/client"
 import { sign } from "jsonwebtoken"
 import type * as ms from "ms"
-import { env } from "../../env"
+import { configuration } from "../../configuration"
 import {
 	encryptAndEncodeByBase64,
 	generatePrivateKeyPem,
@@ -159,7 +159,10 @@ export async function deleteTestJwkPrivateKeyById(id: string) {
 async function toJwkPrivateKeyCreateInput(
 	data?: PrivateKeyData,
 ): Promise<Prisma.jwk_private_keyCreateInput> {
-	const key = await toCryptoKey(env.OIDC_ENCRYPT_PRIVATE_KEY_SECRET, "encrypt")
+	const key = await toCryptoKey(
+		configuration.OIDC_ENCRYPT_PRIVATE_KEY_SECRET,
+		"encrypt",
+	)
 	const iv = data?.iv ?? crypto.getRandomValues(new Uint8Array(16))
 	const now = date()
 	return {
@@ -171,8 +174,10 @@ async function toJwkPrivateKeyCreateInput(
 		base64_iv: Buffer.from(iv).toString("base64"),
 		validate_at: data?.validate_at ?? now,
 		expire_at:
-			data?.expire_at ?? addDay(now, env.OIDC_KEY_ROTATION_PERIOD_IN_DAY),
+			data?.expire_at ??
+			addDay(now, configuration.OIDC_KEY_ROTATION_PERIOD_IN_DAY),
 		closed_at:
-			data?.closed_at ?? addDay(now, env.OIDC_KEY_ROTATION_PERIOD_IN_DAY * 2),
+			data?.closed_at ??
+			addDay(now, configuration.OIDC_KEY_ROTATION_PERIOD_IN_DAY * 2),
 	}
 }

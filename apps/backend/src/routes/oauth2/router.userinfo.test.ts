@@ -1,6 +1,6 @@
 import { sign } from "jsonwebtoken"
 import { afterAll, beforeAll, describe, expect, it } from "vitest"
-import { env } from "../../env"
+import { configuration } from "../../configuration"
 import { app } from "../../index"
 import { createExpiredToken, createValidToken } from "../../test/utils/auth"
 import {
@@ -10,7 +10,7 @@ import {
 } from "../../test/utils/execution-user"
 
 describe("GET /oauth2/userinfo - ユーザー情報取得", () => {
-	const tokenSecret = env.OIDC_TOKEN_SECRET
+	const tokenSecret = configuration.OIDC_TOKEN_SECRET
 
 	// テスト実施ユーザー
 	let testExecutionUser: TestExecutionUser

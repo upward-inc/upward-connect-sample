@@ -1,6 +1,6 @@
 import { type JwtPayload, verify } from "jsonwebtoken"
 import { afterAll, beforeAll, describe, expect, it } from "vitest"
-import { env } from "../../env"
+import { configuration } from "../../configuration"
 import { app } from "../../index"
 import { prisma } from "../../libs/prisma"
 import type { Jwk } from "../../schema/auth"
@@ -18,7 +18,7 @@ import {
 import { convertJwkToPem } from "../../utility/crypto"
 
 describe("POST /oauth2/token - トークンエンドポイント", () => {
-	const tokenSecret = env.OIDC_TOKEN_SECRET
+	const tokenSecret = configuration.OIDC_TOKEN_SECRET
 	interface DecodedIdToken extends JwtPayload {
 		nonce: string
 		user_id: string
@@ -150,7 +150,7 @@ describe("POST /oauth2/token - トークンエンドポイント", () => {
 			expect(data).toHaveProperty("token_type", "Bearer")
 			expect(data).toHaveProperty(
 				"expires_in",
-				env.OIDC_TOKEN_EXPIRES_IN_MINUTE * 60,
+				configuration.OIDC_TOKEN_EXPIRES_IN_MINUTE * 60,
 			)
 		})
 
@@ -789,7 +789,7 @@ describe("POST /oauth2/token - トークンエンドポイント", () => {
 			) as DecodedIdToken
 
 			// Assert - IDトークンに全項目が含まれていることを検証
-			expect(decodedIdToken).toHaveProperty("iss", env.OIDC_ISSUER)
+			expect(decodedIdToken).toHaveProperty("iss", configuration.OIDC_ISSUER)
 			expect(decodedIdToken).toHaveProperty("sub", testExecutionUser.id)
 			expect(decodedIdToken).toHaveProperty("aud", testClient.id)
 			expect(decodedIdToken).toHaveProperty("exp")
@@ -882,7 +882,7 @@ describe("POST /oauth2/token - トークンエンドポイント", () => {
 				) as DecodedIdToken
 
 				// Assert - IDトークンに必須項目のみが含まれていることを検証
-				expect(decodedIdToken).toHaveProperty("iss", env.OIDC_ISSUER)
+				expect(decodedIdToken).toHaveProperty("iss", configuration.OIDC_ISSUER)
 				expect(decodedIdToken).toHaveProperty(
 					"sub",
 					userWithoutOptionalFields.id,
