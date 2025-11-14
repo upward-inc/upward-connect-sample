@@ -6,7 +6,7 @@ import {
 	OffsetQuerySchema,
 	OrderByQuerySchema,
 } from "./paging"
-import { StringToArraySchema } from "./utility"
+import { StringToArraySchema, ToJsonObjectSchema } from "./utility"
 
 // TODO: zod.lazy()はまだサポートしていないため、openapiの内容を上書きする
 // @see https://github.com/honojs/middleware/issues/643#issuecomment-2265271987
@@ -30,6 +30,27 @@ const GroupByQuerySchema = StringToArraySchema().meta({
 	example: "category",
 })
 
+const LocationQuerySchema = ToJsonObjectSchema(
+	z.object({
+		point: z.object({
+			latitude: z.number().min(-90).max(90).meta({
+				description: "検索対象の緯度",
+				example: 35.6795964,
+			}),
+			longitude: z.number().min(-180).max(180).meta({
+				description: "検索対象の経度",
+				example: 139.7460797,
+			}),
+		}),
+		radius: z.number().min(1).meta({
+			description: "検索半径（単位: メートル）",
+			example: 10000,
+		}),
+	}),
+).meta({
+	description: "ロケーション検索専用オブジェクト",
+})
+
 export const GetRecordListQuerySchema = z.object({
 	// TODO: 参照先オブジェクトのフィールドを取得可能な形式を検討する
 	fields: FieldsQuerySchema,
@@ -38,6 +59,7 @@ export const GetRecordListQuerySchema = z.object({
 	order_by: OrderByQuerySchema.optional(),
 	limit: LimitQuerySchema.optional(),
 	offset: OffsetQuerySchema.optional(),
+	location: LocationQuerySchema.optional(),
 })
 
 export const GetRecordListResponseSchema = z.object({

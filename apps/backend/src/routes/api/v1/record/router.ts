@@ -67,7 +67,7 @@ export const recordRouter = new OpenAPIHono<{ Variables: AuthContexts }>()
 				return c.json({ message }, 404)
 			}
 
-			const validateResult = validateGetRecordListQuery(query)
+			const validateResult = validateGetRecordListQuery(entity_name, query)
 			if (!validateResult.success) {
 				return c.json({ message: validateResult.message }, 400)
 			}

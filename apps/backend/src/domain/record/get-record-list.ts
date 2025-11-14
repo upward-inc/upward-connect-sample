@@ -28,8 +28,20 @@ type Reference = {
 
 export const getRecordList = async (
 	entity_name: string,
-	{ fields, filter, group_by, order_by, limit, offset }: GetRecordListQuery,
+	{
+		fields,
+		filter,
+		group_by,
+		order_by,
+		limit,
+		offset,
+		location,
+	}: GetRecordListQuery,
 ): Promise<GetRecordListResponse> => {
+	const { point, radius } = location ?? {}
+	const distanceQuery = point
+		? toDistanceQuery(toGeographyPointQuery(point.latitude, point.longitude))
+		: null
 	const entityItems = await getEntityItemList(entity_name)
 	const entityItemMap = new Map(entityItems.map((item) => [item.name, item]))
 
@@ -70,12 +82,20 @@ export const getRecordList = async (
 		return !!entityItems.find(({ name }) => name === field)
 	})
 
-	const selectClause = SelectClauseSchema.parse(selectFields)
+	const select = SelectClauseSchema.parse(selectFields)
+	// ロケーション検索の場合、距離情報を追加で取得
+	const selectClause = distanceQuery
+		? `${select}, location.Lat AS _latitude, location.Long AS _longitude, ${distanceQuery} AS distance`
+		: select
 
 	// 数式が必要な場合のみビューを参照
 	const fromClause = `FROM [${entity_name}${needFormulaField ? "_view" : ""}]`
 
-	const whereClause = WhereClauseSchema.parse({ items: entityItems, filter })
+	const where = WhereClauseSchema.parse({ items: entityItems, filter })
+	// ロケーション検索の場合、距離条件を追加
+	const whereClause = distanceQuery
+		? `${where ? `${where} AND ` : "WHERE "}${distanceQuery} <= ${radius}`
+		: where
 
 	const groupByFields = group_by?.filter((field) => {
 		return !!entityItems.find(({ name }) => name === field)
@@ -85,7 +105,11 @@ export const getRecordList = async (
 		? GroupByClauseSchema.parse(groupByFields)
 		: null
 
-	const baseOrderBy = buildBaseOrderBy(order_by, groupByFields)
+	// ロケーション検索の場合、距離でのソートを優先的に適用
+	const locationOrderBy = distanceQuery
+		? [{ field: "distance", direction: "asc" as const }, ...(order_by ?? [])]
+		: (order_by ?? [])
+	const baseOrderBy = buildBaseOrderBy(locationOrderBy, groupByFields)
 	const hasGroupByFields = hasFields(groupByFields)
 	const orderBy = appendIdToOrderBy(baseOrderBy, hasGroupByFields)
 	const orderByClause = OrderByClauseSchema.parse(orderBy)
@@ -130,7 +154,7 @@ export const getRecordList = async (
 	// 余分に取得したレコードを除外
 	const records = limit ? fetchDataResult.slice(0, limit) : fetchDataResult
 
-	const data = await covertRecords(records, fields, entityItemMap)
+	const data = await covertRecords(records, fields, entityItemMap, !!location)
 	const hasNextPage = limit ? fetchDataResult.length > limit : false
 	const totalSize = totalSizeResult.at(0)?.count ?? 0
 
@@ -187,6 +211,7 @@ const covertRecords = async (
 	records: DBRecord[],
 	queryFields: string[],
 	entityItemMap: Map<string, EntityItem>,
+	needLocation: boolean,
 ) => {
 	const referenceRecords = await getReferenceRecords(records, entityItemMap)
 
@@ -249,6 +274,17 @@ const covertRecords = async (
 
 			const jsonValue = value instanceof Date ? value.toISOString() : value
 			data = { ...data, [field]: jsonValue ?? null }
+		}
+
+		// locationパラメータが指定されている場合、位置情報を示すローケーションフィールドを付与
+		if (needLocation) {
+			data = {
+				...data,
+				_location: {
+					latitude: row._latitude as number | null,
+					longitude: row._longitude as number | null,
+				},
+			}
 		}
 
 		return data
@@ -332,4 +368,12 @@ const getReferenceRecords = async (
 	}
 
 	return referenceMap
+}
+
+const toGeographyPointQuery = (latitude: number, longitude: number) => {
+	return `GEOGRAPHY::Point(${latitude}, ${longitude}, 4326)`
+}
+
+const toDistanceQuery = (pointQuery: string) => {
+	return `${pointQuery}.STDistance([location])`
 }

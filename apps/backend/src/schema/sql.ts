@@ -20,11 +20,25 @@ import type {
 } from "./operator"
 import { LimitSchema, OffsetSchema, OrderBySchema } from "./paging"
 
-export const SelectClauseSchema = z.array(z.string()).transform((fields) => {
-	// Handle SQL Server reserved keywords by wrapping them in brackets
-	const safeFields = fields.map((field) => `[${field}]`)
-	return `SELECT ${safeFields.join(", ")}`
-})
+export const SelectClauseSchema = z
+	.array(z.string())
+	.transform((fields) => {
+		// SQL Serverの保留キーワードは角括弧で囲んで処理する
+		const safeFields = fields.map((field) => `[${field}]`)
+		// 経緯度フィールドの変換
+		const locationKeywords = ["[latitude]", "[longitude]"]
+		return safeFields.map((field) => {
+			if (locationKeywords.includes(field)) {
+				return field
+					.replace("[latitude]", "location.Lat AS latitude")
+					.replace("[longitude]", "location.Long AS longitude")
+			}
+			return field
+		})
+	})
+	.transform((safeFields) => {
+		return `SELECT ${safeFields.join(", ")}`
+	})
 
 export const WhereClauseSchema = z
 	.object({
