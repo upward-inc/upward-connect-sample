@@ -68,6 +68,8 @@ export interface SampleData
 	reference_single_target_multi_id?: RecordReference[] | null
 	reference_multi_target_single_id?: RecordReference | null
 	reference_multi_target_multi_id?: RecordReference[] | null
+	latitude?: number | null
+	longitude?: number | null
 	owner?: RecordReference
 	created_by?: RecordReference
 	modified_by?: RecordReference
@@ -246,6 +248,13 @@ export async function createTestSample(
 		select: { id: true },
 	})
 
+	if (data.latitude != null && data.longitude != null) {
+		await testPrisma.$executeRaw`
+            UPDATE [sample]
+            SET [location] = GEOGRAPHY::Point(${data.latitude}, ${data.longitude}, 4326)
+            WHERE [id] = ${sample.id}`
+	}
+
 	return await testPrisma.sample_view.findUniqueOrThrow({
 		where: { id: sample.id },
 	})
@@ -258,9 +267,10 @@ export async function createManyTestSamples(
 	userId: string,
 	data: Array<SampleData>,
 ): Promise<{ count: number }> {
-	return await testPrisma.sample.createMany({
-		data: data.map((d) => toSampleCreateInput(userId, d)),
-	})
+	const samples = await Promise.all(
+		data.map(async (d) => createTestSample(userId, d)),
+	)
+	return { count: samples.length }
 }
 
 /**
@@ -352,9 +362,10 @@ function toContactCreateInput(
 
 function toSampleCreateInput(
 	userId: string,
-	data: SampleData,
+	sampleData: SampleData,
 ): Prisma.sampleCreateInput {
 	const userReference = JSON.stringify({ entity_name: "user", id: userId })
+	const { latitude, longitude, ...data } = sampleData
 	return {
 		...data,
 		time: data.time
