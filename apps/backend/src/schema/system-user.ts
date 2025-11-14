@@ -1,5 +1,11 @@
 import { z } from "../libs/zod"
-import { ToDateSchema } from "./utility"
+import { NestableFilterQuerySchema } from "./filter"
+import {
+	LimitQuerySchema,
+	OffsetQuerySchema,
+	OrderByQuerySchema,
+} from "./paging"
+import { StringToArraySchema, ToDateSchema } from "./utility"
 
 export const UserIdSchema = z.string().meta({
 	description: "ユーザーID",
@@ -79,9 +85,48 @@ export const SystemUserListSchema = z.array(SystemUserSchema).meta({
 	description: "システムユーザー一覧",
 })
 
+const FieldsQuerySchema = StringToArraySchema().meta({
+	description: "返却対象のフィールド名（カンマ区切り）",
+	example: "id, user_name, is_active",
+})
+
 export const GetSystemUserParamSchema = z.object({
 	id: z.string(),
 })
 
+export const GetSystemUserListQuerySchema = z.object({
+	fields: FieldsQuerySchema,
+	filter: NestableFilterQuerySchema.optional(),
+	order_by: OrderByQuerySchema.optional(),
+	limit: LimitQuerySchema.optional(),
+	offset: OffsetQuerySchema.optional(),
+})
+
+export const GetSystemUserListResponseSchema = z
+	.object({
+		has_next_page: z.boolean().meta({
+			description: "同一の検索条件にて次ページが存在するかどうか",
+			example: false,
+		}),
+		total_size: z.number().meta({
+			description: "同一の検索条件にて取得可能なデータの総数",
+			example: 1234,
+		}),
+		data: z.array(
+			SystemUserSchema.partial().meta({
+				description: "システムユーザー（指定したフィールドのみ）",
+			}),
+		),
+	})
+	.meta({
+		description: "システムユーザー一覧",
+	})
+
 export type SystemUser = z.infer<typeof SystemUserSchema>
 export type SystemUserList = z.infer<typeof SystemUserListSchema>
+export type GetSystemUserListQuery = z.infer<
+	typeof GetSystemUserListQuerySchema
+>
+export type GetSystemUserListResponse = z.infer<
+	typeof GetSystemUserListResponseSchema
+>
