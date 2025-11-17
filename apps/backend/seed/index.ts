@@ -1,5 +1,9 @@
 import { PrismaClient } from "@prisma/client"
-import { seedAccounts, seedAccountsParent } from "./account"
+import {
+	seedAccounts,
+	seedAccountsAddressAndLocation,
+	seedAccountsParent,
+} from "./account"
 import { seedActivities } from "./activity"
 import { seedCampaigns } from "./campaign"
 import { seedCases } from "./case"
@@ -8,14 +12,14 @@ import { seedEntities } from "./entity"
 import { seedEntityItems } from "./entity-item"
 import { seedEntityItemOptions } from "./entity-item-option"
 import { seedJwkPrivateKeys } from "./jwk-private-key"
-import { seedLeads } from "./lead"
+import { seedLeads, seedLeadsAddressAndLocation } from "./lead"
 import { seedOauthClients } from "./oauth-client"
 import { seedOpportunities } from "./opportunity"
 import { seedPhoneCalls } from "./phone-call"
 import { seedProducts } from "./product"
 import { seedProfiles } from "./profile"
 import { seedRoles } from "./role"
-import { seedSamples } from "./sample"
+import { seedSamples, seedSamplesAddressAndLocation } from "./sample"
 import { seedUsers } from "./user"
 import { seedUserAccessControls } from "./user-access-control"
 
@@ -80,9 +84,11 @@ try {
 
 			// リード
 			await seedLeads(txClient, users)
+			await seedLeadsAddressAndLocation(txClient)
 
 			// 取引先
 			await seedAccounts(txClient, users)
+			await seedAccountsAddressAndLocation(txClient)
 			await seedAccountsParent(txClient)
 
 			// 取引先担当者
@@ -108,6 +114,7 @@ try {
 
 			// サンプル
 			await seedSamples(txClient, users)
+			await seedSamplesAddressAndLocation(txClient)
 		},
 		{
 			timeout: 1000 * 60,
