@@ -18,7 +18,7 @@ const envSchema = z.object({
 
 export const configuration = {
 	...envSchema.parse(process.env),
-	LOCATION_ENTITIES: ["account", "lead"] as const,
+	LOCATION_ENTITIES: ["account", "lead", "sample"] as const,
 }
 
 export type Environment = z.infer<typeof envSchema>

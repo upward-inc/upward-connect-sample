@@ -60,16 +60,6 @@ export async function seedLeads(
 				last_name: person.lastName.value,
 				business_unit: getRandomBoolean(0.9) ? `部署 ${code}` : null,
 				title: getRandomBoolean(0.9) ? `役職 ${code}` : null,
-				...(getRandomBoolean(0.9)
-					? {
-							address_zipcode: address.zipcode,
-							address_prefecture: address.prefecture,
-							address_municipality: address.municipality,
-							address_street: address.street,
-							latitude: address.latitude,
-							longitude: address.longitude,
-						}
-					: {}),
 				phone_number: getRandomBoolean(0.9)
 					? `00-0000-${getZeroPaddingString(index + 1, 4)}`
 					: null,
@@ -106,4 +96,31 @@ export async function seedLeads(
 	console.info(`>> lead records created: ${records.count}`)
 
 	return records
+}
+
+export async function seedLeadsAddressAndLocation(
+	prisma: Prisma.TransactionClient,
+) {
+	const records = await prisma.lead.findMany()
+
+	const result = await Promise.all(
+		records.map((record) => {
+			if (getRandomBoolean(0.9)) {
+				const address = getAnyRow(addresses)
+
+				const query = `
+					UPDATE [lead]
+					SET [address_zipcode] = N'${address.zipcode}',
+						[address_prefecture] = N'${address.prefecture}',
+						[address_municipality] = N'${address.municipality}',
+						[address_street] = N'${address.street}',
+						[location] = geography::Point(${address.latitude}, ${address.longitude}, 4326)
+					WHERE [id] = '${record.id}'
+				`
+
+				return prisma.$executeRawUnsafe(query)
+			}
+		}),
+	)
+	console.log(`>> lead records updated: ${result.length}`)
 }

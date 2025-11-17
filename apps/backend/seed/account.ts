@@ -51,7 +51,6 @@ export async function seedAccounts(
 			entity_name: "user",
 			id: user.id,
 		})
-		const address = getAnyRow(addresses)
 
 		return {
 			name: `株式会社 ${code}`,
@@ -72,16 +71,6 @@ export async function seedAccounts(
 			revenue: getRandomBoolean(0.9)
 				? getRandomInteger(1, 1000) * 10_000_000
 				: null,
-			...(getRandomBoolean(0.9)
-				? {
-						address_zipcode: address.zipcode,
-						address_prefecture: address.prefecture,
-						address_municipality: address.municipality,
-						address_street: address.street,
-						latitude: address.latitude,
-						longitude: address.longitude,
-					}
-				: {}),
 			market_cap: getRandomBoolean(0.9)
 				? getRandomInteger(1, 1000) * 100_000_000
 				: null,
@@ -102,6 +91,33 @@ export async function seedAccounts(
 	console.log(`>> account records created: ${records.count}`)
 
 	return records
+}
+
+export async function seedAccountsAddressAndLocation(
+	prisma: Prisma.TransactionClient,
+) {
+	const accounts = await prisma.account.findMany()
+
+	const result = await Promise.all(
+		accounts.map((account) => {
+			if (getRandomBoolean(0.9)) {
+				const address = getAnyRow(addresses)
+
+				const query = `
+					UPDATE [account]
+					SET [address_zipcode] = N'${address.zipcode}',
+						[address_prefecture] = N'${address.prefecture}',
+						[address_municipality] = N'${address.municipality}',
+						[address_street] = N'${address.street}',
+						[location] = geography::Point(${address.latitude}, ${address.longitude}, 4326)
+					WHERE [id] = '${account.id}'
+					`
+
+				return prisma.$executeRawUnsafe(query)
+			}
+		}),
+	)
+	console.log(`>> account records updated: ${result.length}`)
 }
 
 export async function seedAccountsParent(prisma: Prisma.TransactionClient) {

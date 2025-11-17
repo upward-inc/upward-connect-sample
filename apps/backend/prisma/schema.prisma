@@ -9,31 +9,30 @@ datasource db {
 }
 
 model account {
-  id                   String   @id(map: "pk_account") @default(dbgenerated("newid()"), map: "df_account_id") @db.UniqueIdentifier
-  name                 String   @db.NVarChar(256)
-  account_number       String?  @db.NVarChar(20)
-  main_phone_number    String?  @db.NVarChar(50)
-  sub_phone_number     String?  @db.NVarChar(50)
-  website              String?  @db.NVarChar(Max)
-  industry             String?  @db.NVarChar(Max)
-  number_of_employees  Decimal? @db.Decimal(6, 0)
-  revenue              Decimal? @db.Decimal(16, 0)
-  address_zipcode      String?  @db.NVarChar(20)
-  address_prefecture   String?  @db.NVarChar(256)
-  address_municipality String?  @db.NVarChar(256)
-  address_street       String?  @db.NVarChar(256)
-  latitude             Decimal? @db.Decimal(18, 15)
-  longitude            Decimal? @db.Decimal(18, 15)
-  market_cap           Decimal? @db.Decimal(16, 0)
-  description          String?  @db.NVarChar(Max)
-  originating_lead     String?  @db.NVarChar(Max)
-  parent               String?  @db.NVarChar(Max)
-  is_deleted           Boolean  @default(false, map: "df_account_is_deleted")
-  owner                String   @db.NVarChar(Max)
-  created_at           DateTime @default(dbgenerated("getutcdate()"), map: "df_account_created_at")
-  created_by           String   @db.NVarChar(Max)
-  modified_at          DateTime @default(dbgenerated("getutcdate()"), map: "df_account_modified_at")
-  modified_by          String   @db.NVarChar(Max)
+  id                   String                    @id(map: "pk_account") @default(dbgenerated("newid()"), map: "df_account_id") @db.UniqueIdentifier
+  name                 String                    @db.NVarChar(256)
+  account_number       String?                   @db.NVarChar(20)
+  main_phone_number    String?                   @db.NVarChar(50)
+  sub_phone_number     String?                   @db.NVarChar(50)
+  website              String?                   @db.NVarChar(Max)
+  industry             String?                   @db.NVarChar(Max)
+  number_of_employees  Decimal?                  @db.Decimal(6, 0)
+  revenue              Decimal?                  @db.Decimal(16, 0)
+  address_zipcode      String?                   @db.NVarChar(20)
+  address_prefecture   String?                   @db.NVarChar(256)
+  address_municipality String?                   @db.NVarChar(256)
+  address_street       String?                   @db.NVarChar(256)
+  location             Unsupported("geography")?
+  market_cap           Decimal?                  @db.Decimal(16, 0)
+  description          String?                   @db.NVarChar(Max)
+  originating_lead     String?                   @db.NVarChar(Max)
+  parent               String?                   @db.NVarChar(Max)
+  is_deleted           Boolean                   @default(false, map: "df_account_is_deleted")
+  owner                String                    @db.NVarChar(Max)
+  created_at           DateTime                  @default(dbgenerated("getutcdate()"), map: "df_account_created_at")
+  created_by           String                    @db.NVarChar(Max)
+  modified_at          DateTime                  @default(dbgenerated("getutcdate()"), map: "df_account_modified_at")
+  modified_by          String                    @db.NVarChar(Max)
 }
 
 model activity {
@@ -204,36 +203,35 @@ model file {
 }
 
 model lead {
-  id                   String    @id(map: "pk_lead") @default(dbgenerated("newid()"), map: "df_lead_id") @db.UniqueIdentifier
-  company              String    @db.NVarChar(256)
-  first_name           String?   @db.NVarChar(256)
-  last_name            String    @db.NVarChar(256)
-  business_unit        String?   @db.NVarChar(256)
-  title                String?   @db.NVarChar(256)
-  address_zipcode      String?   @db.NVarChar(20)
-  address_prefecture   String?   @db.NVarChar(256)
-  address_municipality String?   @db.NVarChar(256)
-  address_street       String?   @db.NVarChar(256)
-  latitude             Decimal?  @db.Decimal(18, 15)
-  longitude            Decimal?  @db.Decimal(18, 15)
-  phone_number         String?   @db.NVarChar(50)
-  email                String?   @db.NVarChar(Max)
-  website              String?   @db.NVarChar(Max)
-  description          String?   @db.NVarChar(Max)
-  lead_source          String?   @db.NVarChar(Max)
-  status               String    @db.NVarChar(Max)
-  industry             String?   @db.NVarChar(Max)
-  rating               String?   @db.NVarChar(Max)
-  annual_revenue       Decimal?  @db.Decimal(16, 0)
-  number_of_employees  Decimal?  @db.Decimal(6, 0)
-  is_converted         Boolean?  @default(false, map: "df_lead_is_converted")
-  converted_date       DateTime? @db.Date
-  is_deleted           Boolean   @default(false, map: "df_lead_is_deleted")
-  owner                String    @db.NVarChar(Max)
-  created_at           DateTime  @default(dbgenerated("getutcdate()"), map: "df_lead_created_at")
-  created_by           String    @db.NVarChar(Max)
-  modified_at          DateTime  @default(dbgenerated("getutcdate()"), map: "df_lead_modified_at")
-  modified_by          String    @db.NVarChar(Max)
+  id                   String                    @id(map: "pk_lead") @default(dbgenerated("newid()"), map: "df_lead_id") @db.UniqueIdentifier
+  company              String                    @db.NVarChar(256)
+  first_name           String?                   @db.NVarChar(256)
+  last_name            String                    @db.NVarChar(256)
+  business_unit        String?                   @db.NVarChar(256)
+  title                String?                   @db.NVarChar(256)
+  address_zipcode      String?                   @db.NVarChar(20)
+  address_prefecture   String?                   @db.NVarChar(256)
+  address_municipality String?                   @db.NVarChar(256)
+  address_street       String?                   @db.NVarChar(256)
+  location             Unsupported("geography")?
+  phone_number         String?                   @db.NVarChar(50)
+  email                String?                   @db.NVarChar(Max)
+  website              String?                   @db.NVarChar(Max)
+  description          String?                   @db.NVarChar(Max)
+  lead_source          String?                   @db.NVarChar(Max)
+  status               String                    @db.NVarChar(Max)
+  industry             String?                   @db.NVarChar(Max)
+  rating               String?                   @db.NVarChar(Max)
+  annual_revenue       Decimal?                  @db.Decimal(16, 0)
+  number_of_employees  Decimal?                  @db.Decimal(6, 0)
+  is_converted         Boolean?                  @default(false, map: "df_lead_is_converted")
+  converted_date       DateTime?                 @db.Date
+  is_deleted           Boolean                   @default(false, map: "df_lead_is_deleted")
+  owner                String                    @db.NVarChar(Max)
+  created_at           DateTime                  @default(dbgenerated("getutcdate()"), map: "df_lead_created_at")
+  created_by           String                    @db.NVarChar(Max)
+  modified_at          DateTime                  @default(dbgenerated("getutcdate()"), map: "df_lead_modified_at")
+  modified_by          String                    @db.NVarChar(Max)
 }
 
 model opportunity {
@@ -329,32 +327,37 @@ model role {
 }
 
 model sample {
-  id                                String    @id(map: "pk_sample") @default(dbgenerated("newid()"), map: "df_sample_id") @db.UniqueIdentifier
-  name                              String    @db.NVarChar(256)
-  text                              String?   @db.NVarChar(Max)
-  textarea                          String?   @db.NVarChar(Max)
-  phone_number                      String?   @db.NVarChar(50)
-  email                             String?   @db.NVarChar(Max)
-  url                               String?   @db.NVarChar(Max)
-  combobox                          String?   @db.NVarChar(Max)
-  integer                           Decimal?  @db.Decimal(16, 0)
-  decimal                           Decimal?  @db.Decimal(16, 2)
-  boolean                           Boolean?  @default(false, map: "df_sample_boolean")
-  date                              DateTime? @db.Date
-  datetime                          DateTime? @db.DateTime
-  time                              DateTime? @db.Time
-  option_single                     String?   @db.NVarChar(Max)
-  option_multi                      String?   @db.NVarChar(Max)
-  reference_single_target_single_id String?   @db.NVarChar(Max)
-  reference_single_target_multi_id  String?   @db.NVarChar(Max)
-  reference_multi_target_single_id  String?   @db.NVarChar(Max)
-  reference_multi_target_multi_id   String?   @db.NVarChar(Max)
-  is_deleted                        Boolean   @default(false, map: "df_sample_is_deleted")
-  owner                             String    @db.NVarChar(Max)
-  created_at                        DateTime  @default(dbgenerated("getutcdate()"), map: "df_sample_created_at")
-  created_by                        String    @db.NVarChar(Max)
-  modified_at                       DateTime  @default(dbgenerated("getutcdate()"), map: "df_sample_modified_at")
-  modified_by                       String    @db.NVarChar(Max)
+  id                                String                    @id(map: "pk_sample") @default(dbgenerated("newid()"), map: "df_sample_id") @db.UniqueIdentifier
+  name                              String                    @db.NVarChar(256)
+  text                              String?                   @db.NVarChar(Max)
+  textarea                          String?                   @db.NVarChar(Max)
+  phone_number                      String?                   @db.NVarChar(50)
+  email                             String?                   @db.NVarChar(Max)
+  url                               String?                   @db.NVarChar(Max)
+  combobox                          String?                   @db.NVarChar(Max)
+  integer                           Decimal?                  @db.Decimal(16, 0)
+  decimal                           Decimal?                  @db.Decimal(16, 2)
+  boolean                           Boolean?                  @default(false, map: "df_sample_boolean")
+  date                              DateTime?                 @db.Date
+  datetime                          DateTime?                 @db.DateTime
+  time                              DateTime?                 @db.Time
+  option_single                     String?                   @db.NVarChar(Max)
+  option_multi                      String?                   @db.NVarChar(Max)
+  reference_single_target_single_id String?                   @db.NVarChar(Max)
+  reference_single_target_multi_id  String?                   @db.NVarChar(Max)
+  reference_multi_target_single_id  String?                   @db.NVarChar(Max)
+  reference_multi_target_multi_id   String?                   @db.NVarChar(Max)
+  address_zipcode                   String?                   @db.NVarChar(20)
+  address_prefecture                String?                   @db.NVarChar(256)
+  address_municipality              String?                   @db.NVarChar(256)
+  address_street                    String?                   @db.NVarChar(256)
+  location                          Unsupported("geography")?
+  is_deleted                        Boolean                   @default(false, map: "df_sample_is_deleted")
+  owner                             String                    @db.NVarChar(Max)
+  created_at                        DateTime                  @default(dbgenerated("getutcdate()"), map: "df_sample_created_at")
+  created_by                        String                    @db.NVarChar(Max)
+  modified_at                       DateTime                  @default(dbgenerated("getutcdate()"), map: "df_sample_modified_at")
+  modified_by                       String                    @db.NVarChar(Max)
 }
 
 model user {
@@ -455,67 +458,65 @@ view user_view {
 }
 
 view account_view {
-  id                   String    @unique @db.UniqueIdentifier
-  name                 String    @db.NVarChar(256)
-  account_number       String?   @db.NVarChar(20)
-  main_phone_number    String?   @db.NVarChar(50)
-  sub_phone_number     String?   @db.NVarChar(50)
-  website              String?   @db.NVarChar(Max)
-  industry             String?   @db.NVarChar(Max)
-  number_of_employees  Decimal?  @db.Decimal(6, 0)
-  revenue              Decimal?  @db.Decimal(16, 0)
-  address_zipcode      String?   @db.NVarChar(20)
-  address_prefecture   String?   @db.NVarChar(256)
-  address_municipality String?   @db.NVarChar(256)
-  address_street       String?   @db.NVarChar(256)
-  latitude             Decimal?  @db.Decimal(18, 15)
-  longitude            Decimal?  @db.Decimal(18, 15)
-  market_cap           Decimal?  @db.Decimal(16, 0)
-  description          String?   @db.NVarChar(Max)
-  originating_lead     String?   @db.NVarChar(Max)
-  parent               String?   @db.NVarChar(Max)
+  id                   String                    @unique @db.UniqueIdentifier
+  name                 String                    @db.NVarChar(256)
+  account_number       String?                   @db.NVarChar(20)
+  main_phone_number    String?                   @db.NVarChar(50)
+  sub_phone_number     String?                   @db.NVarChar(50)
+  website              String?                   @db.NVarChar(Max)
+  industry             String?                   @db.NVarChar(Max)
+  number_of_employees  Decimal?                  @db.Decimal(6, 0)
+  revenue              Decimal?                  @db.Decimal(16, 0)
+  address_zipcode      String?                   @db.NVarChar(20)
+  address_prefecture   String?                   @db.NVarChar(256)
+  address_municipality String?                   @db.NVarChar(256)
+  address_street       String?                   @db.NVarChar(256)
+  location             Unsupported("geography")?
+  market_cap           Decimal?                  @db.Decimal(16, 0)
+  description          String?                   @db.NVarChar(Max)
+  originating_lead     String?                   @db.NVarChar(Max)
+  parent               String?                   @db.NVarChar(Max)
   is_deleted           Boolean
-  owner                String    @db.NVarChar(Max)
+  owner                String                    @db.NVarChar(Max)
   created_at           DateTime
-  created_by           String    @db.NVarChar(Max)
+  created_by           String                    @db.NVarChar(Max)
   modified_at          DateTime
-  modified_by          String    @db.NVarChar(Max)
-  last_activity_date   DateTime? @db.Date
+  modified_by          String                    @db.NVarChar(Max)
+  last_activity_date   DateTime?                 @db.Date
 }
 
 view lead_view {
-  id                   String    @unique @db.UniqueIdentifier
-  company              String    @db.NVarChar(256)
-  first_name           String?   @db.NVarChar(256)
-  last_name            String    @db.NVarChar(256)
-  business_unit        String?   @db.NVarChar(256)
-  title                String?   @db.NVarChar(256)
-  address_zipcode      String?   @db.NVarChar(20)
-  address_prefecture   String?   @db.NVarChar(256)
-  address_municipality String?   @db.NVarChar(256)
-  address_street       String?   @db.NVarChar(256)
-  latitude             Decimal?  @db.Decimal(18, 15)
-  longitude            Decimal?  @db.Decimal(18, 15)
-  phone_number         String?   @db.NVarChar(50)
-  email                String?   @db.NVarChar(Max)
-  website              String?   @db.NVarChar(Max)
-  description          String?   @db.NVarChar(Max)
-  lead_source          String?   @db.NVarChar(Max)
-  status               String    @db.NVarChar(Max)
-  industry             String?   @db.NVarChar(Max)
-  rating               String?   @db.NVarChar(Max)
-  annual_revenue       Decimal?  @db.Decimal(16, 0)
-  number_of_employees  Decimal?  @db.Decimal(6, 0)
+  id                   String                    @unique @db.UniqueIdentifier
+  company              String                    @db.NVarChar(256)
+  first_name           String?                   @db.NVarChar(256)
+  last_name            String                    @db.NVarChar(256)
+  business_unit        String?                   @db.NVarChar(256)
+  title                String?                   @db.NVarChar(256)
+  address_zipcode      String?                   @db.NVarChar(20)
+  address_prefecture   String?                   @db.NVarChar(256)
+  address_municipality String?                   @db.NVarChar(256)
+  address_street       String?                   @db.NVarChar(256)
+  location             Unsupported("geography")?
+  phone_number         String?                   @db.NVarChar(50)
+  email                String?                   @db.NVarChar(Max)
+  website              String?                   @db.NVarChar(Max)
+  description          String?                   @db.NVarChar(Max)
+  lead_source          String?                   @db.NVarChar(Max)
+  status               String                    @db.NVarChar(Max)
+  industry             String?                   @db.NVarChar(Max)
+  rating               String?                   @db.NVarChar(Max)
+  annual_revenue       Decimal?                  @db.Decimal(16, 0)
+  number_of_employees  Decimal?                  @db.Decimal(6, 0)
   is_converted         Boolean?
-  converted_date       DateTime? @db.Date
+  converted_date       DateTime?                 @db.Date
   is_deleted           Boolean
-  owner                String    @db.NVarChar(Max)
+  owner                String                    @db.NVarChar(Max)
   created_at           DateTime
-  created_by           String    @db.NVarChar(Max)
+  created_by           String                    @db.NVarChar(Max)
   modified_at          DateTime
-  modified_by          String    @db.NVarChar(Max)
-  full_name            String    @db.NVarChar(512)
-  last_activity_date   DateTime? @db.Date
+  modified_by          String                    @db.NVarChar(Max)
+  full_name            String                    @db.NVarChar(512)
+  last_activity_date   DateTime?                 @db.Date
 }
 
 view activity_view {
@@ -672,35 +673,40 @@ view campaign_view {
 }
 
 view sample_view {
-  id                                        String    @unique @db.UniqueIdentifier
-  name                                      String    @db.NVarChar(256)
-  text                                      String?   @db.NVarChar(Max)
-  textarea                                  String?   @db.NVarChar(Max)
-  phone_number                              String?   @db.NVarChar(50)
-  email                                     String?   @db.NVarChar(Max)
-  url                                       String?   @db.NVarChar(Max)
-  combobox                                  String?   @db.NVarChar(Max)
-  integer                                   Decimal?  @db.Decimal(16, 0)
-  decimal                                   Decimal?  @db.Decimal(16, 2)
+  id                                        String                    @unique @db.UniqueIdentifier
+  name                                      String                    @db.NVarChar(256)
+  text                                      String?                   @db.NVarChar(Max)
+  textarea                                  String?                   @db.NVarChar(Max)
+  phone_number                              String?                   @db.NVarChar(50)
+  email                                     String?                   @db.NVarChar(Max)
+  url                                       String?                   @db.NVarChar(Max)
+  combobox                                  String?                   @db.NVarChar(Max)
+  integer                                   Decimal?                  @db.Decimal(16, 0)
+  decimal                                   Decimal?                  @db.Decimal(16, 2)
   boolean                                   Boolean?
-  date                                      DateTime? @db.Date
-  datetime                                  DateTime? @db.DateTime
-  time                                      DateTime? @db.Time
-  option_single                             String?   @db.NVarChar(Max)
-  option_multi                              String?   @db.NVarChar(Max)
-  reference_single_target_single_id         String?   @db.NVarChar(Max)
-  reference_single_target_multi_id          String?   @db.NVarChar(Max)
-  reference_multi_target_single_id          String?   @db.NVarChar(Max)
-  reference_multi_target_multi_id           String?   @db.NVarChar(Max)
+  date                                      DateTime?                 @db.Date
+  datetime                                  DateTime?                 @db.DateTime
+  time                                      DateTime?                 @db.Time
+  option_single                             String?                   @db.NVarChar(Max)
+  option_multi                              String?                   @db.NVarChar(Max)
+  reference_single_target_single_id         String?                   @db.NVarChar(Max)
+  reference_single_target_multi_id          String?                   @db.NVarChar(Max)
+  reference_multi_target_single_id          String?                   @db.NVarChar(Max)
+  reference_multi_target_multi_id           String?                   @db.NVarChar(Max)
+  address_zipcode                           String?                   @db.NVarChar(20)
+  address_prefecture                        String?                   @db.NVarChar(256)
+  address_municipality                      String?                   @db.NVarChar(256)
+  address_street                            String?                   @db.NVarChar(256)
+  location                                  Unsupported("geography")?
   is_deleted                                Boolean
-  owner                                     String    @db.NVarChar(Max)
+  owner                                     String                    @db.NVarChar(Max)
   created_at                                DateTime
-  created_by                                String    @db.NVarChar(Max)
+  created_by                                String                    @db.NVarChar(Max)
   modified_at                               DateTime
-  modified_by                               String    @db.NVarChar(Max)
-  formula_text                              String?   @db.NVarChar(4000)
-  formula_integer                           Decimal?  @db.Decimal(20, 0)
+  modified_by                               String                    @db.NVarChar(Max)
+  formula_text                              String?                   @db.NVarChar(4000)
+  formula_integer                           Decimal?                  @db.Decimal(20, 0)
   formula_boolean                           Int
-  formula_date                              DateTime? @db.Date
-  formula_reference_single_target_single_id String?   @db.NVarChar(Max)
+  formula_date                              DateTime?                 @db.Date
+  formula_reference_single_target_single_id String?                   @db.NVarChar(Max)
 }

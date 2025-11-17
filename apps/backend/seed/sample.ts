@@ -1,5 +1,6 @@
 import { addYear, date, format } from "@formkit/tempo"
 import type { Prisma, user } from "@prisma/client"
+import { addresses } from "./static/address"
 import {
 	distinctBy,
 	getAnyRow,
@@ -197,4 +198,31 @@ export async function seedSamples(
 	console.info(`>> sample records created: ${records.count}`)
 
 	return records
+}
+
+export async function seedSamplesAddressAndLocation(
+	prisma: Prisma.TransactionClient,
+) {
+	const records = await prisma.sample.findMany()
+
+	const result = await Promise.all(
+		records.map((record) => {
+			if (getRandomBoolean(0.9)) {
+				const address = getAnyRow(addresses)
+
+				const query = `
+					UPDATE [sample]
+					SET [address_zipcode] = N'${address.zipcode}',
+						[address_prefecture] = N'${address.prefecture}',
+						[address_municipality] = N'${address.municipality}',
+						[address_street] = N'${address.street}',
+						[location] = geography::Point(${address.latitude}, ${address.longitude}, 4326)
+					WHERE [id] = '${record.id}'
+				`
+
+				return prisma.$executeRawUnsafe(query)
+			}
+		}),
+	)
+	console.log(`>> sample records updated: ${result.length}`)
 }
