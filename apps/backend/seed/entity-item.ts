@@ -1230,8 +1230,6 @@ export async function seedEntityItems(prisma: Prisma.TransactionClient) {
 			sub_type: "multi",
 			reference_entities: JSON.stringify(["account", "lead"]),
 		},
-		...commonAddressItems,
-		...commonLocationItems,
 		{
 			name: "formula_text",
 			display_name: "数式: テキスト",
