@@ -250,9 +250,9 @@ export async function createTestSample(
 
 	if (data.latitude != null && data.longitude != null) {
 		await testPrisma.$executeRaw`
-            UPDATE [sample]
-            SET [location] = GEOGRAPHY::Point(${data.latitude}, ${data.longitude}, 4326)
-            WHERE [id] = ${sample.id}`
+			UPDATE [sample]
+			SET [location] = GEOGRAPHY::Point(${data.latitude}, ${data.longitude}, 4326)
+			WHERE [id] = ${sample.id}`
 	}
 
 	return await testPrisma.sample_view.findUniqueOrThrow({
