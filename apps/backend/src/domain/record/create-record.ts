@@ -1,4 +1,3 @@
-import { configuration } from "../../configuration"
 import { getEntityItemList } from "../../domain/entity"
 import { prisma } from "../../libs/prisma"
 import type { PostRecordResponse } from "../../schema/record"
