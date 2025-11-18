@@ -1,5 +1,4 @@
 import { afterAll, beforeAll, describe, expect, it } from "vitest"
-import { ad } from "vitest/dist/chunks/reporters.d.BFLkQcL6"
 import { app } from "../../../../index"
 import { testPrisma } from "../../../../test/setup"
 import {
