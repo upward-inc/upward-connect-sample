@@ -51,6 +51,8 @@ export const updateRecord = async (
 		updateFields.splice(updateFields.indexOf(longitudeField), 1)
 	}
 
+	const locationEntities: string[] = [...configuration.LOCATION_ENTITIES]
+
 	const setClause = updateFields
 		.map(({ entityItem, result }) => {
 			if (result.kind === "null") {
@@ -101,9 +103,7 @@ export const updateRecord = async (
 		.join(", ")
 		// 位置情報の設定が必要な場合は、SET句に追加
 		.concat(
-			configuration.LOCATION_ENTITIES.includes(entityName) &&
-				longitudeField &&
-				latitudeField
+			locationEntities.includes(entityName) && longitudeField && latitudeField
 				? `, [location] = geography::Point(${latitudeField.result.value}, ${longitudeField.result.value}, 4326)`
 				: "",
 		)
