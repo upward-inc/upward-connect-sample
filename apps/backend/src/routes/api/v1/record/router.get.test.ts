@@ -63,6 +63,7 @@ describe("GET /records/:entity_name - レコード一覧取得（検索）", () 
 			order_by?: object
 			limit?: number
 			offset?: number
+			location?: object
 		},
 		authToken = testExecutionUser.access_token,
 	) {
@@ -1436,5 +1437,101 @@ describe("GET /records/:entity_name - レコード一覧取得（検索）", () 
 		const json = await response.json()
 		expect(response.status).toBe(404)
 		expect(json).toHaveProperty("message")
+	})
+
+	describe("locationパラメータ", () => {
+		it("_locationフィールドが正しく返されること", async () => {
+			// Arrange
+			const testSample = {
+				name: "Sample with Location",
+				latitude: 35.6795964,
+				longitude: 139.7460797,
+			}
+			await createTestSample(testExecutionUser.id, testSample)
+
+			// Act
+			const response = await requestGet("sample", {
+				fields: "name",
+				location: {
+					point: { latitude: 35.6795964, longitude: 139.7460797 },
+					radius: 1000,
+				},
+			})
+
+			// Assert
+			const { data } = await response.json()
+			expect(data).toHaveLength(1)
+			expect(data[0]).toHaveProperty("_location")
+			expect(data[0]._location).toHaveProperty("latitude", testSample.latitude)
+			expect(data[0]._location).toHaveProperty(
+				"longitude",
+				testSample.longitude,
+			)
+		})
+
+		describe("指定した半径内の対象レコードのみを返すこと", () => {
+			const testRecords = [
+				{ name: "Sample 1", latitude: 0, longitude: 0 },
+				{ name: "Sample 2", latitude: 0, longitude: 1 },
+				{ name: "Sample 3", latitude: 0, longitude: 1.1 },
+				{ name: "Sample 4", latitude: 1, longitude: 0 },
+				{ name: "Sample 5", latitude: 1.1, longitude: 0 },
+			]
+
+			it.each([
+				{
+					title: "検索地点と同じ位置のレコードが存在する場合",
+					location: {
+						point: { latitude: 0, longitude: 0 },
+						radius: 100,
+					},
+					expected: {
+						has_next_page: false,
+						total_size: 1,
+						data: [
+							{ name: "Sample 1", _location: { latitude: 0, longitude: 0 } },
+						],
+					},
+				},
+				{
+					title: "指定した半径内に複数レコードが存在する場合",
+					location: {
+						point: { latitude: 0, longitude: 0.000001 },
+						radius: 110575,
+					}, // 赤道における1度の緯度の距離は約110.574kmなので、少し大きめに指定
+					expected: {
+						has_next_page: false,
+						total_size: 2,
+						data: [
+							{ name: "Sample 1", _location: { latitude: 0, longitude: 0 } },
+							{ name: "Sample 4", _location: { latitude: 1, longitude: 0 } },
+						],
+					},
+				},
+				{
+					title: "指定した半径内にレコードが存在しない場合",
+					location: { point: { latitude: 90, longitude: 180 }, radius: 1000 },
+					expected: {
+						has_next_page: false,
+						total_size: 0,
+						data: [],
+					},
+				},
+			])("$title", async ({ location, expected }) => {
+				// Arrange
+				await createManyTestSamples(testExecutionUser.id, testRecords)
+
+				// Act
+				const response = await requestGet("sample", {
+					fields: "name",
+					order_by: [{ field: "name" }],
+					location,
+				})
+
+				// Assert
+				const json = await response.json()
+				expect(json).toStrictEqual(expected)
+			})
+		})
 	})
 })

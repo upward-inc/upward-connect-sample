@@ -34,10 +34,27 @@ export const createRecord = async (
 			? [{ entityItem: modifiedBy, result: userReferenceData }]
 			: []),
 	]
+	const latitudeField = insertFields.find(
+		({ entityItem }) => entityItem.name === "latitude",
+	)
+	const longitudeField = insertFields.find(
+		({ entityItem }) => entityItem.name === "longitude",
+	)
+	let needLocationField = false
+	if (latitudeField && longitudeField) {
+		// 位置情報は別途設定するため、INSERT文から除外
+		insertFields.splice(insertFields.indexOf(latitudeField), 1)
+		insertFields.splice(insertFields.indexOf(longitudeField), 1)
+		needLocationField = true
+	}
 
 	const columnsClause = insertFields
 		.map(({ entityItem }) => escapeName(entityItem.name))
 		.join(", ")
+		.concat(
+			// 位置情報の設定が必要な場合は、locationカラムを追加
+			needLocationField ? ", [location]" : "",
+		)
 
 	const valuesClause = insertFields
 		.map(({ result }) => {
@@ -67,6 +84,12 @@ export const createRecord = async (
 			}
 		})
 		.join(", ")
+		.concat(
+			// 位置情報の設定が必要な場合は、位置情報の値を追加
+			needLocationField
+				? `, geography::Point(${latitudeField?.result.value}, ${longitudeField?.result.value}, 4326)`
+				: "",
+		)
 
 	const query = `
 		INSERT INTO ${escapeName(entityName)} (${columnsClause})

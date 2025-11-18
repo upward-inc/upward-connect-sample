@@ -1,3 +1,4 @@
+import { configuration } from "../../configuration"
 import { prisma } from "../../libs/prisma"
 import type { PatchRecordResponse } from "../../schema/record"
 import { escapeName, escapeStringValue } from "../../utility/sql"
@@ -38,6 +39,19 @@ export const updateRecord = async (
 		// 更新日時カラムが存在するエンティティの場合は、現在日時を設定
 		...(modifiedAt ? [{ entityItem: modifiedAt, result: nowData }] : []),
 	]
+	const latitudeField = updateFields.find(
+		({ entityItem }) => entityItem.name === "latitude",
+	)
+	const longitudeField = updateFields.find(
+		({ entityItem }) => entityItem.name === "longitude",
+	)
+	if (latitudeField && longitudeField) {
+		// 位置情報は別途設定するため、UPDATE文から除外
+		updateFields.splice(updateFields.indexOf(latitudeField), 1)
+		updateFields.splice(updateFields.indexOf(longitudeField), 1)
+	}
+
+	const locationEntities: string[] = [...configuration.LOCATION_ENTITIES]
 
 	const setClause = updateFields
 		.map(({ entityItem, result }) => {
@@ -87,6 +101,12 @@ export const updateRecord = async (
 		.filter((v) => !!v)
 		.map(({ column, value }) => `${escapeName(column)} = ${value}`)
 		.join(", ")
+		// 位置情報の設定が必要な場合は、SET句に追加
+		.concat(
+			locationEntities.includes(entityName) && longitudeField && latitudeField
+				? `, [location] = geography::Point(${latitudeField.result.value}, ${longitudeField.result.value}, 4326)`
+				: "",
+		)
 
 	const query = `
 		UPDATE ${escapeName(entityName)} SET ${setClause}
