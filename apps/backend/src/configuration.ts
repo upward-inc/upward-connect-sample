@@ -3,6 +3,12 @@ import { z } from "./libs/zod"
 const envSchema = z.object({
 	APP_NAME: z.string(),
 	PORT: z.coerce.number().min(1000).max(65535),
+	FRONTEND_URL: z.union([
+		z.url().startsWith("https://"),
+		z.url().startsWith("http://localhost:"),
+	]),
+	APP_SESSION_SECRET: z.string().min(32),
+	APP_SESSION_EXPIRES_IN_MINUTE: z.coerce.number().min(1),
 	OAUTH2_AUTH_CODE_EXPIRES_IN_MINUTE: z.coerce.number().min(1),
 	OIDC_ISSUER: z.union([
 		z.url().startsWith("https://"),
