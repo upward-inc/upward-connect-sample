@@ -41,7 +41,8 @@ export const validateGetRecordListQuery = (
 		}
 
 		// ロケーション検索が可能なエンティティかどうかを確認
-		if (!configuration.LOCATION_ENTITIES.includes(entity_name)) {
+		const locationEntities: string[] = [...configuration.LOCATION_ENTITIES]
+		if (!locationEntities.includes(entity_name)) {
 			return {
 				success: false,
 				message: `Entity '${entity_name}' does not support location-based queries`,
