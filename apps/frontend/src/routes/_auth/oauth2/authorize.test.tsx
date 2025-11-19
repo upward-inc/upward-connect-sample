@@ -23,13 +23,6 @@ vi.mock("@tanstack/react-router", () => ({
 	createFileRoute: createFileRouteMock,
 }))
 
-const { useAuthMock } = vi.hoisted(() => ({
-	useAuthMock: vi.fn(),
-}))
-vi.mock("../../../auth", () => ({
-	useAuth: useAuthMock,
-}))
-
 const baseSearchParams: Required<SearchParams> = {
 	response_type: "code",
 	client_id: "client-123",
@@ -69,7 +62,6 @@ describe("AuthorizePage", () => {
 
 	beforeEach(() => {
 		useSearchMock.mockReturnValue(baseSearchParams)
-		useAuthMock.mockReturnValue({ token: "test-token" })
 
 		setRequestHandlers(
 			createClientHandler(200, { name: "Sample App" }),
@@ -95,7 +87,6 @@ describe("AuthorizePage", () => {
 
 	afterEach(() => {
 		useSearchMock.mockReset()
-		useAuthMock.mockReset()
 		createFileRouteMock.mockReset()
 		Object.defineProperty(window, "location", {
 			configurable: true,
