@@ -745,43 +745,6 @@ describe("POST /oauth2/token - トークンエンドポイント", () => {
 			expect(decodedRefreshedToken.aud).toBe(testClient.id)
 			expect(decodedRefreshedToken.sub).toBe(testExecutionUser.id)
 		})
-
-		// TODO: Bun.password.hash()の互換性の問題でスキップ
-		// see: https://github.com/vitest-dev/vscode/discussions/473#discussioncomment-10740173
-		// testcontainersは`bun test`と互換性がない
-		// see: https://github.com/oven-sh/bun/issues/7810#issuecomment-2276549353
-		it.skip("ログインエンドポイントのaccess_tokenのaudクレームがデフォルトのclient_idと等しいこと", async () => {
-			// Arrange
-			// TODO: 実際のテストデフォルトクライアントを使用する
-			const testDefaultClient = {
-				id: crypto.randomUUID(),
-			}
-
-			// Act
-			// ログインエンドポイントにアクセス
-			const response = await app.request("/oauth2/login", {
-				method: "POST",
-				headers: {
-					"Content-Type": "application/x-www-form-urlencoded",
-				},
-				body: new URLSearchParams({
-					username: testExecutionUser.user_name,
-					password: "test-password-123",
-				}),
-			})
-
-			const responseData = await response.json()
-			expect(response.status).toBe(200)
-			expect(responseData).toHaveProperty("access_token")
-
-			// Assert
-			// アクセストークンのaudクレームがデフォルトのclient_idと一致することを検証
-			const decodedAccessToken = verify(
-				responseData.access_token,
-				tokenSecret,
-			) as JwtPayload
-			expect(decodedAccessToken.aud).toBe(testDefaultClient.id)
-		})
 	})
 
 	describe("IDトークン検証", () => {
