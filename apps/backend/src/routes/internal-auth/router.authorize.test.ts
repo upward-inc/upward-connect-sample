@@ -1,6 +1,14 @@
 import { type JwtPayload, verify } from "jsonwebtoken"
-import { afterAll, beforeAll, describe, expect, it } from "vitest"
-import { configuration } from "../../configuration"
+import {
+	afterAll,
+	afterEach,
+	beforeAll,
+	beforeEach,
+	describe,
+	expect,
+	it,
+	vi,
+} from "vitest"
 import { app } from "../../index"
 import { prisma } from "../../libs/prisma"
 import type { Jwk } from "../../schema/auth"
@@ -14,6 +22,22 @@ import {
 	deleteTestExecutionUser,
 } from "../../test/utils/execution-user"
 import { convertJwkToPem } from "../../utility/crypto"
+
+const { mockGetActiveUserByUsernameAndPassword } = vi.hoisted(() => {
+	return {
+		mockGetActiveUserByUsernameAndPassword: vi.fn(),
+	}
+})
+
+// Bun.passwordはvitestでサポートしないため、getActiveUserByUsernameAndPasswordをモックする
+vi.mock("../../domain/auth/get-user", async () => {
+	const originalModule = await vi.importActual("../../domain/auth/get-user")
+
+	return {
+		...originalModule,
+		getActiveUserByUsernameAndPassword: mockGetActiveUserByUsernameAndPassword,
+	}
+})
 
 describe("POST /auth/authorize - 認可エンドポイント", () => {
 	interface DecodedIdToken extends JwtPayload {
@@ -37,6 +61,14 @@ describe("POST /auth/authorize - 認可エンドポイント", () => {
 
 	afterAll(async () => {
 		await cleanup()
+	})
+
+	beforeEach(() => {
+		mockGetActiveUserByUsernameAndPassword.mockReturnValue(testExecutionUser)
+	})
+
+	afterEach(() => {
+		mockGetActiveUserByUsernameAndPassword.mockReset()
 	})
 
 	// テストデータのセットアップ
@@ -66,17 +98,41 @@ describe("POST /auth/authorize - 認可エンドポイント", () => {
 	}
 
 	/**
+	 * /auth/loginへのPOSTリクエストを送信する
+	 */
+	async function requestLogin(params: Record<string, string>) {
+		const response = await app.request("/auth/login", {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/x-www-form-urlencoded",
+			},
+			body: new URLSearchParams(params),
+		})
+		const cookie = response.headers.get("Set-Cookie")?.split(";")[0] || ""
+		return { response, cookie }
+	}
+
+	/**
 	 * /auth/authorizeへのPOSTリクエストを送信する
 	 */
 	async function requestAuthorize(
 		params: Record<string, string>,
-		authToken = testExecutionUser.access_token,
+		cookie?: string,
 	) {
+		const loginCookie =
+			cookie ??
+			(
+				await requestLogin({
+					username: testExecutionUser.user_name,
+					password: testExecutionUser.hashed_password,
+				})
+			).cookie
+
 		return await app.request("/auth/authorize", {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/x-www-form-urlencoded",
-				Authorization: authToken ? `Bearer ${authToken}` : "",
+				Cookie: loginCookie,
 			},
 			body: new URLSearchParams(params),
 		})

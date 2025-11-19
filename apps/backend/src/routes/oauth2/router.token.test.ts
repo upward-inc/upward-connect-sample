@@ -1,5 +1,14 @@
 import { type JwtPayload, verify } from "jsonwebtoken"
-import { afterAll, beforeAll, describe, expect, it } from "vitest"
+import {
+	afterAll,
+	afterEach,
+	beforeAll,
+	beforeEach,
+	describe,
+	expect,
+	it,
+	vi,
+} from "vitest"
 import { configuration } from "../../configuration"
 import { app } from "../../index"
 import { prisma } from "../../libs/prisma"
@@ -16,6 +25,22 @@ import {
 	deleteTestExecutionUser,
 } from "../../test/utils/execution-user"
 import { convertJwkToPem } from "../../utility/crypto"
+
+const { mockGetActiveUserByUsernameAndPassword } = vi.hoisted(() => {
+	return {
+		mockGetActiveUserByUsernameAndPassword: vi.fn(),
+	}
+})
+
+// Bun.passwordはvitestでサポートしないため、getActiveUserByUsernameAndPasswordをモックする
+vi.mock("../../domain/auth/get-user", async () => {
+	const originalModule = await vi.importActual("../../domain/auth/get-user")
+
+	return {
+		...originalModule,
+		getActiveUserByUsernameAndPassword: mockGetActiveUserByUsernameAndPassword,
+	}
+})
 
 describe("POST /oauth2/token - トークンエンドポイント", () => {
 	const tokenSecret = configuration.OIDC_TOKEN_SECRET
@@ -42,6 +67,14 @@ describe("POST /oauth2/token - トークンエンドポイント", () => {
 		await cleanup()
 	})
 
+	beforeEach(() => {
+		mockGetActiveUserByUsernameAndPassword.mockReturnValue(testExecutionUser)
+	})
+
+	afterEach(() => {
+		mockGetActiveUserByUsernameAndPassword.mockReset()
+	})
+
 	// テストデータのセットアップ
 	async function setup(taskId: string) {
 		// 秘密鍵を準備
@@ -66,8 +99,10 @@ describe("POST /oauth2/token - トークンエンドポイント", () => {
 		})
 
 		await deleteTestExecutionUser(testExecutionUser.id)
-	}
 
+		// モックのリセット
+		vi.resetAllMocks()
+	}
 	/**
 	 * /oauth2/tokenへのPOSTリクエストを送信する
 	 */
@@ -82,17 +117,34 @@ describe("POST /oauth2/token - トークンエンドポイント", () => {
 	}
 
 	/**
+	 * /auth/loginへのPOSTリクエストを送信する
+	 */
+	async function requestLogin(params: Record<string, string>) {
+		const response = await app.request("/auth/login", {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/x-www-form-urlencoded",
+			},
+			body: new URLSearchParams(params),
+		})
+		const cookie = response.headers.get("Set-Cookie")?.split(";")[0] || ""
+		return { response, cookie }
+	}
+
+	/**
 	 * /auth/authorizeへのPOSTリクエストを送信する
 	 */
-	async function requestAuthorize(
-		params: Record<string, string>,
-		authToken = testExecutionUser.access_token,
-	) {
+	async function requestAuthorize(params: Record<string, string>) {
+		const { cookie } = await requestLogin({
+			username: testExecutionUser.user_name,
+			password: testExecutionUser.hashed_password,
+		})
+
 		return await app.request("/auth/authorize", {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/x-www-form-urlencoded",
-				Authorization: authToken ? `Bearer ${authToken}` : "",
+				Cookie: cookie,
 			},
 			body: new URLSearchParams(params),
 		})
@@ -824,6 +876,10 @@ describe("POST /oauth2/token - トークンエンドポイント", () => {
 				last_name: "IDToken",
 			})
 
+			mockGetActiveUserByUsernameAndPassword.mockReturnValue(
+				userWithoutOptionalFields,
+			)
+
 			try {
 				const testClient = await createTestOAuthClient({
 					name: "min_cli",
@@ -834,19 +890,16 @@ describe("POST /oauth2/token - トークンエンドポイント", () => {
 
 				// Act
 				// ステップ1: 認可リクエスト
-				const authorizeResponse = await requestAuthorize(
-					{
-						response_type: "code",
-						client_id: testClient.id,
-						redirect_uri: "https://example.com/callback",
-						scope: "openid profile email",
-						state: "random_state_12345",
-						nonce: "random_nonce_12345",
-						code_challenge: "E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM",
-						code_challenge_method: "S256",
-					},
-					userWithoutOptionalFields.access_token,
-				)
+				const authorizeResponse = await requestAuthorize({
+					response_type: "code",
+					client_id: testClient.id,
+					redirect_uri: "https://example.com/callback",
+					scope: "openid profile email",
+					state: "random_state_12345",
+					nonce: "random_nonce_12345",
+					code_challenge: "E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM",
+					code_challenge_method: "S256",
+				})
 
 				const authorizeData = await authorizeResponse.json()
 				expect(authorizeResponse.status).toBe(200)
