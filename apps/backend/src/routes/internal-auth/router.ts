@@ -1,21 +1,25 @@
+import { addMinute } from "@formkit/tempo"
 import { OpenAPIHono, createRoute } from "@hono/zod-openapi"
+import type { Context } from "hono"
+import { deleteCookie, getSignedCookie, setSignedCookie } from "hono/cookie"
 import { nanoid } from "nanoid"
 import { configuration } from "../../configuration"
 import {
-	generateAccessToken,
 	getActiveUserByUsernameAndPassword,
 	getOAuthClientById,
 	saveAuthorizationCode,
 	validateAuthorizeParams,
 } from "../../domain/auth"
 import {
-	type AuthContexts,
 	GetOAuthClientParamSchema,
 	GetOAuthClientResultSchema,
+	type LoggedInUser,
 	PostAuthorizeParamSchema,
 	PostAuthorizeResultSchema,
 	PostLoginParamSchema,
 	PostLoginResultSchema,
+	type Session,
+	SessionSchema,
 	StateSchema,
 } from "../../schema/auth"
 import {
@@ -23,7 +27,9 @@ import {
 	ResourceApiErrorResultSchema,
 } from "../../schema/error"
 
-export const internalAuthRouter = new OpenAPIHono<{ Variables: AuthContexts }>()
+const SESSION_COOKIE_NAME = "session"
+
+export const internalAuthRouter = new OpenAPIHono()
 	.openapi(
 		createRoute({
 			method: "post",
@@ -62,14 +68,8 @@ export const internalAuthRouter = new OpenAPIHono<{ Variables: AuthContexts }>()
 				return c.json({ message: "Invalid username or password" }, 401)
 			}
 
-			const accessToken = generateAccessToken({
-				userId: user.id,
-				userName: user.user_name,
-				// アクセストークンにはaud項目を含める必要があるが、
-				// パスワード認証時に発行するアクセストークンにおいては使用されることがないのでダミーの値を設定
-				clientId: "00000000-0000-0000-0000-000000000000",
-			})
-			return c.json({ ...user, access_token: accessToken }, 200)
+			const session = await setCookie(c, user)
+			return c.json({ ...user, expired_at: session.expiredAt }, 200)
 		},
 	)
 	.openapi(
@@ -87,6 +87,12 @@ export const internalAuthRouter = new OpenAPIHono<{ Variables: AuthContexts }>()
 						"application/json": { schema: GetOAuthClientResultSchema },
 					},
 				},
+				401: {
+					description: "Unauthorized",
+					content: {
+						"application/json": { schema: ResourceApiErrorResultSchema },
+					},
+				},
 				404: {
 					description: "Not Found",
 					content: {
@@ -96,6 +102,17 @@ export const internalAuthRouter = new OpenAPIHono<{ Variables: AuthContexts }>()
 			},
 		}),
 		async (c) => {
+			// セッションからユーザー情報を取得
+			const { expiredAt } = await getCookie(c)
+			if (new Date(expiredAt) < new Date()) {
+				return c.json(
+					{
+						message: "Session expired",
+					},
+					401,
+				)
+			}
+
 			const clientId = c.req.param("id")
 
 			const client = await getOAuthClientById(clientId)
@@ -142,7 +159,6 @@ export const internalAuthRouter = new OpenAPIHono<{ Variables: AuthContexts }>()
 			},
 		}),
 		async (c) => {
-			const user = c.get("user")
 			const params = c.req.valid("form")
 
 			// パラメータの検証
@@ -159,10 +175,23 @@ export const internalAuthRouter = new OpenAPIHono<{ Variables: AuthContexts }>()
 				)
 			}
 
+			// セッションからユーザー情報を取得
+			const { userId, expiredAt } = await getCookie(c)
+			if (new Date(expiredAt) < new Date()) {
+				return c.json(
+					{
+						error: "login_required" as const,
+						error_description: "Session expired",
+						state: params.state,
+					},
+					400,
+				)
+			}
+
 			// 認可コードを生成
 			const authorizationCode = nanoid(128)
 
-			await saveAuthorizationCode(authorizationCode, user.id, {
+			await saveAuthorizationCode(authorizationCode, userId, {
 				client_id: validateResult.client_id,
 				client_secret: validateResult.client_secret,
 				redirect_uri: validateResult.redirect_uri,
@@ -187,3 +216,55 @@ export const internalAuthRouter = new OpenAPIHono<{ Variables: AuthContexts }>()
 			)
 		},
 	)
+	.openapi(
+		createRoute({
+			method: "get",
+			path: "/logout",
+			description: "セッションを破棄してログアウトする",
+			responses: {
+				201: {
+					description: "No Content",
+				},
+			},
+		}),
+		async (c) => {
+			deleteCookie(c, SESSION_COOKIE_NAME)
+			return c.json(null, 201)
+		},
+	)
+
+const setCookie = async (c: Context, user: LoggedInUser): Promise<Session> => {
+	const expiredAt = addMinute(
+		new Date(),
+		configuration.APP_SESSION_EXPIRES_IN_MINUTE,
+	)
+	const session: Session = {
+		userId: user.id,
+		expiredAt: expiredAt.toISOString(),
+	}
+	await setSignedCookie(
+		c,
+		SESSION_COOKIE_NAME,
+		JSON.stringify(session),
+		configuration.APP_SESSION_SECRET,
+		{
+			path: "/auth",
+			httpOnly: true,
+			secure: true,
+			sameSite: "Lax",
+			expires: expiredAt,
+		},
+	)
+	return session
+}
+
+const getCookie = async (c: Context): Promise<Session> => {
+	const session = await getSignedCookie(
+		c,
+		configuration.APP_SESSION_SECRET,
+		SESSION_COOKIE_NAME,
+	)
+	return session
+		? SessionSchema.parse(session)
+		: { userId: "", expiredAt: new Date(0).toISOString() }
+}
