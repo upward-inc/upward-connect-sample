@@ -251,7 +251,7 @@ const setCookie = async (c: Context, user: LoggedInUser): Promise<Session> => {
 			path: "/auth",
 			httpOnly: true,
 			secure: true,
-			sameSite: "Lax",
+			sameSite: "Strict",
 			expires: expiredAt,
 		},
 	)
