@@ -222,14 +222,14 @@ export const internalAuthRouter = new OpenAPIHono()
 			path: "/logout",
 			description: "セッションを破棄してログアウトする",
 			responses: {
-				201: {
+				204: {
 					description: "No Content",
 				},
 			},
 		}),
 		async (c) => {
 			deleteCookie(c, SESSION_COOKIE_NAME)
-			return c.json(null, 201)
+			return c.body(null, 204)
 		},
 	)
 
