@@ -9,6 +9,7 @@ import {
 	it,
 	vi,
 } from "vitest"
+import { de } from "zod/v4/locales"
 import { configuration } from "../../configuration"
 import { app } from "../../index"
 import { prisma } from "../../libs/prisma"
@@ -18,6 +19,7 @@ import {
 	createRefreshToken,
 	createTestJwkPrivateKey,
 	createTestOAuthClient,
+	deleteAllTestOAuthClient,
 } from "../../test/utils/auth"
 import {
 	type TestExecutionUser,
@@ -97,6 +99,8 @@ describe("POST /oauth2/token - トークンエンドポイント", () => {
 		await prisma.published_auth_code.deleteMany({
 			where: { user_id: testExecutionUser.id },
 		})
+
+		await deleteAllTestOAuthClient()
 
 		await deleteTestExecutionUser(testExecutionUser.id)
 

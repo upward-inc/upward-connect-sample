@@ -15,6 +15,7 @@ import type { Jwk } from "../../schema/auth"
 import {
 	createTestJwkPrivateKey,
 	createTestOAuthClient,
+	deleteAllTestOAuthClient,
 } from "../../test/utils/auth"
 import {
 	type TestExecutionUser,
@@ -93,6 +94,8 @@ describe("POST /auth/authorize - 認可エンドポイント", () => {
 		await prisma.published_auth_code.deleteMany({
 			where: { user_id: testExecutionUser.id },
 		})
+
+		await deleteAllTestOAuthClient()
 
 		await deleteTestExecutionUser(testExecutionUser.id)
 	}
