@@ -114,26 +114,29 @@ describe("POST /auth/authorize - 認可エンドポイント", () => {
 
 	/**
 	 * /auth/authorizeへのPOSTリクエストを送信する
+	 * @param params リクエストパラメータ
+	 * @param cookie セッションCookie (nullの場合はCookieヘッダーを送信しない, undefinedの場合はtestExecutionUserのCookieヘッダーを送信する)
 	 */
 	async function requestAuthorize(
 		params: Record<string, string>,
-		cookie?: string,
+		cookie?: string | null,
 	) {
 		const loginCookie =
-			cookie ??
-			(
-				await requestLogin({
-					username: testExecutionUser.user_name,
-					password: testExecutionUser.hashed_password,
-				})
-			).cookie
+			cookie === undefined
+				? await requestLogin({
+						username: testExecutionUser.user_name,
+						password: testExecutionUser.hashed_password,
+					}).then(({ cookie }) => cookie)
+				: cookie
+
+		const headers = {
+			"Content-Type": "application/x-www-form-urlencoded",
+			...(loginCookie ? { Cookie: loginCookie } : {}),
+		}
 
 		return await app.request("/auth/authorize", {
 			method: "POST",
-			headers: {
-				"Content-Type": "application/x-www-form-urlencoded",
-				Cookie: loginCookie,
-			},
+			headers: headers,
 			body: new URLSearchParams(params),
 		})
 	}
@@ -773,6 +776,53 @@ describe("POST /auth/authorize - 認可エンドポイント", () => {
 			const data = await response.json()
 			expect(response.status).toBe(400)
 			expect(data.success).toBe(false)
+		})
+	})
+
+	describe("セッションエラーの場合に400エラーを返すこと", () => {
+		it.each([
+			{
+				title: "セッションが存在しない場合",
+				cookie: null,
+			},
+			{
+				title: "空のセッションCookieの場合",
+				cookie: "session=",
+			},
+			{
+				title: "無効なセッションCookieの場合",
+				cookie: "session=invalid_session_token",
+			},
+		])("$title", async ({ cookie }) => {
+			// Arrange
+			const testClient = await createTestOAuthClient({
+				name: "sess_err_cli",
+				secret: "test_secret_12345",
+				redirect_uris: "https://example.com/callback",
+				scopes: "openid,profile,email",
+			})
+
+			// Act
+			const response = await requestAuthorize(
+				{
+					response_type: "code",
+					client_id: testClient.id,
+					redirect_uri: "https://example.com/callback",
+					scope: "openid profile email",
+					state: "random-state-value-12345",
+					nonce: "random-nonce-value-12345",
+					code_challenge: "E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM",
+					code_challenge_method: "S256",
+				},
+				cookie,
+			)
+
+			// Assert
+			const data = await response.json()
+			expect(response.status).toBe(400)
+			expect(data.error).toBe("login_required")
+			expect(data.error_description).toBe("Session expired")
+			expect(data.state).toBe("random-state-value-12345")
 		})
 	})
 })
