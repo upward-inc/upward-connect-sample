@@ -21,6 +21,9 @@ export default defineConfig({
 		// Test environment variables (will be overridden by testcontainers)
 		env: {
 			APP_NAME: "test app",
+			FRONTEND_URL: "http://localhost:5173",
+			APP_SESSION_SECRET: "password_at_least_32_characters_long",
+			APP_SESSION_EXPIRES_IN_MINUTE: "15",
 			PORT: "8787",
 			OAUTH2_AUTH_CODE_EXPIRES_IN_MINUTE: "10",
 			OIDC_ISSUER: "https://iss.test.upward.jp",
