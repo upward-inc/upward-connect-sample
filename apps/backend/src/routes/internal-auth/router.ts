@@ -103,14 +103,9 @@ export const internalAuthRouter = new OpenAPIHono()
 		}),
 		async (c) => {
 			// セッションからユーザー情報を取得
-			const { expiredAt } = await getCookie(c)
-			if (new Date(expiredAt) < new Date()) {
-				return c.json(
-					{
-						message: "Session expired",
-					},
-					401,
-				)
+			const userId = await validateSession(c)
+			if (!userId) {
+				return c.json({ message: "Session expired" }, 401)
 			}
 
 			const clientId = c.req.param("id")
@@ -176,8 +171,8 @@ export const internalAuthRouter = new OpenAPIHono()
 			}
 
 			// セッションからユーザー情報を取得
-			const { userId, expiredAt } = await getCookie(c)
-			if (new Date(expiredAt) < new Date()) {
+			const userId = await validateSession(c)
+			if (!userId) {
 				return c.json(
 					{
 						error: "login_required" as const,
@@ -267,4 +262,17 @@ const getCookie = async (c: Context): Promise<Session> => {
 	return session
 		? SessionSchema.parse(session)
 		: { userId: "", expiredAt: new Date(0).toISOString() }
+}
+
+/**
+ * セッションの検証を行う
+ * @param c
+ * @returns userId または null
+ */
+const validateSession = async (c: Context): Promise<string | null> => {
+	const { userId, expiredAt } = await getCookie(c)
+	if (new Date(expiredAt) < new Date()) {
+		return null
+	}
+	return userId
 }
