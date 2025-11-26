@@ -43,7 +43,7 @@ export const getRecordList = async (
 		? toDistanceQuery(toGeographyPointQuery(point.latitude, point.longitude))
 		: null
 	const entityItems = await getEntityItemList(entity_name)
-	const entityItemMap = new Map(
+	const entityItemMap = new Map<string, Field & { is_formula: boolean }>(
 		entityItems.map((item) => [
 			item.name,
 			{

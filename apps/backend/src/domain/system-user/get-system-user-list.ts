@@ -25,7 +25,7 @@ export const getSystemUserList = async ({
 	offset,
 }: GetSystemUserListQuery): Promise<GetSystemUserListResponse> => {
 	const entityItems = await getEntityItemList("user")
-	const entityItemMap = new Map(
+	const entityItemMap = new Map<string, Field & { is_formula: boolean }>(
 		entityItems.map((item) => [
 			item.name,
 			{
