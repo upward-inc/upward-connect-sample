@@ -1,7 +1,7 @@
 import { format } from "@formkit/tempo"
 import { prisma } from "../../libs/prisma"
 import type { JsonValue } from "../../schema/common"
-import { isAndFilter, isBaseFilter, isOrFilter } from "../../schema/filter"
+import { collectFilterFields } from "../../schema/filter"
 import type {
 	GetRecordListQuery,
 	GetRecordListResponse,
@@ -58,32 +58,10 @@ export const getRecordList = async (
 		]),
 	)
 
-	const collectFilterFields = (
-		filter: GetRecordListQuery["filter"],
-	): string[] => {
-		if (!filter) return []
-
-		if (isBaseFilter(filter)) {
-			return [filter.field]
-		}
-
-		if (isAndFilter(filter)) {
-			return filter.and.flatMap((f) =>
-				collectFilterFields(f as GetRecordListQuery["filter"]),
-			)
-		}
-		if (isOrFilter(filter)) {
-			return filter.or.flatMap((f) =>
-				collectFilterFields(f as GetRecordListQuery["filter"]),
-			)
-		}
-
-		return []
-	}
-
+	const filterFields = collectFilterFields(filter)
 	const needFormulaField = [
 		...fields,
-		...collectFilterFields(filter),
+		...filterFields,
 		...(group_by ?? []),
 		...(order_by?.map(({ field }) => field) ?? []),
 	].some((field) => {

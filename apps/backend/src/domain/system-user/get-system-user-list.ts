@@ -1,7 +1,7 @@
 import { format } from "@formkit/tempo"
 import { prisma } from "../../libs/prisma"
 import type { JsonValue } from "../../schema/common"
-import { isAndFilter, isBaseFilter, isOrFilter } from "../../schema/filter"
+import { collectFilterFields } from "../../schema/filter"
 import {
 	type Field,
 	OrderByClauseSchema,
@@ -58,32 +58,11 @@ export const getSystemUserList = async ({
 		is_formula: false,
 	})
 
-	const collectFilterFields = (
-		filter: GetSystemUserListQuery["filter"],
-	): string[] => {
-		if (!filter) return []
-
-		if (isBaseFilter(filter)) {
-			return [filter.field]
-		}
-
-		if (isAndFilter(filter)) {
-			return filter.and.flatMap((f) =>
-				collectFilterFields(f as GetSystemUserListQuery["filter"]),
-			)
-		}
-		if (isOrFilter(filter)) {
-			return filter.or.flatMap((f) =>
-				collectFilterFields(f as GetSystemUserListQuery["filter"]),
-			)
-		}
-
-		return []
-	}
+	const filterFields = collectFilterFields(filter)
 
 	const needFormulaField = [
 		...fields,
-		...collectFilterFields(filter),
+		...filterFields,
 		...(order_by?.map(({ field }) => field) ?? []),
 	].some((field) => {
 		const item = entityItemMap.get(field)
@@ -92,12 +71,12 @@ export const getSystemUserList = async ({
 
 	const hasProfile = [
 		...fields,
-		...collectFilterFields(filter),
+		...filterFields,
 		...(order_by?.map(({ field }) => field) ?? []),
 	].some((field) => field === "profile_name")
 	const hasRole = [
 		...fields,
-		...collectFilterFields(filter),
+		...filterFields,
 		...(order_by?.map(({ field }) => field) ?? []),
 	].some((field) => field === "role_name")
 

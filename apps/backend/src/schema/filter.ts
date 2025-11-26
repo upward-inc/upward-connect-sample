@@ -192,3 +192,20 @@ export function isOrFilter(
 ): filter is z.infer<typeof NestableOrFilterSchema> {
 	return filter !== null && typeof filter === "object" && "or" in filter
 }
+
+export function collectFilterFields(filter?: Filter): string[] {
+	if (isBaseFilter(filter)) {
+		return [filter.field]
+	}
+
+	if (isAndFilter(filter)) {
+		return filter.and.flatMap((f) => collectFilterFields(f))
+	}
+	if (isOrFilter(filter)) {
+		return filter.or.flatMap((f) => collectFilterFields(f))
+	}
+
+	return []
+}
+
+type Filter = z.infer<typeof NestableFilterSchema | typeof BaseFilterSchema>
