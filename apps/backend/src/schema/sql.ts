@@ -1,5 +1,6 @@
 import { format } from "@formkit/tempo"
 import { z } from "../libs/zod"
+import { escapeStringValue } from "../utility/sql"
 import type { RecordReferenceValue } from "./comparison"
 import { EntityItemSubTypeSchema, EntityItemTypeSchema } from "./entity-item"
 import {
@@ -327,7 +328,7 @@ const getSimpleComparisonPredicate = (
 		"text" | "numeric" | "boolean" | "date",
 		string | number
 	> = {
-		text: `'${value}'`,
+		text: typeof value === "string" ? escapeStringValue(value) : "''",
 		numeric: Number(value),
 		boolean: value ? 1 : 0,
 		date: `'${value}'`,
