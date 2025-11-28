@@ -1,5 +1,4 @@
 import { createRoute } from "@hono/zod-openapi"
-import { ZodError } from "zod"
 import { configuration } from "../../configuration"
 import {
 	deleteAuthorizationCode,
@@ -216,29 +215,25 @@ export const oauth2Router = honoApp<{ Variables: AuthContexts }>()
 		(result, c) => {
 			if (!result.success) {
 				const err = result.error
-				if (err instanceof ZodError) {
-					if (err.issues.some((issue) => issue.path[0] === "grant_type")) {
-						return c.json(
-							{
-								error: "unsupported_grant_type" as const,
-								error_description: "Unknown grant_type",
-							},
-							400,
-						)
-					}
-					const error_description = result.error.issues
-						.map((issue) => issue.message)
-						.join("\n")
+				if (err.issues.some((issue) => issue.path[0] === "grant_type")) {
 					return c.json(
 						{
-							error: "invalid_request" as const,
-							error_description,
+							error: "unsupported_grant_type" as const,
+							error_description: "Unknown grant_type",
 						},
 						400,
 					)
 				}
-				// その他のエラーはそのまま再スロー
-				throw err
+				const error_description = err.issues
+					.map((issue) => issue.message)
+					.join("\n")
+				return c.json(
+					{
+						error: "invalid_request" as const,
+						error_description,
+					},
+					400,
+				)
 			}
 		},
 	)
