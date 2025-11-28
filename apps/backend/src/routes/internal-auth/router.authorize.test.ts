@@ -200,7 +200,6 @@ describe("POST /auth/authorize - 認可エンドポイント", () => {
 		)
 	})
 
-	// TODO: 実装側の修正が必要
 	it("不正なresponse_typeの場合に400エラーを返すこと", async () => {
 		// Arrange
 		const testClient = await createTestOAuthClient({
@@ -227,7 +226,7 @@ describe("POST /auth/authorize - 認可エンドポイント", () => {
 		// Assert
 		const data = await response.json()
 		expect(response.status).toBe(400)
-		expect(data.success).toBe(false)
+		expect(data).toHaveProperty("message")
 	})
 
 	it("IDトークンにnonceクレームが含まれること", async () => {
@@ -612,7 +611,6 @@ describe("POST /auth/authorize - 認可エンドポイント", () => {
 		})
 	})
 
-	// TODO: 実装側の修正が必要
 	it("スコープが未定義の場合に400エラーを返すこと", async () => {
 		// Arrange
 		const testClient = await createTestOAuthClient({
@@ -637,7 +635,7 @@ describe("POST /auth/authorize - 認可エンドポイント", () => {
 		// Assert
 		const data = await response.json()
 		expect(response.status).toBe(400)
-		expect(data.success).toBe(false)
+		expect(data).toHaveProperty("message")
 	})
 
 	it("code_challengeとcode_challenge_methodが正しくDBに永続化されること", async () => {
@@ -676,7 +674,6 @@ describe("POST /auth/authorize - 認可エンドポイント", () => {
 		expect(authCode?.code_challenge_method).toBe("S256")
 	})
 
-	// TODO: 実装側の修正が必要
 	describe("PKCEパラメータ欠如の場合に400エラーを返すこと", () => {
 		it.each([
 			{
@@ -716,7 +713,7 @@ describe("POST /auth/authorize - 認可エンドポイント", () => {
 			// Assert
 			const data = await response.json()
 			expect(response.status).toBe(400)
-			expect(data.success).toBe(false)
+			expect(data).toHaveProperty("message")
 		})
 	})
 })

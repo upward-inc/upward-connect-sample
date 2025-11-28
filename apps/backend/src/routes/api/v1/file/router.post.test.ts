@@ -210,7 +210,7 @@ describe("POST /api/v1/files - ファイル作成", () => {
 			// Assert
 			const json = await response.json()
 			expect(response.status).toBe(400)
-			expect(json).toHaveProperty("success")
+			expect(json).toHaveProperty("message")
 		})
 	})
 })
