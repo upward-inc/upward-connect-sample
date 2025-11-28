@@ -39,6 +39,7 @@ export const getSystemUserList = async ({
 			},
 		]),
 	)
+	// user_access_control経由で参照するフィールドを追加
 	entityItemMap.set("profile_name", {
 		table_name: "profile",
 		column_name: "name",
@@ -58,8 +59,14 @@ export const getSystemUserList = async ({
 		is_formula: false,
 	})
 
-	const filterFields = collectFilterFields(filter)
+	// SELECT句の生成
+	const selectFields = fields
+		.map((field) => entityItemMap.get(field))
+		.filter((field) => !!field)
+	const selectClause = SelectClauseSchema.parse(selectFields)
 
+	const filterFields = collectFilterFields(filter)
+	// queryに数式フィールドが含まれるかどうかを判定
 	const needFormulaField = [
 		...fields,
 		...filterFields,
@@ -69,45 +76,44 @@ export const getSystemUserList = async ({
 		return !!item?.is_formula
 	})
 
-	const hasProfile = [
+	// プロファイルやロールのフィールドが含まれるかどうかを判定
+	const hasProfileField = [
 		...fields,
 		...filterFields,
 		...(order_by?.map(({ field }) => field) ?? []),
 	].some((field) => field === "profile_name")
-	const hasRole = [
+	const hasRoleField = [
 		...fields,
 		...filterFields,
 		...(order_by?.map(({ field }) => field) ?? []),
 	].some((field) => field === "role_name")
 
-	const selectFields = fields
-		.map((field) => entityItemMap.get(field))
-		.filter((field) => !!field)
-
-	const selectClause = SelectClauseSchema.parse(selectFields)
-
+	// FROM句の生成
 	// 数式が必要な場合のみビューを参照
 	const userFrom = `FROM [user${needFormulaField ? "_view]" : "]"}`
+	// プロファイルやロールのフィールドが必要な場合のみ、該当テーブルとJOINする
 	const userAccessControlFrom =
-		hasProfile || hasRole
+		hasProfileField || hasRoleField
 			? "LEFT OUTER JOIN [user_access_control] ON [user].[id] = [user_access_control].[user_id]"
 			: ""
-	const profileFrom = hasProfile
+	const profileFrom = hasProfileField
 		? "LEFT OUTER JOIN [profile] ON [user_access_control].[profile_id] = [profile].[id]"
 		: ""
-	const roleFrom = hasRole
+	const roleFrom = hasRoleField
 		? "LEFT OUTER JOIN [role] ON [user_access_control].[role_id] = [role].[id]"
 		: ""
 
+	// WHERE句の生成
 	const whereClause = WhereClauseSchema.parse({
 		items: Array.from(entityItemMap.values()),
 		filter,
 	})
 
+	// ORDER BY句の生成
 	const orderBy = appendUserNameToOrderBy(order_by ?? [])
-
 	const orderByClause = OrderByClauseSchema.parse(orderBy)
 
+	// OFFSET / LIMIT句の生成
 	const pagingClause = PagingClauseSchema.parse({
 		// `has_next_page`の効率的な算出の為、指定された件数よりも1件多く取得する
 		limit: limit ? limit + 1 : undefined,
