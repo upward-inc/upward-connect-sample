@@ -687,6 +687,42 @@ describe("GET /api/v1/system-users - システムユーザー一覧取得", () =
 					},
 				)
 			})
+
+			describe("存在しないフィールドによる絞り込み", () => {
+				it("無視され、全データが返されること", async () => {
+					// Arrange
+					const testUsers = [{ user_name: "User 1" }, { user_name: "User 2" }]
+					await createTestUsers(testExecutionUser.id, testUsers)
+
+					// Act
+					const response = await requestGetList({
+						fields: "user_name",
+						filter: {
+							and: [
+								{
+									field: "invalid_field",
+									operator: "eq",
+									value: "some_value",
+								},
+								// テスト実施ユーザを除外
+								{
+									field: "user_name",
+									operator: "eq",
+									value: testExecutionUser.user_name,
+									is_not: true,
+								},
+							],
+						},
+					})
+
+					// Assert
+					const { data } = await response.json()
+					expect(data).toStrictEqual([
+						{ user_name: "User 1" },
+						{ user_name: "User 2" },
+					])
+				})
+			})
 		})
 
 		describe("order_byパラメータ", () => {
