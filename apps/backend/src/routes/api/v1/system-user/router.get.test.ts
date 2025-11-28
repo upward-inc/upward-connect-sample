@@ -161,55 +161,94 @@ describe("GET /api/v1/system-users - システムユーザー一覧取得", () =
 		})
 
 		describe("fieldsパラメータ", () => {
+			const testUser = {
+				user_name: "test_user_fields",
+				first_name: "Test",
+				last_name: "User",
+				email: "test_user_fields@example.com",
+				locale: "ja-JP",
+				timezone: "Asia/Tokyo",
+				profile_name: "test_profile_fields",
+				role_name: "test_role_fields",
+			}
 			it.each([
 				{
 					title: "userテーブルのフィールドのみ",
 					fields: "id,user_name,first_name,last_name,email,locale,timezone",
-					expectedFields: [
-						"id",
-						"user_name",
-						"first_name",
-						"last_name",
-						"email",
-						"locale",
-						"timezone",
-					],
+					expected: {
+						id: "", // idは動的に生成されるため後で指定
+						user_name: testUser.user_name,
+						first_name: testUser.first_name,
+						last_name: testUser.last_name,
+						email: testUser.email,
+						locale: testUser.locale,
+						timezone: testUser.timezone,
+					},
 				},
 				{
 					title: "profileテーブルのフィールドのみ",
 					fields: "profile_name",
-					expectedFields: ["profile_name"],
+					expected: { profile_name: testUser.profile_name },
 				},
 				{
 					title: "roleテーブルのフィールドのみ",
 					fields: "role_name",
-					expectedFields: ["role_name"],
+					expected: { role_name: testUser.role_name },
 				},
 				{
 					title: "全フィールドを含む",
 					fields:
-						"id,user_name,first_name,last_name,locale,timezone,profile_name,role_name",
-					expectedFields: [
-						"id",
-						"user_name",
-						"first_name",
-						"last_name",
-						"locale",
-						"timezone",
-						"profile_name",
-						"role_name",
-					],
+						"id,user_name,first_name,last_name,email,locale,timezone,profile_name,role_name",
+					expected: {
+						id: "", // idは動的に生成されるため後で指定
+						user_name: testUser.user_name,
+						first_name: testUser.first_name,
+						last_name: testUser.last_name,
+						email: testUser.email,
+						locale: testUser.locale,
+						timezone: testUser.timezone,
+						profile_name: testUser.profile_name,
+						role_name: testUser.role_name,
+					},
 				},
-			])("$title", async ({ fields, expectedFields }) => {
+				{
+					title: "存在しないフィールドを含む",
+					fields: "id,profile_name,invalid_field",
+					expected: {
+						id: "", // idは動的に生成されるため後で指定
+						profile_name: testUser.profile_name,
+						invalid_field: null,
+					},
+				},
+			])("$title", async ({ fields, expected }) => {
+				// Arrange
+				const target = await createTestExecutionUser(testUser, {
+					withProfile: true,
+					withRole: true,
+				})
+				if ("id" in expected) {
+					expected.id = target.id // 動的に生成されるidをセット
+				}
+
 				// Act
-				const response = await requestGetList({ fields })
+				const response = await requestGetList({
+					fields,
+					// テスト実施ユーザを除外
+					filter: {
+						and: [
+							{
+								field: "user_name",
+								operator: "eq",
+								value: testExecutionUser.user_name,
+								is_not: true,
+							},
+						],
+					},
+				})
 
 				// Assert
 				const { data } = await response.json()
-				expect(Array.isArray(data)).toBe(true)
-				for (const record of data) {
-					expect(Object.keys(record)).toStrictEqual(expectedFields)
-				}
+				expect(data).toStrictEqual([expected])
 			})
 		})
 

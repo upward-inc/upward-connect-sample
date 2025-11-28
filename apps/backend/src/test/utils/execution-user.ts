@@ -4,6 +4,8 @@ import { createValidToken } from "./auth"
 export type TestExecutionUser = Awaited<
 	ReturnType<typeof testPrisma.user.create>
 > & {
+	profile_name?: string
+	role_name?: string
 	access_token: string
 }
 
@@ -18,6 +20,8 @@ export async function createTestExecutionUser(
 		email?: string
 		timezone?: string
 		locale?: string
+		profile_name?: string
+		role_name?: string
 	},
 	options: { withProfile?: boolean; withRole?: boolean } = {},
 ): Promise<TestExecutionUser> {
@@ -35,14 +39,16 @@ export async function createTestExecutionUser(
 	})
 
 	// プロファイルとアクセスコントロールの作成
+	let testProfile = undefined
+	let testRole = undefined
 	if (options.withProfile) {
-		const testProfile = await createTestProfile(
+		testProfile = await createTestProfile(
 			user.id,
-			`test_profile_${user.id}`,
+			data.profile_name ?? `test_profile_${user.id}`,
 		)
 
-		const testRole = options.withRole
-			? await createTestRole(user.id, `test_role_${user.id}`)
+		testRole = options.withRole
+			? await createTestRole(user.id, data.role_name ?? `test_role_${user.id}`)
 			: null
 
 		await testPrisma.user_access_control.create({
@@ -58,7 +64,12 @@ export async function createTestExecutionUser(
 
 	const token = createValidToken(user.id)
 
-	return { ...user, access_token: token }
+	return {
+		...user,
+		profile_name: testProfile?.name,
+		role_name: testRole?.name,
+		access_token: token,
+	}
 }
 
 /**
