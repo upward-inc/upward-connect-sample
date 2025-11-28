@@ -1,5 +1,6 @@
-import { OpenAPIHono, createRoute } from "@hono/zod-openapi"
+import { createRoute } from "@hono/zod-openapi"
 import { getProfile, getProfileList } from "../../../domain/profile"
+import { honoApp } from "../../../libs/hono"
 import { ResourceApiErrorResultSchema } from "../../../schema/error"
 import {
 	GetProfileParamSchema,
@@ -7,7 +8,7 @@ import {
 	ProfileSchema,
 } from "../../../schema/profile"
 
-export const profileRouter = new OpenAPIHono()
+export const profileRouter = honoApp()
 	.openapi(
 		createRoute({
 			method: "get",

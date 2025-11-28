@@ -1,4 +1,4 @@
-import { OpenAPIHono, createRoute } from "@hono/zod-openapi"
+import { createRoute } from "@hono/zod-openapi"
 import { configuration } from "../../configuration"
 import {
 	deleteAuthorizationCode,
@@ -12,6 +12,7 @@ import {
 	validateRefreshTokenParams,
 	validateTokenParams,
 } from "../../domain/auth"
+import { honoApp } from "../../libs/hono"
 import {
 	type AuthContexts,
 	GetJwksResultSchema,
@@ -21,7 +22,7 @@ import {
 } from "../../schema/auth"
 import { OAuthApiErrorResultSchema } from "../../schema/error"
 
-export const oauth2Router = new OpenAPIHono<{ Variables: AuthContexts }>()
+export const oauth2Router = honoApp<{ Variables: AuthContexts }>()
 	.openapi(
 		createRoute({
 			method: "get",

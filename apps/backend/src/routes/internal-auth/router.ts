@@ -1,4 +1,4 @@
-import { OpenAPIHono, createRoute } from "@hono/zod-openapi"
+import { createRoute } from "@hono/zod-openapi"
 import { nanoid } from "nanoid"
 import { configuration } from "../../configuration"
 import {
@@ -8,6 +8,7 @@ import {
 	saveAuthorizationCode,
 	validateAuthorizeParams,
 } from "../../domain/auth"
+import { honoApp } from "../../libs/hono"
 import {
 	type AuthContexts,
 	GetOAuthClientParamSchema,
@@ -23,7 +24,7 @@ import {
 	ResourceApiErrorResultSchema,
 } from "../../schema/error"
 
-export const internalAuthRouter = new OpenAPIHono<{ Variables: AuthContexts }>()
+export const internalAuthRouter = honoApp<{ Variables: AuthContexts }>()
 	.openapi(
 		createRoute({
 			method: "post",

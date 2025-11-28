@@ -1,8 +1,9 @@
-import { OpenAPIHono, createRoute } from "@hono/zod-openapi"
+import { createRoute } from "@hono/zod-openapi"
 import { configuration } from "../../configuration"
+import { honoApp } from "../../libs/hono"
 import { OidcConfigurationResultSchema } from "../../schema/auth"
 
-export const wellKnownRouter = new OpenAPIHono().openapi(
+export const wellKnownRouter = honoApp().openapi(
 	createRoute({
 		method: "get",
 		path: "/openid-configuration",
