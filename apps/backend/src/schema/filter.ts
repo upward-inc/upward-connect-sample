@@ -208,4 +208,6 @@ export function collectFilterFields(filter?: Filter): string[] {
 	return []
 }
 
-type Filter = z.infer<typeof NestableFilterSchema | typeof BaseFilterSchema>
+export type Filter = z.infer<
+	typeof NestableFilterSchema | typeof BaseFilterSchema
+>

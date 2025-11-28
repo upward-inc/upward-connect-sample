@@ -1,7 +1,7 @@
 import { format } from "@formkit/tempo"
 import { prisma } from "../../libs/prisma"
 import type { JsonValue } from "../../schema/common"
-import { collectFilterFields } from "../../schema/filter"
+import { type Filter, collectFilterFields } from "../../schema/filter"
 import {
 	type Field,
 	OrderByClauseSchema,
@@ -60,11 +60,82 @@ export const getSystemUserList = async ({
 	})
 
 	// SELECT句の生成
+	const selectClause = toSelectClause(fields, entityItemMap)
+
+	// FROM句の生成
+	const fromClause = toFromClause(fields, entityItemMap, filter, order_by)
+
+	// WHERE句の生成
+	const whereClause = WhereClauseSchema.parse({
+		items: Array.from(entityItemMap.values()),
+		filter,
+	})
+
+	// ORDER BY句の生成
+	const orderBy = appendUserNameToOrderBy(order_by ?? [])
+	const orderByClause = OrderByClauseSchema.parse(orderBy)
+
+	// OFFSET / LIMIT句の生成
+	const pagingClause = PagingClauseSchema.parse({
+		// `has_next_page`の効率的な算出の為、指定された件数よりも1件多く取得する
+		limit: limit ? limit + 1 : undefined,
+		offset: offset ?? 0,
+	})
+
+	const fetchDataQuery = [
+		selectClause,
+		fromClause,
+		whereClause,
+		orderByClause,
+		pagingClause,
+	]
+		.filter((clause) => !!clause)
+		.join("\n")
+
+	const fetchTotalSizeQuery = [
+		"SELECT COUNT(*) AS count",
+		fromClause,
+		whereClause,
+	]
+		.filter((clause) => !!clause)
+		.join("\n")
+
+	const [fetchDataResult, totalSizeResult] = await Promise.all([
+		prisma.$queryRawUnsafe<DBRecord[]>(fetchDataQuery),
+		prisma.$queryRawUnsafe<{ count: number }[]>(fetchTotalSizeQuery),
+	])
+
+	// 余分に取得したレコードを除外
+	const records = limit ? fetchDataResult.slice(0, limit) : fetchDataResult
+
+	const data = await covertRecords(records, fields, entityItemMap)
+	const hasNextPage = limit ? fetchDataResult.length > limit : false
+	const totalSize = totalSizeResult.at(0)?.count ?? 0
+
+	return {
+		has_next_page: hasNextPage,
+		total_size: totalSize,
+		data,
+	}
+}
+
+const toSelectClause = (
+	fields: string[],
+	entityItemMap: Map<string, Field>,
+) => {
 	const selectFields = fields
 		.map((field) => entityItemMap.get(field))
 		.filter((field) => !!field)
-	const selectClause = SelectClauseSchema.parse(selectFields)
 
+	return SelectClauseSchema.parse(selectFields)
+}
+
+const toFromClause = (
+	fields: string[],
+	entityItemMap: Map<string, { is_formula: boolean }>,
+	filter?: Filter,
+	order_by?: Array<{ field: string; direction: "asc" | "desc" }>,
+) => {
 	const filterFields = collectFilterFields(filter)
 	// queryに数式フィールドが含まれるかどうかを判定
 	const needFormulaField = [
@@ -102,65 +173,9 @@ export const getSystemUserList = async ({
 	const roleFrom = hasRoleField
 		? "LEFT OUTER JOIN [role] ON [user_access_control].[role_id] = [role].[id]"
 		: ""
-
-	// WHERE句の生成
-	const whereClause = WhereClauseSchema.parse({
-		items: Array.from(entityItemMap.values()),
-		filter,
-	})
-
-	// ORDER BY句の生成
-	const orderBy = appendUserNameToOrderBy(order_by ?? [])
-	const orderByClause = OrderByClauseSchema.parse(orderBy)
-
-	// OFFSET / LIMIT句の生成
-	const pagingClause = PagingClauseSchema.parse({
-		// `has_next_page`の効率的な算出の為、指定された件数よりも1件多く取得する
-		limit: limit ? limit + 1 : undefined,
-		offset: offset ?? 0,
-	})
-
-	const fetchDataQuery = [
-		selectClause,
-		userFrom,
-		userAccessControlFrom,
-		profileFrom,
-		roleFrom,
-		whereClause,
-		orderByClause,
-		pagingClause,
-	]
+	return [userFrom, userAccessControlFrom, profileFrom, roleFrom]
 		.filter((clause) => !!clause)
 		.join("\n")
-
-	const fetchTotalSizeQuery = [
-		"SELECT COUNT(*) AS count",
-		userFrom,
-		userAccessControlFrom,
-		profileFrom,
-		roleFrom,
-		whereClause,
-	]
-		.filter((clause) => !!clause)
-		.join("\n")
-
-	const [fetchDataResult, totalSizeResult] = await Promise.all([
-		prisma.$queryRawUnsafe<DBRecord[]>(fetchDataQuery),
-		prisma.$queryRawUnsafe<{ count: number }[]>(fetchTotalSizeQuery),
-	])
-
-	// 余分に取得したレコードを除外
-	const records = limit ? fetchDataResult.slice(0, limit) : fetchDataResult
-
-	const data = await covertRecords(records, fields, entityItemMap)
-	const hasNextPage = limit ? fetchDataResult.length > limit : false
-	const totalSize = totalSizeResult.at(0)?.count ?? 0
-
-	return {
-		has_next_page: hasNextPage,
-		total_size: totalSize,
-		data,
-	}
 }
 
 const appendUserNameToOrderBy = (
