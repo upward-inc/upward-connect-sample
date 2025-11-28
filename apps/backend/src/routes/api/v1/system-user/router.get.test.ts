@@ -954,6 +954,171 @@ describe("GET /api/v1/system-users - システムユーザー一覧取得", () =
 				})
 			})
 		})
+
+		describe("limitパラメータ", () => {
+			describe("指定した数を上限に対象ユーザーを返すこと", () => {
+				const testUsers = [
+					{ user_name: "User 1" },
+					{ user_name: "User 2" },
+					{ user_name: "User 3" },
+					{ user_name: "User 4" },
+					{ user_name: "User 5" },
+				]
+
+				it.each([
+					{
+						title: "limit < 対象ユーザー数",
+						limit: 2,
+						expected: {
+							has_next_page: true,
+							total_size: 5,
+							data: [{ user_name: "User 1" }, { user_name: "User 2" }],
+						},
+					},
+					{
+						title: "limit = 対象ユーザー数",
+						limit: 5,
+						expected: {
+							has_next_page: false,
+							total_size: 5,
+							data: [
+								{ user_name: "User 1" },
+								{ user_name: "User 2" },
+								{ user_name: "User 3" },
+								{ user_name: "User 4" },
+								{ user_name: "User 5" },
+							],
+						},
+					},
+					{
+						title: "limit > 対象ユーザー数",
+						limit: 6,
+						expected: {
+							has_next_page: false,
+							total_size: 5,
+							data: [
+								{ user_name: "User 1" },
+								{ user_name: "User 2" },
+								{ user_name: "User 3" },
+								{ user_name: "User 4" },
+								{ user_name: "User 5" },
+							],
+						},
+					},
+				])("$title", async ({ limit, expected }) => {
+					// Arrange
+					await createTestUsers(testExecutionUser.id, testUsers)
+
+					// Act
+					const response = await requestGetList({
+						fields: "user_name",
+						limit,
+						filter: {
+							and: [
+								// テスト実施ユーザを除外
+								{
+									field: "user_name",
+									operator: "eq",
+									value: testExecutionUser.user_name,
+									is_not: true,
+								},
+							],
+						},
+					})
+
+					// Assert
+					const json = await response.json()
+					expect(json.has_next_page).toBe(expected.has_next_page)
+					expect(json.total_size).toBe(expected.total_size)
+					expect(json.data).toStrictEqual(expected.data)
+				})
+			})
+		})
+
+		describe("limitパラメータ + offsetパラメータ", () => {
+			describe("指定した範囲の対象ユーザーを返すこと", () => {
+				const testUsers = [
+					{ user_name: "User 1" },
+					{ user_name: "User 2" },
+					{ user_name: "User 3" },
+					{ user_name: "User 4" },
+					{ user_name: "User 5" },
+				]
+				it.each([
+					{
+						title: "(limit + offset) < 対象ユーザー数",
+						limit: 2,
+						offset: 1,
+						expected: {
+							has_next_page: true,
+							total_size: 5,
+							data: [{ user_name: "User 2" }, { user_name: "User 3" }],
+						},
+					},
+					{
+						title: "(limit + offset) = 対象ユーザー数",
+						limit: 3,
+						offset: 2,
+						expected: {
+							has_next_page: false,
+							total_size: 5,
+							data: [
+								{ user_name: "User 3" },
+								{ user_name: "User 4" },
+								{ user_name: "User 5" },
+							],
+						},
+					},
+					{
+						title: "(limit + offset) > 対象ユーザー数",
+						limit: 3,
+						offset: 3,
+						expected: {
+							has_next_page: false,
+							total_size: 5,
+							data: [{ user_name: "User 4" }, { user_name: "User 5" }],
+						},
+					},
+					{
+						title: "offset >= 対象ユーザー数",
+						limit: 3,
+						offset: 5,
+						expected: {
+							has_next_page: false,
+							total_size: 5,
+							data: [],
+						},
+					},
+				])("$title", async ({ limit, offset, expected }) => {
+					// Arrange
+					await createTestUsers(testExecutionUser.id, testUsers)
+
+					// Act
+					const response = await requestGetList({
+						fields: "user_name",
+						limit,
+						offset,
+						filter: {
+							and: [
+								// テスト実施ユーザを除外
+								{
+									field: "user_name",
+									operator: "eq",
+									value: testExecutionUser.user_name,
+									is_not: true,
+								},
+							],
+						},
+					})
+
+					// Assert
+					const json = await response.json()
+					expect(json.has_next_page).toBe(expected.has_next_page)
+					expect(json.total_size).toBe(expected.total_size)
+					expect(json.data).toStrictEqual(expected.data)
+				})
+			})
+		})
 	})
 
 	describe("GET /api/v1/system-users/:id - 個別取得", () => {
