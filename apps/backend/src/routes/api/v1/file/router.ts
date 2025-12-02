@@ -62,8 +62,8 @@ export const fileRouter = new OpenAPIHono<{ Variables: AuthContexts }>()
 				},
 			},
 			responses: {
-				200: {
-					description: "Success",
+				201: {
+					description: "Created",
 					content: {
 						"application/json": { schema: PostFileResultSchema },
 					},
@@ -90,6 +90,6 @@ export const fileRouter = new OpenAPIHono<{ Variables: AuthContexts }>()
 
 			const id = await createFile(file, user.id)
 
-			return c.json({ id }, 200)
+			return c.json({ id }, 201)
 		},
 	)
