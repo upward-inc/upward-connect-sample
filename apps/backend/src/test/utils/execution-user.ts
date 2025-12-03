@@ -102,7 +102,6 @@ export async function createTestUsers(
 		})),
 	})
 
-	// プロファイルとロールとアクセスコントロールの作成
 	const allUsers = await testPrisma.user.findMany({
 		where: {
 			user_name: {
@@ -114,6 +113,7 @@ export async function createTestUsers(
 	const testProfileIds = new Map<string, string>()
 	const testRoleIds = new Map<string, string>()
 
+	// プロファイルとロールとアクセスコントロールの作成
 	for (const data of usersData) {
 		const user = userMap.get(data.user_name)
 		if (!user) continue
