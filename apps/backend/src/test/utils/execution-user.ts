@@ -109,42 +109,50 @@ export async function createTestUsers(
 			},
 		},
 	})
+
+	const usersWithAccessControl = usersData.filter(
+		(data) => data.profile_name || data.role_name,
+	)
+
+	// アクセスコントロールの作成がない場合は早期リターン
+	if (usersWithAccessControl.length === 0) {
+		return { count: createdUsers.count }
+	}
+
 	const userMap = new Map(allUsers.map((user) => [user.user_name, user]))
 	const testProfileIds = new Map<string, string>()
 	const testRoleIds = new Map<string, string>()
 
 	// プロファイルとロールとアクセスコントロールの作成
-	for (const data of usersData) {
+	for (const data of usersWithAccessControl) {
 		const user = userMap.get(data.user_name)
 		if (!user) continue
 
-		if (data.profile_name || data.role_name) {
-			// プロファイルを作成
-			const profileName = data.profile_name ?? "test_profile"
-			const profileId =
-				testProfileIds.get(profileName) ??
-				(await createTestProfile(testExecutionUserId, profileName)).id
-			testProfileIds.set(profileName, profileId)
+		// プロファイルを作成
+		const profileName = data.profile_name ?? "test_profile"
+		const profileId =
+			testProfileIds.get(profileName) ??
+			(await createTestProfile(testExecutionUserId, profileName)).id
+		testProfileIds.set(profileName, profileId)
 
-			// ロールを作成
-			if (data.role_name) {
-				const roleId =
-					testRoleIds.get(data.role_name) ??
-					(await createTestRole(testExecutionUserId, data.role_name)).id
-				testRoleIds.set(data.role_name, roleId)
-			}
-
-			// プロファイルの作成
-			await testPrisma.user_access_control.create({
-				data: {
-					user_id: user.id,
-					profile_id: testProfileIds.get(profileName) as string,
-					role_id: data.role_name ? testRoleIds.get(data.role_name) : undefined,
-					created_by: testExecutionUserId,
-					modified_by: testExecutionUserId,
-				},
-			})
+		// ロールを作成
+		if (data.role_name) {
+			const roleId =
+				testRoleIds.get(data.role_name) ??
+				(await createTestRole(testExecutionUserId, data.role_name)).id
+			testRoleIds.set(data.role_name, roleId)
 		}
+
+		// プロファイルの作成
+		await testPrisma.user_access_control.create({
+			data: {
+				user_id: user.id,
+				profile_id: testProfileIds.get(profileName) as string,
+				role_id: data.role_name ? testRoleIds.get(data.role_name) : undefined,
+				created_by: testExecutionUserId,
+				modified_by: testExecutionUserId,
+			},
+		})
 	}
 	return createdUsers
 }
