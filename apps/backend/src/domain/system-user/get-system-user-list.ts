@@ -137,27 +137,22 @@ const toFromClause = (
 	order_by?: Array<{ field: string; direction: "asc" | "desc" }>,
 ) => {
 	const filterFields = collectFilterFields(filter)
+	const hasFieldMatching = (predicate: (field: string) => boolean) => {
+		return [
+			...fields,
+			...filterFields,
+			...(order_by?.map(({ field }) => field) ?? []),
+		].some(predicate)
+	}
 	// queryに数式フィールドが含まれるかどうかを判定
-	const needFormulaField = [
-		...fields,
-		...filterFields,
-		...(order_by?.map(({ field }) => field) ?? []),
-	].some((field) => {
+	const needFormulaField = hasFieldMatching((field) => {
 		const item = entityItemMap.get(field)
 		return !!item?.is_formula
 	})
 
 	// プロファイルやロールのフィールドが含まれるかどうかを判定
-	const hasProfileField = [
-		...fields,
-		...filterFields,
-		...(order_by?.map(({ field }) => field) ?? []),
-	].some((field) => field === "profile_name")
-	const hasRoleField = [
-		...fields,
-		...filterFields,
-		...(order_by?.map(({ field }) => field) ?? []),
-	].some((field) => field === "role_name")
+	const hasProfileField = hasFieldMatching((field) => field === "profile_name")
+	const hasRoleField = hasFieldMatching((field) => field === "role_name")
 
 	// FROM句の生成
 	// 数式が必要な場合のみビューを参照
