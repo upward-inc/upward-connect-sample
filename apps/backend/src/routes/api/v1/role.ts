@@ -1,6 +1,5 @@
-import { createRoute } from "@hono/zod-openapi"
 import { getRole, getRoleList } from "../../../domain/role"
-import { honoApp } from "../../../libs/hono"
+import { createRoute, honoApp } from "../../../libs/hono"
 import { ResourceApiErrorResultSchema } from "../../../schema/error"
 import {
 	GetRoleParamSchema,

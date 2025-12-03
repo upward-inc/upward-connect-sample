@@ -1,4 +1,3 @@
-import { createRoute } from "@hono/zod-openapi"
 import { nanoid } from "nanoid"
 import { configuration } from "../../configuration"
 import {
@@ -8,7 +7,7 @@ import {
 	saveAuthorizationCode,
 	validateAuthorizeParams,
 } from "../../domain/auth"
-import { honoApp } from "../../libs/hono"
+import { createRoute, honoApp } from "../../libs/hono"
 import {
 	type AuthContexts,
 	GetOAuthClientParamSchema,

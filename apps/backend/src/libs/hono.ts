@@ -1,4 +1,8 @@
-import { OpenAPIHono } from "@hono/zod-openapi"
+import {
+	OpenAPIHono,
+	type RouteConfig,
+	createRoute as honoCreateRoute,
+} from "@hono/zod-openapi"
 import { HTTPException } from "hono/http-exception"
 import type { Env } from "hono/types"
 
@@ -15,4 +19,15 @@ export const honoApp = <E extends Env>() => {
 			}
 		},
 	})
+}
+
+export const createRoute = <
+	P extends string,
+	R extends Omit<RouteConfig, "path"> & {
+		path: P
+	},
+>(
+	routeConfig: R,
+) => {
+	return honoCreateRoute(routeConfig)
 }

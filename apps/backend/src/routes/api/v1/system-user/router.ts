@@ -1,9 +1,8 @@
-import { createRoute } from "@hono/zod-openapi"
 import {
 	getSystemUser,
 	getSystemUserList,
 } from "../../../../domain/system-user"
-import { honoApp } from "../../../../libs/hono"
+import { createRoute, honoApp } from "../../../../libs/hono"
 import { ResourceApiErrorResultSchema } from "../../../../schema/error"
 import {
 	GetSystemUserParamSchema,

@@ -1,6 +1,5 @@
-import { createRoute } from "@hono/zod-openapi"
 import { configuration as config } from "../../../configuration"
-import { honoApp } from "../../../libs/hono"
+import { createRoute, honoApp } from "../../../libs/hono"
 import {
 	type Configuration,
 	ConfigurationSchema,

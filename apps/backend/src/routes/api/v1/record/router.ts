@@ -1,4 +1,3 @@
-import { createRoute } from "@hono/zod-openapi"
 import { getEntity } from "../../../../domain/entity"
 import {
 	createRecord,
@@ -10,7 +9,7 @@ import {
 	validateGetRecordListQuery,
 	validateUpdateRecordBody,
 } from "../../../../domain/record"
-import { honoApp } from "../../../../libs/hono"
+import { createRoute, honoApp } from "../../../../libs/hono"
 import type { AuthContexts } from "../../../../schema/auth"
 import { ResourceApiErrorResultSchema } from "../../../../schema/error"
 import {

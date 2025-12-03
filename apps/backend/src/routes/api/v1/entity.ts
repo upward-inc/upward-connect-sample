@@ -1,11 +1,10 @@
-import { createRoute } from "@hono/zod-openapi"
 import {
 	getEntity,
 	getEntityItem,
 	getEntityItemList,
 	getEntityList,
 } from "../../../domain/entity"
-import { honoApp } from "../../../libs/hono"
+import { createRoute, honoApp } from "../../../libs/hono"
 import {
 	EntityListSchema,
 	EntitySchema,

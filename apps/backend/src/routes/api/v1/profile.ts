@@ -1,6 +1,5 @@
-import { createRoute } from "@hono/zod-openapi"
 import { getProfile, getProfileList } from "../../../domain/profile"
-import { honoApp } from "../../../libs/hono"
+import { createRoute, honoApp } from "../../../libs/hono"
 import { ResourceApiErrorResultSchema } from "../../../schema/error"
 import {
 	GetProfileParamSchema,

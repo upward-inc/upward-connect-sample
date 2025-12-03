@@ -1,4 +1,3 @@
-import { createRoute } from "@hono/zod-openapi"
 import { configuration } from "../../configuration"
 import {
 	deleteAuthorizationCode,
@@ -12,7 +11,7 @@ import {
 	validateRefreshTokenParams,
 	validateTokenParams,
 } from "../../domain/auth"
-import { honoApp } from "../../libs/hono"
+import { createRoute, honoApp } from "../../libs/hono"
 import {
 	type AuthContexts,
 	GetJwksResultSchema,

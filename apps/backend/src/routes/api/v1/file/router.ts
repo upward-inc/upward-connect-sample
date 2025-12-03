@@ -1,6 +1,5 @@
-import { createRoute } from "@hono/zod-openapi"
 import { createFile, getFile } from "../../../../domain/file"
-import { honoApp } from "../../../../libs/hono"
+import { createRoute, honoApp } from "../../../../libs/hono"
 import type { AuthContexts } from "../../../../schema/auth"
 import { ResourceApiErrorResultSchema } from "../../../../schema/error"
 import {
