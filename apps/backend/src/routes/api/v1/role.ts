@@ -1,5 +1,5 @@
-import { OpenAPIHono, createRoute } from "@hono/zod-openapi"
 import { getRole, getRoleList } from "../../../domain/role"
+import { createRoute, honoApp } from "../../../libs/hono"
 import { ResourceApiErrorResultSchema } from "../../../schema/error"
 import {
 	GetRoleParamSchema,
@@ -7,7 +7,7 @@ import {
 	RoleSchema,
 } from "../../../schema/role"
 
-export const roleRouter = new OpenAPIHono()
+export const roleRouter = honoApp()
 	.openapi(
 		createRoute({
 			method: "get",

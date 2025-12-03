@@ -172,7 +172,6 @@ describe("GET /oauth2/userinfo - ユーザー情報取得", () => {
 		}
 	})
 
-	// TODO: 実装側の修正が必要
 	it("非アクティブなユーザーの場合に401エラーを返すこと", async () => {
 		// Arrange
 		const nonExistentUserId = crypto.randomUUID()
