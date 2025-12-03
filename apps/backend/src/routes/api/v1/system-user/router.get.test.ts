@@ -173,7 +173,7 @@ describe("GET /api/v1/system-users - システムユーザー一覧取得", () =
 			}
 			it.each([
 				{
-					title: "userテーブルのフィールドのみ",
+					title: "userのフィールドのみ",
 					fields: "id,user_name,first_name,last_name,email,locale,timezone",
 					expected: {
 						id: "", // idは動的に生成されるため後で指定
@@ -186,12 +186,12 @@ describe("GET /api/v1/system-users - システムユーザー一覧取得", () =
 					},
 				},
 				{
-					title: "profileテーブルのフィールドのみ",
+					title: "profileのフィールドのみ",
 					fields: "profile_name",
 					expected: { profile_name: testUser.profile_name },
 				},
 				{
-					title: "roleテーブルのフィールドのみ",
+					title: "roleのフィールドのみ",
 					fields: "role_name",
 					expected: { role_name: testUser.role_name },
 				},
@@ -253,7 +253,7 @@ describe("GET /api/v1/system-users - システムユーザー一覧取得", () =
 		})
 
 		describe("filterパラメータ", () => {
-			describe("userテーブルのフィールドによる絞り込み", () => {
+			describe("userのフィールドによる絞り込み", () => {
 				const targetField = "email"
 				const testUsers = [
 					{ user_name: "User 1", email: "A@AA.com" },
@@ -398,7 +398,7 @@ describe("GET /api/v1/system-users - システムユーザー一覧取得", () =
 				)
 			})
 
-			describe("profileテーブルのフィールドによる絞り込み", () => {
+			describe("profileのフィールドによる絞り込み", () => {
 				const targetField = "profile_name"
 				const testUsers = [
 					{ user_name: "User 1", profile_name: "A AA A" },
@@ -543,7 +543,7 @@ describe("GET /api/v1/system-users - システムユーザー一覧取得", () =
 				)
 			})
 
-			describe("roleテーブルのフィールドによる絞り込み", () => {
+			describe("roleのフィールドによる絞り込み", () => {
 				const targetField = "role_name"
 				const testUsers = [
 					{ user_name: "User 1", role_name: "A AA A" },
@@ -763,7 +763,7 @@ describe("GET /api/v1/system-users - システムユーザー一覧取得", () =
 				},
 				{ user_name: "User 6", first_name: "BB", last_name: "YY" },
 			]
-			describe("userテーブルの項目で並び替えられること", () => {
+			describe("userのフィールドで並び替えられること", () => {
 				it.each([
 					{
 						title: "単一条件",
@@ -823,7 +823,7 @@ describe("GET /api/v1/system-users - システムユーザー一覧取得", () =
 				})
 			})
 
-			describe("profileテーブルの項目で並び替えられること", () => {
+			describe("profileのフィールドで並び替えられること", () => {
 				it.each([
 					{
 						title: "単一条件",
@@ -866,7 +866,7 @@ describe("GET /api/v1/system-users - システムユーザー一覧取得", () =
 				})
 			})
 
-			describe("roleテーブルの項目で並び替えられること", () => {
+			describe("roleのフィールドで並び替えられること", () => {
 				it.each([
 					{
 						title: "単一条件",
@@ -909,10 +909,10 @@ describe("GET /api/v1/system-users - システムユーザー一覧取得", () =
 				})
 			})
 
-			describe("複数テーブルの項目で並び替えられること", () => {
+			describe("複数対象のフィールドで並び替えられること", () => {
 				it.each([
 					{
-						title: "userテーブルとprofileテーブルの項目",
+						title: "userとprofileのフィールド",
 						order_by: [
 							{ field: "first_name", direction: "asc" },
 							{ field: "profile_name", direction: "desc" },
@@ -949,7 +949,7 @@ describe("GET /api/v1/system-users - システムユーザー一覧取得", () =
 						},
 					},
 					{
-						title: "userテーブルとroleテーブルの項目",
+						title: "userとroleのフィールド",
 						order_by: [
 							{ field: "first_name", direction: "asc" },
 							{ field: "role_name", direction: "desc" },
@@ -966,7 +966,7 @@ describe("GET /api/v1/system-users - システムユーザー一覧取得", () =
 						},
 					},
 					{
-						title: "profileテーブルとroleテーブルの項目",
+						title: "profileとroleのフィールド",
 						order_by: [
 							{ field: "profile_name", direction: "asc" },
 							{ field: "role_name", direction: "desc" },
