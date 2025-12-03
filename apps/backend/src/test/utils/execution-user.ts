@@ -143,7 +143,7 @@ export async function createTestUsers(
 			testRoleIds.set(data.role_name, roleId)
 		}
 
-		// プロファイルの作成
+		// アクセスコントロールの作成
 		await testPrisma.user_access_control.create({
 			data: {
 				user_id: user.id,
