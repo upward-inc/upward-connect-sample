@@ -19,9 +19,10 @@ RUN cd /temp/prod && \
 # Prisma clientの生成はNode.jsに依存するため、Node.jsの公式イメージを使用して実行
 FROM node:22-alpine AS prisma
 WORKDIR /usr/src/app
+# @prismaに依存するため、/devからnode_modulesをコピー
+COPY --from=install /temp/dev/node_modules ./node_modules
 COPY package.json ./
 COPY prisma ./prisma/
-RUN npm install prisma @prisma/client
 RUN npx prisma generate
 
 # copy node_modules from temp directory
