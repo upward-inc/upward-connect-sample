@@ -12,7 +12,7 @@ RUN cd /temp/dev && bun install --frozen-lockfile
 
 # install with --production (exclude devDependencies)
 RUN mkdir -p /temp/prod
-COPY package.json ./prisma/ /temp/prod/
+COPY package.json /temp/prod/
 RUN cd /temp/prod && \
 	bun install --frozen-lockfile --production
 
