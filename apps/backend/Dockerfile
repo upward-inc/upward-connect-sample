@@ -21,7 +21,6 @@ FROM node:22-alpine AS prisma
 WORKDIR /usr/src/app
 # @prismaに依存するため、/devからnode_modulesをコピー
 COPY --from=install /temp/dev/node_modules ./node_modules
-COPY package.json ./
 COPY prisma ./prisma/
 RUN npx prisma generate
 
