@@ -17,7 +17,7 @@ RUN cd /temp/prod && \
 	bun install --frozen-lockfile --production
 
 # Prisma clientの生成はNode.jsに依存するため、Node.jsの公式イメージを使用して実行
-FROM node:22-alpine AS prisma
+FROM node:24-alpine AS prisma
 WORKDIR /usr/src/app
 # @prismaに依存するため、/devからnode_modulesをコピー
 COPY --from=install /temp/dev/node_modules ./node_modules
