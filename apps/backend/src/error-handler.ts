@@ -8,16 +8,8 @@ export const handleError = async (
 	err: Error,
 	c: Context,
 ): Promise<Response> => {
-	if (err instanceof ZodError) {
-		// `z.parse()`実行時のエラーをHTTPException化して再スロー
-		throw new HTTPException(500, {
-			message: "Schema parse error",
-			cause: err,
-		})
-	}
-
 	if (err instanceof HTTPException) {
-		// 再スローされたZodError or `hono-openapi/zod`が発生させるレスポンスバリデーションエラー
+		// 再スローされたZodErrorが発生させるレスポンスバリデーションエラー
 		if (err.cause instanceof ZodError) {
 			return c.json(
 				{ message: err.message, issues: err.cause.issues },

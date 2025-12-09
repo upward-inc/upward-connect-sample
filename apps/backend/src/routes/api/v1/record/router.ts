@@ -1,4 +1,3 @@
-import { OpenAPIHono, createRoute } from "@hono/zod-openapi"
 import { getEntity } from "../../../../domain/entity"
 import {
 	createRecord,
@@ -10,6 +9,7 @@ import {
 	validateGetRecordListQuery,
 	validateUpdateRecordBody,
 } from "../../../../domain/record"
+import { createRoute, honoApp } from "../../../../libs/hono"
 import type { AuthContexts } from "../../../../schema/auth"
 import { ResourceApiErrorResultSchema } from "../../../../schema/error"
 import {
@@ -25,7 +25,7 @@ import {
 	PostRecordResponseSchema,
 } from "../../../../schema/record"
 
-export const recordRouter = new OpenAPIHono<{ Variables: AuthContexts }>()
+export const recordRouter = honoApp<{ Variables: AuthContexts }>()
 	.openapi(
 		createRoute({
 			method: "get",

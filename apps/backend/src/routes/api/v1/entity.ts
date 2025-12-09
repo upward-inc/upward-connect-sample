@@ -1,10 +1,10 @@
-import { OpenAPIHono, createRoute } from "@hono/zod-openapi"
 import {
 	getEntity,
 	getEntityItem,
 	getEntityItemList,
 	getEntityList,
 } from "../../../domain/entity"
+import { createRoute, honoApp } from "../../../libs/hono"
 import {
 	EntityListSchema,
 	EntitySchema,
@@ -18,7 +18,7 @@ import {
 } from "../../../schema/entity-item"
 import { ResourceApiErrorResultSchema } from "../../../schema/error"
 
-export const entityRouter = new OpenAPIHono()
+export const entityRouter = honoApp()
 	.openapi(
 		createRoute({
 			method: "get",

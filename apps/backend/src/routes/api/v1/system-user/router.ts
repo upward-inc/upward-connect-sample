@@ -1,9 +1,10 @@
-import { OpenAPIHono, createRoute } from "@hono/zod-openapi"
 import { validateGetRecordListQuery } from "../../../../domain/record"
 import {
 	getSystemUser,
 	getSystemUserList,
 } from "../../../../domain/system-user"
+
+import { createRoute, honoApp } from "../../../../libs/hono"
 import { ResourceApiErrorResultSchema } from "../../../../schema/error"
 import {
 	GetSystemUserListQuerySchema,
@@ -12,7 +13,7 @@ import {
 	SystemUserSchema,
 } from "../../../../schema/system-user"
 
-export const systemUserRouter = new OpenAPIHono()
+export const systemUserRouter = honoApp()
 	.openapi(
 		createRoute({
 			method: "get",

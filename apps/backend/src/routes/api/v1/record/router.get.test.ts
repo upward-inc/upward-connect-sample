@@ -1406,11 +1406,10 @@ describe("GET /records/:entity_name - レコード一覧取得（検索）", () 
 
 	describe("パラメータのバリデーションに失敗する場合に400エラーを返すこと", () => {
 		it.each([
-			// TODO: 実装側の修正が必要
-			// {
-			// 	title: "fieldsパラメータがない",
-			// 	params: {},
-			// },
+			{
+				title: "fieldsパラメータがない",
+				params: {},
+			},
 			{
 				title: "fieldsに指定されたフィールドがgroup_byに含まれていない",
 				params: { fields: "name", group_by: "text" },
