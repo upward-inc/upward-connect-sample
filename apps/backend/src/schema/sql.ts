@@ -1,7 +1,8 @@
 import { format } from "@formkit/tempo"
 import { z } from "../libs/zod"
+import { escapeStringValue } from "../utility/sql"
 import type { RecordReferenceValue } from "./comparison"
-import { type EntityItem, EntityItemSchema } from "./entity-item"
+import { EntityItemSubTypeSchema, EntityItemTypeSchema } from "./entity-item"
 import {
 	BaseFilterSchema,
 	NestableFilterSchema,
@@ -20,20 +21,37 @@ import type {
 } from "./operator"
 import { LimitSchema, OffsetSchema, OrderBySchema } from "./paging"
 
+export const FieldSchema = z.object({
+	table_name: z.string().meta({
+		description: "テーブル名",
+		example: "profile",
+	}),
+	column_name: z.string().meta({
+		description: "カラム名",
+		example: "name",
+	}),
+	alias_name: z.string().meta({
+		description: "取得名（フィールド名）",
+		example: "profile_name",
+	}),
+	type: EntityItemTypeSchema,
+	sub_type: EntityItemSubTypeSchema.nullish(),
+	reference_entities: z.array(z.string()).nullish(),
+})
+
 export const SelectClauseSchema = z
-	.array(z.string())
+	.array(FieldSchema)
 	.transform((fields) => {
-		// SQL Serverの保留キーワードは角括弧で囲んで処理する
-		const safeFields = fields.map((field) => `[${field}]`)
 		// 経緯度フィールドの変換
-		const locationKeywords = ["[latitude]", "[longitude]"]
-		return safeFields.map((field) => {
-			if (locationKeywords.includes(field)) {
-				return field
-					.replace("[latitude]", "location.Lat AS latitude")
-					.replace("[longitude]", "location.Long AS longitude")
+		const locationKeywords = ["latitude", "longitude"]
+		return fields.map((field) => {
+			if (locationKeywords.includes(field.column_name)) {
+				const replacedField = field.column_name
+					.replace("latitude", "[location].[Lat]")
+					.replace("longitude", "[location].[Long]")
+				return `[${field.table_name}].${replacedField} AS [${field.alias_name}]`
 			}
-			return field
+			return `[${field.table_name}].[${field.column_name}] AS [${field.alias_name}]`
 		})
 	})
 	.transform((safeFields) => {
@@ -42,7 +60,7 @@ export const SelectClauseSchema = z
 
 export const WhereClauseSchema = z
 	.object({
-		items: z.array(EntityItemSchema),
+		items: z.array(FieldSchema),
 		filter: NestableFilterSchema.optional(),
 	})
 	.transform(({ items, filter }) => {
@@ -62,7 +80,7 @@ const GetWherePredicatesFilterSchema = z.union([
 type GetWherePredicatesFilter = z.infer<typeof GetWherePredicatesFilterSchema>
 
 const getWherePredicates = (
-	items: EntityItem[],
+	items: Field[],
 	filter?: GetWherePredicatesFilter,
 ): string | null => {
 	if (!filter) {
@@ -100,10 +118,13 @@ const getWherePredicates = (
 }
 
 export const GroupByClauseSchema = z
-	.array(z.string())
+	.array(FieldSchema)
 	.optional()
 	.transform((fields) => {
-		return fields ? `GROUP BY ${fields.join(", ")}` : null
+		const safeFieldNames = fields?.map(
+			(field) => `[${field.table_name}].[${field.column_name}]`,
+		)
+		return fields ? `GROUP BY ${safeFieldNames?.join(", ")}` : null
 	})
 
 export const OrderByClauseSchema = OrderBySchema.optional().transform(
@@ -131,11 +152,11 @@ export const PagingClauseSchema = z
 	})
 
 const baseFilterToPredicate = (
-	items: EntityItem[],
+	items: Field[],
 	filter: z.infer<typeof BaseFilterSchema>,
 ) => {
 	// フィールドが存在しない場合は検索条件に含めない
-	const item = items.find((item) => item.name === filter.field)
+	const item = items.find((item) => item.alias_name === filter.field)
 	if (!item) {
 		return null
 	}
@@ -144,7 +165,7 @@ const baseFilterToPredicate = (
 	if (filter.filter_type === "is_set") {
 		return withPredicatePrefix(
 			filter.is_not,
-			getIsSetComparisonPredicate(item.type, filter.field),
+			getIsSetComparisonPredicate(item.table_name, item.type, item.column_name),
 		)
 	}
 
@@ -157,7 +178,8 @@ const baseFilterToPredicate = (
 		return withPredicatePrefix(
 			filter.is_not,
 			getSimpleComparisonPredicate(
-				filter.field,
+				item.table_name,
+				item.column_name,
 				item.type,
 				filter.operator,
 				filter.value,
@@ -170,7 +192,8 @@ const baseFilterToPredicate = (
 		return withPredicatePrefix(
 			filter.is_not,
 			getSimpleComparisonPredicate(
-				filter.field,
+				item.table_name,
+				item.column_name,
 				item.type,
 				filter.operator,
 				filter.value,
@@ -183,7 +206,8 @@ const baseFilterToPredicate = (
 		return withPredicatePrefix(
 			filter.is_not,
 			getSimpleComparisonPredicate(
-				filter.field,
+				item.table_name,
+				item.column_name,
 				item.type,
 				filter.operator,
 				filter.value,
@@ -210,7 +234,8 @@ const baseFilterToPredicate = (
 		return withPredicatePrefix(
 			filter.is_not,
 			getSimpleComparisonPredicate(
-				filter.field,
+				item.table_name,
+				item.column_name,
 				item.type,
 				filter.operator,
 				value,
@@ -227,7 +252,8 @@ const baseFilterToPredicate = (
 		return withPredicatePrefix(
 			filter.is_not,
 			getOptionComparisonPredicate(
-				filter.field,
+				item.table_name,
+				item.column_name,
 				filter.operator,
 				filter.value,
 				item.sub_type,
@@ -252,7 +278,8 @@ const baseFilterToPredicate = (
 		return withPredicatePrefix(
 			filter.is_not,
 			getReferenceComparisonPredicate(
-				filter.field,
+				item.table_name,
+				item.column_name,
 				filter.operator,
 				value,
 				item.sub_type,
@@ -264,8 +291,9 @@ const baseFilterToPredicate = (
 }
 
 const getSimpleComparisonPredicate = (
-	fieldName: string,
-	itemType: EntityItem["type"],
+	tableName: Field["table_name"],
+	columnName: Field["column_name"],
+	itemType: Field["type"],
 	operator:
 		| EqualOperator
 		| LikeOperator
@@ -279,7 +307,7 @@ const getSimpleComparisonPredicate = (
 		return null
 	}
 
-	const safeColumnName = `[${fieldName}]`
+	const safeColumnName = `[${tableName}].[${columnName}]`
 	const operators: Record<
 		typeof operator,
 		{
@@ -300,7 +328,7 @@ const getSimpleComparisonPredicate = (
 		"text" | "numeric" | "boolean" | "date",
 		string | number
 	> = {
-		text: `'${value}'`,
+		text: typeof value === "string" ? escapeStringValue(value) : "''",
 		numeric: Number(value),
 		boolean: value ? 1 : 0,
 		date: `'${value}'`,
@@ -313,12 +341,13 @@ const getSimpleComparisonPredicate = (
 }
 
 const getOptionComparisonPredicate = (
-	fieldName: string,
+	tableName: Field["table_name"],
+	columnName: Field["column_name"],
 	operator: EqualOperator | IncludesOperator,
 	value: string,
-	subType?: EntityItem["sub_type"],
+	subType?: Field["sub_type"],
 ) => {
-	const safeColumnName = `[${fieldName}]`
+	const safeColumnName = `[${tableName}].[${columnName}]`
 	const isNotNullExpression = `${safeColumnName} IS NOT NULL`
 	const jsonExpression = [
 		"CASE",
@@ -340,12 +369,13 @@ const getOptionComparisonPredicate = (
 }
 
 const getReferenceComparisonPredicate = (
-	fieldName: string,
+	tableName: Field["table_name"],
+	columnName: Field["column_name"],
 	operator: EqualOperator | IncludesOperator,
 	value: RecordReferenceValue,
-	subType?: EntityItem["sub_type"],
+	subType?: Field["sub_type"],
 ) => {
-	const safeColumnName = `[${fieldName}]`
+	const safeColumnName = `[${tableName}].[${columnName}]`
 	const withClause = "WITH (entity_name NVARCHAR(MAX), id NVARCHAR(MAX))"
 	const valueCondition = `${withClause} WHERE entity_name = '${value.entity_name}' AND id = '${value.id}'`
 
@@ -360,11 +390,12 @@ const getReferenceComparisonPredicate = (
 }
 
 const getIsSetComparisonPredicate = (
-	itemType: EntityItem["type"],
-	fieldName: string,
+	tableName: Field["table_name"],
+	itemType: Field["type"],
+	columnName: Field["column_name"],
 ) => {
-	const safeColumnName = `[${fieldName}]`
-	const predicates: Record<EntityItem["type"], string> = {
+	const safeColumnName = `[${tableName}].[${columnName}]`
+	const predicates: Record<Field["type"], string> = {
 		text: `TRIM(ISNULL(${safeColumnName}, '')) != ''`,
 		numeric: `ISNULL(${safeColumnName}, 0) != 0`,
 		boolean: `ISNULL(${safeColumnName}, 0) != 0`,
@@ -407,3 +438,5 @@ const getJsonArrayIncludesPredicate = (
 	const subQuery = `SELECT * FROM OPENJSON(${columnExpression}) ${valueCondition}`
 	return `EXISTS (${subQuery})`
 }
+
+export type Field = z.infer<typeof FieldSchema>
