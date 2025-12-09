@@ -81,6 +81,10 @@ export const SystemUserSchema = z
 		description: "システムユーザー",
 	})
 
+export const PartialSystemUserSchema = SystemUserSchema.partial().meta({
+	description: "システムユーザー（指定したフィールドのみ）",
+})
+
 export const SystemUserListSchema = z.array(SystemUserSchema).meta({
 	description: "システムユーザー一覧",
 })
@@ -102,25 +106,19 @@ export const GetSystemUserListQuerySchema = z.object({
 	offset: OffsetQuerySchema.optional(),
 })
 
-export const GetSystemUserListResponseSchema = z
-	.object({
-		has_next_page: z.boolean().meta({
-			description: "同一の検索条件にて次ページが存在するかどうか",
-			example: false,
-		}),
-		total_size: z.number().meta({
-			description: "同一の検索条件にて取得可能なデータの総数",
-			example: 1234,
-		}),
-		data: z.array(
-			SystemUserSchema.partial().meta({
-				description: "システムユーザー（指定したフィールドのみ）",
-			}),
-		),
-	})
-	.meta({
-		description: "システムユーザー一覧",
-	})
+export const GetSystemUserListResponseSchema = z.object({
+	has_next_page: z.boolean().meta({
+		description: "同一の検索条件にて次ページが存在するかどうか",
+		example: false,
+	}),
+	total_size: z.number().meta({
+		description: "同一の検索条件にて取得可能なデータの総数",
+		example: 1234,
+	}),
+	data: z
+		.array(PartialSystemUserSchema)
+		.meta({ description: "システムユーザーの一覧結果を表す配列" }),
+})
 
 export type SystemUser = z.infer<typeof SystemUserSchema>
 export type SystemUserList = z.infer<typeof SystemUserListSchema>
