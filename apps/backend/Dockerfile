@@ -12,15 +12,21 @@ RUN cd /temp/dev && bun install --frozen-lockfile
 
 # install with --production (exclude devDependencies)
 RUN mkdir -p /temp/prod
-COPY package.json ./prisma/ /temp/prod/
+COPY package.json /temp/prod/
 RUN cd /temp/prod && \
-	bun install --frozen-lockfile --production && \
-	bunx prisma generate
+	bun install --frozen-lockfile --production
+
+# Prisma clientの生成はNode.jsに依存するため、Node.jsの公式イメージを使用して実行
+FROM node:24-alpine AS prisma
+WORKDIR /usr/src/app
+# @prismaに依存するため、/devからnode_modulesをコピー
+COPY --from=install /temp/dev/node_modules ./node_modules
+COPY prisma ./prisma/
+RUN npx prisma generate
 
 # copy node_modules from temp directory
 # then copy all (non-ignored) project files into the image
 FROM base AS prerelease
-COPY --from=install /temp/dev/node_modules node_modules
 COPY . .
 
 # copy production dependencies and source code into final image
@@ -29,6 +35,7 @@ FROM base AS release
 ENV NODE_ENV=production
 
 COPY --from=install /temp/prod/node_modules node_modules
+COPY --from=prisma /usr/src/app/node_modules/.prisma node_modules/.prisma
 COPY --from=prerelease /usr/src/app/package.json .
 COPY --from=prerelease /usr/src/app/src src
 
