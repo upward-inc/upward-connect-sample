@@ -68,6 +68,21 @@ describe("GET /api/v1/system-users - システムユーザー一覧取得", () =
 		},
 		authToken = testExecutionUser.access_token,
 	) {
+		// テスト実施ユーザはテスト実行時に動的に作成される管理ユーザであり、
+		// 各テストケースで用意されるベタ書きの静的テストデータとは異なる性質を持つため、
+		// 検証対象の結果に含めるとテストの意図と異なる結果になることを防ぐために除外する
+		const filterWithExecutionUserExcluded = {
+			and: [
+				{
+					field: "user_name",
+					operator: "eq",
+					value: testExecutionUser.user_name,
+					is_not: true,
+				},
+				...(params.filter ? [params.filter] : []),
+			],
+		}
+		params.filter = filterWithExecutionUserExcluded
 		const queryString = generateQueryString(params)
 		return await app.request(`/api/v1/system-users${queryString}`, {
 			method: "GET",
@@ -233,17 +248,6 @@ describe("GET /api/v1/system-users - システムユーザー一覧取得", () =
 				// Act
 				const response = await requestGetList({
 					fields,
-					// テスト実施ユーザを除外
-					filter: {
-						and: [
-							{
-								field: "user_name",
-								operator: "eq",
-								value: testExecutionUser.user_name,
-								is_not: true,
-							},
-						],
-					},
 				})
 
 				// Assert
@@ -378,16 +382,7 @@ describe("GET /api/v1/system-users - システムユーザー一覧取得", () =
 						const response = await requestGetList({
 							fields: "user_name",
 							filter: {
-								and: [
-									{ field: targetField, operator, value, is_not },
-									// テスト実施ユーザを除外
-									{
-										field: "user_name",
-										operator: "eq",
-										value: testExecutionUser.user_name,
-										is_not: true,
-									},
-								],
+								and: [{ field: targetField, operator, value, is_not }],
 							},
 						})
 
@@ -523,16 +518,7 @@ describe("GET /api/v1/system-users - システムユーザー一覧取得", () =
 						const response = await requestGetList({
 							fields: "user_name",
 							filter: {
-								and: [
-									{ field: targetField, operator, value, is_not },
-									// テスト実施ユーザを除外
-									{
-										field: "user_name",
-										operator: "eq",
-										value: testExecutionUser.user_name,
-										is_not: true,
-									},
-								],
+								and: [{ field: targetField, operator, value, is_not }],
 							},
 						})
 
@@ -668,16 +654,7 @@ describe("GET /api/v1/system-users - システムユーザー一覧取得", () =
 						const response = await requestGetList({
 							fields: "user_name",
 							filter: {
-								and: [
-									{ field: targetField, operator, value, is_not },
-									// テスト実施ユーザを除外
-									{
-										field: "user_name",
-										operator: "eq",
-										value: testExecutionUser.user_name,
-										is_not: true,
-									},
-								],
+								and: [{ field: targetField, operator, value, is_not }],
 							},
 						})
 
@@ -703,13 +680,6 @@ describe("GET /api/v1/system-users - システムユーザー一覧取得", () =
 									field: "invalid_field",
 									operator: "eq",
 									value: "some_value",
-								},
-								// テスト実施ユーザを除外
-								{
-									field: "user_name",
-									operator: "eq",
-									value: testExecutionUser.user_name,
-									is_not: true,
 								},
 							],
 						},
@@ -804,17 +774,6 @@ describe("GET /api/v1/system-users - システムユーザー一覧取得", () =
 					const response = await requestGetList({
 						fields: "user_name",
 						order_by,
-						filter: {
-							and: [
-								// テスト実施ユーザを除外
-								{
-									field: "user_name",
-									operator: "eq",
-									value: testExecutionUser.user_name,
-									is_not: true,
-								},
-							],
-						},
 					})
 
 					// Assert
@@ -847,17 +806,6 @@ describe("GET /api/v1/system-users - システムユーザー一覧取得", () =
 					const response = await requestGetList({
 						fields: `user_name,${order_by.map((o) => o.field).join(",")}`,
 						order_by,
-						filter: {
-							and: [
-								// テスト実施ユーザを除外
-								{
-									field: "user_name",
-									operator: "eq",
-									value: testExecutionUser.user_name,
-									is_not: true,
-								},
-							],
-						},
 					})
 
 					// Assert
@@ -890,17 +838,6 @@ describe("GET /api/v1/system-users - システムユーザー一覧取得", () =
 					const response = await requestGetList({
 						fields: `user_name,${order_by.map((o) => o.field).join(",")}`,
 						order_by,
-						filter: {
-							and: [
-								// テスト実施ユーザを除外
-								{
-									field: "user_name",
-									operator: "eq",
-									value: testExecutionUser.user_name,
-									is_not: true,
-								},
-							],
-						},
 					})
 
 					// Assert
@@ -1010,17 +947,6 @@ describe("GET /api/v1/system-users - システムユーザー一覧取得", () =
 					const response = await requestGetList({
 						fields: `user_name,${order_by.map((o) => o.field).join(",")}`,
 						order_by,
-						filter: {
-							and: [
-								// テスト実施ユーザを除外
-								{
-									field: "user_name",
-									operator: "eq",
-									value: testExecutionUser.user_name,
-									is_not: true,
-								},
-							],
-						},
 					})
 
 					// Assert
@@ -1088,17 +1014,6 @@ describe("GET /api/v1/system-users - システムユーザー一覧取得", () =
 					const response = await requestGetList({
 						fields: "user_name",
 						limit,
-						filter: {
-							and: [
-								// テスト実施ユーザを除外
-								{
-									field: "user_name",
-									operator: "eq",
-									value: testExecutionUser.user_name,
-									is_not: true,
-								},
-							],
-						},
 					})
 
 					// Assert
@@ -1173,17 +1088,6 @@ describe("GET /api/v1/system-users - システムユーザー一覧取得", () =
 						fields: "user_name",
 						limit,
 						offset,
-						filter: {
-							and: [
-								// テスト実施ユーザを除外
-								{
-									field: "user_name",
-									operator: "eq",
-									value: testExecutionUser.user_name,
-									is_not: true,
-								},
-							],
-						},
 					})
 
 					// Assert
