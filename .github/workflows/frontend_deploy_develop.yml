@@ -64,6 +64,7 @@ jobs:
     name: Deploy Job
     if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
+    environment: develop
     needs: build_job
     steps:
       # Download artifact
@@ -89,6 +90,7 @@ jobs:
     name: Close Pull Request Job
     if: github.event_name == 'pull_request' && github.event.action == 'closed'
     runs-on: ubuntu-latest
+    environment: develop
     steps:
       - name: Close Pull Request
         id: closepullrequest
