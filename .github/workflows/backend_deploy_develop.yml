@@ -25,8 +25,8 @@ jobs:
     uses: ./.github/workflows/call_backend_build.yml
     with:
       environment: 'develop'
-      registry_domain: 'multipfdevjecr.azurecr.io'
-      repository_name: 'multi-pf-api'
+      registry_domain: 'connectsampledevjecr01.azurecr.io'
+      repository_name: 'connect-sample-backend-01'
       tag: 'latest'
       dockerfile_path: './apps/backend/Dockerfile'
       context_path: './apps/backend'
@@ -37,9 +37,9 @@ jobs:
     uses: ./.github/workflows/call_backend_deploy.yml
     with:
       environment: 'develop'
-      container_app_name: 'multi-pf-dev-je-api'
-      resource_group: 'multi-pf-dev-je'
-      registry_domain: 'multipfdevjecr.azurecr.io'
-      repository_name: 'multi-pf-api'
+      container_app_name: 'connect-sample-dev-je-api-01'
+      resource_group: 'connect-sample-dev-je'
+      registry_domain: 'connectsampledevjecr01.azurecr.io'
+      repository_name: 'connect-sample-backend-01'
       tag: 'latest'
     secrets: inherit
