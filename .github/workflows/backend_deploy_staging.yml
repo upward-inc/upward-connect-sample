@@ -1,0 +1,45 @@
+name: backend deploy - staging
+
+# When this action will be executed
+on:
+  # Automatically trigger it when detected changes in repo
+  push:
+    branches:
+      [ staging ]
+    paths:
+      - 'apps/backend/**'
+      - '.github/workflows/backend_deploy_staging.yml'
+
+  # Allow manually trigger
+  workflow_dispatch:
+
+jobs:
+  lint:
+    uses: ./.github/workflows/call_backend_lint.yml
+
+  test:
+    uses: ./.github/workflows/call_backend_test.yml
+
+  build:
+    needs: [lint, test]
+    uses: ./.github/workflows/call_backend_build.yml
+    with:
+      environment: 'staging'
+      registry_domain: 'connectsamplestgjecr01.azurecr.io'
+      repository_name: 'connect-sample-backend-01'
+      tag: 'latest'
+      dockerfile_path: './apps/backend/Dockerfile'
+      context_path: './apps/backend'
+    secrets: inherit
+
+  deploy:
+    needs: build
+    uses: ./.github/workflows/call_backend_deploy.yml
+    with:
+      environment: 'staging'
+      container_app_name: 'connect-sample-stg-je-api-01'
+      resource_group: 'connect-sample-stg-je'
+      registry_domain: 'connectsamplestgjecr01.azurecr.io'
+      repository_name: 'connect-sample-backend-01'
+      tag: 'latest'
+    secrets: inherit
