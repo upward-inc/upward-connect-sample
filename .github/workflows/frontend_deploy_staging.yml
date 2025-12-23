@@ -7,7 +7,11 @@ on:
     paths:
       - 'apps/frontend/**'
       - '.github/workflows/frontend_deploy_staging.yml'
-  # Allow manually trigger
+  pull_request:
+    types: [opened, synchronize, reopened, closed]
+    branches:
+      - staging
+  # 手動トリガーを許可
   workflow_dispatch:
 
 jobs:
@@ -22,8 +26,11 @@ jobs:
     uses: ./.github/workflows/call_frontend_build.yml
     with:
       environment: 'staging'
+    secrets: inherit
 
   deploy:
+    # PRの場合はdeployをスキップ
+    if: github.event_name != 'pull_request'
     needs: build
     uses: ./.github/workflows/call_frontend_deploy.yml
     with:
@@ -31,6 +38,7 @@ jobs:
     secrets: inherit
 
   close_pull_request:
+    if: github.event_name == 'pull_request' && github.event.action == 'closed'
     needs: build
     uses: ./.github/workflows/call_frontend_close_pull_request.yml
     with:

@@ -1,16 +1,17 @@
 name: backend deploy - develop
 
-# When this action will be executed
 on:
-  # Automatically trigger it when detected changes in repo
   push:
     branches:
       - develop
     paths:
       - 'apps/backend/**'
       - '.github/workflows/backend_deploy_develop.yml'
-
-  # Allow manually trigger
+  pull_request:
+    types: [opened, synchronize, reopened, closed]
+    branches:
+      - develop
+  # 手動トリガーを許可
   workflow_dispatch:
 
 jobs:
@@ -33,6 +34,8 @@ jobs:
     secrets: inherit
 
   deploy:
+    # PRの場合はdeployをスキップ
+    if: github.event_name != 'pull_request'
     needs: build
     uses: ./.github/workflows/call_backend_deploy.yml
     with:

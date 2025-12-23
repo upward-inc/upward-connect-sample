@@ -7,7 +7,6 @@ on:
     paths:
       - 'apps/frontend/**'
       - '.github/workflows/frontend_deploy_develop.yml'
-  # PRを更新した際にlint,testのみ実行する
   pull_request:
     types: [opened, synchronize, reopened, closed]
     branches:
@@ -23,7 +22,6 @@ jobs:
     uses: ./.github/workflows/call_frontend_test.yml
 
   build:
-    if: github.event_name != 'pull_request'
     needs: [lint, test]
     uses: ./.github/workflows/call_frontend_build.yml
     with:
@@ -31,6 +29,8 @@ jobs:
     secrets: inherit
 
   deploy:
+    # PRの場合はdeployをスキップ
+    if: github.event_name != 'pull_request'
     needs: build
     uses: ./.github/workflows/call_frontend_deploy.yml
     with:
