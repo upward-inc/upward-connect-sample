@@ -4,98 +4,35 @@ on:
   push:
     branches:
       - staging
-  pull_request:
-    types: [opened, synchronize, reopened, closed]
-    branches:
-      - staging
+    paths:
+      - 'apps/frontend/**'
+      - '.github/workflows/frontend_deploy_staging.yml'
   # Allow manually trigger
   workflow_dispatch:
 
 jobs:
-  build_job:
-    name: Build Job
-    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch' || (github.event_name == 'pull_request' && github.event.action != 'closed')
-    runs-on: ubuntu-latest
-    environment: staging
-    steps:
-      # Checkout
-      - name: Checkout repository
-        uses: actions/checkout@v4
+  lint:
+    uses: ./.github/workflows/call_frontend_lint.yml
 
-      # Setup Bun
-      - name: Setup Bun
-        uses: oven-sh/setup-bun@v2
-        with:
-          bun-version: 1.2.12
+  test:
+    uses: ./.github/workflows/call_frontend_test.yml
 
-      # Install dependencies
-      - name: Install dependencies
-        working-directory: ./apps/frontend
-        run: bun install --frozen-lockfile
+  build:
+    needs: [lint, test]
+    uses: ./.github/workflows/call_frontend_build.yml
+    with:
+      environment: 'staging'
 
-      # Lint
-      - name: Lint
-        working-directory: ./apps/frontend
-        run: bun run lint
+  deploy:
+    needs: build
+    uses: ./.github/workflows/call_frontend_deploy.yml
+    with:
+      environment: 'staging'
+    secrets: inherit
 
-      # Test
-      - name: Test
-        working-directory: ./apps/frontend
-        run: bun run test
-
-      # Build
-      - name: Build
-        working-directory: ./apps/frontend
-        env:
-          VARS_JSON: ${{ toJSON(vars) }}
-        run: |
-          echo "$VARS_JSON" | jq -r 'to_entries[] | "\(.key)=\(.value)"' > .env
-          bun run build
-          cp ../../staticwebapp.config.json ./dist
-
-      # Upload Publish Files
-      - name: Upload Publish Files
-        uses: actions/upload-artifact@v4
-        with:
-          name: publish-files
-          path: ./apps/frontend/dist
-
-  deploy_job:
-    name: Deploy Job
-    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
-    runs-on: ubuntu-latest
-    environment: staging
-    needs: build_job
-    steps:
-      # Download artifact
-      - name: Download Publish Files
-        uses: actions/download-artifact@v5
-        with:
-          name: publish-files
-          path: dist
-
-      # Deploy to SWA
-      - name: Deploy
-        id: builddeploy
-        uses: Azure/static-web-apps-deploy@v1
-        with:
-          azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_DEPLOY_TOKEN }}
-          repo_token: ${{ secrets.GITHUB_TOKEN }} # Used for Github integrations (i.e. PR comments)
-          action: 'upload'
-          app_location: '/dist'
-          # `build_job`を個別に定義している為、デフォルトのビルドステップを使用しない
-          skip_app_build: true
-
-  close_pull_request_job:
-    name: Close Pull Request Job
-    if: github.event_name == 'pull_request' && github.event.action == 'closed'
-    runs-on: ubuntu-latest
-    environment: staging
-    steps:
-      - name: Close Pull Request
-        id: closepullrequest
-        uses: Azure/static-web-apps-deploy@v1
-        with:
-          azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_DEPLOY_TOKEN }}
-          action: 'close'
-          app_location: '/dist'
+  close_pull_request:
+    needs: build
+    uses: ./.github/workflows/call_frontend_close_pull_request.yml
+    with:
+      environment: 'staging'
+    secrets: inherit
