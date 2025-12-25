@@ -20,12 +20,15 @@ concurrency:
 
 jobs:
   lint:
+    if: github.event.action != 'closed'
     uses: ./.github/workflows/call_frontend_lint.yml
 
   test:
+    if: github.event.action != 'closed'
     uses: ./.github/workflows/call_frontend_test.yml
 
   build:
+    if: github.event.action != 'closed'
     needs: [lint, test]
     uses: ./.github/workflows/call_frontend_build.yml
     with:
@@ -43,7 +46,6 @@ jobs:
 
   close_pull_request:
     if: github.event_name == 'pull_request' && github.event.action == 'closed'
-    needs: build
     uses: ./.github/workflows/call_frontend_close_pull_request.yml
     with:
       environment: 'develop'
