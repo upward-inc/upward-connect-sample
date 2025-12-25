@@ -41,6 +41,7 @@ jobs:
         run: |
           echo "$VARS_JSON" | jq -r 'to_entries[] | "\(.key)=\(.value)"' > .env
           bun run build
+          rm -f .env
           cp ../../staticwebapp.config.json ./dist
 
       - name: Upload Publish Files
@@ -48,3 +49,4 @@ jobs:
         with:
           name: publish-files
           path: ./apps/frontend/dist
+          retention-days: 1
