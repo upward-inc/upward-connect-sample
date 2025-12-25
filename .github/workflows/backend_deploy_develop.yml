@@ -1,6 +1,7 @@
 name: backend deploy - develop
 
 on:
+  # developブランチへのPush時（PRマージ時）
   push:
     branches:
       - develop
@@ -8,6 +9,8 @@ on:
       - 'apps/backend/**'
       - '.github/workflows/backend_deploy_develop.yml'
       - '.github/workflows/call_backend_*.yml'
+
+  # developブランチへのPR操作時
   pull_request:
     types: [opened, synchronize, reopened]
     branches:
@@ -16,20 +19,27 @@ on:
       - 'apps/backend/**'
       - '.github/workflows/backend_deploy_develop.yml'
       - '.github/workflows/call_backend_*.yml'
-  # 手動トリガーを許可
+
+  # 手動トリガー
   workflow_dispatch:
 
+# 同一ブランチでの重複実行を制御
+# - PR操作時: 古い実行をキャンセルして最新のみ実行
+# - Push時: キャンセルせず順番に実行（デプロイの安全性確保）
 concurrency:
   group: backend-deploy-develop-${{ github.ref }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
+  # コード品質チェック
   lint:
     uses: ./.github/workflows/call_backend_lint.yml
 
+  # ユニットテスト実行
   test:
     uses: ./.github/workflows/call_backend_test.yml
 
+  # Dockerイメージのビルド/プッシュ
   build:
     needs: [lint, test]
     uses: ./.github/workflows/call_backend_build.yml
@@ -42,8 +52,8 @@ jobs:
       context_path: './apps/backend'
     secrets: inherit
 
+  # Azure Container Appsへのデプロイ
   deploy:
-    # PRの場合はdeployをスキップ
     if: github.event_name != 'pull_request'
     needs: build
     uses: ./.github/workflows/call_backend_deploy.yml
