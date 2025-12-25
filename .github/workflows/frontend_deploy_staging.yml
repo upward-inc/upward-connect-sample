@@ -1,16 +1,16 @@
-name: frontend deploy - develop
+name: frontend deploy - staging
 
 on:
   push:
     branches:
-      - develop
+      - staging
     paths:
       - 'apps/frontend/**'
-      - '.github/workflows/frontend_deploy_develop.yml'
+      - '.github/workflows/frontend_deploy_staging.yml'
   pull_request:
     types: [opened, synchronize, reopened, closed]
     branches:
-      - develop
+      - staging
   # 手動トリガーを許可
   workflow_dispatch:
 
@@ -25,7 +25,7 @@ jobs:
     needs: [lint, test]
     uses: ./.github/workflows/call_frontend_build.yml
     with:
-      environment: 'develop'
+      environment: 'staging'
     secrets: inherit
 
   deploy:
@@ -34,7 +34,7 @@ jobs:
     needs: build
     uses: ./.github/workflows/call_frontend_deploy.yml
     with:
-      environment: 'develop'
+      environment: 'staging'
     secrets: inherit
 
   close_pull_request:
@@ -42,5 +42,5 @@ jobs:
     needs: build
     uses: ./.github/workflows/call_frontend_close_pull_request.yml
     with:
-      environment: 'develop'
+      environment: 'staging'
     secrets: inherit

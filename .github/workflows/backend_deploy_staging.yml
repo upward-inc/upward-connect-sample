@@ -1,16 +1,16 @@
-name: backend deploy - develop
+name: backend deploy - staging
 
 on:
   push:
     branches:
-      - develop
+      - staging
     paths:
       - 'apps/backend/**'
-      - '.github/workflows/backend_deploy_develop.yml'
+      - '.github/workflows/backend_deploy_staging.yml'
   pull_request:
     types: [opened, synchronize, reopened, closed]
     branches:
-      - develop
+      - staging
   # 手動トリガーを許可
   workflow_dispatch:
 
@@ -25,8 +25,8 @@ jobs:
     needs: [lint, test]
     uses: ./.github/workflows/call_backend_build.yml
     with:
-      environment: 'develop'
-      registry_domain: 'connectsampledevjecr01.azurecr.io'
+      environment: 'staging'
+      registry_domain: 'connectsamplestgjecr01.azurecr.io'
       repository_name: 'connect-sample-backend-01'
       tag: 'latest'
       dockerfile_path: './apps/backend/Dockerfile'
@@ -39,10 +39,10 @@ jobs:
     needs: build
     uses: ./.github/workflows/call_backend_deploy.yml
     with:
-      environment: 'develop'
-      container_app_name: 'connect-sample-dev-je-api-01'
-      resource_group: 'connect-sample-dev-je'
-      registry_domain: 'connectsampledevjecr01.azurecr.io'
+      environment: 'staging'
+      container_app_name: 'connect-sample-stg-je-api-01'
+      resource_group: 'connect-sample-stg-je'
+      registry_domain: 'connectsamplestgjecr01.azurecr.io'
       repository_name: 'connect-sample-backend-01'
       tag: 'latest'
     secrets: inherit
