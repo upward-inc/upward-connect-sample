@@ -7,10 +7,15 @@ on:
     paths:
       - 'apps/backend/**'
       - '.github/workflows/backend_deploy_develop.yml'
+      - '.github/workflows/call_backend_*.yml'
   pull_request:
     types: [opened, synchronize, reopened]
     branches:
       - develop
+    paths:
+      - 'apps/backend/**'
+      - '.github/workflows/backend_deploy_develop.yml'
+      - '.github/workflows/call_backend_*.yml'
   # 手動トリガーを許可
   workflow_dispatch:
 
