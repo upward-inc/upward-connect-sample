@@ -8,7 +8,7 @@ on:
       - 'apps/backend/**'
       - '.github/workflows/backend_deploy_staging.yml'
   pull_request:
-    types: [opened, synchronize, reopened, closed]
+    types: [opened, synchronize, reopened]
     branches:
       - staging
   # 手動トリガーを許可
