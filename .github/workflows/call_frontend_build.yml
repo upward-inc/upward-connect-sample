@@ -22,6 +22,14 @@ jobs:
         with:
           bun-version: 1.2.12
 
+      - name: Cache Bun dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.bun/install/cache
+          key: ${{ runner.os }}-bun-frontend-${{ hashFiles('apps/frontend/bun.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-bun-frontend-
+
       - name: Install dependencies
         working-directory: ./apps/frontend
         run: bun install --frozen-lockfile
@@ -33,6 +41,7 @@ jobs:
         run: |
           echo "$VARS_JSON" | jq -r 'to_entries[] | "\(.key)=\(.value)"' > .env
           bun run build
+          rm -f .env
           cp ../../staticwebapp.config.json ./dist
 
       - name: Upload Publish Files
@@ -40,3 +49,4 @@ jobs:
         with:
           name: publish-files
           path: ./apps/frontend/dist
+          retention-days: 1
