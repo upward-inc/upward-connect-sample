@@ -59,7 +59,7 @@ jobs:
     uses: ./.github/workflows/call_backend_deploy.yml
     with:
       environment: 'staging'
-      container_app_name: 'connect-sample-stg-je-api-01'
+      container_app_name: 'connect-sample-stg-je-ca-01'
       resource_group: 'connect-sample-stg-je'
       registry_domain: 'connectsamplestgjecr01.azurecr.io'
       repository_name: 'connect-sample-backend-01'
