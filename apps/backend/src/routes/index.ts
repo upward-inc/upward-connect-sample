@@ -1,4 +1,5 @@
 import { cors } from "hono/cors"
+import { configuration } from "../configuration"
 import { honoApp } from "../libs/hono"
 import { bearerAuth } from "../middleware/bearer-auth"
 import type { AuthContexts } from "../schema/auth"
@@ -20,7 +21,13 @@ setupOpenAPIEndpoints(noneVersioningRouter, "/", {
 })
 
 export const router = honoApp<{ Variables: AuthContexts }>()
-	.use("/*", cors())
+	.use(
+		"/*",
+		cors({
+			origin: configuration.FRONTEND_URL,
+			credentials: true,
+		}),
+	)
 	// bearer auth
 	.use("/*", async (c, next) => {
 		// ユーザー認証を必要としないパス一覧
@@ -30,14 +37,20 @@ export const router = honoApp<{ Variables: AuthContexts }>()
 			"/api/v1/openapi",
 			"/api/v1/docs",
 			"/.well-known/openid-configuration",
-			"/auth/login",
 			"/oauth2/token",
 			"/oauth2/jwks",
+			"/auth/*",
 		]
 
 		const normalizedPath = c.req.path.replace(/\/$/, "")
 
-		if (publicPaths.includes(normalizedPath)) {
+		// パブリックパスの場合は認証をスキップ
+		const isPublicPath = publicPaths.some((path) =>
+			path.includes("*")
+				? new RegExp(`^${path.replace(/\*/g, ".*")}$`).test(normalizedPath)
+				: path === normalizedPath,
+		)
+		if (isPublicPath) {
 			return next()
 		}
 		return bearerAuth(c, next)

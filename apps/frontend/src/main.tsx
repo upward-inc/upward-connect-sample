@@ -14,7 +14,6 @@ const router = createRouter({
 		auth: {
 			isAuthenticated: false,
 			user: null,
-			token: null,
 			login: async () => {},
 			logout: async () => {},
 		},

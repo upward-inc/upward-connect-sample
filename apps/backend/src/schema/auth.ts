@@ -11,7 +11,7 @@ import {
 	UserIdSchema,
 	UserNameSchema,
 } from "./system-user"
-import { StringToArraySchema } from "./utility"
+import { StringToArraySchema, ToJsonObjectSchema } from "./utility"
 
 const decryptJwkPrivateKeySecret = await toCryptoKey(
 	configuration.OIDC_ENCRYPT_PRIVATE_KEY_SECRET,
@@ -178,6 +178,16 @@ export const LoggedInUserSchema = z
 		description: "ログインに成功したユーザーの情報",
 	})
 
+export const SessionSchema = ToJsonObjectSchema(
+	z.object({
+		userId: UserIdSchema,
+		expiredAt: z.string().meta({
+			description: "セッション有効期限（ISO 8601形式）",
+			example: "2025-12-31T23:59:59.000Z",
+		}),
+	}),
+)
+
 // ログインリクエスト用のスキーマ
 export const PostLoginParamSchema = z.object({
 	username: z.string(),
@@ -185,7 +195,10 @@ export const PostLoginParamSchema = z.object({
 })
 
 export const PostLoginResultSchema = LoggedInUserSchema.extend({
-	access_token: AccessTokenSchema,
+	expired_at: z.string().meta({
+		description: "セッション有効期限（ISO 8601形式）",
+		example: "2025-12-31T23:59:59.000Z",
+	}),
 })
 
 export const GetOAuthClientParamSchema = z.object({
@@ -375,6 +388,7 @@ export type JwkPrivateKeyList = z.infer<typeof JwkPrivateKeyListSchema>
 export type OAuthClient = z.infer<typeof OAuthClientSchema>
 export type PublishedAuthCode = z.infer<typeof PublishedAuthCodeSchema>
 export type LoggedInUser = z.infer<typeof LoggedInUserSchema>
+export type Session = z.infer<typeof SessionSchema>
 export type PostLoginParam = z.infer<typeof PostLoginParamSchema>
 export type PostLoginResult = z.infer<typeof PostLoginResultSchema>
 export type GetOAuthClientParam = z.infer<typeof GetOAuthClientParamSchema>
