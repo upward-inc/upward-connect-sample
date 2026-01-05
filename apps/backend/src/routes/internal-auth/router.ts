@@ -213,7 +213,7 @@ export const internalAuthRouter = new OpenAPIHono()
 	)
 	.openapi(
 		createRoute({
-			method: "get",
+			method: "post",
 			path: "/logout",
 			description: "セッションを破棄してログアウトする",
 			responses: {

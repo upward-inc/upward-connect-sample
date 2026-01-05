@@ -100,7 +100,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 		localStorage.removeItem(AUTH_USER_KEY)
 
 		await fetch(`${env.API_URL}/auth/logout`, {
-			method: "GET",
+			method: "POST",
 			credentials: "include",
 		})
 
