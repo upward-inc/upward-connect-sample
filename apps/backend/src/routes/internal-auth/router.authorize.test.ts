@@ -1,12 +1,21 @@
 import { type JwtPayload, verify } from "jsonwebtoken"
-import { afterAll, beforeAll, describe, expect, it } from "vitest"
-import { configuration } from "../../configuration"
+import {
+	afterAll,
+	afterEach,
+	beforeAll,
+	beforeEach,
+	describe,
+	expect,
+	it,
+	vi,
+} from "vitest"
 import { app } from "../../index"
 import { prisma } from "../../libs/prisma"
 import type { Jwk } from "../../schema/auth"
 import {
 	createTestJwkPrivateKey,
 	createTestOAuthClient,
+	deleteAllTestOAuthClient,
 } from "../../test/utils/auth"
 import {
 	type TestExecutionUser,
@@ -14,6 +23,22 @@ import {
 	deleteTestExecutionUser,
 } from "../../test/utils/execution-user"
 import { convertJwkToPem } from "../../utility/crypto"
+
+const { mockGetActiveUserByUsernameAndPassword } = vi.hoisted(() => {
+	return {
+		mockGetActiveUserByUsernameAndPassword: vi.fn(),
+	}
+})
+
+// Bun.passwordはvitestでサポートしないため、getActiveUserByUsernameAndPasswordをモックする
+vi.mock("../../domain/auth/get-user", async () => {
+	const originalModule = await vi.importActual("../../domain/auth/get-user")
+
+	return {
+		...originalModule,
+		getActiveUserByUsernameAndPassword: mockGetActiveUserByUsernameAndPassword,
+	}
+})
 
 describe("POST /auth/authorize - 認可エンドポイント", () => {
 	interface DecodedIdToken extends JwtPayload {
@@ -39,6 +64,14 @@ describe("POST /auth/authorize - 認可エンドポイント", () => {
 		await cleanup()
 	})
 
+	beforeEach(() => {
+		mockGetActiveUserByUsernameAndPassword.mockReturnValue(testExecutionUser)
+	})
+
+	afterEach(() => {
+		mockGetActiveUserByUsernameAndPassword.mockReset()
+	})
+
 	// テストデータのセットアップ
 	async function setup(taskId: string) {
 		// 秘密鍵を準備
@@ -62,22 +95,51 @@ describe("POST /auth/authorize - 認可エンドポイント", () => {
 			where: { user_id: testExecutionUser.id },
 		})
 
+		await deleteAllTestOAuthClient()
+
 		await deleteTestExecutionUser(testExecutionUser.id)
 	}
 
 	/**
-	 * /auth/authorizeへのPOSTリクエストを送信する
+	 * /auth/loginへのPOSTリクエストを送信する
 	 */
-	async function requestAuthorize(
-		params: Record<string, string>,
-		authToken = testExecutionUser.access_token,
-	) {
-		return await app.request("/auth/authorize", {
+	async function requestLogin(params: Record<string, string>) {
+		const response = await app.request("/auth/login", {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/x-www-form-urlencoded",
-				Authorization: authToken ? `Bearer ${authToken}` : "",
 			},
+			body: new URLSearchParams(params),
+		})
+		const cookie = response.headers.get("Set-Cookie")?.split(";")[0] || ""
+		return { response, cookie }
+	}
+
+	/**
+	 * /auth/authorizeへのPOSTリクエストを送信する
+	 * @param params リクエストパラメータ
+	 * @param cookie セッションCookie (nullの場合はCookieヘッダーを送信しない, undefinedの場合はtestExecutionUserのCookieヘッダーを送信する)
+	 */
+	async function requestAuthorize(
+		params: Record<string, string>,
+		cookie?: string | null,
+	) {
+		const loginCookie =
+			cookie === undefined
+				? await requestLogin({
+						username: testExecutionUser.user_name,
+						password: testExecutionUser.hashed_password,
+					}).then(({ cookie }) => cookie)
+				: cookie
+
+		const headers = {
+			"Content-Type": "application/x-www-form-urlencoded",
+			...(loginCookie ? { Cookie: loginCookie } : {}),
+		}
+
+		return await app.request("/auth/authorize", {
+			method: "POST",
+			headers: headers,
 			body: new URLSearchParams(params),
 		})
 	}
@@ -714,6 +776,53 @@ describe("POST /auth/authorize - 認可エンドポイント", () => {
 			const data = await response.json()
 			expect(response.status).toBe(400)
 			expect(data).toHaveProperty("message")
+		})
+	})
+
+	describe("セッションエラーの場合に400エラーを返すこと", () => {
+		it.each([
+			{
+				title: "セッションが存在しない場合",
+				cookie: null,
+			},
+			{
+				title: "空のセッションCookieの場合",
+				cookie: "session=",
+			},
+			{
+				title: "無効なセッションCookieの場合",
+				cookie: "session=invalid_session_token",
+			},
+		])("$title", async ({ cookie }) => {
+			// Arrange
+			const testClient = await createTestOAuthClient({
+				name: "sess_err_cli",
+				secret: "test_secret_12345",
+				redirect_uris: "https://example.com/callback",
+				scopes: "openid,profile,email",
+			})
+
+			// Act
+			const response = await requestAuthorize(
+				{
+					response_type: "code",
+					client_id: testClient.id,
+					redirect_uri: "https://example.com/callback",
+					scope: "openid profile email",
+					state: "random-state-value-12345",
+					nonce: "random-nonce-value-12345",
+					code_challenge: "E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM",
+					code_challenge_method: "S256",
+				},
+				cookie,
+			)
+
+			// Assert
+			const data = await response.json()
+			expect(response.status).toBe(400)
+			expect(data.error).toBe("login_required")
+			expect(data.error_description).toBe("Session expired")
+			expect(data.state).toBe("random-state-value-12345")
 		})
 	})
 })

@@ -1,7 +1,6 @@
 import { createFileRoute, useSearch } from "@tanstack/react-router"
 import { useEffect, useState } from "react"
 import { z } from "zod"
-import { useAuth } from "../../../auth"
 import { Button } from "../../../components/button"
 import { env } from "../../../env"
 
@@ -198,13 +197,12 @@ function useAuthorizeValidation(
 function useOAuthClient(
 	isValidating: boolean,
 	clientId: string | undefined,
-	token: string | null,
 ): OAuthClientFetchResult {
 	const [clientName, setClientName] = useState<string | null>(null)
 	const [isFetching, setIsFetching] = useState(true)
 
 	useEffect(() => {
-		if (!isValidating && clientId && token) {
+		if (!isValidating && clientId) {
 			const fetchClientInfo = async () => {
 				try {
 					setIsFetching(true)
@@ -212,7 +210,7 @@ function useOAuthClient(
 					const response = await fetch(
 						`${env.API_URL}/auth/clients/${clientId}`,
 						{
-							headers: { authorization: `Bearer ${token}` },
+							credentials: "include",
 						},
 					)
 
@@ -230,7 +228,7 @@ function useOAuthClient(
 		} else if (!isValidating) {
 			setIsFetching(false)
 		}
-	}, [isValidating, clientId, token])
+	}, [isValidating, clientId])
 
 	if (isFetching) {
 		return { isFetching }
@@ -269,8 +267,6 @@ const redirectFail = (url: string, result: AuthorizeResultFailure) => {
 }
 
 export function AuthorizePage() {
-	const { token } = useAuth()
-
 	const searchParams = useSearch({ from: "/_auth/oauth2/authorize" })
 
 	// ページリクエスト時のバリデーション（クライアントサイドでの最低限の検証）
@@ -280,7 +276,6 @@ export function AuthorizePage() {
 	const oauthClientFetchResult = useOAuthClient(
 		isValidating,
 		searchParams.client_id,
-		token,
 	)
 
 	// 許可時の処理
@@ -303,9 +298,7 @@ export function AuthorizePage() {
 		// サーバーサイドで検証
 		const response = await fetch(`${env.API_URL}/auth/authorize`, {
 			method: "POST",
-			headers: {
-				authorization: `Bearer ${token}`,
-			},
+			credentials: "include",
 			body: formData,
 		})
 

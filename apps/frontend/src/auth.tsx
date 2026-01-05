@@ -7,7 +7,6 @@ import {
 } from "react"
 import { env } from "./env"
 
-const AUTH_TOKEN_KEY = "auth.token"
 const AUTH_USER_KEY = "auth.user"
 
 interface UserData {
@@ -15,12 +14,12 @@ interface UserData {
 	username: string
 	firstName: string
 	lastName: string
+	expiredAt: string
 }
 
 interface AuthState {
 	isAuthenticated: boolean
 	user: UserData | null
-	token: string | null
 }
 
 export interface AuthContextType extends AuthState {
@@ -38,24 +37,24 @@ export function AuthProvider({ children }: AuthProviderProps) {
 	const [authState, setAuthState] = useState<AuthState>({
 		isAuthenticated: false,
 		user: null,
-		token: null,
 	})
 
 	// 初回マウント時に認証情報をローカルストレージから復元
 	useEffect(() => {
-		const token = localStorage.getItem(AUTH_TOKEN_KEY)
 		const userData = localStorage.getItem(AUTH_USER_KEY)
 
-		if (token && userData) {
+		if (userData) {
 			try {
 				const user = JSON.parse(userData) as UserData
-				setAuthState({
-					isAuthenticated: true,
-					user,
-					token,
-				})
+				if (new Date(user.expiredAt) > new Date()) {
+					setAuthState({
+						isAuthenticated: true,
+						user,
+					})
+				} else {
+					localStorage.removeItem(AUTH_USER_KEY)
+				}
 			} catch (error) {
-				localStorage.removeItem(AUTH_TOKEN_KEY)
 				localStorage.removeItem(AUTH_USER_KEY)
 			}
 		}
@@ -69,6 +68,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
 		const response = await fetch(`${env.API_URL}/auth/login`, {
 			method: "POST",
+			credentials: "include",
 			body: formData,
 		})
 
@@ -79,33 +79,34 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
 		const data = await response.json()
 
-		const token = data.access_token
 		const userData = {
 			id: data.id,
 			username: data.user_name,
 			firstName: data.first_name,
 			lastName: data.last_name,
+			expiredAt: data.expired_at,
 		}
 
-		localStorage.setItem(AUTH_TOKEN_KEY, token)
 		localStorage.setItem(AUTH_USER_KEY, JSON.stringify(userData))
 
 		setAuthState({
 			isAuthenticated: true,
 			user: userData,
-			token,
 		})
 	}, [])
 
 	// ログアウト処理
 	const logout = useCallback(async () => {
-		localStorage.removeItem(AUTH_TOKEN_KEY)
 		localStorage.removeItem(AUTH_USER_KEY)
+
+		await fetch(`${env.API_URL}/auth/logout`, {
+			method: "POST",
+			credentials: "include",
+		})
 
 		setAuthState({
 			isAuthenticated: false,
 			user: null,
-			token: null,
 		})
 	}, [])
 

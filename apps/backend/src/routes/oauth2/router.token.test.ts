@@ -1,5 +1,15 @@
 import { type JwtPayload, verify } from "jsonwebtoken"
-import { afterAll, beforeAll, describe, expect, it } from "vitest"
+import {
+	afterAll,
+	afterEach,
+	beforeAll,
+	beforeEach,
+	describe,
+	expect,
+	it,
+	vi,
+} from "vitest"
+import { de } from "zod/v4/locales"
 import { configuration } from "../../configuration"
 import { app } from "../../index"
 import { prisma } from "../../libs/prisma"
@@ -9,6 +19,7 @@ import {
 	createRefreshToken,
 	createTestJwkPrivateKey,
 	createTestOAuthClient,
+	deleteAllTestOAuthClient,
 } from "../../test/utils/auth"
 import {
 	type TestExecutionUser,
@@ -16,6 +27,22 @@ import {
 	deleteTestExecutionUser,
 } from "../../test/utils/execution-user"
 import { convertJwkToPem } from "../../utility/crypto"
+
+const { mockGetActiveUserByUsernameAndPassword } = vi.hoisted(() => {
+	return {
+		mockGetActiveUserByUsernameAndPassword: vi.fn(),
+	}
+})
+
+// Bun.passwordはvitestでサポートしないため、getActiveUserByUsernameAndPasswordをモックする
+vi.mock("../../domain/auth/get-user", async () => {
+	const originalModule = await vi.importActual("../../domain/auth/get-user")
+
+	return {
+		...originalModule,
+		getActiveUserByUsernameAndPassword: mockGetActiveUserByUsernameAndPassword,
+	}
+})
 
 describe("POST /oauth2/token - トークンエンドポイント", () => {
 	const tokenSecret = configuration.OIDC_TOKEN_SECRET
@@ -42,6 +69,14 @@ describe("POST /oauth2/token - トークンエンドポイント", () => {
 		await cleanup()
 	})
 
+	beforeEach(() => {
+		mockGetActiveUserByUsernameAndPassword.mockReturnValue(testExecutionUser)
+	})
+
+	afterEach(() => {
+		mockGetActiveUserByUsernameAndPassword.mockReset()
+	})
+
 	// テストデータのセットアップ
 	async function setup(taskId: string) {
 		// 秘密鍵を準備
@@ -65,9 +100,13 @@ describe("POST /oauth2/token - トークンエンドポイント", () => {
 			where: { user_id: testExecutionUser.id },
 		})
 
-		await deleteTestExecutionUser(testExecutionUser.id)
-	}
+		await deleteAllTestOAuthClient()
 
+		await deleteTestExecutionUser(testExecutionUser.id)
+
+		// モックのリセット
+		vi.resetAllMocks()
+	}
 	/**
 	 * /oauth2/tokenへのPOSTリクエストを送信する
 	 */
@@ -82,17 +121,34 @@ describe("POST /oauth2/token - トークンエンドポイント", () => {
 	}
 
 	/**
+	 * /auth/loginへのPOSTリクエストを送信する
+	 */
+	async function requestLogin(params: Record<string, string>) {
+		const response = await app.request("/auth/login", {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/x-www-form-urlencoded",
+			},
+			body: new URLSearchParams(params),
+		})
+		const cookie = response.headers.get("Set-Cookie")?.split(";")[0] || ""
+		return { response, cookie }
+	}
+
+	/**
 	 * /auth/authorizeへのPOSTリクエストを送信する
 	 */
-	async function requestAuthorize(
-		params: Record<string, string>,
-		authToken = testExecutionUser.access_token,
-	) {
+	async function requestAuthorize(params: Record<string, string>) {
+		const { cookie } = await requestLogin({
+			username: testExecutionUser.user_name,
+			password: testExecutionUser.hashed_password,
+		})
+
 		return await app.request("/auth/authorize", {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/x-www-form-urlencoded",
-				Authorization: authToken ? `Bearer ${authToken}` : "",
+				Cookie: cookie,
 			},
 			body: new URLSearchParams(params),
 		})
@@ -699,43 +755,6 @@ describe("POST /oauth2/token - トークンエンドポイント", () => {
 			expect(decodedRefreshedToken.aud).toBe(testClient.id)
 			expect(decodedRefreshedToken.sub).toBe(testExecutionUser.id)
 		})
-
-		// TODO: Bun.password.hash()の互換性の問題でスキップ
-		// see: https://github.com/vitest-dev/vscode/discussions/473#discussioncomment-10740173
-		// testcontainersは`bun test`と互換性がない
-		// see: https://github.com/oven-sh/bun/issues/7810#issuecomment-2276549353
-		it.skip("ログインエンドポイントのaccess_tokenのaudクレームがデフォルトのclient_idと等しいこと", async () => {
-			// Arrange
-			// TODO: 実際のテストデフォルトクライアントを使用する
-			const testDefaultClient = {
-				id: crypto.randomUUID(),
-			}
-
-			// Act
-			// ログインエンドポイントにアクセス
-			const response = await app.request("/oauth2/login", {
-				method: "POST",
-				headers: {
-					"Content-Type": "application/x-www-form-urlencoded",
-				},
-				body: new URLSearchParams({
-					username: testExecutionUser.user_name,
-					password: "test-password-123",
-				}),
-			})
-
-			const responseData = await response.json()
-			expect(response.status).toBe(200)
-			expect(responseData).toHaveProperty("access_token")
-
-			// Assert
-			// アクセストークンのaudクレームがデフォルトのclient_idと一致することを検証
-			const decodedAccessToken = verify(
-				responseData.access_token,
-				tokenSecret,
-			) as JwtPayload
-			expect(decodedAccessToken.aud).toBe(testDefaultClient.id)
-		})
 	})
 
 	describe("IDトークン検証", () => {
@@ -830,6 +849,10 @@ describe("POST /oauth2/token - トークンエンドポイント", () => {
 				last_name: "IDToken",
 			})
 
+			mockGetActiveUserByUsernameAndPassword.mockReturnValue(
+				userWithoutOptionalFields,
+			)
+
 			try {
 				const testClient = await createTestOAuthClient({
 					name: "min_cli",
@@ -840,19 +863,16 @@ describe("POST /oauth2/token - トークンエンドポイント", () => {
 
 				// Act
 				// ステップ1: 認可リクエスト
-				const authorizeResponse = await requestAuthorize(
-					{
-						response_type: "code",
-						client_id: testClient.id,
-						redirect_uri: "https://example.com/callback",
-						scope: "openid profile email",
-						state: "random_state_12345",
-						nonce: "random_nonce_12345",
-						code_challenge: "E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM",
-						code_challenge_method: "S256",
-					},
-					userWithoutOptionalFields.access_token,
-				)
+				const authorizeResponse = await requestAuthorize({
+					response_type: "code",
+					client_id: testClient.id,
+					redirect_uri: "https://example.com/callback",
+					scope: "openid profile email",
+					state: "random_state_12345",
+					nonce: "random_nonce_12345",
+					code_challenge: "E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM",
+					code_challenge_method: "S256",
+				})
 
 				const authorizeData = await authorizeResponse.json()
 				expect(authorizeResponse.status).toBe(200)

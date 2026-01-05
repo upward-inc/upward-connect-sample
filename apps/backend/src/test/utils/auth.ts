@@ -10,6 +10,10 @@ import {
 } from "../../utility/crypto"
 import { testPrisma } from "../setup"
 
+export type TestOAuthClient = Awaited<
+	ReturnType<typeof testPrisma.oauth_client.create>
+>
+
 export interface PrivateKeyData
 	extends Omit<
 		Prisma.jwk_private_keyCreateInput,
@@ -52,7 +56,7 @@ export function createExpiredToken(userId: string) {
 }
 
 /**
- * Create a test OAuth client for tests
+ * テストOAuthクライアントの作成
  */
 export async function createTestOAuthClient(clientData: {
 	name: string
@@ -73,7 +77,21 @@ export async function createTestOAuthClient(clientData: {
 }
 
 /**
- * Create a refresh token for testing
+ * テストOAuthクライアントの全削除
+ */
+export async function deleteAllTestOAuthClient() {
+	await testPrisma.oauth_client.deleteMany()
+}
+
+/**
+ * テストOAuthクライアントの削除（レコードID指定）
+ */
+export async function deleteTestOAuthClientById(id: string) {
+	await testPrisma.oauth_client.delete({ where: { id } })
+}
+
+/**
+ * テスト用リフレッシュトークンの作成
  */
 export function createRefreshToken(userId: string) {
 	const secret = process.env.OIDC_REFRESH_TOKEN_SECRET
@@ -93,7 +111,7 @@ export function createRefreshToken(userId: string) {
 }
 
 /**
- * Create an expired refresh token for testing
+ * テスト用期限切れリフレッシュトークンの作成
  */
 export function createExpiredRefreshToken(userId: string) {
 	const secret = process.env.OIDC_REFRESH_TOKEN_SECRET
