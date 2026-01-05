@@ -1,11 +1,11 @@
-name: call backend lint
+name: call frontend test
 
 on:
   workflow_call:
 
 jobs:
-  lint:
-    name: Lint
+  test:
+    name: Test
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -20,14 +20,14 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/.bun/install/cache
-          key: ${{ runner.os }}-bun-backend-${{ hashFiles('apps/backend/bun.lock') }}
+          key: ${{ runner.os }}-bun-frontend-${{ hashFiles('apps/frontend/bun.lock') }}
           restore-keys: |
-            ${{ runner.os }}-bun-backend-
+            ${{ runner.os }}-bun-frontend-
 
       - name: Install dependencies
-        working-directory: ./apps/backend
+        working-directory: ./apps/frontend
         run: bun install --frozen-lockfile
 
-      - name: Lint
-        working-directory: ./apps/backend
-        run: bun run lint
+      - name: Test
+        working-directory: ./apps/frontend
+        run: bun run test

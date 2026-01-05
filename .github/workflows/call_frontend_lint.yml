@@ -1,4 +1,4 @@
-name: call backend lint
+name: call frontend lint
 
 on:
   workflow_call:
@@ -20,14 +20,14 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/.bun/install/cache
-          key: ${{ runner.os }}-bun-backend-${{ hashFiles('apps/backend/bun.lock') }}
+          key: ${{ runner.os }}-bun-frontend-${{ hashFiles('apps/frontend/bun.lock') }}
           restore-keys: |
-            ${{ runner.os }}-bun-backend-
+            ${{ runner.os }}-bun-frontend-
 
       - name: Install dependencies
-        working-directory: ./apps/backend
+        working-directory: ./apps/frontend
         run: bun install --frozen-lockfile
 
       - name: Lint
-        working-directory: ./apps/backend
+        working-directory: ./apps/frontend
         run: bun run lint

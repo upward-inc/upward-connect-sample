@@ -1,30 +1,60 @@
-import { OpenAPIHono, createRoute } from "@hono/zod-openapi"
-import { getSystemUser, getSystemUserList } from "../../../../domain/system-user"
+import { validateGetRecordListQuery } from "../../../../domain/record"
+import {
+	getSystemUser,
+	getSystemUserList,
+} from "../../../../domain/system-user"
+
+import { createRoute, honoApp } from "../../../../libs/hono"
 import { ResourceApiErrorResultSchema } from "../../../../schema/error"
 import {
+	GetSystemUserListQuerySchema,
+	GetSystemUserListResponseSchema,
 	GetSystemUserParamSchema,
-	SystemUserListSchema,
 	SystemUserSchema,
 } from "../../../../schema/system-user"
 
-export const systemUserRouter = new OpenAPIHono()
+export const systemUserRouter = honoApp()
 	.openapi(
 		createRoute({
 			method: "get",
 			path: "/",
 			description: "システムユーザーの情報を一覧で返却する",
+			request: {
+				query: GetSystemUserListQuerySchema,
+			},
 			responses: {
 				200: {
 					description: "Success",
 					content: {
-						"application/json": { schema: SystemUserListSchema },
+						"application/json": { schema: GetSystemUserListResponseSchema },
+					},
+				},
+				400: {
+					description: "Bad Request",
+					content: {
+						"application/json": { schema: ResourceApiErrorResultSchema },
 					},
 				},
 			},
 		}),
 		async (c) => {
-			const result = await getSystemUserList()
-			return c.json(result, 200)
+			const query = c.req.valid("query")
+
+			const validateResult = validateGetRecordListQuery("user", query)
+			if (!validateResult.success) {
+				return c.json({ message: validateResult.message }, 400)
+			}
+
+			const { data, has_next_page, total_size } = await getSystemUserList(query)
+
+			return c.json(
+				{
+					has_next_page,
+					total_size,
+					data,
+				},
+				200,
+			)
 		},
 	)
 	.openapi(

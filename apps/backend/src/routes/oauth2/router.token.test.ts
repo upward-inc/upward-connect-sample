@@ -364,7 +364,10 @@ describe("POST /oauth2/token - トークンエンドポイント", () => {
 			// Assert
 			const data = await response.json()
 			expect(response.status).toBe(400)
-			expect(data.success).toBe(false)
+			expect(data).toEqual({
+				error: "unsupported_grant_type",
+				error_description: "Unknown grant_type",
+			})
 		})
 
 		it("クライアントのスコープにoffline_accessが含まれていない場合に400エラーを返すこと", async () => {
@@ -388,7 +391,10 @@ describe("POST /oauth2/token - トークンエンドポイント", () => {
 			// Assert
 			const data = await response.json()
 			expect(response.status).toBe(400)
-			expect(data.error).toBe("invalid_grant")
+			expect(data).toEqual({
+				error: "invalid_grant",
+				error_description: "No offline_access scope for this client",
+			})
 		})
 	})
 

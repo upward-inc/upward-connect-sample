@@ -1,11 +1,11 @@
-import { OpenAPIHono, createRoute } from "@hono/zod-openapi"
 import { configuration as config } from "../../../configuration"
+import { createRoute, honoApp } from "../../../libs/hono"
 import {
 	type Configuration,
 	ConfigurationSchema,
 } from "../../../schema/configuration"
 
-export const configurationRouter = new OpenAPIHono().openapi(
+export const configurationRouter = honoApp().openapi(
 	createRoute({
 		method: "get",
 		path: "/",

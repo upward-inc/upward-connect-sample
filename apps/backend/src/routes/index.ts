@@ -1,6 +1,6 @@
-import { OpenAPIHono } from "@hono/zod-openapi"
 import { cors } from "hono/cors"
 import { configuration } from "../configuration"
+import { honoApp } from "../libs/hono"
 import { bearerAuth } from "../middleware/bearer-auth"
 import type { AuthContexts } from "../schema/auth"
 import { wellKnownRouter } from "./.well-known"
@@ -9,7 +9,7 @@ import { internalAuthRouter } from "./internal-auth"
 import { oauth2Router } from "./oauth2"
 import { setupOpenAPIEndpoints } from "./utils/openapi-setup"
 
-const noneVersioningRouter = new OpenAPIHono()
+const noneVersioningRouter = honoApp()
 	.route("/.well-known", wellKnownRouter)
 	.route("/oauth2", oauth2Router)
 	.route("/auth", internalAuthRouter)
@@ -20,7 +20,7 @@ setupOpenAPIEndpoints(noneVersioningRouter, "/", {
 	description: "認証・認可APIドキュメント",
 })
 
-export const router = new OpenAPIHono<{ Variables: AuthContexts }>()
+export const router = honoApp<{ Variables: AuthContexts }>()
 	.use(
 		"/*",
 		cors({

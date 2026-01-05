@@ -1,5 +1,4 @@
 import { addMinute } from "@formkit/tempo"
-import { OpenAPIHono, createRoute } from "@hono/zod-openapi"
 import type { Context } from "hono"
 import { deleteCookie, getSignedCookie, setSignedCookie } from "hono/cookie"
 import { nanoid } from "nanoid"
@@ -10,7 +9,9 @@ import {
 	saveAuthorizationCode,
 	validateAuthorizeParams,
 } from "../../domain/auth"
+import { createRoute, honoApp } from "../../libs/hono"
 import {
+	type AuthContexts,
 	GetOAuthClientParamSchema,
 	GetOAuthClientResultSchema,
 	type LoggedInUser,
@@ -29,7 +30,7 @@ import {
 
 const SESSION_COOKIE_NAME = "session"
 
-export const internalAuthRouter = new OpenAPIHono()
+export const internalAuthRouter = honoApp()
 	.openapi(
 		createRoute({
 			method: "post",

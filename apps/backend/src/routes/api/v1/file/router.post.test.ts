@@ -106,7 +106,7 @@ describe("POST /api/v1/files - ファイル作成", () => {
 
 		// Assert
 		const data = await response.json()
-		expect(response.status).toBe(200)
+		expect(response.status).toBe(201)
 		expect(data).toHaveProperty("id")
 		expect(typeof data.id).toBe("string")
 	})
@@ -148,7 +148,7 @@ describe("POST /api/v1/files - ファイル作成", () => {
 
 		// Assert
 		const data = await response.json()
-		expect(response.status).toBe(200)
+		expect(response.status).toBe(201)
 		expect(data).toHaveProperty("id")
 
 		const savedFile = await testPrisma.file.findUnique({
@@ -175,7 +175,7 @@ describe("POST /api/v1/files - ファイル作成", () => {
 
 		// Assert
 		const data = await response.json()
-		expect(response.status).toBe(200)
+		expect(response.status).toBe(201)
 		expect(data).toHaveProperty("id")
 
 		const savedFile = await testPrisma.file.findUnique({
@@ -210,7 +210,7 @@ describe("POST /api/v1/files - ファイル作成", () => {
 			// Assert
 			const json = await response.json()
 			expect(response.status).toBe(400)
-			expect(json).toHaveProperty("success")
+			expect(json).toHaveProperty("message")
 		})
 	})
 })

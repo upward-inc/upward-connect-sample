@@ -1,13 +1,13 @@
 import { format } from "@formkit/tempo"
 import { prisma } from "../../libs/prisma"
 import type { JsonValue } from "../../schema/common"
-import type { EntityItem } from "../../schema/entity-item"
-import { isAndFilter, isBaseFilter, isOrFilter } from "../../schema/filter"
+import { collectFilterFields } from "../../schema/filter"
 import type {
 	GetRecordListQuery,
 	GetRecordListResponse,
 } from "../../schema/record"
 import {
+	type Field,
 	GroupByClauseSchema,
 	OrderByClauseSchema,
 	PagingClauseSchema,
@@ -43,34 +43,25 @@ export const getRecordList = async (
 		? toDistanceQuery(toGeographyPointQuery(point.latitude, point.longitude))
 		: null
 	const entityItems = await getEntityItemList(entity_name)
-	const entityItemMap = new Map(entityItems.map((item) => [item.name, item]))
+	const entityItemMap = new Map<string, Field & { is_formula: boolean }>(
+		entityItems.map((item) => [
+			item.name,
+			{
+				table_name: entity_name,
+				column_name: item.name,
+				alias_name: item.name,
+				type: item.type,
+				sub_type: item.sub_type,
+				reference_entities: item.reference_entities,
+				is_formula: item.is_formula,
+			},
+		]),
+	)
 
-	const collectFilterFields = (
-		filter: GetRecordListQuery["filter"],
-	): string[] => {
-		if (!filter) return []
-
-		if (isBaseFilter(filter)) {
-			return [filter.field]
-		}
-
-		if (isAndFilter(filter)) {
-			return filter.and.flatMap((f) =>
-				collectFilterFields(f as GetRecordListQuery["filter"]),
-			)
-		}
-		if (isOrFilter(filter)) {
-			return filter.or.flatMap((f) =>
-				collectFilterFields(f as GetRecordListQuery["filter"]),
-			)
-		}
-
-		return []
-	}
-
+	const filterFields = collectFilterFields(filter)
 	const needFormulaField = [
 		...fields,
-		...collectFilterFields(filter),
+		...filterFields,
 		...(group_by ?? []),
 		...(order_by?.map(({ field }) => field) ?? []),
 	].some((field) => {
@@ -78,28 +69,31 @@ export const getRecordList = async (
 		return !!item?.is_formula
 	})
 
-	const selectFields = fields.filter((field) => {
-		return !!entityItems.find(({ name }) => name === field)
-	})
+	const selectFields = fields
+		.map((field) => entityItemMap.get(field))
+		.filter((field) => !!field)
 
 	const select = SelectClauseSchema.parse(selectFields)
 	// ロケーション検索の場合、距離情報を追加で取得
 	const selectClause = distanceQuery
-		? `${select}, location.Lat AS _latitude, location.Long AS _longitude, ${distanceQuery} AS distance`
+		? `${select}, [location].[Lat] AS _latitude, [location].[Long] AS _longitude, ${distanceQuery} AS distance`
 		: select
 
 	// 数式が必要な場合のみビューを参照
 	const fromClause = `FROM [${entity_name}${needFormulaField ? "_view" : ""}]`
 
-	const where = WhereClauseSchema.parse({ items: entityItems, filter })
+	const where = WhereClauseSchema.parse({
+		items: Array.from(entityItemMap.values()),
+		filter,
+	})
 	// ロケーション検索の場合、距離条件を追加
 	const whereClause = distanceQuery
 		? `${where ? `${where} AND ` : "WHERE "}${distanceQuery} <= ${radius}`
 		: where
 
-	const groupByFields = group_by?.filter((field) => {
-		return !!entityItems.find(({ name }) => name === field)
-	})
+	const groupByFields = group_by
+		?.map((field) => entityItemMap.get(field))
+		.filter((field) => !!field)
 
 	const groupByClause = groupByFields
 		? GroupByClauseSchema.parse(groupByFields)
@@ -165,19 +159,19 @@ export const getRecordList = async (
 	}
 }
 
-const hasFields = (fields: string[] | undefined): fields is string[] => {
+const hasFields = (fields: Field[] | undefined): fields is Field[] => {
 	return !!(fields && fields.length > 0)
 }
 
 const buildBaseOrderBy = (
 	order_by: GetRecordListQuery["order_by"],
-	groupByFields: string[] | undefined,
+	groupByFields: Field[] | undefined,
 ): Array<{ field: string; direction: "asc" | "desc" }> => {
 	if (order_by) return order_by
 
 	if (hasFields(groupByFields)) {
 		return groupByFields.map((field) => ({
-			field,
+			field: field.column_name,
 			direction: "asc" as const,
 		}))
 	}
@@ -210,7 +204,7 @@ const isArray = <T>(maybeArray: T | readonly T[]): maybeArray is T[] => {
 const covertRecords = async (
 	records: DBRecord[],
 	queryFields: string[],
-	entityItemMap: Map<string, EntityItem>,
+	entityItemMap: Map<string, Field>,
 	needLocation: boolean,
 ) => {
 	const referenceRecords = await getReferenceRecords(records, entityItemMap)
@@ -293,7 +287,7 @@ const covertRecords = async (
 
 const getReferenceRecords = async (
 	records: DBRecord[],
-	entityItemMap: Map<string, EntityItem>,
+	entityItemMap: Map<string, Field>,
 ): Promise<Map<string, Map<string, string>>> => {
 	const referenceMap = new Map<string, Map<string, string>>()
 
@@ -316,9 +310,12 @@ const getReferenceRecords = async (
 
 	const references = records.flatMap((record) => {
 		return Array.from(entityItemMap.values())
-			.filter(({ name, type }) => type === "reference" && !!record[name])
-			.flatMap(({ name }) => {
-				const value = record[name]
+			.filter(
+				({ column_name, type }) =>
+					type === "reference" && !!record[column_name],
+			)
+			.flatMap(({ column_name }) => {
+				const value = record[column_name]
 				const references: Reference | Reference[] = JSON.parse(String(value))
 				return isArray(references) ? references : [references]
 			})

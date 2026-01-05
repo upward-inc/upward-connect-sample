@@ -1,11 +1,11 @@
-import { OpenAPIHono } from "@hono/zod-openapi"
 import { secureHeaders } from "hono/secure-headers"
 import { trimTrailingSlash } from "hono/trailing-slash"
 import { configuration } from "./configuration"
 import { handleError, handleNotFound } from "./error-handler"
+import { honoApp } from "./libs/hono"
 import { router } from "./routes"
 
-export const app = new OpenAPIHono()
+export const app = honoApp()
 
 // middleware
 app.use(secureHeaders())
