@@ -1,0 +1,48 @@
+name: Create Develop to Staging Pull Request
+on:
+  push:
+    branches: [ develop ]
+
+concurrency:
+  group: create-release-pr-d2s-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  release-pull-request:
+    permissions:
+      contents: read
+      pull-requests: write
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: develop
+      - name: Use ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: 3.1
+      - name: Install git-pr-release
+        run: gem install --no-document git-pr-release
+      - name: Generate token
+        id: generate_token
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ secrets.GIT_PR_RELEASE_APP_ID }}
+          private-key: ${{ secrets.GIT_PR_RELEASE_PRIVATE_KEY }}
+      - name: Set up environment variables
+        env:
+          TZ: 'Asia/Tokyo'
+        run: |
+          echo "PR_TITLE=release - staging: $(date '+%Y-%m-%d')" >> $GITHUB_ENV
+      - name: Run
+        run: git-pr-release --squashed
+        env:
+          GIT_PR_RELEASE_TOKEN: ${{ steps.generate_token.outputs.token }}
+          GIT_PR_RELEASE_BRANCH_PRODUCTION: staging
+          GIT_PR_RELEASE_BRANCH_STAGING: develop
+          GIT_PR_RELEASE_LABELS: release
+          GIT_PR_RELEASE_TEMPLATE: .github/workflows/git-pr-release.erb
+          PR_TITLE: ${{ env.PR_TITLE }} 
+          TZ: Asia/Tokyo
