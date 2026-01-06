@@ -2,6 +2,11 @@ name: Create Develop to Staging Pull Request
 on:
   push:
     branches: [ develop ]
+
+concurrency:
+  group: create-release-pr-d2s-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   release-pull-request:
     permissions:
