@@ -35,7 +35,7 @@ jobs:
         env:
           TZ: 'Asia/Tokyo'
         run: |
-          echo "PR_TITLE=s2m $(date '+%Y-%m-%d')" >> $GITHUB_ENV
+          echo "PR_TITLE=release - main: $(date '+%Y%m%d')" >> $GITHUB_ENV
       - name: Run
         run: git-pr-release --squashed
         env:
