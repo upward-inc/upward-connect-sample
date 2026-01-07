@@ -10,10 +10,6 @@ export const EntityItemOptionSchema = z
 			description: "オプションの表示名",
 			example: "金融業",
 		}),
-		is_default: z.boolean().meta({
-			description: "レコード作成時のデフォルト値かどうか",
-			example: true,
-		}),
 	})
 	.meta({
 		description: "項目選択肢",
