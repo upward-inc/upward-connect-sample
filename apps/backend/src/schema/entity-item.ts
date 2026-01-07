@@ -1,5 +1,6 @@
 import { z } from "../libs/zod"
 import { EntityItemOptionListSchema } from "./entity-item-option"
+import { RecordReferenceInputSchema } from "./record"
 
 // type
 export const EntityItemTypeTextSchema = z.literal("text").meta({
@@ -185,6 +186,20 @@ export const EntityItemSchema = z
 				"データ型が`option`の場合、または、サブデータ型が`combobox`の場合の選択肢一覧",
 			example: [],
 		}).nullish(),
+		default_value: z
+			.union([
+				z.string(),
+				z.number(),
+				z.boolean(),
+				z.array(z.string()),
+				RecordReferenceInputSchema,
+				z.array(RecordReferenceInputSchema),
+			])
+			.meta({
+				description: "レコード作成時に画面表示されるデフォルト値",
+				example: null,
+			})
+			.nullish(),
 	})
 	.meta({
 		description: "エンティティ項目",
