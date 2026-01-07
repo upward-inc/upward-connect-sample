@@ -3,20 +3,20 @@ import {
 	getEntityItem,
 	getEntityItemList,
 	getEntityList,
-} from "../../../domain/entity"
-import { createRoute, honoApp } from "../../../libs/hono"
+} from "../../../../domain/entity"
+import { createRoute, honoApp } from "../../../../libs/hono"
 import {
 	EntityListSchema,
 	EntitySchema,
 	GetEntityParamSchema,
-} from "../../../schema/entity"
+} from "../../../../schema/entity"
 import {
 	EntityItemListSchema,
 	EntityItemSchema,
 	GetEntityItemListParamSchema,
 	GetEntityItemParamSchema,
-} from "../../../schema/entity-item"
-import { ResourceApiErrorResultSchema } from "../../../schema/error"
+} from "../../../../schema/entity-item"
+import { ResourceApiErrorResultSchema } from "../../../../schema/error"
 
 export const entityRouter = honoApp()
 	.openapi(
