@@ -276,6 +276,7 @@ export const oauth2Router = honoApp<{ Variables: AuthContexts }>()
 				{
 					sub: loggedInUser.id,
 					user_id: loggedInUser.id, // custom claim
+					user_name: loggedInUser.user_name, // custom claim
 					name: `${loggedInUser.last_name} ${loggedInUser.first_name}`,
 					given_name: loggedInUser.first_name,
 					family_name: loggedInUser.last_name ?? undefined,
