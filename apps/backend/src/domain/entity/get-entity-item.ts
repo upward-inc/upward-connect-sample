@@ -55,7 +55,7 @@ export const getEntityItemDefaultValue = (
 	entityItem: { type: string; sub_type: string | null },
 	options: { name: string; is_default: boolean }[],
 ): string | string[] | null => {
-	// 現在option型のみ対応
+	// 現在はoption型のみ対応
 	if (entityItem.type !== "option") return null
 
 	const defaultOptions = options.filter((item) => item.is_default)
