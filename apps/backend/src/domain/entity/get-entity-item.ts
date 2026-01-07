@@ -1,4 +1,3 @@
-import { de } from "zod/v4/locales"
 import { prisma } from "../../libs/prisma"
 import type { Entity } from "../../schema/entity"
 import { type EntityItem, EntityItemSchema } from "../../schema/entity-item"
