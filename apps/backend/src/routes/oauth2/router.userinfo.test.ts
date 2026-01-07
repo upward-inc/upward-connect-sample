@@ -133,6 +133,7 @@ describe("GET /oauth2/userinfo - ユーザー情報取得", () => {
 		expect(data).toEqual({
 			sub: testExecutionUser.id,
 			user_id: testExecutionUser.id,
+			user_name: testExecutionUser.user_name,
 			name: `${testExecutionUser.last_name} ${testExecutionUser.first_name}`,
 			given_name: testExecutionUser.first_name,
 			family_name: testExecutionUser.last_name,
@@ -160,6 +161,7 @@ describe("GET /oauth2/userinfo - ユーザー情報取得", () => {
 			expect(data).toEqual({
 				sub: userWithoutEmail.id,
 				user_id: userWithoutEmail.id,
+				user_name: userWithoutEmail.user_name,
 				name: `${userWithoutEmail.last_name} ${userWithoutEmail.first_name}`,
 				given_name: userWithoutEmail.first_name,
 				family_name: userWithoutEmail.last_name,
