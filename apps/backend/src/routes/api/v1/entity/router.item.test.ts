@@ -50,27 +50,22 @@ const optionSingleValidation = (value: object) => {
 			{
 				name: "option1",
 				display_name: "オプション1",
-				is_default: true,
 			},
 			{
 				name: "option2",
 				display_name: "オプション2",
-				is_default: false,
 			},
 			{
 				name: "option3",
 				display_name: "オプション3",
-				is_default: false,
 			},
 			{
 				name: "option4",
 				display_name: "オプション4",
-				is_default: false,
 			},
 			{
 				name: "option5",
 				display_name: "オプション5",
-				is_default: false,
 			},
 		],
 		default_value: "option1",
@@ -96,27 +91,22 @@ const optionMultiValidation = (value: object) => {
 			{
 				name: "option1",
 				display_name: "オプション1",
-				is_default: false,
 			},
 			{
 				name: "option2",
 				display_name: "オプション2",
-				is_default: true,
 			},
 			{
 				name: "option3",
 				display_name: "オプション3",
-				is_default: false,
 			},
 			{
 				name: "option4",
 				display_name: "オプション4",
-				is_default: true,
 			},
 			{
 				name: "option5",
 				display_name: "オプション5",
-				is_default: false,
 			},
 		],
 		default_value: ["option2", "option4"],
@@ -142,27 +132,22 @@ const comboboxValidation = (value: object) => {
 			{
 				name: "option1",
 				display_name: "オプション1",
-				is_default: false,
 			},
 			{
 				name: "option2",
 				display_name: "オプション2",
-				is_default: false,
 			},
 			{
 				name: "option3",
 				display_name: "オプション3",
-				is_default: false,
 			},
 			{
 				name: "option4",
 				display_name: "オプション4",
-				is_default: false,
 			},
 			{
 				name: "option5",
 				display_name: "オプション5",
-				is_default: false,
 			},
 		],
 		default_value: null,
