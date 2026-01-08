@@ -345,70 +345,51 @@ describe("エンティティ項目の取得", () => {
 			expect(response.status).toBe(200)
 		})
 
-		it("text型の項目レスポンスが正しいこと", async () => {
-			// Act
-			const response = await requestGetEntityItem("sample", "text")
+		describe("各型の項目のレスポンスが正しいこと", () => {
+			it.each([
+				{
+					title: "text型",
+					itemName: "text",
+					validationFn: textValidation,
+				},
+				{
+					title: "numeric型",
+					itemName: "decimal",
+					validationFn: numericValidation,
+				},
+				{
+					title: "boolean型",
+					itemName: "boolean",
+					validationFn: booleanValidation,
+				},
+				{
+					title: "option(single)型",
+					itemName: "option_single",
+					validationFn: optionSingleValidation,
+				},
+				{
+					title: "option(multi)型",
+					itemName: "option_multi",
+					validationFn: optionMultiValidation,
+				},
+				{
+					title: "combobox型",
+					itemName: "combobox",
+					validationFn: comboboxValidation,
+				},
+				{
+					title: "reference(single)型",
+					itemName: "reference_single_target_single_id",
+					validationFn: referenceSingleValidation,
+				},
+			])("$title", async ({ itemName, validationFn }) => {
+				// Act
+				const response = await requestGetEntityItem("sample", itemName)
 
-			// Assert
-			const data = await response.json()
-			textValidation(data)
-		})
-
-		it("numeric型の項目レスポンスが正しいこと", async () => {
-			// Act
-			const response = await requestGetEntityItem("sample", "decimal")
-
-			// Assert
-			const data = await response.json()
-			numericValidation(data)
-		})
-
-		it("boolean型の項目レスポンスが正しいこと", async () => {
-			// Act
-			const response = await requestGetEntityItem("sample", "boolean")
-
-			// Assert
-			const data = await response.json()
-			booleanValidation(data)
-		})
-
-		it("option(single)型の項目レスポンスが正しいこと", async () => {
-			// Act
-			const response = await requestGetEntityItem("sample", "option_single")
-
-			// Assert
-			const data = await response.json()
-			optionSingleValidation(data)
-		})
-
-		it("option(multi)型の項目レスポンスが正しいこと", async () => {
-			// Act
-			const response = await requestGetEntityItem("sample", "option_multi")
-
-			// Assert
-			const data = await response.json()
-			optionMultiValidation(data)
-		})
-
-		it("combobox型の項目レスポンスが正しいこと", async () => {
-			// Act
-			const response = await requestGetEntityItem("sample", "combobox")
-
-			// Assert
-			const data = await response.json()
-			comboboxValidation(data)
-		})
-
-		it("reference(single)型の項目レスポンスが正しいこと", async () => {
-			// Act
-			const response = await requestGetEntityItem(
-				"sample",
-				"reference_single_target_single_id",
-			)
-
-			// Assert
-			const data = await response.json()
-			referenceSingleValidation(data)
+				// Assert
+				const data = await response.json()
+				validationFn(data)
+			})
 		})
 	})
 })
