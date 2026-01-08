@@ -9,7 +9,6 @@ import {
 	createTestExecutionUser,
 	deleteTestExecutionUser,
 } from "../../../../test/utils/execution-user"
-import { deleteAllTestSamples } from "../../../../test/utils/record"
 
 const textValidation = (value: object) => {
 	expect(value).toStrictEqual({
@@ -165,11 +164,6 @@ describe("エンティティ項目の取得", () => {
 
 	afterAll(async () => {
 		await cleanup()
-	})
-
-	afterEach(async () => {
-		// テスト毎に対象データを削除
-		await deleteAllTestSamples()
 	})
 
 	// テストデータのセットアップ
