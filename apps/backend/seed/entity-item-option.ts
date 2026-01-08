@@ -445,7 +445,7 @@ export async function seedEntityItemOptions(prisma: Prisma.TransactionClient) {
 		{
 			entity_item_id: getEntityItem("sample", "option_single").id,
 			options: [
-				{ name: "option1", display_name: "オプション1" },
+				{ name: "option1", display_name: "オプション1", is_default: true },
 				{ name: "option2", display_name: "オプション2" },
 				{ name: "option3", display_name: "オプション3" },
 				{ name: "option4", display_name: "オプション4" },
@@ -456,9 +456,9 @@ export async function seedEntityItemOptions(prisma: Prisma.TransactionClient) {
 			entity_item_id: getEntityItem("sample", "option_multi").id,
 			options: [
 				{ name: "option1", display_name: "オプション1" },
-				{ name: "option2", display_name: "オプション2" },
+				{ name: "option2", display_name: "オプション2", is_default: true },
 				{ name: "option3", display_name: "オプション3" },
-				{ name: "option4", display_name: "オプション4" },
+				{ name: "option4", display_name: "オプション4", is_default: true },
 				{ name: "option5", display_name: "オプション5" },
 			],
 		},

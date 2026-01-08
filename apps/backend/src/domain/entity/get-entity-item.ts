@@ -40,9 +40,27 @@ export const getEntityItem = async (
 							? JSON.parse(result.reference_entities)
 							: null,
 						options: result.entity_item_option,
+						default_value: getEntityItemDefaultValue(
+							result,
+							result.entity_item_option,
+						),
 					}
 				: null
 		})
 
 	return result ? EntityItemSchema.parse(result) : null
+}
+
+export const getEntityItemDefaultValue = (
+	entityItem: { type: string; sub_type: string | null },
+	options: { name: string; is_default: boolean }[],
+): string | string[] | null => {
+	// 現在はoption型のみ対応
+	if (entityItem.type !== "option") return null
+
+	const defaultOptions = options.filter((item) => item.is_default)
+	// sub_typeがmultiの場合は配列で返し、その他は単一の値で返す
+	return entityItem.sub_type === "multi"
+		? defaultOptions.map((item) => item.name)
+		: (defaultOptions[0]?.name ?? null)
 }
