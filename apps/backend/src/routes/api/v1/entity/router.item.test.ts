@@ -30,6 +30,46 @@ const textValidation = (value: object) => {
 	})
 }
 
+const numericValidation = (value: object) => {
+	expect(value).toStrictEqual({
+		name: "decimal",
+		display_name: "少数あり",
+		type: "numeric",
+		sub_type: "decimal",
+		is_required: false,
+		is_filterable: true,
+		is_creatable: true,
+		is_updatable: true,
+		is_formula: false,
+		max_length: null,
+		precision: 16,
+		scale: 2,
+		reference_entities: null,
+		options: [],
+		default_value: null,
+	})
+}
+
+const booleanValidation = (value: object) => {
+	expect(value).toStrictEqual({
+		name: "boolean",
+		display_name: "真偽値",
+		type: "boolean",
+		sub_type: null,
+		is_required: false,
+		is_filterable: true,
+		is_creatable: true,
+		is_updatable: true,
+		is_formula: false,
+		max_length: null,
+		precision: null,
+		scale: null,
+		reference_entities: null,
+		options: [],
+		default_value: null,
+	})
+}
+
 const optionSingleValidation = (value: object) => {
 	expect(value).toStrictEqual({
 		name: "option_single",
@@ -153,6 +193,26 @@ const comboboxValidation = (value: object) => {
 	})
 }
 
+const referenceSingleValidation = (value: object) => {
+	expect(value).toStrictEqual({
+		name: "reference_single_target_single_id",
+		display_name: "単一参照先、単一ID",
+		type: "reference",
+		sub_type: "single",
+		is_required: false,
+		is_filterable: true,
+		is_creatable: true,
+		is_updatable: true,
+		is_formula: false,
+		max_length: null,
+		precision: null,
+		scale: null,
+		reference_entities: ["account"],
+		options: [],
+		default_value: null,
+	})
+}
+
 describe("エンティティ項目の取得", () => {
 	// テスト実施ユーザー
 	let testExecutionUser: TestExecutionUser
@@ -249,12 +309,20 @@ describe("エンティティ項目の取得", () => {
 			expect(Array.isArray(data)).toBe(true)
 			// text型の項目検証
 			textValidation(findField(data, "text"))
+			// numeric型の項目検証
+			numericValidation(findField(data, "decimal"))
+			// boolean型の項目検証
+			booleanValidation(findField(data, "boolean"))
 			// option(single)型の項目検証
 			optionSingleValidation(findField(data, "option_single"))
 			// option(multi)型の項目検証
 			optionMultiValidation(findField(data, "option_multi"))
 			// combobox型の項目検証
 			comboboxValidation(findField(data, "combobox"))
+			// reference(single)型の項目検証
+			referenceSingleValidation(
+				findField(data, "reference_single_target_single_id"),
+			)
 		})
 	})
 
