@@ -213,6 +213,14 @@ describe("エンティティ項目の取得", () => {
 		)
 	}
 
+	/**
+	 * 指定されたnameの項目をdata配列から検索して返す
+	 */
+	// biome-ignore lint/suspicious/noExplicitAny: <explanation>
+	const findField = (data: any, name: string) => {
+		return data.find((item: { name: string }) => item.name === name)
+	}
+
 	describe("GET /api/v1/entities/{entity_name}/items - エンティティ項目一覧の取得", () => {
 		it("認証ヘッダーがない場合に401エラーを返すこと", async () => {
 			// Act
@@ -240,23 +248,13 @@ describe("エンティティ項目の取得", () => {
 			const data = await response.json()
 			expect(Array.isArray(data)).toBe(true)
 			// text型の項目検証
-			const text = data.find((item: { name: string }) => item.name === "text")
-			textValidation(text)
+			textValidation(findField(data, "text"))
 			// option(single)型の項目検証
-			const optionSingle = data.find(
-				(item: { name: string }) => item.name === "option_single",
-			)
-			optionSingleValidation(optionSingle)
+			optionSingleValidation(findField(data, "option_single"))
 			// option(multi)型の項目検証
-			const optionMulti = data.find(
-				(item: { name: string }) => item.name === "option_multi",
-			)
-			optionMultiValidation(optionMulti)
+			optionMultiValidation(findField(data, "option_multi"))
 			// combobox型の項目検証
-			const combobox = data.find(
-				(item: { name: string }) => item.name === "combobox",
-			)
-			comboboxValidation(combobox)
+			comboboxValidation(findField(data, "combobox"))
 		})
 	})
 
