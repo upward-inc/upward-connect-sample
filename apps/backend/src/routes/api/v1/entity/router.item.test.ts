@@ -1,4 +1,4 @@
-import { afterAll, afterEach, beforeAll, describe, expect, it } from "vitest"
+import { afterAll, beforeAll, describe, expect, it } from "vitest"
 import { app } from "../../../.."
 import {
 	cleanupEntityMetadata,
@@ -345,13 +345,31 @@ describe("エンティティ項目の取得", () => {
 			expect(response.status).toBe(200)
 		})
 
-		it("リクエストが正常に処理された場合のレスポンスが正しいこと", async () => {
+		it("text型の項目レスポンスが正しいこと", async () => {
 			// Act
 			const response = await requestGetEntityItem("sample", "text")
 
 			// Assert
 			const data = await response.json()
 			textValidation(data)
+		})
+
+		it("numeric型の項目レスポンスが正しいこと", async () => {
+			// Act
+			const response = await requestGetEntityItem("sample", "decimal")
+
+			// Assert
+			const data = await response.json()
+			numericValidation(data)
+		})
+
+		it("boolean型の項目レスポンスが正しいこと", async () => {
+			// Act
+			const response = await requestGetEntityItem("sample", "boolean")
+
+			// Assert
+			const data = await response.json()
+			booleanValidation(data)
 		})
 
 		it("option(single)型の項目レスポンスが正しいこと", async () => {
@@ -379,6 +397,18 @@ describe("エンティティ項目の取得", () => {
 			// Assert
 			const data = await response.json()
 			comboboxValidation(data)
+		})
+
+		it("reference(single)型の項目レスポンスが正しいこと", async () => {
+			// Act
+			const response = await requestGetEntityItem(
+				"sample",
+				"reference_single_target_single_id",
+			)
+
+			// Assert
+			const data = await response.json()
+			referenceSingleValidation(data)
 		})
 	})
 })
