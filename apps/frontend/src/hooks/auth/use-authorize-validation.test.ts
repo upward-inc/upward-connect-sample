@@ -41,7 +41,6 @@ describe("useAuthorizeValidation", () => {
 			"redirect_uriが$titleの場合、エラーをthrowすること",
 			({ redirect_uri }) => {
 				// Arrange
-				// Arrange
 				global.alert = vi.fn() // alertをモック化
 				const searchParams: SearchParams = {
 					response_type: "code",
