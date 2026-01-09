@@ -9,6 +9,7 @@ export const getEntityList = async (): Promise<EntityList> => {
 		.then((results) => {
 			return results.map((result) => ({
 				...result,
+				// このサンプルにおいては、すべてのエンティティのIDフィールド名は`id`として統一する
 				id_field_name: "id",
 			}))
 		})
