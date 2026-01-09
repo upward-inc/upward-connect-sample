@@ -1,0 +1,59 @@
+name: call backend build
+
+on:
+  workflow_call:
+    inputs:
+      environment:
+        description: '環境名'
+        required: true
+        type: string
+      registry_domain:
+        description: 'コンテナレジストリ'
+        required: true
+        type: string
+      repository_name:
+        description: 'コンテナリポジトリ名'
+        required: true
+        type: string
+      tag:
+        description: 'コンテナイメージのタグ'
+        required: true
+        type: string
+      dockerfile_path:
+        description: 'Dockerfileのパス'
+        required: true
+        type: string
+      context_path:
+        description: 'ビルドコンテキストのパス'
+        required: true
+        type: string
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+    steps:
+      - name: Checkout to the branch
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to container registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ inputs.registry_domain }}
+          username: ${{ secrets.CONTAINER_REGISTRY_USERNAME }}
+          password: ${{ secrets.CONTAINER_REGISTRY_PASSWORD }}
+
+      - name: Build and push container image to registry
+        uses: docker/build-push-action@v6
+        with:
+          push: true
+          tags: ${{ inputs.registry_domain }}/${{ inputs.repository_name }}:${{ inputs.tag }}
+          file: ${{ inputs.dockerfile_path }}
+          context: ${{ inputs.context_path }}
+          build-args: |
+            ENV_NAME=${{ inputs.environment }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
