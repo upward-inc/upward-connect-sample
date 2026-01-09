@@ -19,7 +19,7 @@ const envSchema = z.object({
 	OIDC_REFRESH_TOKEN_SECRET: z.string().min(10),
 	OIDC_REFRESH_TOKEN_EXPIRES_IN_DAY: z.coerce.number().min(1),
 	OIDC_KEY_ROTATION_PERIOD_IN_DAY: z.coerce.number().min(1),
-	OIDC_ENCRYPT_PRIVATE_KEY_SECRET: z.string().min(32).max(32),
+	OIDC_ENCRYPT_PRIVATE_KEY_SECRET: z.string().length(32),
 })
 
 export const configuration = {

@@ -44,5 +44,5 @@ jobs:
           GIT_PR_RELEASE_BRANCH_STAGING: staging
           GIT_PR_RELEASE_LABELS: release
           GIT_PR_RELEASE_TEMPLATE: .github/workflows/git-pr-release.erb
-          PR_TITLE: ${{ env.PR_TITLE }} 
+          PR_TITLE: ${{ env.PR_TITLE }}
           TZ: Asia/Tokyo

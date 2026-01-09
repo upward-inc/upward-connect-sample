@@ -10,8 +10,12 @@ export const EntitySchema = z
 			description: "エンティティの表示名",
 			examples: ["取引先", "商談"],
 		}),
+		id_field_name: z.string().meta({
+			description: "エンティティのレコードのID（一意識別子）となる項目名",
+			example: "id",
+		}),
 		title_field_name: z.string().meta({
-			description: "エンティティのタイトルとなる項目名",
+			description: "エンティティのレコードのタイトルとなる項目名",
 			example: "name",
 		}),
 	})
