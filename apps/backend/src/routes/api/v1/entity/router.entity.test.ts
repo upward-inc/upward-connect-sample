@@ -64,6 +64,7 @@ describe("エンティティの取得", () => {
 			headers: authToken ? { Authorization: `Bearer ${authToken}` } : {},
 		})
 	}
+
 	describe("GET /api/v1/entities - エンティティ一覧の取得", () => {
 		it("認証ヘッダーがない場合に401エラーを返すこと", async () => {
 			// Act
