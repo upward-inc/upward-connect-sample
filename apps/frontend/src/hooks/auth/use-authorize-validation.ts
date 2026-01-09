@@ -44,6 +44,7 @@ export function useAuthorizeValidation(
 		)
 		if (!stateSuccess) {
 			redirectFail(redirectUri, { error: "invalid_request", state })
+			return
 		}
 
 		// `response_type`の検証
@@ -52,6 +53,7 @@ export function useAuthorizeValidation(
 		)
 		if (!responseTypeSuccess) {
 			redirectFail(redirectUri, { error: "unsupported_response_type", state })
+			return
 		}
 
 		// `client_id`の検証
@@ -60,18 +62,21 @@ export function useAuthorizeValidation(
 		)
 		if (!clientIdSuccess) {
 			redirectFail(redirectUri, { error: "unauthorized_client", state })
+			return
 		}
 
 		// `scope`の検証
 		const { success: scopeSuccess } = ScopeSchema.safeParse(searchParams.scope)
 		if (!scopeSuccess) {
 			redirectFail(redirectUri, { error: "invalid_scope", state })
+			return
 		}
 
 		// `nonce`の検証
 		const { success: nonceSuccess } = NonceSchema.safeParse(searchParams.nonce)
 		if (!nonceSuccess) {
 			redirectFail(redirectUri, { error: "invalid_request", state })
+			return
 		}
 
 		// `code_challenge`の検証
@@ -80,6 +85,7 @@ export function useAuthorizeValidation(
 		)
 		if (!codeChallengeSuccess) {
 			redirectFail(redirectUri, { error: "invalid_request", state })
+			return
 		}
 
 		// `code_challenge_method`の検証
@@ -87,6 +93,7 @@ export function useAuthorizeValidation(
 			CodeChallengeMethodSchema.safeParse(searchParams.code_challenge_method)
 		if (!codeChallengeMethodSuccess) {
 			redirectFail(redirectUri, { error: "invalid_request", state })
+			return
 		}
 
 		setIsValidating(false)
