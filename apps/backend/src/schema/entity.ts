@@ -15,7 +15,7 @@ export const EntitySchema = z
 			example: "id",
 		}),
 		title_field_name: z.string().meta({
-			description: "エンティティのタイトルとなる項目名",
+			description: "エンティティのレコードのタイトルとなる項目名",
 			example: "name",
 		}),
 	})
