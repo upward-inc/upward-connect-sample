@@ -260,6 +260,10 @@ export const GetUserInfoResultSchema = z.object({
 	user_id: UserIdSchema.meta({
 		description: "システムユーザーID（非標準クレーム）",
 	}),
+	user_name: UserNameSchema.meta({
+		description:
+			"システム内でユニークな値となるシステムユーザー名（非標準クレーム、ログイン時に使用するシステムユーザー名等）",
+	}),
 	name: FullNameSchema.meta({
 		description: "表示用のフルネーム",
 	}),

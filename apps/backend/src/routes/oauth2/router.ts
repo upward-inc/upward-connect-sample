@@ -126,7 +126,6 @@ export const oauth2Router = honoApp<{ Variables: AuthContexts }>()
 				// アクセストークンを生成
 				const accessToken = generateAccessToken({
 					userId: user.id,
-					userName: user.user_name,
 					clientId: client_id,
 					nonce: nonce,
 				})
@@ -174,12 +173,11 @@ export const oauth2Router = honoApp<{ Variables: AuthContexts }>()
 						400,
 					)
 				}
-				const { user_id, user_name, client_id } = validateResult
+				const { user_id, client_id } = validateResult
 
 				// アクセストークンを生成
 				const accessToken = generateAccessToken({
 					userId: user_id,
-					userName: user_name,
 					clientId: client_id,
 				})
 
@@ -276,6 +274,7 @@ export const oauth2Router = honoApp<{ Variables: AuthContexts }>()
 				{
 					sub: loggedInUser.id,
 					user_id: loggedInUser.id, // custom claim
+					user_name: loggedInUser.user_name, // custom claim
 					name: `${loggedInUser.last_name} ${loggedInUser.first_name}`,
 					given_name: loggedInUser.first_name,
 					family_name: loggedInUser.last_name ?? undefined,

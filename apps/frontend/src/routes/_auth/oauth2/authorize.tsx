@@ -17,7 +17,7 @@ const scopeDescriptions: Record<(typeof specifiedScopes)[number], string> = {
 
 const ResponseTypeSchema = z.literal("code")
 const ClientIdSchema = z.string().min(1)
-const AuthorizeParamsRedirectUriSchema = z.url().startsWith("https://")
+const AuthorizeParamsRedirectUriSchema = z.string().min(1)
 const ScopeSchema = z
 	.string()
 	.refine(
@@ -131,6 +131,7 @@ function useAuthorizeValidation(
 		if (!redirectUriSuccess) {
 			// `redirect_uri`に不備がある場合は、エラーをスロー
 			// オープンリダイレクト攻撃を防止するため、リダイレクトを行ってはならない
+			alert("redirect_uriが不正です")
 			throw new Error("invalid redirect_uri")
 		}
 
@@ -308,6 +309,7 @@ export function AuthorizePage() {
 			if (result.error === "invalid_request_uri") {
 				// `redirect_uri`に不備がある場合は、エラーをスロー
 				// オープンリダイレクト攻撃を防止するため、リダイレクトを行ってはならない
+				alert("redirect_uriが不正です")
 				throw new Error("invalid redirect_uri")
 			}
 

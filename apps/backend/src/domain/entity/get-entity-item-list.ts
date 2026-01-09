@@ -1,3 +1,4 @@
+import { getEntityItemDefaultValue } from "."
 import { prisma } from "../../libs/prisma"
 import type { Entity } from "../../schema/entity"
 import {
@@ -35,6 +36,10 @@ export const getEntityItemList = async (
 						? JSON.parse(item.reference_entities)
 						: null,
 					options: item.entity_item_option,
+					default_value: getEntityItemDefaultValue(
+						item,
+						item.entity_item_option,
+					),
 				}
 			})
 		})

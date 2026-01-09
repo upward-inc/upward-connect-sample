@@ -8,7 +8,6 @@ import { getNotExpiredJwkPrivateKeyList } from "./get-jwk-private-key-list"
  */
 export const generateAccessToken = (payload: {
 	userId: string
-	userName: string
 	clientId: string
 	nonce?: string
 }) => {
