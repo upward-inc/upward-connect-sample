@@ -32,7 +32,7 @@ export default defineConfig({
 					autogenerate: { directory: "reference" },
 				},
 			],
-			customCss: ["./src/styles/global.css"],
+			customCss: ["./src/styles/global.css", "./src/styles/custom.css"],
 		}),
 
 		// https://starlight-mermaid-demo.netlify.app/configuration/
