@@ -3,6 +3,7 @@ import tailwindcss from "@tailwindcss/vite"
 import mermaid from "astro-mermaid"
 // @ts-check
 import { defineConfig } from "astro/config"
+import starlightLinksValidator from "starlight-links-validator"
 import starlightThemeNova from "starlight-theme-nova"
 
 // https://astro.build/config
@@ -10,8 +11,8 @@ import starlightThemeNova from "starlight-theme-nova"
 export default defineConfig({
 	integrations: [
 		starlight({
-			plugins: [starlightThemeNova()],
 			title: "Docs with Tailwind",
+			plugins: [starlightLinksValidator(), starlightThemeNova()],
 			social: [
 				{
 					icon: "github",
