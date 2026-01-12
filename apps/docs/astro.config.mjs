@@ -3,12 +3,14 @@ import tailwindcss from "@tailwindcss/vite"
 import mermaid from "astro-mermaid"
 // @ts-check
 import { defineConfig } from "astro/config"
+import starlightThemeNova from "starlight-theme-nova"
 
 // https://astro.build/config
 // https://starlight.astro.build/reference/configuration/
 export default defineConfig({
 	integrations: [
 		starlight({
+			plugins: [starlightThemeNova()],
 			title: "Docs with Tailwind",
 			social: [
 				{
