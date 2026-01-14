@@ -35,15 +35,17 @@
    1. `bun install`
 3. 環境変数ファイルの作成
    1. `apps/backend/.env`（`apps/backend/.env.template`をコピー）
-4. ローカルデータベース（Docker）の起動
+   2. `apps/frontend/.env`（`apps/frontend/.env.template`をコピー）
+4. （必要に応じて）環境変数ファイル内の値を調整
+5. ローカルデータベース（Docker）の起動
    1. `bun db#up`
-5. マイグレーションの実行（テーブルの作成）
+6. マイグレーションの実行（テーブルの作成）
    1. `bun db#migrate`
-6. ビューの作成
+7. ビューの作成
    1. `apps/backend/prisma/views/dbo`配下のビュー作成スクリプトを手動で実行
-7. Prismaクライアントの最新化
+8. Prismaクライアントの最新化
    1. `bun prisma#generate`
-8. サンプルデータの投入
+9. サンプルデータの投入
    1. `bun db#seed`
 
 ## コマンド
