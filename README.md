@@ -1,6 +1,32 @@
 # upward-connect-sample
 
-このリポジトリは、UPWARDが標準対応しないCRMを使用するお客様が、UPWARDのアプリケーションと接続するために構築するAPIのサンプルです。
+このリポジトリは、UPWARD CONNECTに対応したAPIサーバーの構築サンプルです。
+
+以下の技術スタックを用いて実装されています。
+
+### 共通
+
+- [Bun](https://bun.sh/) - JavaScript/TypeScript ランタイム / パッケージマネージャー
+- [TypeScript](https://www.typescriptlang.org/) - 型付き JavaScript
+- [Vitest](https://vitest.dev/) - テストフレームワーク
+- [Biome](https://biomejs.dev/) - Linter / Formatter
+
+### バックエンド
+
+- [Hono](https://hono.dev/) - Web フレームワーク
+- [Prisma](https://www.prisma.io/) - ORM
+- [Zod](https://zod.dev/) - バリデーション
+
+### フロントエンド
+
+- [React](https://react.dev/) - UI ライブラリ
+- [Vite](https://vite.dev/) - ビルドツール
+- [TanStack Router](https://tanstack.com/router) - ルーティング
+- [Tailwind CSS](https://tailwindcss.com/) - CSS フレームワーク
+
+### データベース
+
+- SQL Server (Docker)
 
 ## セットアップ
 
@@ -58,14 +84,3 @@ bun fe#dev
    1. `bun db#migrate`
 4. Prismaクライアントの最新化
    1. `bun prisma#generate`
-
-### カラムに制約(CONSTRAINT)を追加する際の注意事項
-
-**制約名(constraint name)は以下の命名ルールで追加すること**
-
-| 種別 | 命名規則 |
-|:--|:--|
-| 主キー | `pk_[table_name]` |
-| 外部キー | `fk_[table_name]_[column_name]` |
-| デフォルト値 | `df_[table_name]_[column_name]` |
-| UNIQUEキー | `uk_[table_name]_[連番(1, 2, ...)]` |
