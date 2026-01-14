@@ -1,4 +1,4 @@
-# multi-platform-sample
+# upward-connect-sample
 
 このリポジトリは、UPWARDが標準対応しないCRMを使用するお客様が、UPWARDのアプリケーションと接続するために構築するAPIのサンプルです。
 

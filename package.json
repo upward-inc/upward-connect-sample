@@ -1,5 +1,5 @@
 {
-	"name": "multi-platform-sample",
+	"name": "upward-connect-sample",
 	"version": "1.0.0",
 	"scripts": {
 		"be#dev": "bun run --filter backend dev",
