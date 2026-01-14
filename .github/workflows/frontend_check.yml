@@ -1,0 +1,44 @@
+name: frontend check
+
+on:
+  # mainブランチへのPush時（PRマージ時）
+  push:
+    branches:
+      - main
+    paths:
+      - 'apps/frontend/**'
+      - '.github/workflows/frontend_check.yml'
+      - '.github/workflows/call_frontend_*.yml'
+
+  # mainブランチへのPR操作時
+  pull_request:
+    types: [opened, synchronize, reopened]
+    branches:
+      - main
+    paths:
+      - 'apps/frontend/**'
+      - '.github/workflows/frontend_check.yml'
+      - '.github/workflows/call_frontend_*.yml'
+
+  # 手動トリガー
+  workflow_dispatch:
+
+# 同一ブランチでの重複実行を制御
+concurrency:
+  group: frontend-deploy-main-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # コード品質チェック
+  lint:
+    uses: ./.github/workflows/call_frontend_lint.yml
+
+  # ユニットテスト実行
+  test:
+    uses: ./.github/workflows/call_frontend_test.yml
+
+  # フロントエンドのビルド
+  build:
+    needs: [lint, test]
+    uses: ./.github/workflows/call_frontend_build.yml
+    secrets: inherit

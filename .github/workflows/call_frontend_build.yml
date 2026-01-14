@@ -2,17 +2,11 @@ name: call frontend build
 
 on:
   workflow_call:
-    inputs:
-      environment:
-        description: '環境名'
-        required: true
-        type: string
 
 jobs:
   build:
     name: Build
     runs-on: ubuntu-latest
-    environment: ${{ inputs.environment }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -42,11 +36,3 @@ jobs:
           echo "$VARS_JSON" | jq -r 'to_entries[] | "\(.key)=\(.value)"' > .env
           bun run build
           rm -f .env
-          cp ../../staticwebapp.config.json ./dist
-
-      - name: Upload Publish Files
-        uses: actions/upload-artifact@v4
-        with:
-          name: publish-files
-          path: ./apps/frontend/dist
-          retention-days: 1
