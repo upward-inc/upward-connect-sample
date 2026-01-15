@@ -1,6 +1,9 @@
-# multi-platform-sample
+# upward-connect-sample-internal
 
-このリポジトリは、UPWARDが標準対応しないCRMを使用するお客様が、UPWARDのアプリケーションと接続するために構築するAPIのサンプルです。
+このリポジトリは、UPWARD CONNECTの仕様に準拠した社内用の開発資産です。  
+以下の役割を担っています。
+- 顧客提供用サンプルコードリポジトリ（[upward-connect-sample](https://github.com/upward-inc/upward-connect-sample)）のベース資産
+- 社内展開用のUPWARD CONNECT環境の実コード
 
 ## セットアップ
 
