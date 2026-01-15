@@ -1,0 +1,32 @@
+name: call backend build
+
+on:
+  workflow_call:
+    inputs:
+      dockerfile_path:
+        description: 'Dockerfileのパス'
+        required: true
+        type: string
+      context_path:
+        description: 'ビルドコンテキストのパス'
+        required: true
+        type: string
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout to the branch
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build container image
+        uses: docker/build-push-action@v6
+        with:
+          push: false
+          file: ${{ inputs.dockerfile_path }}
+          context: ${{ inputs.context_path }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max

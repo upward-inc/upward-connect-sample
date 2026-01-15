@@ -1,12 +1,24 @@
 {
-  "name": "multi-platform-sample",
-  "scripts": {
-    "dev": "bun run --hot src/index.ts"
-  },
-  "dependencies": {
-    "hono": "^4.7.9"
-  },
-  "devDependencies": {
-    "@types/bun": "latest"
-  }
+	"name": "upward-connect-sample",
+	"version": "1.0.0",
+	"scripts": {
+		"be#dev": "bun run --filter backend dev",
+		"be#test": "bun run --filter backend test",
+		"fe#dev": "bun run --filter frontend dev",
+		"fe#test": "bun run --filter frontend test",
+		"db#up": "bun run --filter backend db#up",
+		"db#down": "bun run --filter backend db#down",
+		"db#migrate": "bun run --filter backend db#migrate",
+		"db#pull": "bun run --filter backend db#pull",
+		"db#migratefile": "bun run --filter backend db#migratefile",
+		"db#seed": "bun run --filter backend db#seed",
+		"prisma#generate": "bun run --filter backend prisma#generate",
+		"format": "bun run --filter backend --filter frontend format",
+		"lint": "bun run --filter backend --filter frontend lint",
+		"check": "bun run --filter backend --filter frontend check"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "^1.9.4"
+	},
+	"workspaces": ["apps/*"]
 }
