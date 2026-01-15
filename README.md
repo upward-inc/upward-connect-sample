@@ -1,4 +1,4 @@
-# upward-connect-sample-internal
+# upward-connect-internal
 
 このリポジトリは、UPWARD CONNECTの仕様に準拠した社内用の開発資産です。  
 以下の役割を担っています。
