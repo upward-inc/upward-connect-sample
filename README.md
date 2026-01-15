@@ -79,7 +79,7 @@ bun fe#dev
 ### 他の開発者が実施した変更を取り込む場合
 
 1. 最新のブランチをローカルに取り込む
-   1. `git checkout develop && git pull`
+   1. `git checkout main && git pull`
 2. ローカルデータベース（Docker）の起動
    1. `bun db#up`
 3. マイグレーションを実施
