@@ -1,9 +1,9 @@
-import { renderHook } from "@testing-library/react"
+import { renderHook, waitFor } from "@testing-library/react"
 import type { SearchParams } from "../../schema/auth"
 import { useAuthorizeValidation } from "./use-authorize-validation"
 
 describe("useAuthorizeValidation", () => {
-	it("全ての必須パラメータが有効な場合、検証が成功すること", () => {
+	it("全ての必須パラメータが有効な場合、検証が成功すること", async () => {
 		// Arrange
 		const searchParams: SearchParams = {
 			response_type: "code",
@@ -23,7 +23,7 @@ describe("useAuthorizeValidation", () => {
 		)
 
 		// Assert
-		expect(result.current.isValidating).toBe(false)
+		await waitFor(() => expect(result.current.isValidating).toBe(false))
 		expect(redirectFail).not.toHaveBeenCalled()
 	})
 
@@ -39,7 +39,7 @@ describe("useAuthorizeValidation", () => {
 			},
 		])(
 			"redirect_uriが$titleの場合、エラーをthrowすること",
-			({ redirect_uri }) => {
+			async ({ redirect_uri }) => {
 				// Arrange
 				global.alert = vi.fn() // alertをモック化
 				const searchParams: SearchParams = {
@@ -55,9 +55,11 @@ describe("useAuthorizeValidation", () => {
 				const redirectFail = vi.fn()
 
 				// Act & Assert
-				expect(() => {
-					renderHook(() => useAuthorizeValidation(searchParams, redirectFail))
-				}).toThrow("invalid redirect_uri")
+				await waitFor(() =>
+					expect(() => {
+						renderHook(() => useAuthorizeValidation(searchParams, redirectFail))
+					}).toThrow("invalid redirect_uri"),
+				)
 				expect(global.alert).toHaveBeenCalledWith("redirect_uriが不正です")
 				expect(redirectFail).not.toHaveBeenCalled()
 			},
@@ -74,7 +76,7 @@ describe("useAuthorizeValidation", () => {
 				title: "空文字",
 				state: "",
 			},
-		])("stateが$titleの場合、redirectFailが呼ばれること", ({ state }) => {
+		])("stateが$titleの場合、redirectFailが呼ばれること", async ({ state }) => {
 			// Arrange
 			const searchParams: SearchParams = {
 				response_type: "code",
@@ -89,9 +91,12 @@ describe("useAuthorizeValidation", () => {
 			const redirectFail = vi.fn()
 
 			// Act
-			renderHook(() => useAuthorizeValidation(searchParams, redirectFail))
+			const { result } = renderHook(() =>
+				useAuthorizeValidation(searchParams, redirectFail),
+			)
 
 			// Assert
+			await waitFor(() => expect(result.current.isValidating).toBe(true))
 			expect(redirectFail).toHaveBeenCalledWith(
 				"https://client.test.local/callback",
 				{ error: "invalid_request", state: undefined },
@@ -115,7 +120,7 @@ describe("useAuthorizeValidation", () => {
 			},
 		])(
 			"response_typeが$titleの場合、redirectFailが呼ばれること",
-			({ response_type }) => {
+			async ({ response_type }) => {
 				// Arrange
 				const searchParams: SearchParams = {
 					response_type,
@@ -130,9 +135,12 @@ describe("useAuthorizeValidation", () => {
 				const redirectFail = vi.fn()
 
 				// Act
-				renderHook(() => useAuthorizeValidation(searchParams, redirectFail))
+				const { result } = renderHook(() =>
+					useAuthorizeValidation(searchParams, redirectFail),
+				)
 
 				// Assert
+				await waitFor(() => expect(result.current.isValidating).toBe(true))
 				expect(redirectFail).toHaveBeenCalledWith(
 					"https://client.test.local/callback",
 					{ error: "unsupported_response_type", state: "valid_state" },
@@ -153,7 +161,7 @@ describe("useAuthorizeValidation", () => {
 			},
 		])(
 			"client_idが$titleの場合、redirectFailが呼ばれること",
-			({ client_id }) => {
+			async ({ client_id }) => {
 				// Arrange
 				const searchParams: SearchParams = {
 					response_type: "code",
@@ -168,9 +176,12 @@ describe("useAuthorizeValidation", () => {
 				const redirectFail = vi.fn()
 
 				// Act
-				renderHook(() => useAuthorizeValidation(searchParams, redirectFail))
+				const { result } = renderHook(() =>
+					useAuthorizeValidation(searchParams, redirectFail),
+				)
 
 				// Assert
+				await waitFor(() => expect(result.current.isValidating).toBe(true))
 				expect(redirectFail).toHaveBeenCalledWith(
 					"https://client.test.local/callback",
 					{ error: "unauthorized_client", state: "valid_state" },
@@ -193,7 +204,7 @@ describe("useAuthorizeValidation", () => {
 				title: "不正な値",
 				scope: "invalid_scope_value",
 			},
-		])("scopeが$titleの場合、redirectFailが呼ばれること", ({ scope }) => {
+		])("scopeが$titleの場合、redirectFailが呼ばれること", async ({ scope }) => {
 			// Arrange
 			const searchParams: SearchParams = {
 				response_type: "code",
@@ -208,9 +219,12 @@ describe("useAuthorizeValidation", () => {
 			const redirectFail = vi.fn()
 
 			// Act
-			renderHook(() => useAuthorizeValidation(searchParams, redirectFail))
+			const { result } = renderHook(() =>
+				useAuthorizeValidation(searchParams, redirectFail),
+			)
 
 			// Assert
+			await waitFor(() => expect(result.current.isValidating).toBe(true))
 			expect(redirectFail).toHaveBeenCalledWith(
 				"https://client.test.local/callback",
 				{ error: "invalid_scope", state: "valid_state" },
@@ -228,7 +242,7 @@ describe("useAuthorizeValidation", () => {
 				title: "空文字",
 				nonce: "",
 			},
-		])("nonceが$titleの場合、redirectFailが呼ばれること", ({ nonce }) => {
+		])("nonceが$titleの場合、redirectFailが呼ばれること", async ({ nonce }) => {
 			// Arrange
 			const searchParams: SearchParams = {
 				response_type: "code",
@@ -243,9 +257,12 @@ describe("useAuthorizeValidation", () => {
 			const redirectFail = vi.fn()
 
 			// Act
-			renderHook(() => useAuthorizeValidation(searchParams, redirectFail))
+			const { result } = renderHook(() =>
+				useAuthorizeValidation(searchParams, redirectFail),
+			)
 
 			// Assert
+			await waitFor(() => expect(result.current.isValidating).toBe(true))
 			expect(redirectFail).toHaveBeenCalledWith(
 				"https://client.test.local/callback",
 				{ error: "invalid_request", state: "valid_state" },
@@ -273,7 +290,7 @@ describe("useAuthorizeValidation", () => {
 			},
 		])(
 			"code_challengeが$titleの場合、redirectFailが呼ばれること",
-			({ code_challenge }) => {
+			async ({ code_challenge }) => {
 				// Arrange
 				const searchParams: SearchParams = {
 					response_type: "code",
@@ -288,9 +305,12 @@ describe("useAuthorizeValidation", () => {
 				const redirectFail = vi.fn()
 
 				// Act
-				renderHook(() => useAuthorizeValidation(searchParams, redirectFail))
+				const { result } = renderHook(() =>
+					useAuthorizeValidation(searchParams, redirectFail),
+				)
 
 				// Assert
+				await waitFor(() => expect(result.current.isValidating).toBe(true))
 				expect(redirectFail).toHaveBeenCalledWith(
 					"https://client.test.local/callback",
 					{ error: "invalid_request", state: "valid_state" },
@@ -315,7 +335,7 @@ describe("useAuthorizeValidation", () => {
 			},
 		])(
 			"code_challenge_methodが$titleの場合、redirectFailが呼ばれること",
-			({ code_challenge_method }) => {
+			async ({ code_challenge_method }) => {
 				// Arrange
 				const searchParams: SearchParams = {
 					response_type: "code",
@@ -330,9 +350,12 @@ describe("useAuthorizeValidation", () => {
 				const redirectFail = vi.fn()
 
 				// Act
-				renderHook(() => useAuthorizeValidation(searchParams, redirectFail))
+				const { result } = renderHook(() =>
+					useAuthorizeValidation(searchParams, redirectFail),
+				)
 
 				// Assert
+				await waitFor(() => expect(result.current.isValidating).toBe(true))
 				expect(redirectFail).toHaveBeenCalledWith(
 					"https://client.test.local/callback",
 					{ error: "invalid_request", state: "valid_state" },
