@@ -4,7 +4,7 @@ import {
 	seedAccountsAddressAndLocation,
 	seedAccountsParent,
 } from "./account"
-import { seedActivities } from "./activity"
+import { seedActivities, seedActivitiesTimeAndLatLong } from "./activity"
 import { seedCampaigns } from "./campaign"
 import { seedCases } from "./case"
 import { seedContacts } from "./contact"
@@ -105,6 +105,7 @@ try {
 
 			// 活動
 			await seedActivities(txClient, users)
+			await seedActivitiesTimeAndLatLong(txClient)
 
 			// 通話
 			await seedPhoneCalls(txClient, users)

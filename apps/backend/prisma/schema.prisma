@@ -36,26 +36,34 @@ model account {
 }
 
 model activity {
-  id                 String    @id(map: "pk_activity") @default(dbgenerated("newid()"), map: "df_activity_id") @db.UniqueIdentifier
-  subject            String?   @db.NVarChar(256)
-  target             String?   @db.NVarChar(256)
-  start_date_time    DateTime? @db.DateTime
-  end_date_time      DateTime? @db.DateTime
-  is_all_day_event   Boolean   @default(false, map: "df_activity_is_all_day_event")
-  status             String?   @db.NVarChar(Max)
-  location           String?   @db.NVarChar(256)
-  required_attendees String?   @db.NVarChar(Max)
-  optional_attendees String?   @db.NVarChar(Max)
-  organizer          String?   @db.NVarChar(Max)
-  meeting_url        String?   @db.NVarChar(Max)
-  description        String?   @db.NVarChar(Max)
-  is_archived        Boolean   @default(false, map: "df_activity_is_archived")
-  is_deleted         Boolean   @default(false, map: "df_activity_is_deleted")
-  owner              String    @db.NVarChar(Max)
-  created_at         DateTime  @default(dbgenerated("getutcdate()"), map: "df_activity_created_at")
-  created_by         String    @db.NVarChar(Max)
-  modified_at        DateTime  @default(dbgenerated("getutcdate()"), map: "df_activity_modified_at")
-  modified_by        String    @db.NVarChar(Max)
+  id                     String    @id(map: "pk_activity") @default(dbgenerated("newid()"), map: "df_activity_id") @db.UniqueIdentifier
+  subject                String?   @db.NVarChar(256)
+  target                 String?   @db.NVarChar(256)
+  start_date_time        DateTime? @db.DateTime
+  end_date_time          DateTime? @db.DateTime
+  is_all_day_event       Boolean   @default(false, map: "df_activity_is_all_day_event")
+  actual_start_date_time DateTime? @db.DateTime
+  actual_end_date_time   DateTime? @db.DateTime
+  status                 String?   @db.NVarChar(Max)
+  location               String?   @db.NVarChar(256)
+  required_attendees     String?   @db.NVarChar(Max)
+  optional_attendees     String?   @db.NVarChar(Max)
+  organizer              String?   @db.NVarChar(Max)
+  meeting_url            String?   @db.NVarChar(Max)
+  description            String?   @db.NVarChar(Max)
+  start_latitude         Decimal?  @db.Decimal(18, 15)
+  start_longitude        Decimal?  @db.Decimal(18, 15)
+  finish_latitude        Decimal?  @db.Decimal(18, 15)
+  finish_longitude       Decimal?  @db.Decimal(18, 15)
+  working_latitude       Decimal?  @db.Decimal(18, 15)
+  working_longitude      Decimal?  @db.Decimal(18, 15)
+  is_archived            Boolean   @default(false, map: "df_activity_is_archived")
+  is_deleted             Boolean   @default(false, map: "df_activity_is_deleted")
+  owner                  String    @db.NVarChar(Max)
+  created_at             DateTime  @default(dbgenerated("getutcdate()"), map: "df_activity_created_at")
+  created_by             String    @db.NVarChar(Max)
+  modified_at            DateTime  @default(dbgenerated("getutcdate()"), map: "df_activity_modified_at")
+  modified_by            String    @db.NVarChar(Max)
 }
 
 model campaign {
