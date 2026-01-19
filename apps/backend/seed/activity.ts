@@ -1,5 +1,6 @@
 import { addMinute, addYear, date, format } from "@formkit/tempo"
 import type { Prisma, user } from "@prisma/client"
+import { addresses } from "./static/address"
 import {
 	getAnyRow,
 	getRandomBoolean,
@@ -110,4 +111,75 @@ export async function seedActivities(
 	console.info(`>> activity records created: ${records.count}`)
 
 	return records
+}
+
+export async function seedActivitiesTimeAndLatLong(
+	prisma: Prisma.TransactionClient,
+) {
+	const activities = await prisma.activity.findMany()
+	const addressMap = addresses.reduce((map, address) => {
+		map.set(
+			`${address.prefecture}${address.municipality}${address.street}`,
+			address,
+		)
+		return map
+	}, new Map<string, (typeof addresses)[0]>())
+	const now = date()
+
+	const result = await Promise.all(
+		activities.map((activity) => {
+			// 過去の活動を9割の確率で実績日時と緯度経度を設定
+			if (
+				activity.start_date_time &&
+				activity.start_date_time <= now &&
+				activity.end_date_time &&
+				activity.end_date_time <= now &&
+				getRandomBoolean(0.9)
+			) {
+				const actual_start_date_time = getRandomDate(
+					addMinute(activity.start_date_time, -30),
+					addMinute(activity.start_date_time, 30),
+				)
+				const actual_end_date_time = getRandomDate(
+					addMinute(activity.end_date_time, -30),
+					addMinute(activity.end_date_time, 30),
+				)
+				const address = addressMap.get(activity.location ?? "")
+
+				const start_latitude = address
+					? address.latitude + getRandomInteger(-1000, 1000) * 0.000001
+					: null
+				const start_longitude = address
+					? address.longitude + getRandomInteger(-1000, 1000) * 0.000001
+					: null
+				const finish_latitude = address
+					? address.latitude + getRandomInteger(-1000, 1000) * 0.000001
+					: null
+				const finish_longitude = address
+					? address.longitude + getRandomInteger(-1000, 1000) * 0.000001
+					: null
+				const working_latitude = address
+					? address.latitude + getRandomInteger(-1000, 1000) * 0.000001
+					: null
+				const working_longitude = address
+					? address.longitude + getRandomInteger(-1000, 1000) * 0.000001
+					: null
+
+				return prisma.activity.update({
+					where: { id: activity.id },
+					data: {
+						actual_start_date_time,
+						actual_end_date_time,
+						start_latitude,
+						start_longitude,
+						finish_latitude,
+						finish_longitude,
+						working_latitude,
+						working_longitude,
+					},
+				})
+			}
+		}),
+	)
+	console.info(`>> activity records updated: ${result.length}`)
 }
