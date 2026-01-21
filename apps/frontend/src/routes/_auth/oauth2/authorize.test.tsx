@@ -7,7 +7,7 @@ import {
 	createAuthorizeHandler,
 	createClientHandler,
 } from "../../../test/mocks/handlers"
-import { setRequestHandlers } from "../../../test/msw"
+import { setRequestHandlers } from "../../../test/mocks/server"
 import { AuthorizePage } from "./authorize"
 
 const { API_URL } = vi.hoisted(() => ({
