@@ -66,7 +66,7 @@ export const EntitySchema = z
 			.nullable()
 			.meta({
 				description: "エンティティの種別",
-				examples: ["user", "account"],
+				examples: ["account", null],
 			}),
 		display_name: z.string().meta({
 			description: "エンティティの表示名",
