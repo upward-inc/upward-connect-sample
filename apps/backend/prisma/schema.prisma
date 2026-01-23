@@ -141,6 +141,7 @@ model entity {
   display_name                  String        @db.NVarChar(255)
   order                         Int           @default(0, map: "df_entity_order") @db.SmallInt
   title_field_name              String        @db.NVarChar(255)
+  has_location                  Boolean       @default(false, map: "df_entity_has_location")
   created_at                    DateTime      @default(dbgenerated("getutcdate()"), map: "df_entity_created_at")
   created_by                    String        @db.UniqueIdentifier
   modified_at                   DateTime      @default(dbgenerated("getutcdate()"), map: "df_entity_modified_at")
