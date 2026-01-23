@@ -76,7 +76,7 @@ export const getRecordList = async (
 	const select = SelectClauseSchema.parse(selectFields)
 	// ロケーション検索の場合、距離情報を追加で取得
 	const selectClause = distanceQuery
-		? `${select}, [location].[Lat] AS _latitude, [location].[Long] AS _longitude, ${distanceQuery} AS distance`
+		? `${select}, ${distanceQuery} AS distance`
 		: select
 
 	// 数式が必要な場合のみビューを参照
@@ -148,7 +148,7 @@ export const getRecordList = async (
 	// 余分に取得したレコードを除外
 	const records = limit ? fetchDataResult.slice(0, limit) : fetchDataResult
 
-	const data = await covertRecords(records, fields, entityItemMap, !!location)
+	const data = await covertRecords(records, fields, entityItemMap)
 	const hasNextPage = limit ? fetchDataResult.length > limit : false
 	const totalSize = totalSizeResult.at(0)?.count ?? 0
 
@@ -205,7 +205,6 @@ const covertRecords = async (
 	records: DBRecord[],
 	queryFields: string[],
 	entityItemMap: Map<string, Field>,
-	needLocation: boolean,
 ) => {
 	const referenceRecords = await getReferenceRecords(records, entityItemMap)
 
@@ -268,17 +267,6 @@ const covertRecords = async (
 
 			const jsonValue = value instanceof Date ? value.toISOString() : value
 			data = { ...data, [field]: jsonValue ?? null }
-		}
-
-		// locationパラメータが指定されている場合、位置情報を示すローケーションフィールドを付与
-		if (needLocation) {
-			data = {
-				...data,
-				_location: {
-					latitude: row._latitude as number | null,
-					longitude: row._longitude as number | null,
-				},
-			}
 		}
 
 		return data
