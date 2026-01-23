@@ -89,7 +89,6 @@ export async function seedActivities(
 			status: getRandomBoolean(0.9)
 				? JSON.stringify([getAnyOption("status").name])
 				: null,
-			location: `${account.address_prefecture ?? ""}${account.address_municipality ?? ""}${account.address_street ?? ""}`,
 			required_attendees: null,
 			optional_attendees: null,
 			organizer: null,
@@ -110,4 +109,94 @@ export async function seedActivities(
 	console.info(`>> activity records created: ${records.count}`)
 
 	return records
+}
+
+async function findLatLng(
+	prisma: Prisma.TransactionClient,
+	target: { entity_name: string; id: string },
+) {
+	if (["account", "lead"].includes(target.entity_name)) {
+		const query = `SELECT [location].[Lat] as latitude, [location].[Long] as longitude
+			FROM [${target.entity_name}]
+			WHERE [id] = '${target.id}'`
+
+		const result =
+			await prisma.$queryRawUnsafe<{ latitude: number; longitude: number }[]>(
+				query,
+			)
+		if (result.length > 0) {
+			return result[0]
+		}
+	}
+	return { latitude: null, longitude: null }
+}
+
+export async function seedActivitiesTimeAndLatLong(
+	prisma: Prisma.TransactionClient,
+) {
+	const activities = await prisma.activity.findMany()
+	const now = date()
+
+	const result = await Promise.all(
+		activities
+			.map(async (activity) => {
+				// 過去の活動を9割の確率で実績日時と緯度経度を設定
+				if (
+					activity.start_date_time &&
+					activity.start_date_time <= now &&
+					activity.end_date_time &&
+					activity.end_date_time <= now &&
+					getRandomBoolean(0.9)
+				) {
+					const actual_start_date_time = getRandomDate(
+						addMinute(activity.start_date_time, -30),
+						addMinute(activity.start_date_time, 30),
+					)
+					const actual_end_date_time = getRandomDate(
+						addMinute(activity.end_date_time, -30),
+						addMinute(activity.end_date_time, 30),
+					)
+					const { latitude, longitude } = await findLatLng(
+						prisma,
+						JSON.parse(activity.target ?? "{}"),
+					)
+
+					const start_latitude = latitude
+						? latitude + getRandomInteger(-1000, 1000) * 0.000001
+						: null
+					const start_longitude = longitude
+						? longitude + getRandomInteger(-1000, 1000) * 0.000001
+						: null
+					const finish_latitude = latitude
+						? latitude + getRandomInteger(-1000, 1000) * 0.000001
+						: null
+					const finish_longitude = longitude
+						? longitude + getRandomInteger(-1000, 1000) * 0.000001
+						: null
+					const working_latitude = latitude
+						? latitude + getRandomInteger(-1000, 1000) * 0.000001
+						: null
+					const working_longitude = longitude
+						? longitude + getRandomInteger(-1000, 1000) * 0.000001
+						: null
+
+					return prisma.activity.update({
+						where: { id: activity.id },
+						data: {
+							actual_start_date_time,
+							actual_end_date_time,
+							start_latitude,
+							start_longitude,
+							finish_latitude,
+							finish_longitude,
+							working_latitude,
+							working_longitude,
+						},
+					})
+				}
+				return null
+			})
+			.filter((result) => result !== null),
+	)
+	console.info(`>> activity records updated: ${result.length}`)
 }

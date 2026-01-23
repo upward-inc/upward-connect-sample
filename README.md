@@ -1,6 +1,36 @@
-# multi-platform-sample
+# upward-connect-internal
 
-このリポジトリは、UPWARDが標準対応しないCRMを使用するお客様が、UPWARDのアプリケーションと接続するために構築するAPIのサンプルです。
+このリポジトリは、UPWARD CONNECTの仕様に準拠した社内用の開発資産です。  
+以下の役割を担っています。
+- 顧客提供用サンプルコードリポジトリ（[upward-connect-sample](https://github.com/upward-inc/upward-connect-sample)）のベース資産
+- 社内展開用のUPWARD CONNECT環境の実コード
+
+以下の技術スタックを用いて実装されています。
+
+### 共通
+
+- [Bun](https://bun.sh/) - JavaScript/TypeScript ランタイム / パッケージマネージャー
+- [TypeScript](https://www.typescriptlang.org/) - 型付き JavaScript
+- [Vitest](https://vitest.dev/) - テストフレームワーク
+- [Biome](https://biomejs.dev/) - Linter / Formatter
+
+### バックエンド
+
+- [Hono](https://hono.dev/) - Web フレームワーク
+- [Prisma](https://www.prisma.io/) - ORM
+- [Zod](https://zod.dev/) - バリデーション
+
+### フロントエンド
+
+- [React](https://react.dev/) - UI ライブラリ
+- [Vite](https://vite.dev/) - ビルドツール
+- [TanStack Router](https://tanstack.com/router) - ルーティング
+- [Tailwind CSS](https://tailwindcss.com/) - CSS フレームワーク
+
+### データベース
+
+- SQL Server (Docker)
+
 
 ## セットアップ
 
@@ -9,15 +39,17 @@
    1. `bun install`
 3. 環境変数ファイルの作成
    1. `apps/backend/.env`（`apps/backend/.env.template`をコピー）
-4. ローカルデータベース（Docker）の起動
+   2. `apps/frontend/.env`（`apps/frontend/.env.template`をコピー）
+4. （必要に応じて）環境変数ファイル内の値を調整
+5. ローカルデータベース（Docker）の起動
    1. `bun db#up`
-5. マイグレーションの実行（テーブルの作成）
+6. マイグレーションの実行（テーブルの作成）
    1. `bun db#migrate`
-6. ビューの作成
+7. ビューの作成
    1. `apps/backend/prisma/views/dbo`配下のビュー作成スクリプトを手動で実行
-7. Prismaクライアントの最新化
+8. Prismaクライアントの最新化
    1. `bun prisma#generate`
-8. サンプルデータの投入
+9. サンプルデータの投入
    1. `bun db#seed`
 
 ## コマンド
