@@ -28,7 +28,7 @@ export async function seedEntities(
 			name: "activity",
 			display_name: "活動",
 			title_field_name: "subject",
-			has_location: true,
+			has_location: false,
 		},
 		{
 			name: "phone_call",
