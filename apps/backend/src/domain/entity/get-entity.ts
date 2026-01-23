@@ -1,5 +1,5 @@
 import { prisma } from "../../libs/prisma"
-import { type Entity, EntitySchema } from "../../schema/entity"
+import { type Entity, EntitySchema, EntityTypeEnum } from "../../schema/entity"
 
 export const getEntity = async (
 	name: Entity["name"],
@@ -11,9 +11,33 @@ export const getEntity = async (
 		.then((result) => {
 			return result
 				? {
-						...result,
-						// このサンプルにおいては、すべてのエンティティのIDフィールド名は`id`として統一する
-						id_field_name: "id",
+						name: result.name,
+						type: EntityTypeEnum.includes(
+							result.name as (typeof EntityTypeEnum)[number],
+						)
+							? (result.name as (typeof EntityTypeEnum)[number])
+							: null,
+						display_name: result.display_name,
+						has_location: result.has_location,
+						item_mapping: {
+							// このサンプルにおいては、すべてのエンティティのIDフィールド名は`id`として統一する
+							id: "id",
+							title: result.title_field_name,
+							// このサンプルにおいては、user以外すべてのエンティティの所有者フィールド名は`owner`として統一する
+							owner: result.name !== "user" ? "owner" : null,
+							// このサンプルにおいては、すべてのエンティティの作成日時フィールド名は`created_at`として統一する
+							created_at: "created_at",
+							// このサンプルにおいては、user以外すべてのエンティティの作成者フィールド名は`created_by`として統一する
+							created_by: result.name !== "user" ? "created_by" : null,
+							// このサンプルにおいては、すべてのエンティティの最終更新日時フィールド名は`updated_at`として統一する
+							updated_at: "updated_at",
+							// このサンプルにおいては、user以外すべてのエンティティの最終更新者フィールド名は`updated_by`として統一する
+							updated_by: result.name !== "user" ? "updated_by" : null,
+							// このサンプルにおいては、locationフィールドが存在するエンティティの緯度フィールド名は`latitude`として統一する
+							latitude: result.has_location ? "latitude" : null,
+							// このサンプルにおいては、locationフィールドが存在するエンティティの経度フィールド名は`longitude`として統一する
+							longitude: result.has_location ? "longitude" : null,
+						},
 					}
 				: null
 		})

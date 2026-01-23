@@ -1,0 +1,19 @@
+BEGIN TRY
+
+BEGIN TRAN;
+
+-- activityテーブルからlocationカラムを削除
+ALTER TABLE [activity] DROP COLUMN [location];
+
+COMMIT TRAN;
+
+END TRY
+BEGIN CATCH
+
+IF @@TRANCOUNT > 0
+BEGIN
+  ROLLBACK TRAN;
+END;
+THROW
+
+END CATCH

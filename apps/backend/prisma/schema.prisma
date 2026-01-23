@@ -45,7 +45,6 @@ model activity {
   actual_start_date_time DateTime? @db.DateTime
   actual_end_date_time   DateTime? @db.DateTime
   status                 String?   @db.NVarChar(Max)
-  location               String?   @db.NVarChar(256)
   required_attendees     String?   @db.NVarChar(Max)
   optional_attendees     String?   @db.NVarChar(Max)
   organizer              String?   @db.NVarChar(Max)
@@ -141,6 +140,7 @@ model entity {
   display_name                  String        @db.NVarChar(255)
   order                         Int           @default(0, map: "df_entity_order") @db.SmallInt
   title_field_name              String        @db.NVarChar(255)
+  has_location                  Boolean       @default(false, map: "df_entity_has_location")
   created_at                    DateTime      @default(dbgenerated("getutcdate()"), map: "df_entity_created_at")
   created_by                    String        @db.UniqueIdentifier
   modified_at                   DateTime      @default(dbgenerated("getutcdate()"), map: "df_entity_modified_at")
@@ -528,27 +528,34 @@ view lead_view {
 }
 
 view activity_view {
-  id                  String    @unique @db.UniqueIdentifier
-  subject             String?   @db.NVarChar(256)
-  target              String?   @db.NVarChar(256)
-  start_date_time     DateTime? @db.DateTime
-  end_date_time       DateTime? @db.DateTime
-  is_all_day_event    Boolean
-  status              String?   @db.NVarChar(Max)
-  location            String?   @db.NVarChar(256)
-  required_attendees  String?   @db.NVarChar(Max)
-  optional_attendees  String?   @db.NVarChar(Max)
-  organizer           String?   @db.NVarChar(Max)
-  meeting_url         String?   @db.NVarChar(Max)
-  description         String?   @db.NVarChar(Max)
-  is_archived         Boolean
-  is_deleted          Boolean
-  owner               String    @db.NVarChar(Max)
-  created_at          DateTime
-  created_by          String    @db.NVarChar(Max)
-  modified_at         DateTime
-  modified_by         String    @db.NVarChar(Max)
-  duration_in_minutes Int?
+  id                     String    @unique @db.UniqueIdentifier
+  subject                String?   @db.NVarChar(256)
+  target                 String?   @db.NVarChar(256)
+  start_date_time        DateTime? @db.DateTime
+  end_date_time          DateTime? @db.DateTime
+  is_all_day_event       Boolean
+  actual_start_date_time DateTime? @db.DateTime
+  actual_end_date_time   DateTime? @db.DateTime
+  status                 String?   @db.NVarChar(Max)
+  required_attendees     String?   @db.NVarChar(Max)
+  optional_attendees     String?   @db.NVarChar(Max)
+  organizer              String?   @db.NVarChar(Max)
+  meeting_url            String?   @db.NVarChar(Max)
+  description            String?   @db.NVarChar(Max)
+  start_latitude         Decimal?  @db.Decimal(18, 15)
+  start_longitude        Decimal?  @db.Decimal(18, 15)
+  finish_latitude        Decimal?  @db.Decimal(18, 15)
+  finish_longitude       Decimal?  @db.Decimal(18, 15)
+  working_latitude       Decimal?  @db.Decimal(18, 15)
+  working_longitude      Decimal?  @db.Decimal(18, 15)
+  is_archived            Boolean
+  is_deleted             Boolean
+  owner                  String    @db.NVarChar(Max)
+  created_at             DateTime
+  created_by             String    @db.NVarChar(Max)
+  modified_at            DateTime
+  modified_by            String    @db.NVarChar(Max)
+  duration_in_minutes    Int?
 }
 
 view phone_call_view {

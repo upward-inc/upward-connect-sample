@@ -1,6 +1,5 @@
 import { addMinute, addYear, date, format } from "@formkit/tempo"
 import type { Prisma, user } from "@prisma/client"
-import { addresses } from "./static/address"
 import {
 	getAnyRow,
 	getRandomBoolean,
@@ -90,7 +89,6 @@ export async function seedActivities(
 			status: getRandomBoolean(0.9)
 				? JSON.stringify([getAnyOption("status").name])
 				: null,
-			location: `${account.address_prefecture ?? ""}${account.address_municipality ?? ""}${account.address_street ?? ""}`,
 			required_attendees: null,
 			optional_attendees: null,
 			organizer: null,
@@ -113,22 +111,35 @@ export async function seedActivities(
 	return records
 }
 
+async function findLatLng(
+	prisma: Prisma.TransactionClient,
+	target: { entity_name: string; id: string },
+) {
+	if (["account", "lead"].includes(target.entity_name)) {
+		const query = `SELECT [location].[Lat] as latitude, [location].[Long] as longitude
+			FROM [${target.entity_name}]
+			WHERE [id] = '${target.id}'`
+
+		const result =
+			await prisma.$queryRawUnsafe<{ latitude: number; longitude: number }[]>(
+				query,
+			)
+		if (result.length > 0) {
+			return result[0]
+		}
+	}
+	return { latitude: null, longitude: null }
+}
+
 export async function seedActivitiesTimeAndLatLong(
 	prisma: Prisma.TransactionClient,
 ) {
 	const activities = await prisma.activity.findMany()
-	const addressMap = addresses.reduce((map, address) => {
-		map.set(
-			`${address.prefecture}${address.municipality}${address.street}`,
-			address,
-		)
-		return map
-	}, new Map<string, (typeof addresses)[0]>())
 	const now = date()
 
 	const result = await Promise.all(
 		activities
-			.map((activity) => {
+			.map(async (activity) => {
 				// 過去の活動を9割の確率で実績日時と緯度経度を設定
 				if (
 					activity.start_date_time &&
@@ -145,25 +156,28 @@ export async function seedActivitiesTimeAndLatLong(
 						addMinute(activity.end_date_time, -30),
 						addMinute(activity.end_date_time, 30),
 					)
-					const address = addressMap.get(activity.location ?? "")
+					const { latitude, longitude } = await findLatLng(
+						prisma,
+						JSON.parse(activity.target ?? "{}"),
+					)
 
-					const start_latitude = address
-						? address.latitude + getRandomInteger(-1000, 1000) * 0.000001
+					const start_latitude = latitude
+						? latitude + getRandomInteger(-1000, 1000) * 0.000001
 						: null
-					const start_longitude = address
-						? address.longitude + getRandomInteger(-1000, 1000) * 0.000001
+					const start_longitude = longitude
+						? longitude + getRandomInteger(-1000, 1000) * 0.000001
 						: null
-					const finish_latitude = address
-						? address.latitude + getRandomInteger(-1000, 1000) * 0.000001
+					const finish_latitude = latitude
+						? latitude + getRandomInteger(-1000, 1000) * 0.000001
 						: null
-					const finish_longitude = address
-						? address.longitude + getRandomInteger(-1000, 1000) * 0.000001
+					const finish_longitude = longitude
+						? longitude + getRandomInteger(-1000, 1000) * 0.000001
 						: null
-					const working_latitude = address
-						? address.latitude + getRandomInteger(-1000, 1000) * 0.000001
+					const working_latitude = latitude
+						? latitude + getRandomInteger(-1000, 1000) * 0.000001
 						: null
-					const working_longitude = address
-						? address.longitude + getRandomInteger(-1000, 1000) * 0.000001
+					const working_longitude = longitude
+						? longitude + getRandomInteger(-1000, 1000) * 0.000001
 						: null
 
 					return prisma.activity.update({
