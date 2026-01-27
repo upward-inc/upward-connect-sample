@@ -9,6 +9,7 @@ import { seedCampaigns } from "./campaign"
 import { seedCases } from "./case"
 import { seedContacts } from "./contact"
 import { seedEntities } from "./entity"
+import { seedFiles } from "./file"
 import { seedEntityItems } from "./entity-item"
 import { seedEntityItemOptions } from "./entity-item-option"
 import { seedJwkPrivateKeys } from "./jwk-private-key"
@@ -45,6 +46,7 @@ try {
 			await txClient.entity_item.deleteMany()
 			await txClient.entity.deleteMany()
 			await txClient.user_access_control.deleteMany()
+			await txClient.file.deleteMany()
 			await txClient.role.deleteMany()
 			await txClient.profile.deleteMany()
 			await txClient.user.deleteMany()
@@ -63,6 +65,9 @@ try {
 			if (!adminUser) {
 				throw new Error("admin user not found")
 			}
+
+			// ファイル
+			await seedFiles(txClient, users)
 
 			// プロファイル
 			await seedProfiles(txClient, adminUser.id)
