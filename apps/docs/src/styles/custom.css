@@ -2,9 +2,8 @@
   /* 収まらない場合に折り返す */
   overflow-wrap: anywhere;
 
-  /* 折り返し設定（長い英単語でのレイアウト突き抜け防止） */
-  overflow: anywhere;
-  word-break: normal;
+  /* 単語の分割はデフォルトを使用 */
+  word-break: initial;
 
   /* 禁則処理を厳格に適用 */
   line-break: strict;
