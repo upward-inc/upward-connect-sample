@@ -1,4 +1,4 @@
-name: call frontend close pull request
+name: call static web close pull request
 
 on:
   workflow_call:

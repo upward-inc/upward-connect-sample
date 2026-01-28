@@ -1,4 +1,4 @@
-name: call frontend test
+name: call static web test
 
 on:
   workflow_call:

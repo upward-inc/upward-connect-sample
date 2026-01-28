@@ -1,4 +1,4 @@
-name: call frontend deploy
+name: call static web deploy
 
 on:
   workflow_call:

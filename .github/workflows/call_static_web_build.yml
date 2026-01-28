@@ -1,4 +1,4 @@
-name: call frontend build
+name: call static web build
 
 on:
   workflow_call:

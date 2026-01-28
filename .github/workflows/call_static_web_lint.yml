@@ -1,4 +1,4 @@
-name: call frontend lint
+name: call static web lint
 
 on:
   workflow_call:
