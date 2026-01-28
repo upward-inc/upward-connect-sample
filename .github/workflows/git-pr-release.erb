@@ -1,4 +1,4 @@
 <%= ENV['PR_TITLE'] %>
 <% pull_requests.sort_by { |pr| pr.merged_at || '' }.reverse.each do |pr| -%>
-<%= pr.to_checklist_item %>
+- #<%= pr.number %> @<%= pr.user.login %>
 <% end -%>
