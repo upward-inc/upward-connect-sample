@@ -29,10 +29,10 @@ export const getEntity = async (
 							created_at: "created_at",
 							// このサンプルにおいては、user以外すべてのエンティティの作成者フィールド名は`created_by`として統一する
 							created_by: result.name !== "user" ? "created_by" : null,
-							// このサンプルにおいては、すべてのエンティティの最終更新日時フィールド名は`updated_at`として統一する
-							updated_at: "updated_at",
-							// このサンプルにおいては、user以外すべてのエンティティの最終更新者フィールド名は`updated_by`として統一する
-							updated_by: result.name !== "user" ? "updated_by" : null,
+							// このサンプルにおいては、すべてのエンティティの最終更新日時フィールド名は`modified_at`として統一する
+							modified_at: "modified_at",
+							// このサンプルにおいては、user以外すべてのエンティティの最終更新者フィールド名は`modified_by`として統一する
+							modified_by: result.name !== "user" ? "modified_by" : null,
 							// このサンプルにおいては、locationフィールドが存在するエンティティの緯度フィールド名は`latitude`として統一する
 							latitude: result.has_location ? "latitude" : null,
 							// このサンプルにおいては、locationフィールドが存在するエンティティの経度フィールド名は`longitude`として統一する
