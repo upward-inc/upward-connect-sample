@@ -4,7 +4,7 @@ on:
   workflow_call:
     inputs:
       target:
-        description: '対象プロダクト'
+        description: '対象アプリ'
         required: true
         type: string
 
