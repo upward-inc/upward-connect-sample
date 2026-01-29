@@ -1,4 +1,4 @@
-name: call static web test
+name: call frontend lint
 
 on:
   workflow_call:
@@ -7,9 +7,10 @@ on:
         description: '対象アプリ'
         required: true
         type: string
+
 jobs:
-  test:
-    name: Test
+  lint:
+    name: Lint
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -32,6 +33,6 @@ jobs:
         working-directory: ./apps/${{ inputs.target }}
         run: bun install --frozen-lockfile
 
-      - name: Test
+      - name: Lint
         working-directory: ./apps/${{ inputs.target }}
-        run: bun run test
+        run: bun run lint

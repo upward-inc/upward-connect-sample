@@ -1,22 +1,16 @@
-name: call static web build
+name: call frontend test
 
 on:
   workflow_call:
     inputs:
-      environment:
-        description: '環境名'
-        required: true
-        type: string
       target:
         description: '対象アプリ'
         required: true
         type: string
-
 jobs:
-  build:
-    name: Build
+  test:
+    name: Test
     runs-on: ubuntu-latest
-    environment: ${{ inputs.environment }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -38,19 +32,6 @@ jobs:
         working-directory: ./apps/${{ inputs.target }}
         run: bun install --frozen-lockfile
 
-      - name: Build
+      - name: Test
         working-directory: ./apps/${{ inputs.target }}
-        env:
-          VARS_JSON: ${{ toJSON(vars) }}
-        run: |
-          echo "$VARS_JSON" | jq -r 'to_entries[] | "\(.key)=\(.value)"' > .env
-          bun run build
-          rm -f .env
-          cp ../../staticwebapp.config.json ./dist
-
-      - name: Upload Publish Files
-        uses: actions/upload-artifact@v4
-        with:
-          name: publish-files
-          path: ./apps/${{ inputs.target }}/dist
-          retention-days: 1
+        run: bun run test

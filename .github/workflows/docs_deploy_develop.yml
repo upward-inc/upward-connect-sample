@@ -8,7 +8,7 @@ on:
     paths:
       - 'apps/docs/**'
       - '.github/workflows/docs_deploy_develop.yml'
-      - '.github/workflows/call_static_web_*.yml'
+      - '.github/workflows/call_frontend_*.yml'
 
   # developブランチへのPR操作時（closed含む：プレビュー環境削除のため）
   pull_request:
@@ -18,7 +18,7 @@ on:
     paths:
       - 'apps/docs/**'
       - '.github/workflows/docs_deploy_develop.yml'
-      - '.github/workflows/call_static_web_*.yml'
+      - '.github/workflows/call_frontend_*.yml'
 
   # 手動トリガー
   workflow_dispatch:
@@ -34,7 +34,7 @@ jobs:
   # コード品質チェック
   lint:
     if: github.event.action != 'closed'
-    uses: ./.github/workflows/call_static_web_lint.yml
+    uses: ./.github/workflows/call_frontend_lint.yml
     with:
       target: 'docs'
 
@@ -42,7 +42,7 @@ jobs:
   build:
     if: github.event.action != 'closed'
     needs: [lint]
-    uses: ./.github/workflows/call_static_web_build.yml
+    uses: ./.github/workflows/call_frontend_build.yml
     with:
       environment: 'develop'
       target: 'docs'
@@ -51,7 +51,7 @@ jobs:
   deploy:
     if: github.event_name != 'pull_request'
     needs: build
-    uses: ./.github/workflows/call_static_web_deploy.yml
+    uses: ./.github/workflows/call_frontend_deploy.yml
     with:
       environment: 'develop'
     secrets:
@@ -60,7 +60,7 @@ jobs:
   # プレビュー環境の削除
   close_pull_request:
     if: github.event_name == 'pull_request' && github.event.action == 'closed'
-    uses: ./.github/workflows/call_static_web_close_pull_request.yml
+    uses: ./.github/workflows/call_frontend_close_pull_request.yml
     with:
       environment: 'develop'
     secrets:
