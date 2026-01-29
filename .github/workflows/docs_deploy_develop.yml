@@ -1,23 +1,23 @@
-name: frontend deploy - staging
+name: docs deploy - develop
 
 on:
-  # stagingブランチへのPush時（PRマージ時）
+  # developブランチへのPush時（PRマージ時）
   push:
     branches:
-      - staging
+      - develop
     paths:
-      - 'apps/frontend/**'
-      - '.github/workflows/frontend_deploy_staging.yml'
+      - 'apps/docs/**'
+      - '.github/workflows/docs_deploy_develop.yml'
       - '.github/workflows/call_frontend_*.yml'
 
-  # stagingブランチへのPR操作時（closed含む：プレビュー環境削除のため）
+  # developブランチへのPR操作時（closed含む：プレビュー環境削除のため）
   pull_request:
     types: [opened, synchronize, reopened, closed]
     branches:
-      - staging
+      - develop
     paths:
-      - 'apps/frontend/**'
-      - '.github/workflows/frontend_deploy_staging.yml'
+      - 'apps/docs/**'
+      - '.github/workflows/docs_deploy_develop.yml'
       - '.github/workflows/call_frontend_*.yml'
 
   # 手動トリガー
@@ -27,7 +27,7 @@ on:
 # - PR操作時: 古い実行をキャンセルして最新のみ実行
 # - Push時: キャンセルせず順番に実行（デプロイの安全性確保）
 concurrency:
-  group: frontend-deploy-staging-${{ github.ref }}
+  group: docs-deploy-develop-${{ github.ref }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
@@ -36,23 +36,16 @@ jobs:
     if: github.event.action != 'closed'
     uses: ./.github/workflows/call_frontend_lint.yml
     with:
-      target: 'frontend'
-
-  # ユニットテスト実行
-  test:
-    if: github.event.action != 'closed'
-    uses: ./.github/workflows/call_frontend_test.yml
-    with:
-      target: 'frontend'
+      target: 'docs'
 
   # フロントエンドのビルド
   build:
     if: github.event.action != 'closed'
-    needs: [lint, test]
+    needs: [lint]
     uses: ./.github/workflows/call_frontend_build.yml
     with:
-      environment: 'staging'
-      target: 'frontend'
+      environment: 'develop'
+      target: 'docs'
 
   # Azure Static Web Appsへのデプロイ
   deploy:
@@ -60,15 +53,15 @@ jobs:
     needs: build
     uses: ./.github/workflows/call_frontend_deploy.yml
     with:
-      environment: 'staging'
+      environment: 'develop'
     secrets:
-      AZURE_STATIC_WEB_APPS_DEPLOY_TOKEN: ${{ secrets.AZURE_STATIC_WEB_APPS_DEPLOY_TOKEN }}
+      AZURE_STATIC_WEB_APPS_DEPLOY_TOKEN: ${{ secrets.DOCS_AZURE_STATIC_WEB_APPS_DEPLOY_TOKEN }}
 
   # プレビュー環境の削除
   close_pull_request:
     if: github.event_name == 'pull_request' && github.event.action == 'closed'
     uses: ./.github/workflows/call_frontend_close_pull_request.yml
     with:
-      environment: 'staging'
+      environment: 'develop'
     secrets:
-      AZURE_STATIC_WEB_APPS_DEPLOY_TOKEN: ${{ secrets.AZURE_STATIC_WEB_APPS_DEPLOY_TOKEN }}
+      AZURE_STATIC_WEB_APPS_DEPLOY_TOKEN: ${{ secrets.DOCS_AZURE_STATIC_WEB_APPS_DEPLOY_TOKEN }}

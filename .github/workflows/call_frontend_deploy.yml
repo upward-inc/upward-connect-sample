@@ -7,6 +7,10 @@ on:
         description: '環境名'
         required: true
         type: string
+    secrets:
+      AZURE_STATIC_WEB_APPS_DEPLOY_TOKEN:
+        description: 'Azure Static Web Apps デプロイ用トークン'
+        required: true
 
 jobs:
   deploy:
