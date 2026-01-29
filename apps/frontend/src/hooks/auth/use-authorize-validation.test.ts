@@ -96,7 +96,7 @@ describe("useAuthorizeValidation", () => {
 			)
 
 			// Assert
-			await waitFor(() => expect(result.current.isValidating).toBe(true))
+			await waitFor(() => expect(result.current.isValidating).toBe(false))
 			expect(redirectFail).toHaveBeenCalledWith(
 				"https://client.test.local/callback",
 				{ error: "invalid_request", state: undefined },
@@ -140,7 +140,7 @@ describe("useAuthorizeValidation", () => {
 				)
 
 				// Assert
-				await waitFor(() => expect(result.current.isValidating).toBe(true))
+				await waitFor(() => expect(result.current.isValidating).toBe(false))
 				expect(redirectFail).toHaveBeenCalledWith(
 					"https://client.test.local/callback",
 					{ error: "unsupported_response_type", state: "valid_state" },
@@ -181,7 +181,7 @@ describe("useAuthorizeValidation", () => {
 				)
 
 				// Assert
-				await waitFor(() => expect(result.current.isValidating).toBe(true))
+				await waitFor(() => expect(result.current.isValidating).toBe(false))
 				expect(redirectFail).toHaveBeenCalledWith(
 					"https://client.test.local/callback",
 					{ error: "unauthorized_client", state: "valid_state" },
@@ -224,7 +224,7 @@ describe("useAuthorizeValidation", () => {
 			)
 
 			// Assert
-			await waitFor(() => expect(result.current.isValidating).toBe(true))
+			await waitFor(() => expect(result.current.isValidating).toBe(false))
 			expect(redirectFail).toHaveBeenCalledWith(
 				"https://client.test.local/callback",
 				{ error: "invalid_scope", state: "valid_state" },
@@ -262,7 +262,7 @@ describe("useAuthorizeValidation", () => {
 			)
 
 			// Assert
-			await waitFor(() => expect(result.current.isValidating).toBe(true))
+			await waitFor(() => expect(result.current.isValidating).toBe(false))
 			expect(redirectFail).toHaveBeenCalledWith(
 				"https://client.test.local/callback",
 				{ error: "invalid_request", state: "valid_state" },
@@ -310,7 +310,7 @@ describe("useAuthorizeValidation", () => {
 				)
 
 				// Assert
-				await waitFor(() => expect(result.current.isValidating).toBe(true))
+				await waitFor(() => expect(result.current.isValidating).toBe(false))
 				expect(redirectFail).toHaveBeenCalledWith(
 					"https://client.test.local/callback",
 					{ error: "invalid_request", state: "valid_state" },
@@ -355,7 +355,7 @@ describe("useAuthorizeValidation", () => {
 				)
 
 				// Assert
-				await waitFor(() => expect(result.current.isValidating).toBe(true))
+				await waitFor(() => expect(result.current.isValidating).toBe(false))
 				expect(redirectFail).toHaveBeenCalledWith(
 					"https://client.test.local/callback",
 					{ error: "invalid_request", state: "valid_state" },

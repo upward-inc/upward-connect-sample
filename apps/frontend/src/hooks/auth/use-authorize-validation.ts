@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { useCallback, useEffect, useState } from "react"
 import type { z } from "zod"
 import {
 	AuthorizeParamsRedirectUriSchema,
@@ -26,6 +26,14 @@ export function useAuthorizeValidation(
 ) {
 	const [isValidating, setIsValidating] = useState(true)
 
+	const setIsValidatingFalseBeforeRedirect = useCallback(
+		(url: string, result: AuthorizeResultFailure) => {
+			setIsValidating(false)
+			redirectFail(url, result)
+		},
+		[redirectFail],
+	)
+
 	// パラメータの検証（サーバーサイドでの検証前の最低限の検証）
 	useEffect(() => {
 		// `redirect_uri`の検証
@@ -43,7 +51,10 @@ export function useAuthorizeValidation(
 			searchParams.state,
 		)
 		if (!stateSuccess) {
-			redirectFail(redirectUri, { error: "invalid_request", state })
+			setIsValidatingFalseBeforeRedirect(redirectUri, {
+				error: "invalid_request",
+				state,
+			})
 			return
 		}
 
@@ -52,7 +63,10 @@ export function useAuthorizeValidation(
 			searchParams.response_type,
 		)
 		if (!responseTypeSuccess) {
-			redirectFail(redirectUri, { error: "unsupported_response_type", state })
+			setIsValidatingFalseBeforeRedirect(redirectUri, {
+				error: "unsupported_response_type",
+				state,
+			})
 			return
 		}
 
@@ -61,21 +75,30 @@ export function useAuthorizeValidation(
 			searchParams.client_id,
 		)
 		if (!clientIdSuccess) {
-			redirectFail(redirectUri, { error: "unauthorized_client", state })
+			setIsValidatingFalseBeforeRedirect(redirectUri, {
+				error: "unauthorized_client",
+				state,
+			})
 			return
 		}
 
 		// `scope`の検証
 		const { success: scopeSuccess } = ScopeSchema.safeParse(searchParams.scope)
 		if (!scopeSuccess) {
-			redirectFail(redirectUri, { error: "invalid_scope", state })
+			setIsValidatingFalseBeforeRedirect(redirectUri, {
+				error: "invalid_scope",
+				state,
+			})
 			return
 		}
 
 		// `nonce`の検証
 		const { success: nonceSuccess } = NonceSchema.safeParse(searchParams.nonce)
 		if (!nonceSuccess) {
-			redirectFail(redirectUri, { error: "invalid_request", state })
+			setIsValidatingFalseBeforeRedirect(redirectUri, {
+				error: "invalid_request",
+				state,
+			})
 			return
 		}
 
@@ -84,7 +107,10 @@ export function useAuthorizeValidation(
 			searchParams.code_challenge,
 		)
 		if (!codeChallengeSuccess) {
-			redirectFail(redirectUri, { error: "invalid_request", state })
+			setIsValidatingFalseBeforeRedirect(redirectUri, {
+				error: "invalid_request",
+				state,
+			})
 			return
 		}
 
@@ -92,12 +118,15 @@ export function useAuthorizeValidation(
 		const { success: codeChallengeMethodSuccess } =
 			CodeChallengeMethodSchema.safeParse(searchParams.code_challenge_method)
 		if (!codeChallengeMethodSuccess) {
-			redirectFail(redirectUri, { error: "invalid_request", state })
+			setIsValidatingFalseBeforeRedirect(redirectUri, {
+				error: "invalid_request",
+				state,
+			})
 			return
 		}
 
 		setIsValidating(false)
-	}, [searchParams, redirectFail])
+	}, [searchParams, setIsValidatingFalseBeforeRedirect])
 
 	return { isValidating }
 }
