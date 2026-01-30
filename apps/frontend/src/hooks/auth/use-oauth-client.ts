@@ -13,6 +13,9 @@ export function useOAuthClient(
 	const [isFetching, setIsFetching] = useState(true)
 
 	useEffect(() => {
+		// クリーンアップ用のフラグ
+		let isCancelled = false
+
 		if (!isValidating && clientId) {
 			const fetchClientInfo = async () => {
 				try {
@@ -27,17 +30,23 @@ export function useOAuthClient(
 
 					const client = await response.json()
 
-					if (response.ok && client.name) {
+					if (!isCancelled && response.ok && client.name) {
 						setClientName(client.name)
 					}
 				} finally {
-					setIsFetching(false)
+					if (!isCancelled) {
+						setIsFetching(false)
+					}
 				}
 			}
 
 			fetchClientInfo()
 		} else if (!isValidating) {
 			setIsFetching(false)
+		}
+
+		return () => {
+			isCancelled = true
 		}
 	}, [isValidating, clientId])
 
