@@ -11,9 +11,9 @@ vi.mock("../../env", () => ({
 }))
 
 describe("useOAuthClient", () => {
-	beforeEach(() => {
+	beforeEach(async () => {
 		setRequestHandlers(
-			createClientHandler(API_URL, 200, { name: "Sample App" }),
+			await createClientHandler(API_URL, 200, { name: "Sample App" }),
 		)
 	})
 
@@ -38,7 +38,7 @@ describe("useOAuthClient", () => {
 		// Arrange
 		const clientId = "invalid_client_id"
 		setRequestHandlers(
-			createClientHandler(API_URL, 404, { error: "Client not found" }),
+			await createClientHandler(API_URL, 404, { error: "Client not found" }),
 		)
 
 		// Act
@@ -58,7 +58,7 @@ describe("useOAuthClient", () => {
 		// Arrange
 		const clientId = "valid_client_id"
 		setRequestHandlers(
-			createClientHandler(API_URL, 401, { error: "Unauthorized" }),
+			await createClientHandler(API_URL, 401, { error: "Unauthorized" }),
 		)
 
 		// Act
@@ -83,5 +83,80 @@ describe("useOAuthClient", () => {
 
 		// Assert
 		expect(result.current).toEqual({ isFetching: true })
+	})
+
+	it("フェッチ中にclientIdが変更された場合、最新のclientIdの結果が表示されること", async () => {
+		// Arrange
+		const firstClientId = "client_1"
+		const secondClientId = "client_2"
+
+		// 最初のリクエストに遅延を追加
+		setRequestHandlers(
+			await createClientHandler(
+				API_URL,
+				200,
+				{ name: "First Client" },
+				firstClientId,
+				100,
+			),
+			await createClientHandler(
+				API_URL,
+				200,
+				{ name: "Second Client" },
+				secondClientId,
+			),
+		)
+
+		// Act
+		const { result, rerender } = renderHook(
+			({ clientId }) => useOAuthClient(false, clientId),
+			{ initialProps: { clientId: firstClientId } },
+		)
+
+		// 最初のフェッチが完了する前に clientId を変更
+		rerender({ clientId: secondClientId })
+
+		// Assert
+		// 最新の clientId（secondClientId）の結果が表示されることを確認
+		await waitFor(() =>
+			expect(result.current).toEqual({
+				isSuccess: true,
+				name: "Second Client",
+				isFetching: false,
+			}),
+		)
+	})
+
+	it("フェッチ中にコンポーネントがアンマウントされた場合、メモリリーク警告が発生しないこと", async () => {
+		// Arrange
+		const clientId = "valid_client_id"
+
+		// リクエストに遅延を追加
+		setRequestHandlers(
+			await createClientHandler(
+				API_URL,
+				200,
+				{ name: "Sample App" },
+				clientId,
+				100,
+			),
+		)
+
+		// console.error をモックして警告をキャッチ
+		const consoleErrorSpy = vi.spyOn(console, "error")
+
+		// Act
+		const { unmount } = renderHook(() => useOAuthClient(false, clientId))
+
+		// フェッチが完了する前にコンポーネントをアンマウント
+		unmount()
+
+		// Assert
+		// 少し待って、遅延したリクエストが完了する時間を与える
+		await new Promise((resolve) => setTimeout(resolve, 150))
+		expect(consoleErrorSpy).not.toHaveBeenCalled()
+
+		// console.error のモックを元に戻す
+		consoleErrorSpy.mockRestore()
 	})
 })

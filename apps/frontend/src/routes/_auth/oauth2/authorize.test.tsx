@@ -45,11 +45,11 @@ describe("AuthorizePage", () => {
 	const originalLocation = window.location
 	let locationHref = baseSearchParams.redirect_uri
 
-	beforeEach(() => {
+	beforeEach(async () => {
 		useSearchMock.mockReturnValue(baseSearchParams)
 
 		setRequestHandlers(
-			createClientHandler(API_URL, 200, { name: "Sample App" }),
+			await createClientHandler(API_URL, 200, { name: "Sample App" }),
 			createAuthorizeHandler(API_URL, 200, {
 				code: "AUTH_CODE",
 				state: baseSearchParams.state,
@@ -122,7 +122,7 @@ describe("AuthorizePage", () => {
 
 	it("クライアント情報の取得に失敗したとき、unauthorized_clientエラーを付与してリダイレクトURIへ遷移する", async () => {
 		// クライアント情報の取得に失敗するように上書き
-		setRequestHandlers(createClientHandler(API_URL, 404, {}))
+		setRequestHandlers(await createClientHandler(API_URL, 404, {}))
 
 		renderAuthorizePage()
 
