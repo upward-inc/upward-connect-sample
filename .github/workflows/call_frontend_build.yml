@@ -7,6 +7,10 @@ on:
         description: '環境名'
         required: true
         type: string
+      target:
+        description: '対象アプリ'
+        required: true
+        type: string
 
 jobs:
   build:
@@ -26,16 +30,16 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/.bun/install/cache
-          key: ${{ runner.os }}-bun-frontend-${{ hashFiles('apps/frontend/bun.lock') }}
+          key: ${{ runner.os }}-bun-${{ inputs.target }}-${{ hashFiles( format('apps/{0}/bun.lock', inputs.target) ) }}
           restore-keys: |
-            ${{ runner.os }}-bun-frontend-
+            ${{ runner.os }}-bun-${{ inputs.target }}-
 
       - name: Install dependencies
-        working-directory: ./apps/frontend
+        working-directory: ./apps/${{ inputs.target }}
         run: bun install --frozen-lockfile
 
       - name: Build
-        working-directory: ./apps/frontend
+        working-directory: ./apps/${{ inputs.target }}
         env:
           VARS_JSON: ${{ toJSON(vars) }}
         run: |
@@ -48,5 +52,5 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: publish-files
-          path: ./apps/frontend/dist
+          path: ./apps/${{ inputs.target }}/dist
           retention-days: 1
