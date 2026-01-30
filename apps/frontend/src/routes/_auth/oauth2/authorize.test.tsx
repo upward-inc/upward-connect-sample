@@ -4,8 +4,9 @@ import { http, HttpResponse } from "msw"
 import type { HttpHandler } from "msw"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
+import type { SearchParams } from "../../../schema/auth"
 import { setRequestHandlers } from "../../../test/msw"
-import { AuthorizePage, type SearchParams } from "./authorize"
+import { AuthorizePage } from "./authorize"
 
 const { API_URL } = vi.hoisted(() => ({
 	API_URL: "https://api.test.local",

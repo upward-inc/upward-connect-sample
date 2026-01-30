@@ -35,11 +35,15 @@ jobs:
   lint:
     if: github.event.action != 'closed'
     uses: ./.github/workflows/call_frontend_lint.yml
+    with:
+      target: 'frontend'
 
   # ユニットテスト実行
   test:
     if: github.event.action != 'closed'
     uses: ./.github/workflows/call_frontend_test.yml
+    with:
+      target: 'frontend'
 
   # フロントエンドのビルド
   build:
@@ -48,7 +52,7 @@ jobs:
     uses: ./.github/workflows/call_frontend_build.yml
     with:
       environment: 'develop'
-    secrets: inherit
+      target: 'frontend'
 
   # Azure Static Web Appsへのデプロイ
   deploy:
@@ -57,7 +61,8 @@ jobs:
     uses: ./.github/workflows/call_frontend_deploy.yml
     with:
       environment: 'develop'
-    secrets: inherit
+    secrets:
+      AZURE_STATIC_WEB_APPS_DEPLOY_TOKEN: ${{ secrets.AZURE_STATIC_WEB_APPS_DEPLOY_TOKEN }}
 
   # プレビュー環境の削除
   close_pull_request:
@@ -65,4 +70,5 @@ jobs:
     uses: ./.github/workflows/call_frontend_close_pull_request.yml
     with:
       environment: 'develop'
-    secrets: inherit
+    secrets:
+      AZURE_STATIC_WEB_APPS_DEPLOY_TOKEN: ${{ secrets.AZURE_STATIC_WEB_APPS_DEPLOY_TOKEN }}

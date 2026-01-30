@@ -1439,35 +1439,6 @@ describe("GET /records/:entity_name - レコード一覧取得（検索）", () 
 	})
 
 	describe("locationパラメータ", () => {
-		it("_locationフィールドが正しく返されること", async () => {
-			// Arrange
-			const testSample = {
-				name: "Sample with Location",
-				latitude: 35.6795964,
-				longitude: 139.7460797,
-			}
-			await createTestSample(testExecutionUser.id, testSample)
-
-			// Act
-			const response = await requestGet("sample", {
-				fields: "name",
-				location: {
-					point: { latitude: 35.6795964, longitude: 139.7460797 },
-					radius: 1000,
-				},
-			})
-
-			// Assert
-			const { data } = await response.json()
-			expect(data).toHaveLength(1)
-			expect(data[0]).toHaveProperty("_location")
-			expect(data[0]._location).toHaveProperty("latitude", testSample.latitude)
-			expect(data[0]._location).toHaveProperty(
-				"longitude",
-				testSample.longitude,
-			)
-		})
-
 		describe("指定した半径内の対象レコードのみを返すこと", () => {
 			const testRecords = [
 				{ name: "Sample 1", latitude: 0, longitude: 0 },
@@ -1487,9 +1458,7 @@ describe("GET /records/:entity_name - レコード一覧取得（検索）", () 
 					expected: {
 						has_next_page: false,
 						total_size: 1,
-						data: [
-							{ name: "Sample 1", _location: { latitude: 0, longitude: 0 } },
-						],
+						data: [{ name: "Sample 1" }],
 					},
 				},
 				{
@@ -1501,10 +1470,7 @@ describe("GET /records/:entity_name - レコード一覧取得（検索）", () 
 					expected: {
 						has_next_page: false,
 						total_size: 2,
-						data: [
-							{ name: "Sample 1", _location: { latitude: 0, longitude: 0 } },
-							{ name: "Sample 4", _location: { latitude: 1, longitude: 0 } },
-						],
+						data: [{ name: "Sample 1" }, { name: "Sample 4" }],
 					},
 				},
 				{

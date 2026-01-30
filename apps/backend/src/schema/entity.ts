@@ -24,14 +24,14 @@ const itemMapping = z
 				"レコードの作成者（ユーザーエンティティへの参照）が設定されている項目名",
 			example: "created_by",
 		}),
-		updated_at: z.string().nullable().meta({
+		modified_at: z.string().nullable().meta({
 			description: "レコードの最終更新日時が設定されている項目名",
-			example: "updated_at",
+			example: "modified_at",
 		}),
-		updated_by: z.string().nullable().meta({
+		modified_by: z.string().nullable().meta({
 			description:
 				"レコードの最終更新者（ユーザーエンティティへの参照）が設定されている項目名",
-			example: "updated_by",
+			example: "modified_by",
 		}),
 		latitude: z.string().nullable().meta({
 			description: "レコードの緯度が設定されている項目名",

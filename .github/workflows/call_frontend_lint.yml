@@ -2,6 +2,11 @@ name: call frontend lint
 
 on:
   workflow_call:
+    inputs:
+      target:
+        description: '対象アプリ'
+        required: true
+        type: string
 
 jobs:
   lint:
@@ -20,14 +25,14 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/.bun/install/cache
-          key: ${{ runner.os }}-bun-frontend-${{ hashFiles('apps/frontend/bun.lock') }}
+          key: ${{ runner.os }}-bun-${{ inputs.target }}-${{ hashFiles( format('apps/{0}/bun.lock', inputs.target) ) }}
           restore-keys: |
-            ${{ runner.os }}-bun-frontend-
+            ${{ runner.os }}-bun-${{ inputs.target }}-
 
       - name: Install dependencies
-        working-directory: ./apps/frontend
+        working-directory: ./apps/${{ inputs.target }}
         run: bun install --frozen-lockfile
 
       - name: Lint
-        working-directory: ./apps/frontend
+        working-directory: ./apps/${{ inputs.target }}
         run: bun run lint
