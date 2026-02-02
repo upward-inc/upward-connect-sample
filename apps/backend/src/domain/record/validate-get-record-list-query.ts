@@ -15,7 +15,7 @@ interface ValidateGetRecordListQueryResultFailure {
 }
 
 export const validateGetRecordListQuery = (
-	entity: { name: string; has_location: boolean },
+	entity: Entity,
 	query: GetRecordListQuery,
 ): ValidateGetRecordListQueryResult => {
 	const { group_by, fields, location } = query
