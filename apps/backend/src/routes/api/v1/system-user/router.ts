@@ -43,7 +43,7 @@ export const systemUserRouter = honoApp()
 
 			const entity = await getEntity("user")
 			if (!entity) {
-				// ユーザーエンティティが存在しない場合はサーバーサイドの設定が間違ったため、500エラーとする
+				// ユーザーエンティティが存在しない場合はサーバーサイドの設定が間違っているため、500エラーとする
 				throw new Error("Entity 'user' does not exist")
 			}
 
