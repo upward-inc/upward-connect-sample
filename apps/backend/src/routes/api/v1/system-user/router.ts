@@ -40,7 +40,10 @@ export const systemUserRouter = honoApp()
 		async (c) => {
 			const query = c.req.valid("query")
 
-			const validateResult = validateGetRecordListQuery("user", query)
+			const validateResult = validateGetRecordListQuery(
+				{ name: "user", has_location: false },
+				query,
+			)
 			if (!validateResult.success) {
 				return c.json({ message: validateResult.message }, 400)
 			}

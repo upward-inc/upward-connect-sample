@@ -1,4 +1,4 @@
-import { configuration } from "../../configuration"
+import type { Entity } from "../../schema/entity"
 import type { GetRecordListQuery } from "../../schema/record"
 
 type ValidateGetRecordListQueryResult =
@@ -15,7 +15,7 @@ interface ValidateGetRecordListQueryResultFailure {
 }
 
 export const validateGetRecordListQuery = (
-	entity_name: string,
+	entity: { name: string; has_location: boolean },
 	query: GetRecordListQuery,
 ): ValidateGetRecordListQueryResult => {
 	const { group_by, fields, location } = query
@@ -41,11 +41,10 @@ export const validateGetRecordListQuery = (
 		}
 
 		// ロケーション検索が可能なエンティティかどうかを確認
-		const locationEntities: string[] = [...configuration.LOCATION_ENTITIES]
-		if (!locationEntities.includes(entity_name)) {
+		if (!entity?.has_location) {
 			return {
 				success: false,
-				message: `Entity '${entity_name}' does not support location-based queries`,
+				message: `Entity '${entity.name}' does not support location-based queries`,
 			}
 		}
 	}
