@@ -22,9 +22,6 @@ const envSchema = z.object({
 	OIDC_ENCRYPT_PRIVATE_KEY_SECRET: z.string().length(32),
 })
 
-export const configuration = {
-	...envSchema.parse(process.env),
-	LOCATION_ENTITIES: ["account", "lead", "sample"] as const,
-}
+export const configuration = envSchema.parse(process.env)
 
 export type Environment = z.infer<typeof envSchema>
