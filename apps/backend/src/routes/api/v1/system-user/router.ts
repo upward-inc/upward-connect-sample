@@ -1,3 +1,4 @@
+import { getEntity } from "../../../../domain/entity"
 import { validateGetRecordListQuery } from "../../../../domain/record"
 import {
 	getSystemUser,
@@ -40,7 +41,13 @@ export const systemUserRouter = honoApp()
 		async (c) => {
 			const query = c.req.valid("query")
 
-			const validateResult = validateGetRecordListQuery("user", query)
+			const entity = await getEntity("user")
+			if (!entity) {
+				// ユーザーエンティティが存在しない場合はサーバーサイドの設定が間違っているため、500エラーとする
+				throw new Error("Entity 'user' does not exist")
+			}
+
+			const validateResult = validateGetRecordListQuery(entity, query)
 			if (!validateResult.success) {
 				return c.json({ message: validateResult.message }, 400)
 			}
