@@ -1,9 +1,10 @@
 import { format } from "@formkit/tempo"
 import { z } from "../libs/zod"
 import { escapeStringValue } from "../utility/sql"
-import { ComparisonSchema, type RecordReferenceValue } from "./comparison"
+import type { ComparisonSchema, RecordReferenceValue } from "./comparison"
 import { EntityItemSubTypeSchema, EntityItemTypeSchema } from "./entity-item"
 import {
+	type Filter,
 	NestableFilterSchema,
 	isAndFilter,
 	isComparison,
@@ -71,17 +72,7 @@ export const WhereClauseSchema = z
 		return `WHERE ${predicates}`
 	})
 
-const GetWherePredicatesFilterSchema = z.union([
-	NestableFilterSchema,
-	ComparisonSchema,
-])
-
-type GetWherePredicatesFilter = z.infer<typeof GetWherePredicatesFilterSchema>
-
-const getWherePredicates = (
-	items: Field[],
-	filter?: GetWherePredicatesFilter,
-): string | null => {
+const getWherePredicates = (items: Field[], filter?: Filter): string | null => {
 	if (!filter) {
 		return null
 	}
