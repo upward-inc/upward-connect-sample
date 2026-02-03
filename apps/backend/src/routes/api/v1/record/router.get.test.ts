@@ -1129,6 +1129,8 @@ describe("GET /records/:entity_name - レコード一覧取得（検索）", () 
 						{ name: "Record 7", text: "text C", integer: 7, boolean: false },
 						{ name: "Record 8", text: "text C", integer: 8, boolean: false },
 						{ name: "Record 9", text: "text C", integer: 9, boolean: true },
+						{ name: "Record 10", text: "text D", integer: 10, boolean: false },
+						{ name: "Record 11", text: "text D", integer: 11, boolean: true },
 					],
 					filter: {
 						and: [
@@ -1147,7 +1149,11 @@ describe("GET /records/:entity_name - レコード一覧取得（検索）", () 
 						],
 					},
 					expected: {
-						data: [{ name: "Record 6" }, { name: "Record 9" }],
+						data: [
+							{ name: "Record 11" },
+							{ name: "Record 6" },
+							{ name: "Record 9" },
+						],
 					},
 				},
 			])("$title", async ({ testRecords, filter, expected }) => {
