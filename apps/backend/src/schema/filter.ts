@@ -58,8 +58,7 @@ export const AndFilterLv2Schema = z
 		and: z.array(z.union([ComparisonSchema, AndFilterSchema, OrFilterSchema])),
 	})
 	.meta({
-		description:
-			"AND論理演算子による条件オブジェクト配列（最大2階層の入れ子構造可）",
+		description: "AND論理演算子による条件オブジェクト配列（入れ子構造可）",
 	})
 
 // 入れ子構造可能なOR条件（2階層目）
@@ -68,8 +67,7 @@ export const OrFilterLv2Schema = z
 		or: z.array(z.union([ComparisonSchema, AndFilterSchema, OrFilterSchema])),
 	})
 	.meta({
-		description:
-			"OR論理演算子による条件オブジェクト配列（最大2階層の入れ子構造可）",
+		description: "OR論理演算子による条件オブジェクト配列（入れ子構造可）",
 	})
 
 // 入れ子構造可能なAND条件（トップレベル）
@@ -86,7 +84,7 @@ export const NestableAndFilterSchema = z
 				]),
 			)
 			.meta({
-				description: "条件オブジェクト配列（最大3階層の入れ子構造可）",
+				description: "条件オブジェクト配列（入れ子構造可）",
 				examples: [
 					andFilterExample,
 					[
@@ -116,7 +114,7 @@ export const NestableOrFilterSchema = z
 				]),
 			)
 			.meta({
-				description: "条件オブジェクト配列（最大3階層の入れ子構造可）",
+				description: "条件オブジェクト配列（入れ子構造可）",
 				examples: [
 					orFilterExample,
 					[
