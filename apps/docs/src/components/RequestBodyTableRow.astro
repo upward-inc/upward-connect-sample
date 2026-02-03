@@ -1,0 +1,29 @@
+---
+/**
+ * リクエストボディ専用のテーブル行
+ *
+ * @example
+ * ```
+ * <RequestBodyTableRow name="grant_type" type={`<code>authorization_code</code>（固定値）`} required="YES" example="authorization_code">
+ *   付与タイプ
+ * </RequestBodyTableRow>
+ * ```
+ */
+
+interface Props {
+	name: string
+	type: string
+	required: boolean
+	example: string
+}
+
+const { name, type, required, example } = Astro.props
+---
+
+<tr>
+	<td>{name}</td>
+	<td set:html={type} />
+	<td>{required ? "YES" : "NO"}</td>
+	<td><slot /></td>
+	<td><code>{example}</code></td>
+</tr>

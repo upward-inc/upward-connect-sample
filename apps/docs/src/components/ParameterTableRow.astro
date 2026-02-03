@@ -1,0 +1,29 @@
+---
+/**
+ * パラメータ専用のテーブル行
+ *
+ * @example
+ * ```
+ * <ParameterTableRow name="type" type="固定値" required="YES" example="text">
+ *   データ型
+ * </ParameterTableRow>
+ * ```
+ */
+
+interface Props {
+	name: string
+	type: string
+	required: boolean
+	example: string
+}
+
+const { name, type, required, example } = Astro.props
+---
+
+<tr>
+	<td>{name}</td>
+	<td set:html={type} />
+	<td>{required ? "YES" : "NO"}</td>
+	<td><slot /></td>
+	<td><code>{example}</code></td>
+</tr>

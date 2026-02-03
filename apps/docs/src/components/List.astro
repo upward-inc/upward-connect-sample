@@ -1,0 +1,53 @@
+---
+/**
+ * リストコンポーネント
+ * 主にMarkdownのテーブル内で使用する
+ *
+ * @example シンプル
+ * ```
+ * <List items={[
+ *   "<code>text</code>: 文字列",
+ *   "<code>number</code>: 数値",
+ * ]} />
+ * ```
+ *
+ * @example ネスト
+ * ```
+ * <List items={[
+ *   "シンプルな項目",
+ *   {
+ *     text: "データ型が<code>text</code>の場合",
+ *     children: [
+ *       "<code>textarea</code>: 複数行入力",
+ *       "<code>phone</code>: 電話番号",
+ *     ]
+ *   },
+ * ]} />
+ * ```
+ */
+
+interface Props {
+	items: ListItem[]
+}
+
+type ListItem = string | { text: string; children: ListItem[] }
+
+const { items } = Astro.props
+
+const isString = (item: ListItem): item is string => typeof item === "string"
+---
+
+<ul>
+	{items.map((item) => {
+		if (isString(item)) {
+			return <li set:html={item} />
+		}
+		return (
+			<li>
+				<Fragment set:html={item.text} />
+				<Astro.self items={item.children} />
+			</li>
+		)
+	}
+	)}
+</ul>
