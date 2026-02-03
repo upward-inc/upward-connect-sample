@@ -173,6 +173,41 @@ export const IsSetComparisonSchema = z
 	}))
 	.meta({ description: "値設定有無比較条件" })
 
+// 単一の条件
+export const ComparisonSchema = z
+	.union([
+		z
+			.union([
+				TextFieldComparisonSchema,
+				DateFieldComparisonSchema,
+				OptionFieldComparisonSchema,
+				ReferenceFieldStringComparisonSchema,
+			])
+			.transform((data) => ({
+				filter_type: "string" as const,
+				...data,
+			})),
+		NumericFieldComparisonSchema.transform((data) => ({
+			filter_type: "numeric" as const,
+			...data,
+		})),
+		BooleanFieldComparisonSchema.transform((data) => ({
+			filter_type: "boolean" as const,
+			...data,
+		})),
+		ReferenceFieldObjectComparisonSchema.transform((data) => ({
+			filter_type: "object" as const,
+			...data,
+		})),
+		IsSetComparisonSchema.transform((data) => ({
+			filter_type: "is_set" as const,
+			...data,
+		})),
+	])
+	.meta({
+		description: "単一の条件オブジェクト",
+	})
+
 export type Field = z.infer<typeof FieldSchema>
 export type IsNot = z.infer<typeof IsNotSchema>
 export type RecordReferenceValue = z.infer<typeof RecordReferenceValueSchema>
@@ -192,3 +227,4 @@ export type ReferenceFieldObjectComparison = z.infer<
 	typeof ReferenceFieldObjectComparisonSchema
 >
 export type IsSetComparison = z.infer<typeof IsSetComparisonSchema>
+export type Comparison = z.infer<typeof ComparisonSchema>
