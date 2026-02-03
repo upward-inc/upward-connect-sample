@@ -28,30 +28,6 @@ const orFilterExample: Array<TextFieldFilterSample> = [
 	{ field: "category", operator: "eq", value: "alcohol", is_not: false },
 ]
 
-// AND条件
-export const AndFilterSchema = z
-	.object({
-		and: z.array(ComparisonSchema).meta({
-			description: "条件オブジェクト配列",
-			example: andFilterExample,
-		}),
-	})
-	.meta({
-		description: "AND論理演算子による条件オブジェクト配列",
-	})
-
-// OR条件
-export const OrFilterSchema = z
-	.object({
-		or: z.array(ComparisonSchema).meta({
-			description: "条件オブジェクト配列",
-			example: orFilterExample,
-		}),
-	})
-	.meta({
-		description: "OR論理演算子による条件オブジェクト配列",
-	})
-
 // AND条件（入れ子構造可）
 export const NestableAndFilterSchema = z
 	.object({
@@ -62,8 +38,6 @@ export const NestableAndFilterSchema = z
 						NestableAndFilterSchema,
 						NestableOrFilterSchema,
 						ComparisonSchema,
-						AndFilterSchema,
-						OrFilterSchema,
 					]),
 				)
 				.meta({
@@ -94,8 +68,6 @@ export const NestableOrFilterSchema = z
 						NestableAndFilterSchema,
 						NestableOrFilterSchema,
 						ComparisonSchema,
-						AndFilterSchema,
-						OrFilterSchema,
 					]),
 				)
 				.meta({
