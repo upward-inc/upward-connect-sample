@@ -1,0 +1,110 @@
+---
+title: OIDC 1.0ユーザー情報の取得
+description: OIDC 1.0で定められたユーザー情報（UserInfo）を返却する
+sidebar:
+  order: 5
+---
+
+import ResponseBodyTable from '../../../../components/ResponseBodyTable.astro'
+import ResponseBodyTableRow from '../../../../components/ResponseBodyTableRow.astro'
+
+OIDC 1.0で定められたユーザー情報（UserInfo）を返却する
+
+## 📬 リクエスト
+
+<code>GET \{<a href="/auth-api/spec/openid-configuration/#レスポンスボディ">userinfo_endpoint</a>\}</code>
+
+### リクエストヘッダ
+
+| キー | 値 |
+| --- | --- |
+| Authorization | `Bearer {アクセストークン}` |
+
+### パスパラメータ
+
+なし
+
+### クエリパラメータ
+
+なし
+
+## ✨ 成功レスポンス
+
+### ステータスコード
+
+`200` : OK
+
+### レスポンスヘッダ
+
+| キー | 値 |
+| --- | --- |
+| Content-Type | `application/json` |
+
+### レスポンスボディ
+
+<ResponseBodyTable>
+  <ResponseBodyTableRow name="sub" type="文字列" required={true} example='https://example.com/users/user-00000001'>
+    subjectクレーム
+  </ResponseBodyTableRow>
+  <ResponseBodyTableRow name="user_id" type="文字列" required={true} example='user-00000001'>
+    システムユーザーID（非標準クレーム）
+  </ResponseBodyTableRow>
+  <ResponseBodyTableRow name="user_name" type="文字列" required={true} example='yosuke-tahara@example.com'>
+    システム内でユニークな値となるシステムユーザー名（非標準クレーム、ログイン時に使用するシステムユーザー名等）
+  </ResponseBodyTableRow>
+  <ResponseBodyTableRow name="name" type="文字列" required={true} example='田原 陽介'>
+    表示用のフルネーム
+  </ResponseBodyTableRow>
+  <ResponseBodyTableRow name="given_name" type="文字列" required={true} example='陽介'>
+    名
+  </ResponseBodyTableRow>
+  <ResponseBodyTableRow name="family_name" type="文字列" required={false} example='田原'>
+    姓
+  </ResponseBodyTableRow>
+  <ResponseBodyTableRow name="email" type="文字列" required={false} example='yosuke-tahara@example.com'>
+    メールアドレス
+  </ResponseBodyTableRow>
+  <ResponseBodyTableRow name="zoneinfo" type="文字列" required={true} example='Asia/Tokyo'>
+    タイムゾーン文字列
+  </ResponseBodyTableRow>
+  <ResponseBodyTableRow name="locale" type="文字列" required={true} example='ja-JP'>
+    ロケール識別子
+  </ResponseBodyTableRow>
+</ResponseBodyTable>
+
+```json title="レスポンスボディのサンプル"
+{
+  "sub": "https://example.com/users/user-00000001",
+  "user_id": "user-00000001",
+  "user_name": "yosuke-tahara@example.com",
+  "name": "田原 陽介",
+  "given_name": "陽介",
+  "family_name": "田原",
+  "email": "yosuke-tahara@example.com",
+  "zoneinfo": "Asia/Tokyo",
+  "locale": "ja-JP",
+}
+```
+
+## 💬 具体的な要求事項
+
+### 基本要求
+
+- OIDC 1.0 UserInfoエンドポイント仕様に従い実装してください
+
+### その他（補足等）
+
+- UPWARDからはGETメソッドを用いてUserInfoエンドポイントへリクエストを行います。そのため、POSTメソッドをサポートする必要はありません
+- アクセストークンに紐づけられたユーザー識別子を用いてユーザー検索を行ってください
+- subフィールド / user_idフィールド
+  - subフィールドは、貴社システム内で一意になる文字列（例: システムユーザーID）、もしくは、他システムも含めて一意になる文字列（例: ドメインとシステムユーザーIDを組み合わせた文字列）である必要があり、文字列形式の指定はありません
+  - 対して、user_idフィールドは必ず貴社システムにおけるシステムユーザーIDを設定してください
+
+## 📚 参考資料
+
+- OpenID Connect Core 1.0
+  - [5.3. UserInfo Endpoint](https://openid.net/specs/openid-connect-core-1_0.html#UserInfo)（[日本語](https://openid-foundation-japan.github.io/openid-connect-core-1_0.ja.html#UserInfo)）
+
+## 📝 変更履歴
+
+- YYYY/MM/DD: 初版作成

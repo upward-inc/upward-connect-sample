@@ -1,0 +1,119 @@
+---
+title: OIDC 1.0認可処理
+description: OIDC 1.0で定められた認可処理を行う（認可コードを返却する）
+sidebar:
+  order: 3
+---
+
+import ParameterTable from '../../../../components/ParameterTable.astro'
+import ParameterTableRow from '../../../../components/ParameterTableRow.astro'
+import ResponseBodyTable from '../../../../components/ResponseBodyTable.astro'
+import ResponseBodyTableRow from '../../../../components/ResponseBodyTableRow.astro'
+
+OIDC 1.0で定められた認可処理を行う（認可コードを返却する）
+
+このエンドポイントは、**ブラウザを介したリダイレクト（HTTP GET）で実行され、状況に応じてログイン画面や同意画面を返す、または、リダイレクトする**
+
+## 📬 リクエスト
+
+<code>GET \{<a href="/auth-api/spec/openid-configuration/#レスポンスボディ">authorization_endpoint</a>\}</code>
+
+### リクエストヘッダ
+
+なし
+
+### パスパラメータ
+
+なし
+
+### クエリパラメータ
+
+<ParameterTable>
+  <ParameterTableRow name="response_type" type={`<code>code</code>（固定値）`} required={true} example='code'>
+    使用する認証処理フロー
+  </ParameterTableRow>
+  <ParameterTableRow name="client_id" type="文字列" required={true} example='client-00000001'>
+    OAuth 2.0クライアント識別子
+  </ParameterTableRow>
+  <ParameterTableRow name="redirect_uri" type="文字列" required={true} example='https://sample-app.upward.com/callback'>
+    認可コードが返却されるリダイレクションURL
+  </ParameterTableRow>
+  <ParameterTableRow name="scope" type={`<code>openid profile email offline_access</code>（固定値）`} required={true} example='openid profile email offline_access'>
+    クライアントが要求するアクセス範囲
+  </ParameterTableRow>
+  <ParameterTableRow name="state" type="文字列" required={true} example='WVwJX4KDmLTs8piK'>
+    CSRF攻撃防止のために使用するランダムな文字列
+  </ParameterTableRow>
+  <ParameterTableRow name="nonce" type="文字列" required={true} example='cma33PzyycBFb3LA'>
+    リプレイアタック対策のために使用する推測不可能な文字列
+  </ParameterTableRow>
+  <ParameterTableRow name="code_challenge" type="文字列" required={true} example='E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM'>
+    認可コード横取り攻撃防止のために使用するハッシュ文字列
+  </ParameterTableRow>
+  <ParameterTableRow name="code_challenge_method" type={`<code>S256</code>（固定値）`} required={true} example='S256'>
+    PKCEで使用するアルゴリズム
+  </ParameterTableRow>
+</ParameterTable>
+
+## ✨ 成功レスポンス
+
+### ステータスコード
+
+`302` : Found<br/>or<br/>直接リダイレクト
+
+### レスポンスヘッダ
+
+| キー | 値 |
+| --- | --- |
+| Content-Type | `text/html` |
+
+### レスポンスボディ
+
+<ResponseBodyTable>
+  <ResponseBodyTableRow name="code" type="文字列" required={true} example='xJ1pprG9aRO8WYesHQXc7t7jBb8XBhMjbHcw8s1YT_zrSKxWdZFs-qKv51l0dK9ufodw0RLQkIZerPGEcl5GFiaFR8vN0nSKh8UgSvdU4YbIKxydQgOcaTHWA3i10EqZ'>
+    認可コード
+  </ResponseBodyTableRow>
+  <ResponseBodyTableRow name="state" type="文字列" required={true} example='WVwJX4KDmLTs8piK'>
+    リクエストで受け取ったstateパラメータの値
+  </ResponseBodyTableRow>
+</ResponseBodyTable>
+
+```plaintext title="レスポンスのサンプル（改行は掲載上の都合による）"
+HTTP/1.1 302 Found
+Location: https://sample-app.upward.com/callback
+  ?code=xJ1pprG9aRO8WYesHQXc7t7jBb8XBhMjbHcw8s1YT_zrSKxWdZFs-qKv51l0dK9ufodw0RLQkIZerPGEcl5GFiaFR8vN0nSKh8UgSvdU4YbIKxydQgOcaTHWA3i10EqZ
+  &state=WVwJX4KDmLTs8piK
+```
+
+## 💬 具体的な要求事項
+
+### 基本要求
+
+- OIDC 1.0トークンエンドポイント仕様（OAuth 2.0の拡張）、および、PKCEの仕様に従い実装してください
+- 処理パターン
+  - 有効なユーザーセッションが存在しない場合: ログイン処理を経由
+  - パラメータ検証成功時: 「redirect_uri」へ成功リダイレクト（w/ code、state）
+  - パラメータ検証失敗時
+    - 「redirect_uri」以外のパラメータに不備がある場合: 「redirect_uri」へエラーリダイレクト（w/ error, error_description, state）
+    - 「redirect_uri」パラメータに不備がある場合: エラー内容を画面に表示（オープンリダイレクト攻撃防止の観点で、リダイレクトを行わない）
+  - ユーザーアクセス拒否時: 「redirect_uri」へエラーリダイレクト（w/ error, error_description, state）
+
+### その他（補足等）
+
+- UPWARDからのリクエストは、ブラウザを介したリダイレクト（HTTP GET）で実行されます。HTTP POSTメソッドを考慮した実装は不要です。
+- UPWARDからのリクエストは、[クエリパラメータ](#クエリパラメータ)に記載されたパラメータのみ送信します。それ以外のパラメータを考慮した実装は不要です。
+
+## 📚 参考資料
+
+- OpenID Connect Core 1.0
+  - [3.1.2. Authorization Endpoint](https://openid.net/specs/openid-connect-core-1_0.html#AuthorizationEndpoint)（[日本語](https://openid-foundation-japan.github.io/openid-connect-core-1_0.ja.html#AuthorizationEndpoint)）
+- The OAuth 2.0 Authorization Framework
+  - [3.1. Authorization Endpoint](https://datatracker.ietf.org/doc/html/rfc6749#section-3.1)（[日本語](https://openid-foundation-japan.github.io/rfc6749.ja.html#anchor17)）
+  - [4.1.1. Authorization Request](https://datatracker.ietf.org/doc/html/rfc6749#section-4.1.1)（[日本語](https://openid-foundation-japan.github.io/rfc6749.ja.html#code-authz-req)）
+  - [4.1.2. Authorization Response](https://datatracker.ietf.org/doc/html/rfc6749#section-4.1.2)（[日本語](https://openid-foundation-japan.github.io/rfc6749.ja.html#code-authz-resp)）
+- Proof Key for Code Exchange by OAuth Public Clients
+  - [4.4. Server Returns the Code](https://datatracker.ietf.org/doc/html/rfc7636#section-4.4)（[日本語](https://tex2e.github.io/rfc-translater/html/rfc7636.html#4-4--Server-Returns-the-Code)）
+
+## 📝 変更履歴
+
+- YYYY/MM/DD: 初版作成

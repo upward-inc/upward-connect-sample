@@ -1,0 +1,124 @@
+---
+title: OIDC 1.0公開鍵群の取得
+description: id_tokenの署名を検証するための公開鍵群（JWKs）を返却する
+sidebar:
+  order: 2
+---
+
+import ResponseBodyTable from '../../../../components/ResponseBodyTable.astro'
+import ResponseBodyTableRow from '../../../../components/ResponseBodyTableRow.astro'
+
+`id_token`の署名を検証するための公開鍵群（JWKs）を返却する
+
+## 📬 リクエスト
+
+<code>GET \{<a href="/auth-api/spec/openid-configuration/#レスポンスボディ">jwks_uri</a>\}</code>
+
+### リクエストヘッダ
+
+なし
+
+### パスパラメータ
+
+なし
+
+### クエリパラメータ
+
+なし
+
+## ✨ 成功レスポンス
+
+### ステータスコード
+
+`200` : OK
+
+### レスポンスヘッダ
+
+| キー | 値 |
+| --- | --- |
+| Content-Type | `application/json` |
+
+### レスポンスボディ
+
+<ResponseBodyTable>
+  <ResponseBodyTableRow name="keys" type={`<a href="#jwkオブジェクト">JWKオブジェクト</a>の配列`} required={true} example='[ { "kty": "RSA", "n": "w76VbIRgafxBJyL9lmeCG-Z...", "e": "AQAB", "alg": "RS256", "use": "sig", "kid": "00001" }, ... ]'>
+    `id_token`の署名を検証するための公開鍵の配列
+  </ResponseBodyTableRow>
+</ResponseBodyTable>
+
+#### JWKオブジェクト
+
+<ResponseBodyTable>
+  <ResponseBodyTableRow name="kty" type="文字列" required={true} example='RSA'>
+    JWAで定義したアルゴリズムファミリー名
+  </ResponseBodyTableRow>
+  <ResponseBodyTableRow name="use" type="文字列" required={true} example='sig'>
+    公開鍵の用途
+  </ResponseBodyTableRow>
+  <ResponseBodyTableRow name="alg" type="文字列" required={true} example='RS256'>
+    署名検証用のJWAで定義したアルゴリズム名
+  </ResponseBodyTableRow>
+  <ResponseBodyTableRow name="kid" type="文字列" required={true} example='00001'>
+    公開鍵ID
+  </ResponseBodyTableRow>
+  <ResponseBodyTableRow name="n" type="文字列" required={true} example='w76VbIRgafxBJyL9lmeCG-ZuQyTD0-wvV-Ruaf8M6cMbkh5mC9S23GsT7ttnhjh0Xb8JmblHDS-M9_f0euwmTkXd7I49-_vde6_ysjk7Q8HnOWvIaUgEiNHH6J7-NQ-NREkPOQ3bRz8wtFEpOkqZFPNATyhgOs3MW_iYUE5McQs9dMTg5xBB_JeIIDe-IxKjAKMgsus4pxbk4QeoXjjgtJkqjl9Y_-fUJiyWDjIAv9ijMpmMqzhEwfMx41gHS-FMEHs9IwHl358ecFsaoWYevyX4g0F_Vv9zeggmkPt3gk26w0fAlnkP13--7BrwBLJvDWmUxwANzStVKyB6crv5IvMrm0g4y7SNpmjh_dmJO8cjytKn1Vts783rf1vQgGCIGfIQMljIFIcHLEEG8t4P65lCQVvflBXypDGCdVagBsubSsZNVzwpLA9zXqoa-Zv_5XOerdgfSlle5ry443x46sU-hDVexps48Ql3XPAljbDF42YscWUDLV0vQtaUUCBVpO-zrI_6kePkQ62bSeaJ3GIVcn4Zhs5ddG1OoqifxTxDzyTikguvNyaZFfeawI8sXitJoC2weD9QYaxlaeWaIYYZuXcu6IneN7z1Kxg6-XEni0waccd24ggkrAQl5ghxhXLF_RuPC5uKDARXP2bT6kSB2DVK-Ie-LGWhTWsqiGs'>
+    公開鍵を復元するための公開鍵の絶対値（modulus）
+  </ResponseBodyTableRow>
+  <ResponseBodyTableRow name="e" type="文字列" required={true} example='AQAB'>
+    公開鍵を復元するための指数値（exponent）
+  </ResponseBodyTableRow>
+</ResponseBodyTable>
+
+```json title="レスポンスボディのサンプル"
+{
+  "keys": [
+    {
+      "kty": "RSA",
+      "n": "w76VbIRgafxBJyL9lmeCG-ZuQyTD0-wvV-Ruaf8M6cMbkh5mC9S23GsT7ttnhjh0Xb8JmblHDS-M9_f0euwmTkXd7I49-_vde6_ysjk7Q8HnOWvIaUgEiNHH6J7-NQ-NREkPOQ3bRz8wtFEpOkqZFPNATyhgOs3MW_iYUE5McQs9dMTg5xBB_JeIIDe-IxKjAKMgsus4pxbk4QeoXjjgtJkqjl9Y_-fUJiyWDjIAv9ijMpmMqzhEwfMx41gHS-FMEHs9IwHl358ecFsaoWYevyX4g0F_Vv9zeggmkPt3gk26w0fAlnkP13--7BrwBLJvDWmUxwANzStVKyB6crv5IvMrm0g4y7SNpmjh_dmJO8cjytKn1Vts783rf1vQgGCIGfIQMljIFIcHLEEG8t4P65lCQVvflBXypDGCdVagBsubSsZNVzwpLA9zXqoa-Zv_5XOerdgfSlle5ry443x46sU-hDVexps48Ql3XPAljbDF42YscWUDLV0vQtaUUCBVpO-zrI_6kePkQ62bSeaJ3GIVcn4Zhs5ddG1OoqifxTxDzyTikguvNyaZFfeawI8sXitJoC2weD9QYaxlaeWaIYYZuXcu6IneN7z1Kxg6-XEni0waccd24ggkrAQl5ghxhXLF_RuPC5uKDARXP2bT6kSB2DVK-Ie-LGWhTWsqiGs",
+      "e": "AQAB",
+      "alg": "RS256",
+      "use": "sig",
+      "kid": "00001"
+    },
+    {
+      "kty": "RSA",
+      "n": "pC16D2ff1XPATUpyGpflQS-LyMY-cj04IY5moH37d_DRuvyQsrFMe4Mm9TTlNMWS-VF0hrAJZ9YRyrzznYciNPWPQi8VvJja6e_K-g1OCxaXdJDNekRJyEfjZy_881hnHQAVRzCNAndgDSXijrn9Zgyqv1E6YpHDBl3jUOLJ3lDTyvWMj6QE0YpBTyQzGubsWBu-jpM2VA4b8XMju2Xt5sOqdc-JygrBBVioXPI9NRJSHYXR7XKSsrCbtEEnWcccDTmetKsDXy-UVQ9tFiFTSPvG-h51mGF-30ic8xLrMXgWV9SDDjh3wu7MNg_4MtVeHhvuciAoxjXDYKXow7X4qAPzhzWStMH7PRrx9aXjM7-7Cy2zZ5G7l9w4ou-KBzNqP9Uuv8YbYDfuihOawsvGMog118mYmFu_ZkTuMEMm-VMJtBiYTVg8aG7cugmFVhIbmcoG0ze8-370cR6FxB-26yhOPIuhPqp0T6lg_eFFoZcd6BfvRBzpdYFqmk9bJ-FYSF1ASOJ1gzKaCwse6zKyyJMShKR1EKGxXSZf4l7aX0k9BbpLU4Edf_KQz8ABdQKfeDqyerW1njL4aVe9v-z_hmykiP7bcwH4rF4AtASivAOvwaWFU890aq16FuYH18eSfJzKhxiUsh3awpZB94PSgzPyP6NMCcDI3YNA1wCDrq0",
+      "e": "AQAB",
+      "alg": "RS256",
+      "use": "sig",
+      "kid": "00002"
+    },
+    ...
+  ]
+}
+```
+
+## 💬 具体的な要求事項
+
+### 基本要求
+
+- [JWK (RFC 7517)](https://www.rfc-editor.org/rfc/rfc7517.html)の仕様に従い実装してください
+
+### その他（補足等）
+
+- JWK (RFC 7517)で列挙されたオプションのうち、[レスポンスボディ](#レスポンスボディ)に記載されてないフィールドについては、UPWARDから参照しないためサポートする必要はありません
+- セキュリティ向上の観点で、定期的に署名鍵をローテーションすることを強く推奨しています
+  - ローテーション期間は数ヶ月から1年程度を推奨します
+  - 段階的移行方式を採用し、旧鍵であってもJWKsエンドポイントには含めるようにしてください（下記イメージ）
+    | 状態 | 説明 | 署名使用 | 検証使用 | JWKsエンドポイント公開 |
+    | --- | --- | --- | --- | --- |
+    | Future | 次期鍵（事前公開） | × | ◯ | ◯ |
+    | Current | 現行鍵（アクティブ） | ◯ | ◯ | ◯ |
+    | Previous | 旧鍵（廃止予定） | × | ◯ | ◯ |
+    | Expired | 期限切れ | × | × | × |
+
+## 📚 参考資料
+
+- [JWK (RFC 7517)](https://www.rfc-editor.org/rfc/rfc7517.html)
+- [JWA (RFC 7518)](https://www.rfc-editor.org/rfc/rfc7518)
+  - [3.1. "alg" (Algorithm) Header Parameter Values for JWS](https://www.rfc-editor.org/rfc/rfc7518#section-3.1)
+  - [6.1. "kty" (Key Type) Parameter Values](https://www.rfc-editor.org/rfc/rfc7518#section-6.1)
+
+## 📝 変更履歴
+
+- YYYY/MM/DD: 初版作成
