@@ -55,30 +55,20 @@ export const OrFilterSchema = z
 // AND条件（入れ子構造可）
 export const NestableAndFilterSchema = z
 	.object({
-		get and() {
-			return z
-				.array(
-					z.union([
-						NestableAndFilterSchema,
-						NestableOrFilterSchema,
-						ComparisonSchema,
-						AndFilterSchema,
-						OrFilterSchema,
-					]),
-				)
-				.meta({
-					description: "条件オブジェクト配列（入れ子構造可）",
-					examples: [
-						andFilterExample,
-						[
-							singleFilterExample,
-							{
-								or: orFilterExample,
-							},
-						],
+		and: z
+			.array(z.union([ComparisonSchema, AndFilterSchema, OrFilterSchema]))
+			.meta({
+				description: "条件オブジェクト配列（入れ子構造可）",
+				examples: [
+					andFilterExample,
+					[
+						singleFilterExample,
+						{
+							or: orFilterExample,
+						},
 					],
-				})
-		},
+				],
+			}),
 	})
 	.meta({
 		description: "AND論理演算子による条件オブジェクト配列（入れ子構造可）",
@@ -87,30 +77,20 @@ export const NestableAndFilterSchema = z
 // OR条件（入れ子構造可）
 export const NestableOrFilterSchema = z
 	.object({
-		get or() {
-			return z
-				.array(
-					z.union([
-						NestableAndFilterSchema,
-						NestableOrFilterSchema,
-						ComparisonSchema,
-						AndFilterSchema,
-						OrFilterSchema,
-					]),
-				)
-				.meta({
-					description: "条件オブジェクト配列（入れ子構造可）",
-					examples: [
-						orFilterExample,
-						[
-							singleFilterExample,
-							{
-								and: andFilterExample,
-							},
-						],
+		or: z
+			.array(z.union([ComparisonSchema, AndFilterSchema, OrFilterSchema]))
+			.meta({
+				description: "条件オブジェクト配列（入れ子構造可）",
+				examples: [
+					orFilterExample,
+					[
+						singleFilterExample,
+						{
+							and: andFilterExample,
+						},
 					],
-				})
-		},
+				],
+			}),
 	})
 	.meta({
 		description: "OR論理演算子による条件オブジェクト配列（入れ子構造可）",
@@ -120,7 +100,7 @@ export const NestableOrFilterSchema = z
 export const NestableFilterSchema = z
 	.union([NestableAndFilterSchema, NestableOrFilterSchema])
 	.meta({
-		description: "フィルター条件",
+		description: "フィルター条件（最大2階層の入れ子構造可）",
 		examples: [
 			{
 				and: andFilterExample,
