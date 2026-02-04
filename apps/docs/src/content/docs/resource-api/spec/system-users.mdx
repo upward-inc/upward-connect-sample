@@ -1,0 +1,140 @@
+---
+title: システムユーザー一覧の検索
+description: システムユーザー一覧の検索
+sidebar:
+  order: 2
+---
+
+import ParameterTable from '../../../../components/ParameterTable.astro'
+import ParameterTableRow from '../../../../components/ParameterTableRow.astro'
+import ResponseBodyTable from '../../../../components/ResponseBodyTable.astro'
+import ResponseBodyTableRow from '../../../../components/ResponseBodyTableRow.astro'
+import List from '../../../../components/List.astro'
+
+システムユーザーの情報を検索し、一覧で返却する
+
+## 📬 リクエスト
+
+<code>GET \{resource_api_url\}/system-users</code>
+
+### リクエストヘッダ
+
+| キー | 値 |
+| --- | --- |
+| Authorization | `Bearer {アクセストークン}` |
+
+### パスパラメータ
+
+なし
+
+### クエリパラメータ
+
+<ParameterTable>
+  <ParameterTableRow name="fields" type="文字列" required={true} example="id, user_name, is_active">
+    返却対象のフィールド名（カンマ区切り）
+  </ParameterTableRow>
+  <ParameterTableRow name="filter" type="オブジェクト" required={false} example='{ "and": [ { "field": "user_name", "operator": "eq", "value": "yosuke-tahara@example.com" } ] }'>
+    検索条件<br/>参考: <a href="/resource-api/spec/filter-params">filterパラメータ仕様</a>
+  </ParameterTableRow>
+  <ParameterTableRow name="order_by" type="オブジェクトの配列" required={false} example='[{ field: "id", direction: "asc" }]'>
+    検索結果のソート条件
+  </ParameterTableRow>
+  <ParameterTableRow name="limit" type="整数値" required={false} example="100">
+    1回のリクエストで取得する最大システムユーザー数
+  </ParameterTableRow>
+  <ParameterTableRow name="offset" type="整数値" required={false} example="0">
+    取得開始位置（スキップするシステムユーザー数）
+  </ParameterTableRow>
+</ParameterTable>
+
+#### 「order_by」パラメータの構成要素
+
+<ResponseBodyTable>
+  <ResponseBodyTableRow name="field" type="文字列" required={true} example="id">
+    ソート対象のフィールド名
+  </ResponseBodyTableRow>
+  <ResponseBodyTableRow name="direction" type={`<ul><li><code>asc</code> （昇順）</li><li><code>desc</code> （降順）</li></ul>`} required={false} example="asc">
+    ソート方向（省略時は昇順扱い）
+  </ResponseBodyTableRow>
+</ResponseBodyTable>
+
+## ✨ 成功レスポンス
+
+### ステータスコード
+
+`200` : OK
+
+### レスポンスヘッダ
+
+| キー | 値 |
+| --- | --- |
+| Content-Type | `application/json` |
+
+### レスポンスボディ
+
+<ResponseBodyTable>
+  <ResponseBodyTableRow name="has_next_page" type="真偽値" required={true} example="true">
+    検索結果に対して、次ページが存在するかどうか
+  </ResponseBodyTableRow>
+  <ResponseBodyTableRow name="total_size" type="整数値" required={true} example="371">
+    検索条件に合致するシステムユーザー総数
+  </ResponseBodyTableRow>
+  <ResponseBodyTableRow name="data" type={`<a href="/resource-api/spec/system-user#レスポンスボディ">単一システムユーザーの取得 - レスポンスボディ</a>と同内容の配列`} required={true} example='[ { "id": "user-00000001", "user_name": "yosuke-tahara@example.com", "first_name": "陽介", ... }, { "id": "user-00000002", "user_name": "akemi-matsushita@example.com", "first_name": "明美", ... }, ... ]'>
+    検索結果
+  </ResponseBodyTableRow>
+</ResponseBodyTable>
+
+```json title="レスポンスボディのサンプル"
+{
+  "has_next_page": true,
+  "total_size": 371,
+  "data": [
+    {
+      "id": "user-00000001",
+      "user_name": "yosuke-tahara@example.com",
+      "first_name": "陽介",
+      "last_name": "田原",
+      "email": "yosuke-tahara@example.com",
+      "timezone": "Asia/Tokyo",
+      "locale": "ja-JP",
+      "profile_name": "admin",
+      "role_name": "west_japan_sales_department",
+      "is_active": true,
+      "created_at": "2025-01-01T00:00:00Z",
+      "modified_at": "2025-01-01T00:00:00Z"
+    },
+    {
+      "id": "user-00000002",
+      "user_name": "akemi-matsushita@example.com",
+      "first_name": "明美",
+      "last_name": "松下",
+      "email": "akemi-matsushita@example.com",
+      "timezone": "Asia/Tokyo",
+      "locale": "ja-JP",
+      "profile_name": "standard_user",
+      "role_name": "central_japan_sales_department",
+      "is_active": true,
+      "created_at": "2025-02-03T04:05:06Z",
+      "modified_at": "2025-06-05T04:03:02Z"
+    },
+    ...
+  ]
+}
+```
+
+## 💬 具体的な要求事項
+
+- 基本的な検索要件については、[レコード一覧の取得（検索）](/resource-api/spec/records)を参考にし、同等の実装を行ってください
+    - クエリパラメータ内で使用されるフィールドは、 [単一システムユーザーの取得 - レスポンスボディ](/resource-api/spec/system-user#レスポンスボディ)に記載のフィールドが対象となります
+- UPWARDを使用する可能性がないユーザーは返却対象から除外しても構いません
+    - これは「現在UPWARDを利用中のユーザーのみを返却する」という意味ではありません
+    - 今後UPWARDの利用が見込まれるユーザーは対象に含めてください
+
+## 📚 参考資料
+
+- [レコード一覧の取得（検索）](/resource-api/spec/records)
+- [filterパラメータ仕様](/resource-api/spec/filter-params)
+
+## 📝 変更履歴
+
+- YYYY/MM/DD: 初版作成
