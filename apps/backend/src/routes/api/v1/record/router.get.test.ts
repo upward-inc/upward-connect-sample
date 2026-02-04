@@ -1117,6 +1117,45 @@ describe("GET /records/:entity_name - レコード一覧取得（検索）", () 
 						],
 					},
 				},
+				{
+					title: "ネスト検索（三階層）",
+					testRecords: [
+						{ name: "Record 01", text: "text A", integer: 1, boolean: false },
+						{ name: "Record 02", text: "text A", integer: 2, boolean: false },
+						{ name: "Record 03", text: "text A", integer: 3, boolean: true },
+						{ name: "Record 04", text: "text B", integer: 4, boolean: false },
+						{ name: "Record 05", text: "text B", integer: 5, boolean: false },
+						{ name: "Record 06", text: "text B", integer: 6, boolean: true },
+						{ name: "Record 07", text: "text C", integer: 7, boolean: false },
+						{ name: "Record 08", text: "text C", integer: 8, boolean: false },
+						{ name: "Record 09", text: "text C", integer: 9, boolean: true },
+						{ name: "Record 10", text: "text D", integer: 10, boolean: false },
+						{ name: "Record 11", text: "text D", integer: 11, boolean: true },
+					],
+					filter: {
+						and: [
+							{
+								or: [
+									{
+										and: [
+											{ field: "text", operator: "gt", value: "text A" },
+											{ field: "text", operator: "lte", value: "text C" },
+										],
+									},
+									{ field: "integer", operator: "gte", value: 9 },
+								],
+							},
+							{ field: "boolean", operator: "eq", value: true },
+						],
+					},
+					expected: {
+						data: [
+							{ name: "Record 06" },
+							{ name: "Record 09" },
+							{ name: "Record 11" },
+						],
+					},
+				},
 			])("$title", async ({ testRecords, filter, expected }) => {
 				// Arrange
 				await createManyTestSamples(testExecutionUser.id, testRecords)

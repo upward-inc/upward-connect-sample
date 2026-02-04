@@ -1,15 +1,8 @@
 import { z } from "../libs/zod"
 import {
-	BooleanFieldComparisonSchema,
-	DateFieldComparisonSchema,
-	IsSetComparisonSchema,
+	ComparisonSchema,
 	type NumericFieldComparison,
-	NumericFieldComparisonSchema,
-	OptionFieldComparisonSchema,
-	ReferenceFieldObjectComparisonSchema,
-	ReferenceFieldStringComparisonSchema,
 	type TextFieldComparison,
-	TextFieldComparisonSchema,
 } from "./comparison"
 import { ToJsonObjectSchema } from "./utility"
 
@@ -35,45 +28,10 @@ const orFilterExample: Array<TextFieldFilterSample> = [
 	{ field: "category", operator: "eq", value: "alcohol", is_not: false },
 ]
 
-// 単一の条件
-export const BaseFilterSchema = z
-	.union([
-		z
-			.union([
-				TextFieldComparisonSchema,
-				DateFieldComparisonSchema,
-				OptionFieldComparisonSchema,
-				ReferenceFieldStringComparisonSchema,
-			])
-			.transform((data) => ({
-				filter_type: "string" as const,
-				...data,
-			})),
-		NumericFieldComparisonSchema.transform((data) => ({
-			filter_type: "numeric" as const,
-			...data,
-		})),
-		BooleanFieldComparisonSchema.transform((data) => ({
-			filter_type: "boolean" as const,
-			...data,
-		})),
-		ReferenceFieldObjectComparisonSchema.transform((data) => ({
-			filter_type: "object" as const,
-			...data,
-		})),
-		IsSetComparisonSchema.transform((data) => ({
-			filter_type: "is_set" as const,
-			...data,
-		})),
-	])
-	.meta({
-		description: "単一の条件オブジェクト",
-	})
-
 // AND条件
 export const AndFilterSchema = z
 	.object({
-		and: z.array(BaseFilterSchema).meta({
+		and: z.array(ComparisonSchema).meta({
 			description: "条件オブジェクト配列",
 			example: andFilterExample,
 		}),
@@ -85,7 +43,7 @@ export const AndFilterSchema = z
 // OR条件
 export const OrFilterSchema = z
 	.object({
-		or: z.array(BaseFilterSchema).meta({
+		or: z.array(ComparisonSchema).meta({
 			description: "条件オブジェクト配列",
 			example: orFilterExample,
 		}),
@@ -94,11 +52,37 @@ export const OrFilterSchema = z
 		description: "OR論理演算子による条件オブジェクト配列",
 	})
 
-// AND条件（入れ子構造可）
+// 入れ子構造可能なAND条件（2階層目）
+export const AndFilterLv2Schema = z
+	.object({
+		and: z.array(z.union([ComparisonSchema, AndFilterSchema, OrFilterSchema])),
+	})
+	.meta({
+		description: "AND論理演算子による条件オブジェクト配列（入れ子構造可）",
+	})
+
+// 入れ子構造可能なOR条件（2階層目）
+export const OrFilterLv2Schema = z
+	.object({
+		or: z.array(z.union([ComparisonSchema, AndFilterSchema, OrFilterSchema])),
+	})
+	.meta({
+		description: "OR論理演算子による条件オブジェクト配列（入れ子構造可）",
+	})
+
+// 入れ子構造可能なAND条件（トップレベル）
 export const NestableAndFilterSchema = z
 	.object({
 		and: z
-			.array(z.union([BaseFilterSchema, AndFilterSchema, OrFilterSchema]))
+			.array(
+				z.union([
+					ComparisonSchema,
+					AndFilterSchema,
+					OrFilterSchema,
+					AndFilterLv2Schema,
+					OrFilterLv2Schema,
+				]),
+			)
 			.meta({
 				description: "条件オブジェクト配列（入れ子構造可）",
 				examples: [
@@ -116,11 +100,19 @@ export const NestableAndFilterSchema = z
 		description: "AND論理演算子による条件オブジェクト配列（入れ子構造可）",
 	})
 
-// OR条件（入れ子構造可）
+// 入れ子構造可能なOR条件（トップレベル）
 export const NestableOrFilterSchema = z
 	.object({
 		or: z
-			.array(z.union([BaseFilterSchema, AndFilterSchema, OrFilterSchema]))
+			.array(
+				z.union([
+					ComparisonSchema,
+					AndFilterSchema,
+					OrFilterSchema,
+					AndFilterLv2Schema,
+					OrFilterLv2Schema,
+				]),
+			)
 			.meta({
 				description: "条件オブジェクト配列（入れ子構造可）",
 				examples: [
@@ -142,7 +134,7 @@ export const NestableOrFilterSchema = z
 export const NestableFilterSchema = z
 	.union([NestableAndFilterSchema, NestableOrFilterSchema])
 	.meta({
-		description: "フィルター条件（最大2階層の入れ子構造可）",
+		description: "フィルター条件（最大3階層の入れ子構造可）",
 		examples: [
 			{
 				and: andFilterExample,
@@ -173,9 +165,9 @@ export const NestableFilterQuerySchema =
 	ToJsonObjectSchema(NestableFilterSchema)
 
 // フィルタータイプの判別関数
-export function isBaseFilter(
+export function isComparison(
 	filter: unknown,
-): filter is z.infer<typeof BaseFilterSchema> {
+): filter is z.infer<typeof ComparisonSchema> {
 	return (
 		filter !== null && typeof filter === "object" && "filter_type" in filter
 	)
@@ -194,7 +186,7 @@ export function isOrFilter(
 }
 
 export function collectFilterFields(filter?: Filter): string[] {
-	if (isBaseFilter(filter)) {
+	if (isComparison(filter)) {
 		return [filter.field]
 	}
 
@@ -209,5 +201,5 @@ export function collectFilterFields(filter?: Filter): string[] {
 }
 
 export type Filter = z.infer<
-	typeof NestableFilterSchema | typeof BaseFilterSchema
+	typeof NestableFilterSchema | typeof ComparisonSchema
 >
