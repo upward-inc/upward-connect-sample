@@ -1,6 +1,5 @@
 import { honoApp } from "../../../libs/hono"
 import { setupOpenAPIEndpoints } from "../../utils/openapi-setup"
-import { configurationRouter } from "./configuration"
 import { entityRouter } from "./entity"
 import { fileRouter } from "./file"
 import { profileRouter } from "./profile"
@@ -15,7 +14,6 @@ const v1Router = honoApp()
 	.route("/entities", entityRouter)
 	.route("/records", recordRouter)
 	.route("/files", fileRouter)
-	.route("/configuration", configurationRouter)
 
 setupOpenAPIEndpoints(v1Router, "/api/v1", {
 	pageTitle: "Resource API v1",

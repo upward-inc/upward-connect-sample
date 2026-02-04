@@ -13,9 +13,9 @@
 		"db#migratefile": "bun run --filter backend db#migratefile",
 		"db#seed": "bun run --filter backend db#seed",
 		"prisma#generate": "bun run --filter backend prisma#generate",
-		"format": "bun run --filter backend --filter frontend format",
-		"lint": "bun run --filter backend --filter frontend lint",
-		"check": "bun run --filter backend --filter frontend check"
+		"format": "bun run --filter '*' format",
+		"lint": "bun run --filter '*' lint",
+		"check": "bun run --filter '*' check"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "^1.9.4"

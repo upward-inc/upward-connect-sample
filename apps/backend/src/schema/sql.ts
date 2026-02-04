@@ -1,13 +1,13 @@
 import { format } from "@formkit/tempo"
 import { z } from "../libs/zod"
 import { escapeStringValue } from "../utility/sql"
-import type { RecordReferenceValue } from "./comparison"
+import type { Comparison, RecordReferenceValue } from "./comparison"
 import { EntityItemSubTypeSchema, EntityItemTypeSchema } from "./entity-item"
 import {
-	BaseFilterSchema,
+	type Filter,
 	NestableFilterSchema,
 	isAndFilter,
-	isBaseFilter,
+	isComparison,
 	isOrFilter,
 } from "./filter"
 import type {
@@ -72,22 +72,12 @@ export const WhereClauseSchema = z
 		return `WHERE ${predicates}`
 	})
 
-const GetWherePredicatesFilterSchema = z.union([
-	NestableFilterSchema,
-	BaseFilterSchema,
-])
-
-type GetWherePredicatesFilter = z.infer<typeof GetWherePredicatesFilterSchema>
-
-const getWherePredicates = (
-	items: Field[],
-	filter?: GetWherePredicatesFilter,
-): string | null => {
+const getWherePredicates = (items: Field[], filter?: Filter): string | null => {
 	if (!filter) {
 		return null
 	}
-	if (isBaseFilter(filter)) {
-		return baseFilterToPredicate(items, filter)
+	if (isComparison(filter)) {
+		return comparisonToPredicate(items, filter)
 	}
 
 	if (isAndFilter(filter)) {
@@ -151,10 +141,7 @@ export const PagingClauseSchema = z
 		return [offsetClause, limitClause].filter((s) => s).join(" ")
 	})
 
-const baseFilterToPredicate = (
-	items: Field[],
-	filter: z.infer<typeof BaseFilterSchema>,
-) => {
+const comparisonToPredicate = (items: Field[], filter: Comparison) => {
 	// フィールドが存在しない場合は検索条件に含めない
 	const item = items.find((item) => item.alias_name === filter.field)
 	if (!item) {
