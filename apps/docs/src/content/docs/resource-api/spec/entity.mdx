@@ -1,0 +1,135 @@
+---
+title: 単一エンティティの取得
+description: 単一エンティティの取得
+sidebar:
+  order: 9
+---
+
+import ParameterTable from '../../../../components/ParameterTable.astro'
+import ParameterTableRow from '../../../../components/ParameterTableRow.astro'
+import ResponseBodyTable from '../../../../components/ResponseBodyTable.astro'
+import ResponseBodyTableRow from '../../../../components/ResponseBodyTableRow.astro'
+
+パスで指定された単一のエンティティ情報を返却する
+
+## 📬 リクエスト
+
+<code>GET \{resource_api_url\}/entities/\{name\}</code>
+
+### リクエストヘッダ
+
+| キー | 値 |
+| --- | --- |
+| Authorization | `Bearer {アクセストークン}` |
+
+### パスパラメータ
+
+<ParameterTable>
+  <ParameterTableRow name="name" type="文字列" required={true} example="account">
+    検索対象のエンティティ名
+  </ParameterTableRow>
+</ParameterTable>
+
+### クエリパラメータ
+
+なし
+
+## ✨ 成功レスポンス
+
+### ステータスコード
+
+`200` : OK
+
+### レスポンスヘッダ
+
+| キー | 値 |
+| --- | --- |
+| Content-Type | `application/json` |
+
+### レスポンスボディ
+
+<ResponseBodyTable>
+  <ResponseBodyTableRow name="name" type="文字列" required={true} example="account">
+    エンティティ名
+  </ResponseBodyTableRow>
+  <ResponseBodyTableRow name="type" type="<ul><li><code>user</code>（ユーザーエンティティ）</li><li><code>account</code>（取引先エンティティ）</li><li><code>lead</code>（リードエンティティ）</li><li><code>contact</code>（取引先責任者エンティティ）</li><li><code>activity</code>（活動エンティティ）</li><li><code>phone_call</code>（電話履歴エンティティ）</li></ul>" required={false} example="account">
+    エンティティの種別
+    <br/>
+    UPWARDが標準的に扱うエンティティに該当する場合、その種別を設定する
+    該当しない場合は、`null`を設定する
+  </ResponseBodyTableRow>
+  <ResponseBodyTableRow name="display_name" type="文字列" required={true} example="取引先名">
+    エンティティの表示名
+  </ResponseBodyTableRow>
+  <ResponseBodyTableRow name="has_location" type="真偽値" required={true} example="true">
+    エンティティが位置情報を保持しているかどうか
+  </ResponseBodyTableRow>
+  <ResponseBodyTableRow name="item_mapping" type={`<a href="#item_mappingオブジェクト">item_mappingオブジェクト</a>`} required={true} example='{ "id": "id", "title": "name", "owner": "owner", "created_at": "created_at", "created_by": "created_by", "modified_at": "modified_at", "modified_by": "modified_by", "latitude": "latitude", "longitude": "longitude" }'>
+    UPWARDが標準的に扱う項目名のマッピング
+  </ResponseBodyTableRow>
+</ResponseBodyTable>
+
+#### item_mappingオブジェクト
+
+<ResponseBodyTable>
+  <ResponseBodyTableRow name="id" type="文字列" required={true} example="id">
+    レコードのID（一意識別子）が設定されている項目名
+  </ResponseBodyTableRow>
+  <ResponseBodyTableRow name="title" type="文字列" required={true} example="name">
+    レコードのタイトルが設定されている項目名
+  </ResponseBodyTableRow>
+  <ResponseBodyTableRow name="owner" type="文字列" required={false} example="owner">
+    レコードの所有者（ユーザーエンティティへの参照）が設定されている項目名<br/><br/>「type」が<code>activity</code>, <code>phone_call</code>であるエンティティの場合は必須
+  </ResponseBodyTableRow>
+  <ResponseBodyTableRow name="created_at" type="文字列" required={false} example="created_at">
+    レコードの作成日時が設定されている項目名
+  </ResponseBodyTableRow>
+  <ResponseBodyTableRow name="created_by" type="文字列" required={false} example="created_by">
+    レコードの作成者（ユーザーエンティティへの参照）が設定されている項目名
+  </ResponseBodyTableRow>
+  <ResponseBodyTableRow name="modified_at" type="文字列" required={false} example="modified_at">
+    レコードの最終更新日時が設定されている項目名
+  </ResponseBodyTableRow>
+  <ResponseBodyTableRow name="modified_by" type="文字列" required={false} example="modified_by">
+    レコードの最終更新者（ユーザーエンティティへの参照）が設定されている項目名
+  </ResponseBodyTableRow>
+  <ResponseBodyTableRow name="latitude" type="文字列" required={false} example="latitude">
+    レコードの緯度が設定されている項目名<br/><br/>「has_location」が<code>true</code>であるエンティティの場合は必須
+  </ResponseBodyTableRow>
+  <ResponseBodyTableRow name="longitude" type="文字列" required={false} example="longitude">
+    レコードの経度が設定されている項目名<br/><br/>「has_location」が<code>true</code>であるエンティティの場合は必須
+  </ResponseBodyTableRow>
+</ResponseBodyTable>
+
+
+```json title="レスポンスボディのサンプル"
+{
+  "name": "account",
+  "type": "account",
+  "display_name": "取引先",
+  "has_location": true,
+  "item_mapping": {
+    "id": "id",
+    "title": "name",
+    "owner": "owner",
+    "created_at": "created_at",
+    "created_by": "created_by",
+    "modified_at": "modified_at",
+    "modified_by": "modified_by",
+    "latitude": "latitude",
+    "longitude": "longitude"
+  }
+}
+```
+
+## 💬 具体的な要求事項
+
+- 検索対象のエンティティ名が存在しない場合は、「`404` : Not Found」エラーを返却してください
+
+## 📚 参考資料
+
+なし
+
+## 📝 変更履歴
+
+- YYYY/MM/DD: 初版作成
