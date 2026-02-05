@@ -169,6 +169,29 @@ describe("GET /records/:entity_name - レコード一覧取得（検索）", () 
 				},
 			])
 		})
+
+		it("数式項目が含まれる場合、数式用のビューから値が取得されること", async () => {
+			// Arrange
+			const target = await createTestSample(testExecutionUser.id, {
+				name: "Sample to Get",
+				integer: 50,
+			})
+
+			// Act
+			const response = await requestGet("sample", {
+				fields: "id,name,formula_integer",
+			})
+
+			// Assert
+			const { data } = await response.json()
+			expect(data).toStrictEqual([
+				{
+					id: target.id,
+					name: target.name,
+					formula_integer: 50 * 100,
+				},
+			])
+		})
 	})
 
 	describe("filterパラメータ", () => {
@@ -1006,6 +1029,76 @@ describe("GET /records/:entity_name - レコード一覧取得（検索）", () 
 			})
 		})
 
+		describe("数式項目に対する検索が正常に動作すること", () => {
+			it.each([
+				{
+					title: "text型の数式項目",
+					testRecords: [
+						{ name: "Record 1", text: "prefix A suffix" },
+						{ name: "Record 2", text: "prefix B suffix" },
+						{ name: "Record 3", text: "prefix BB suffix" },
+					],
+					filter: {
+						and: [{ field: "formula_text", operator: "like", value: "%B%" }],
+					},
+					expected: {
+						data: [{ name: "Record 2" }, { name: "Record 3" }],
+					},
+				},
+				{
+					title: "numeric型の数式項目",
+					testRecords: [
+						{ name: "Record 1", integer: 10 },
+						{ name: "Record 2", integer: 20 },
+						{ name: "Record 3", integer: 30 },
+					],
+					filter: {
+						and: [{ field: "formula_integer", operator: "gte", value: 2000 }],
+					},
+					expected: { data: [{ name: "Record 2" }, { name: "Record 3" }] },
+				},
+				{
+					title: "boolean型の数式項目",
+					testRecords: [
+						{ name: "Record 1", boolean: true },
+						{ name: "Record 2", boolean: false },
+					],
+					filter: {
+						and: [{ field: "formula_boolean", operator: "eq", value: true }],
+					},
+					expected: { data: [{ name: "Record 2" }] },
+				},
+				{
+					title: "date型の数式項目",
+					testRecords: [
+						{ name: "Record 1", datetime: "2026-01-01T00:00:00Z" },
+						{ name: "Record 2", datetime: "2026-01-02T00:00:00Z" },
+						{ name: "Record 3", datetime: "2026-01-03T00:00:00Z" },
+					],
+					filter: {
+						and: [
+							{ field: "formula_date", operator: "lt", value: "2026-01-03" },
+						],
+					},
+					expected: { data: [{ name: "Record 1" }, { name: "Record 2" }] },
+				},
+			])("$title", async ({ testRecords, filter, expected }) => {
+				// Arrange
+				await createManyTestSamples(testExecutionUser.id, testRecords)
+
+				// Act
+				const response = await requestGet("sample", {
+					fields: "name",
+					filter,
+					order_by: [{ field: "name" }],
+				})
+
+				// Assert
+				const { data } = await response.json()
+				expect(data).toStrictEqual(expected.data)
+			})
+		})
+
 		describe("複数条件検索が正常に動作すること", () => {
 			it.each([
 				{
@@ -1214,6 +1307,19 @@ describe("GET /records/:entity_name - レコード一覧取得（検索）", () 
 						],
 					},
 				},
+				{
+					title: "数式項目",
+					fields: "formula_text",
+					group_by: "formula_text",
+					order_by: [{ field: "formula_text" }],
+					expected: {
+						data: [
+							{ formula_text: "This is your sample text: text A" },
+							{ formula_text: "This is your sample text: text B" },
+							{ formula_text: "This is your sample text: text C" },
+						],
+					},
+				},
 			])("$title", async ({ fields, group_by, order_by, expected }) => {
 				// Arrange
 				await createManyTestSamples(testExecutionUser.id, testRecords)
@@ -1281,6 +1387,23 @@ describe("GET /records/:entity_name - レコード一覧取得（検索）", () 
 							{ name: "Record 9" },
 							{ name: "Record 6" },
 							{ name: "Record 3" },
+						],
+					},
+				},
+				{
+					title: "数式項目",
+					order_by: [{ field: "formula_text", direction: "desc" }],
+					expected: {
+						data: [
+							{ name: "Record 9" },
+							{ name: "Record 8" },
+							{ name: "Record 7" },
+							{ name: "Record 6" },
+							{ name: "Record 5" },
+							{ name: "Record 4" },
+							{ name: "Record 3" },
+							{ name: "Record 2" },
+							{ name: "Record 1" },
 						],
 					},
 				},
