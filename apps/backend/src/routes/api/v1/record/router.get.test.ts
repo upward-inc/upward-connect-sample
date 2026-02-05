@@ -1,6 +1,5 @@
 import { afterAll, afterEach, beforeAll, describe, expect, it } from "vitest"
 import { app } from "../../../../index"
-import { testPrisma } from "../../../../test/setup"
 import {
 	cleanupEntityMetadata,
 	setupEntityMetadata,
