@@ -69,6 +69,16 @@ export const getRecordList = async (
 		return !!item?.is_formula
 	})
 
+	entityItemMap.forEach((value, key) => {
+		// 数式が必要な場合、ビューを参照するように変更
+		if (needFormulaField) {
+			entityItemMap.set(key, {
+				...value,
+				table_name: `${value.table_name}_view`,
+			})
+		}
+	})
+
 	const selectFields = fields
 		.map((field) => entityItemMap.get(field))
 		.filter((field) => !!field)
