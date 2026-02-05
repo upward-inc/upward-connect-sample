@@ -170,7 +170,7 @@ describe("GET /records/:entity_name - レコード一覧取得（検索）", () 
 			])
 		})
 
-		it("数式が必要な項目を指定した場合、数式用のビューから値が取得されること", async () => {
+		it("数式項目が含まれる場合、数式用のビューから値が取得されること", async () => {
 			// Arrange
 			const target = await createTestSample(testExecutionUser.id, {
 				name: "Sample to Get",
@@ -1029,7 +1029,7 @@ describe("GET /records/:entity_name - レコード一覧取得（検索）", () 
 			})
 		})
 
-		describe("数式が必要な項目で検索が正常に動作すること", () => {
+		describe("数式項目に対する検索が正常に動作すること", () => {
 			it.each([
 				{
 					title: "text型の数式項目",
