@@ -69,16 +69,6 @@ export const getRecordList = async (
 		return !!item?.is_formula
 	})
 
-	entityItemMap.forEach((value, key) => {
-		// 数式が必要な場合、ビューを参照するように変更
-		if (hasFormulaField) {
-			entityItemMap.set(key, {
-				...value,
-				table_name: `${value.table_name}_view`,
-			})
-		}
-	})
-
 	const selectFields = fields
 		.map((field) => entityItemMap.get(field))
 		.filter((field) => !!field)
@@ -90,7 +80,7 @@ export const getRecordList = async (
 		: select
 
 	// 数式が必要な場合のみビューを参照
-	const fromClause = `FROM [${entity_name}${hasFormulaField ? "_view" : ""}]`
+	const fromClause = `FROM [${entity_name}${hasFormulaField ? "_view" : ""}] AS [${entity_name}]`
 
 	const where = WhereClauseSchema.parse({
 		items: Array.from(entityItemMap.values()),
