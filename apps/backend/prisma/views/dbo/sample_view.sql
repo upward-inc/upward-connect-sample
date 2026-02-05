@@ -1,14 +1,14 @@
 CREATE VIEW sample_view AS
 SELECT
   *,
-  'current UTC time: ' + FORMAT(GETUTCDATE(), 'HH:mm:ss') AS formula_text,
+  'This is your sample text: ' + [text] AS formula_text,
   [integer] * 100 AS formula_integer,
   CASE
     boolean
     WHEN 0 THEN 1
     ELSE 0
   END AS formula_boolean,
-  CAST(GETUTCDATE() AS DATE) AS formula_date,
+  CAST([datetime] AS DATE) AS formula_date,
   (
     SELECT
       TOP 1 'account' AS entity,
