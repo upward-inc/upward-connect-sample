@@ -40,8 +40,9 @@ export const TextFieldComparisonSchema = z
 		value: z.string().meta({ description: "検索値", example: "abc" }),
 		is_not: IsNotSchema.optional().default(false),
 	})
-	.transform((data) => ({
+	.transform(({ value, ...data }) => ({
 		comparison_type: "text" as const,
+		value: data.operator === "like" ? value.replace(/\\%/g, "[%]") : value,
 		...data,
 	}))
 	.meta({ description: "テキストフィールド比較条件" })
