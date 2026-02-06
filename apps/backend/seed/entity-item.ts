@@ -483,11 +483,16 @@ export async function seedEntityItems(prisma: Prisma.TransactionClient) {
 			reference_entities: JSON.stringify([
 				"account",
 				"lead",
-				"contact",
 				"opportunity",
 				"case",
 				"campaign",
 			]),
+		},
+		{
+			name: "contact",
+			display_name: "取引先責任者",
+			type: "reference",
+			reference_entities: JSON.stringify(["contact"]),
 		},
 		{
 			name: "start_date_time",
