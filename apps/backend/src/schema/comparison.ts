@@ -42,6 +42,11 @@ export const TextFieldComparisonSchema = z
 	})
 	.transform(({ value, ...data }) => ({
 		comparison_type: "text" as const,
+		// LIKE演算子のエスケープ処理:
+		// - % : ワイルドカード（0文字以上の任意の文字列）
+		// - \% : リテラルの % として検索（[%]に変換）
+		// - \\% : リテラルの \% として検索（\[%]に変換）
+		// 注: \ はエスケープ文字としてのみ使用され、\ 自体をエスケープする必要はない
 		value: data.operator === "like" ? value.replace(/\\%/g, "[%]") : value,
 		...data,
 	}))
