@@ -528,7 +528,6 @@ export async function seedEntityItems(prisma: Prisma.TransactionClient) {
 			name: "is_all_day_event",
 			display_name: "終日行動",
 			type: "boolean",
-			is_required: true,
 		},
 		{
 			name: "actual_start_date_time",
