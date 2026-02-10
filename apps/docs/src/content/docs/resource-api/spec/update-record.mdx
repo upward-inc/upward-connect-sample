@@ -1,0 +1,89 @@
+---
+title: レコードの更新
+description: レコードの更新
+sidebar:
+  order: 14
+---
+
+import ParameterTable from '../../../../components/ParameterTable.astro'
+import ParameterTableRow from '../../../../components/ParameterTableRow.astro'
+import ResponseBodyTable from '../../../../components/ResponseBodyTable.astro'
+import ResponseBodyTableRow from '../../../../components/ResponseBodyTableRow.astro'
+
+パスで指定されたエンティティのレコードに対し、リクエストボディの内容で更新する
+
+## 📬 リクエスト
+
+<code>PATCH \{resource_api_url\}/records/\{entity_name\}/\{id\}</code>
+
+### リクエストヘッダ
+
+| キー | 値 |
+| --- | --- |
+| Authorization | `Bearer {アクセストークン}` |
+| Content-Type | `application/json` |
+
+### パスパラメータ
+
+<ParameterTable>
+  <ParameterTableRow name="entity_name" type="文字列" required={true} example="account">
+    更新対象レコードのエンティティ名
+  </ParameterTableRow>
+  <ParameterTableRow name="id" type="文字列" required={true} example="account-00000001">
+    更新対象のレコードID
+  </ParameterTableRow>
+</ParameterTable>
+
+### リクエストボディ
+
+[レコードの作成 - リクエストボディ](/resource-api/spec/create-record#リクエストボディ)と同内容のJSONオブジェクト
+
+## ✨ 成功レスポンス
+
+### ステータスコード
+
+`200` : OK
+
+### レスポンスヘッダ
+
+| キー | 値 |
+| --- | --- |
+| Content-Type | `application/json` |
+
+### レスポンスボディ
+
+<ResponseBodyTable>
+  <ResponseBodyTableRow name="entity_name" type="文字列" required={true} example="account">
+    更新したレコードのエンティティ名
+  </ResponseBodyTableRow>
+  <ResponseBodyTableRow name="id" type="文字列" required={true} example="account-00000001">
+    更新したレコードのID
+  </ResponseBodyTableRow>
+</ResponseBodyTable>
+
+```json title="レスポンスボディのサンプル"
+{
+  "entity_name": "account",
+  "id": "account-00000001"
+}
+```
+
+## 💬 具体的な要求事項
+
+### 基本要求
+
+- 指定されたエンティティ名・レコードIDとフィールドの値を元にレコードを更新してください
+- 更新対象のレコードが存在しない場合は、「`404` : Not Found」エラーを返却してください
+
+### その他（補足等）
+
+- UPWARDから送信されるリクエストボディには、「is_updatable」フィールドが`true`の項目のみ含まれます（`false`の項目についてはサポートする必要はありません）
+- 必要に応じて、貴社が定める仕様に基づいてリクエストボディのバリデーションを行ってください
+
+## 📚 参考資料
+
+なし
+
+## 📝 変更履歴
+
+- YYYY/MM/DD: 初版作成

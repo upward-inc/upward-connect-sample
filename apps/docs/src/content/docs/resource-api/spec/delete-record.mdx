@@ -1,0 +1,68 @@
+---
+title: レコードの削除
+description: レコードの削除
+sidebar:
+  order: 15
+---
+
+import ParameterTable from '../../../../components/ParameterTable.astro'
+import ParameterTableRow from '../../../../components/ParameterTableRow.astro'
+
+パスで指定されたエンティティのレコードを削除する
+
+## 📬 リクエスト
+
+<code>DELETE \{resource_api_url\}/records/\{entity_name\}/\{id\}</code>
+
+### リクエストヘッダ
+
+| キー | 値 |
+| --- | --- |
+| Authorization | `Bearer {アクセストークン}` |
+
+### パスパラメータ
+
+<ParameterTable>
+  <ParameterTableRow name="entity_name" type="文字列" required={true} example="account">
+    削除対象レコードのエンティティ名
+  </ParameterTableRow>
+  <ParameterTableRow name="id" type="文字列" required={true} example="account-00000001">
+    削除対象のレコードID
+  </ParameterTableRow>
+</ParameterTable>
+
+### リクエストボディ
+
+なし
+
+## ✨ 成功レスポンス
+
+### ステータスコード
+
+`204` : No Content
+
+### レスポンスヘッダ
+
+なし
+
+### レスポンスボディ
+
+なし
+
+## 💬 具体的な要求事項
+
+### 基本要求
+
+- 削除対象のレコードが存在しない場合は、「`404` : Not Found」エラーを返却してください
+
+### その他（補足等）
+
+なし
+
+## 📚 参考資料
+
+なし
+
+## 📝 変更履歴
+
+- YYYY/MM/DD: 初版作成
