@@ -46,7 +46,47 @@ import ParameterTableRow from '../../../../components/ParameterTableRow.astro'
 
 ### レスポンスボディ
 
-[単一エンティティ項目の取得 - レスポンスボディ](/resource-api/spec/entity-item#レスポンスボディ)と同内容の配列
+[単一エンティティ項目の取得 - レスポンスボディ](/resource-api/spec-metadata/entity-item#レスポンスボディ)と同内容の配列
+
+```json title="レスポンスボディのサンプル"
+[
+  {
+    "name": "name",
+    "display_name": "取引先名",
+    "type": "text",
+    "sub_type": null,
+    "is_required": true,
+    "is_filterable": true,
+    "is_creatable": true,
+    "is_updatable": true,
+    "is_formula": false,
+    "max_length": 256,
+    "precision": null,
+    "scale": null,
+    "reference_entities": null,
+    "options": [],
+    "default_value": null
+  },
+  {
+    "name": "revenue",
+    "display_name": "売上高",
+    "type": "numeric",
+    "sub_type": "integer",
+    "is_required": false,
+    "is_filterable": true,
+    "is_creatable": true,
+    "is_updatable": true,
+    "is_formula": false,
+    "max_length": null,
+    "precision": 16,
+    "scale": 0,
+    "reference_entities": null,
+    "options": [],
+    "default_value": null
+  },
+  ...
+]
+```
 
 ## 💬 具体的な要求事項
 

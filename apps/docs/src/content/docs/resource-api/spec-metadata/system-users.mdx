@@ -33,8 +33,8 @@ import List from '../../../../components/List.astro'
   <ParameterTableRow name="fields" type="文字列" required={true} example="id, user_name, is_active">
     返却対象のフィールド名（カンマ区切り）
   </ParameterTableRow>
-  <ParameterTableRow name="filter" type="オブジェクト" required={false} example='{ "and": [ { "field": "user_name", "operator": "eq", "value": "yosuke-tahara@example.com" } ] }'>
-    検索条件<br/>参考: <a href="/resource-api/spec/filter-params">filterパラメータ仕様</a>
+  <ParameterTableRow name="filter" type={`<a href="/resource-api/filter-params">filterパラメータ</a>オブジェクト`} required={false} example='{ "and": [ { "field": "industry", "operator": "eq", "value": "public_admin" } ] }'>
+    検索条件
   </ParameterTableRow>
   <ParameterTableRow name="order_by" type="オブジェクトの配列" required={false} example='[{ field: "id", direction: "asc" }]'>
     検索結果のソート条件
@@ -79,7 +79,7 @@ import List from '../../../../components/List.astro'
   <ResponseBodyTableRow name="total_size" type="整数値" required={true} example="371">
     検索条件に合致するシステムユーザー総数
   </ResponseBodyTableRow>
-  <ResponseBodyTableRow name="data" type={`<a href="/resource-api/spec/system-user#レスポンスボディ">単一システムユーザーの取得 - レスポンスボディ</a>と同内容の配列`} required={true} example='[ { "id": "user-00000001", "user_name": "yosuke-tahara@example.com", "first_name": "陽介", ... }, { "id": "user-00000002", "user_name": "akemi-matsushita@example.com", "first_name": "明美", ... }, ... ]'>
+  <ResponseBodyTableRow name="data" type={`<a href="/resource-api/spec-metadata/system-user#レスポンスボディ">単一システムユーザーの取得 - レスポンスボディ</a>と同内容の配列`} required={true} example='[ { "id": "user-00000001", "user_name": "yosuke-tahara@example.com", "first_name": "陽介", ... }, { "id": "user-00000002", "user_name": "akemi-matsushita@example.com", "first_name": "明美", ... }, ... ]'>
     検索結果
   </ResponseBodyTableRow>
 </ResponseBodyTable>
@@ -124,16 +124,16 @@ import List from '../../../../components/List.astro'
 
 ## 💬 具体的な要求事項
 
-- 基本的な検索要件については、[レコード一覧の取得（検索）](/resource-api/spec/records)を参考にし、同等の実装を行ってください
-    - クエリパラメータ内で使用されるフィールドは、 [単一システムユーザーの取得 - レスポンスボディ](/resource-api/spec/system-user#レスポンスボディ)に記載のフィールドが対象となります
+- 基本的な検索要件については、[レコード一覧の検索](/resource-api/spec-record/records)を参考にし、同等の実装を行ってください
+  - クエリパラメータ内で使用されるフィールドは、 [単一システムユーザーの取得 - レスポンスボディ](/resource-api/spec-metadata/system-user#レスポンスボディ)に記載のフィールドが対象となります
 - UPWARDを使用する可能性がないユーザーは返却対象から除外しても構いません
-    - これは「現在UPWARDを利用中のユーザーのみを返却する」という意味ではありません
-    - 今後UPWARDの利用が見込まれるユーザーは対象に含めてください
+  - これは「現在UPWARDを利用中のユーザーのみを返却する」という意味ではありません
+  - 今後UPWARDの利用が見込まれるユーザーは対象に含めてください
 
 ## 📚 参考資料
 
-- [レコード一覧の取得（検索）](/resource-api/spec/records)
-- [filterパラメータ仕様](/resource-api/spec/filter-params)
+- [レコード一覧の検索](/resource-api/spec-record/records)
+- [filterパラメータ仕様](/resource-api/filter-params)
 
 ## 📝 変更履歴
 

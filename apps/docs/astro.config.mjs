@@ -11,29 +11,52 @@ import starlightThemeNova from "starlight-theme-nova"
 export default defineConfig({
 	integrations: [
 		starlight({
-			title: "Docs with Tailwind",
 			plugins: [starlightLinksValidator(), starlightThemeNova()],
+			customCss: ["./src/styles/global.css", "./src/styles/custom.css"],
+			title: "UPWARD CONNECT構築ガイド",
 			social: [
 				{
 					icon: "github",
 					label: "GitHub",
-					href: "https://github.com/withastro/starlight",
+					href: "https://github.com/upward-inc/upward-connect-sample",
 				},
 			],
 			sidebar: [
 				{
-					label: "Guides",
+					label: "はじめに",
+					autogenerate: { directory: "intro" },
+				},
+				{
+					label: "認証・認可API",
 					items: [
-						// Each item here is one entry in the navigation menu.
-						{ label: "Example Guide", slug: "guides/example" },
+						{
+							label: "認証・認可の実装ガイド",
+							link: "auth-api/guide",
+						},
+						{
+							label: "API仕様",
+							autogenerate: { directory: "auth-api/spec" },
+						},
 					],
 				},
 				{
-					label: "Reference",
-					autogenerate: { directory: "reference" },
+					label: "リソースAPI",
+					items: [
+						{
+							label: "API仕様 - メタデータ操作",
+							autogenerate: { directory: "resource-api/spec-metadata" },
+						},
+						{
+							label: "API仕様 - レコード操作",
+							autogenerate: { directory: "resource-api/spec-record" },
+						},
+						{
+							label: "API仕様 - その他",
+							autogenerate: { directory: "resource-api/spec-other" },
+						},
+					],
 				},
 			],
-			customCss: ["./src/styles/global.css", "./src/styles/custom.css"],
 		}),
 
 		// https://starlight-mermaid-demo.netlify.app/configuration/

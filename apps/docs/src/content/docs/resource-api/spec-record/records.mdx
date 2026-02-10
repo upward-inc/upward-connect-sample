@@ -2,7 +2,7 @@
 title: レコード一覧の検索
 description: レコード一覧の検索
 sidebar:
-  order: 12
+  order: 1
 ---
 
 import ParameterTable from '../../../../components/ParameterTable.astro'
@@ -37,7 +37,7 @@ import List from '../../../../components/List.astro'
   <ParameterTableRow name="fields" type="文字列" required={true} example="name,industry,revenue">
     返却対象の項目名（カンマ区切り）
   </ParameterTableRow>
-  <ParameterTableRow name="filter" type={`<a href="/resource-api/spec/filter-params">filterパラメータ</a>オブジェクト`} required={false} example='{ "and": [ { "field": "industry", "operator": "eq", "value": "public_admin" } ] }'>
+  <ParameterTableRow name="filter" type={`<a href="/resource-api/filter-params">filterパラメータ</a>オブジェクト`} required={false} example='{ "and": [ { "field": "industry", "operator": "eq", "value": "public_admin" } ] }'>
     レコード検索条件
   </ParameterTableRow>
   <ParameterTableRow name="group_by" type="文字列" required={false} example="industry">
@@ -193,7 +193,7 @@ import List from '../../../../components/List.astro'
 
 ### 「filter」パラメータ
 
-- [filterパラメータ仕様](/resource-api/spec/filter-params)に従い実装してください
+- [filterパラメータ仕様](/resource-api/filter-params)に従い実装してください
 - 「filter」パラメータが受け取るオブジェクトから貴社システムに対する検索条件を生成し、レコードの検索を行ってください
 
 ### 「group_by」パラメータ
@@ -218,13 +218,13 @@ import List from '../../../../components/List.astro'
 
 ### 「location」パラメータ
 
-- [単一エンティティの取得 - レスポンスボディ](/resource-api/spec/entity#レスポンスボディ)の「has_location」が`true`のエンティティに対する検索時にのみ「location」パラメータが指定されます
-    - 該当しないエンティティにおいては対応する必要はありません
+- [単一エンティティの取得 - レスポンスボディ](/resource-api/spec-metadata/entity#レスポンスボディ)の「has_location」が`true`のエンティティに対する検索時にのみ「location」パラメータが指定されます
+  - 該当しないエンティティにおいては対応する必要はありません
 - 「location」パラメータが指定された場合、通常の検索条件（「filter」パラメータ）に加え、位置情報と半径に基づいた近傍検索を行ってください
-    - 例: 「point」フィールド（例: `{ "latitude": 35.6795964, "longitude": 139.7460797 }`）から「radius」フィールド（例: `10000`メートル）以内のレコード
+  - 例: 「point」フィールド（例: `{ "latitude": 35.6795964, "longitude": 139.7460797 }`）から「radius」フィールド（例: `10000`メートル）以内のレコード
 - 「location」パラメータが指定された場合、返却するレコード一覧の順序は「point」フィールドに指定された位置から近いレコード順としてください（「order_by」パラメータの指定よりも優先してください）
 - 「location」パラメータと「group_by」パラメータが同時に指定された場合、エラーとしてください
-    - UPWARDが送信するリクエストでは、そのようなパラメータの指定は行いません
+  - UPWARDが送信するリクエストでは、そのようなパラメータの指定は行いません
 
 ### 「has_next_page」レスポンスフィールド
 
@@ -241,7 +241,7 @@ import List from '../../../../components/List.astro'
 
 ## 📚 参考資料
 
-- [filterパラメータ仕様](/resource-api/spec/filter-params)
+- [filterパラメータ仕様](/resource-api/filter-params)
 
 ## 📝 変更履歴
 
