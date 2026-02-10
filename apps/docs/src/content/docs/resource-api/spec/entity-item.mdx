@@ -1,0 +1,313 @@
+---
+title: 単一エンティティ項目の取得
+description: 単一エンティティ項目の取得
+sidebar:
+  order: 11
+---
+
+import ParameterTable from '../../../../components/ParameterTable.astro'
+import ParameterTableRow from '../../../../components/ParameterTableRow.astro'
+import ResponseBodyTable from '../../../../components/ResponseBodyTable.astro'
+import ResponseBodyTableRow from '../../../../components/ResponseBodyTableRow.astro'
+import List from '../../../../components/List.astro'
+
+パスで指定された単一のエンティティ項目情報を返却する
+
+## 📬 リクエスト
+
+<code>GET \{resource_api_url\}/entities/\{entity_name\}/items/\{name\}</code>
+
+### リクエストヘッダ
+
+| キー | 値 |
+| --- | --- |
+| Authorization | `Bearer {アクセストークン}` |
+
+### パスパラメータ
+
+<ParameterTable>
+  <ParameterTableRow name="entity_name" type="文字列" required={true} example="account">
+    検索対象のエンティティ名
+  </ParameterTableRow>
+  <ParameterTableRow name="name" type="文字列" required={true} example="name">
+    検索対象のエンティティ項目名
+  </ParameterTableRow>
+</ParameterTable>
+
+### クエリパラメータ
+
+なし
+
+## ✨ 成功レスポンス
+
+### ステータスコード
+
+`200` : OK
+
+### レスポンスヘッダ
+
+| キー | 値 |
+| --- | --- |
+| Content-Type | `application/json` |
+
+### レスポンスボディ
+
+<ResponseBodyTable>
+  <ResponseBodyTableRow name="name" type="文字列" required={true} example="name">
+    項目名
+  </ResponseBodyTableRow>
+  <ResponseBodyTableRow name="display_name" type="文字列" required={true} example="取引先名">
+    項目の表示名
+  </ResponseBodyTableRow>
+  <ResponseBodyTableRow name="type" type="<ul><li><code>text</code></li><li><code>numeric</code></li><li><code>boolean</code></li><li><code>date</code></li><li><code>option</code></li><li><code>reference</code></li></ul>" required={true} example="text">
+    データ型
+    <List items={[
+      "<code>text</code> : 文字列形式のフィールドに対して設定する",
+      "<code>numeric</code> : 数値形式のフィールドに対して設定する",
+      "<code>boolean</code> : 真偽値形式のフィールドに対して設定する",
+      "<code>date</code> : 日付や日時形式のフィールドに対して設定する",
+      "<code>option</code> : オプション形式のフィールドに対して設定する",
+      "<code>reference</code> : 他レコード参照形式のフィールドに対して設定する",
+    ]} />
+  </ResponseBodyTableRow>
+  <ResponseBodyTableRow name="sub_type" type="<ul><li><code>textarea</code></li><li><code>phone</code></li><li><code>email</code></li><li><code>url</code></li><li><code>combobox</code></li><li><code>integer</code></li><li><code>decimal</code></li><li><code>date</code></li><li><code>datetime</code></li><li><code>time</code></li><li><code>single</code></li><li><code>multi</code></li></ul>" required={false} example="null">
+    サブデータ型
+    <List items={[
+      {
+        text: "データ型が<code>text</code>の場合",
+        children: [
+          "<code>textarea</code> : 複数行入力が可能なフィールドに対して設定する",
+          "<code>phone</code> : 電話番号を表すフィールドに対して設定する",
+          "<code>email</code> : メールアドレスを表すフィールドに対して設定する",
+          "<code>url</code> : URLを表すフィールドに対して設定する",
+          "<code>combobox</code> : 入力補助オプション付きフィールドに対して設定する",
+        ],
+      },
+      {
+        text: "データ型が<code>numeric</code>の場合",
+        children: [
+          "<code>integer</code> : 整数を扱うフィールドに対して設定する",
+          "<code>decimal</code> : 小数点以下の値を扱うフィールドに対して設定する",
+        ],
+      },
+      {
+        text: "データ型が<code>date</code>の場合",
+        children: [
+          "<code>date</code> : 日付のみを扱うフィールドに対して設定する",
+          "<code>datetime</code> : 日時（日付と時刻）を扱うフィールドに対して設定する",
+          "<code>time</code> : 時刻のみを扱うフィールドに対して設定する",
+        ],
+      },
+      {
+        text: "データ型が<code>option</code>の場合",
+        children: [
+          "<code>single</code> : 選択肢の中から単一の値を設定するフィールドに対して設定する",
+          "<code>multi</code> : 選択肢の中から複数の値を設定するフィールドに対して設定する",
+        ],
+      },
+      {
+        text: "データ型が<code>reference</code>の場合",
+        children: [
+          "<code>single</code> : 単一のレコードが設定可能なフィールドに対して設定する",
+          "<code>multi</code> : 複数のレコードが設定可能なフィールドに対して設定する",
+        ],
+      },
+    ]} />
+  </ResponseBodyTableRow>
+  <ResponseBodyTableRow name="is_required" type="真偽値" required={true} example="true">
+    必須入力かどうか
+  </ResponseBodyTableRow>
+  <ResponseBodyTableRow name="is_filterable" type="真偽値" required={true} example="true">
+    フィルタリング可能かどうか
+  </ResponseBodyTableRow>
+  <ResponseBodyTableRow name="is_creatable" type="真偽値" required={true} example="true">
+    レコード作成時に指定可能かどうか
+  </ResponseBodyTableRow>
+  <ResponseBodyTableRow name="is_updatable" type="真偽値" required={true} example="true">
+    レコード更新時に指定可能かどうか
+  </ResponseBodyTableRow>
+  <ResponseBodyTableRow name="is_formula" type="真偽値" required={true} example="false">
+    計算によって表現されるフィールドかどうか
+  </ResponseBodyTableRow>
+  <ResponseBodyTableRow name="max_length" type="整数値" required={false} example="256">
+    データ型が<code>text</code>の場合の最大文字数
+  </ResponseBodyTableRow>
+  <ResponseBodyTableRow name="precision" type="整数値" required={false} example="null">
+    データ型が<code>numeric</code>の場合の精度（全体の桁数）
+  </ResponseBodyTableRow>
+  <ResponseBodyTableRow name="scale" type="整数値" required={false} example="null">
+    データ型が<code>numeric</code>の場合の小数点以下の桁数
+  </ResponseBodyTableRow>
+  <ResponseBodyTableRow name="reference_entities" type="文字列の配列" required={false} example="null">
+    データ型が<code>reference</code>の場合の参照先のエンティティ名一覧
+  </ResponseBodyTableRow>
+  <ResponseBodyTableRow name="options" type={`<a href="#optionオブジェクト">optionオブジェクト</a>の配列`} required={false} example="[]">
+    データ型が<code>option</code>の場合、または、サブデータ型が<code>combobox</code>の場合の選択肢一覧
+  </ResponseBodyTableRow>
+  <ResponseBodyTableRow name="default_value" type="-" required={false} example="null">
+    レコード作成時に画面表示されるデフォルト値<br />
+    デフォルト値が存在しない場合は<code>null</code>
+    <List items={[
+      "データ型が<code>text</code>の場合: 文字列",
+      "データ型が<code>numeric</code>の場合: 数値",
+      "データ型が<code>boolean</code>の場合: 真偽値",
+      {
+        text: "データ型が<code>date</code>の場合",
+        children: [
+          "サブデータ型が<code>date</code>の場合: ISO8601日付形式の文字列（<code>YYYY-MM-DD</code>）",
+          "サブデータ型が<code>datetime</code>の場合: ISO8601日時形式の文字列（<code>YYYY-MM-DDTHH:MM[:SS[.s+]]Z</code>）",
+          "サブデータ型が<code>time</code>の場合: ISO8601時刻形式の文字列（<code>HH:MM[:SS[.s+]]</code>）",
+        ],
+      },
+      {
+        text: "データ型が<code>option</code>の場合",
+        children: [
+          'サブデータ型が<code>single</code>の場合: <a href="#optionオブジェクト">optionオブジェクト</a>の<code>name</code>の値',
+          'サブデータ型が<code>multi</code>の場合: <a href="#optionオブジェクト">optionオブジェクト</a>の<code>name</code>の配列',
+        ],
+      },
+      {
+        text: "データ型が<code>reference</code>の場合",
+        children: [
+          'サブデータ型が<code>single</code>の場合: <a href="#レコード参照オブジェクト">レコード参照オブジェクト</a>',
+          'サブデータ型が<code>multi</code>の場合: <a href="#レコード参照オブジェクト">レコード参照オブジェクト</a>の配列',
+        ],
+      },
+    ]} />
+  </ResponseBodyTableRow>
+</ResponseBodyTable>
+
+#### optionオブジェクト
+
+<ResponseBodyTable>
+  <ResponseBodyTableRow name="name" type="文字列" required={true} example="finance">
+    オプション名
+  </ResponseBodyTableRow>
+  <ResponseBodyTableRow name="display_name" type="文字列" required={true} example="金融業">
+    オプションの表示名
+  </ResponseBodyTableRow>
+</ResponseBodyTable>
+
+#### レコード参照オブジェクト
+
+<ResponseBodyTable>
+  <ResponseBodyTableRow name="entity_name" type="文字列" required={true} example="lead">
+    参照レコードのエンティティ名
+  </ResponseBodyTableRow>
+  <ResponseBodyTableRow name="id" type="文字列" required={true} example="lead-00000001">
+    参照レコードのID
+  </ResponseBodyTableRow>
+</ResponseBodyTable>
+
+```json title="レスポンスボディのサンプル（文字列フィールド）"
+{
+  "name": "name",
+  "display_name": "取引先名",
+  "type": "text",
+  "sub_type": null,
+  "is_required": true,
+  "is_filterable": true,
+  "is_creatable": true,
+  "is_updatable": true,
+  "is_formula": false,
+  "max_length": 256,
+  "precision": null,
+  "scale": null,
+  "reference_entities": null,
+  "options": [],
+  "default_value": null
+}
+```
+
+```json title="レスポンスボディのサンプル（数値フィールド）"
+{
+  "name": "revenue",
+  "display_name": "売上高",
+  "type": "numeric",
+  "sub_type": "integer",
+  "is_required": false,
+  "is_filterable": true,
+  "is_creatable": true,
+  "is_updatable": true,
+  "is_formula": false,
+  "max_length": null,
+  "precision": 16,
+  "scale": 0,
+  "reference_entities": null,
+  "options": [],
+  "default_value": null
+}
+```
+
+```json title="レスポンスボディのサンプル（オプションフィールド）"
+{
+  "name": "industry",
+  "display_name": "業種",
+  "type": "option",
+  "sub_type": "single",
+  "is_required": false,
+  "is_filterable": true,
+  "is_creatable": true,
+  "is_updatable": true,
+  "is_formula": false,
+  "max_length": null,
+  "precision": null,
+  "scale": null,
+  "reference_entities": null,
+  "options": [
+    {
+      "name": "finance",
+      "display_name": "金融業"
+    },
+    {
+      "name": "real_estate",
+      "display_name": "不動産業"
+    },
+    ...
+  ],
+  "default_value": "finance"
+}
+```
+
+```json title="レスポンスボディのサンプル（レコード参照フィールド）"
+{
+  "name": "originating_lead",
+  "display_name": "元のリード",
+  "type": "reference",
+  "sub_type": null,
+  "is_required": false,
+  "is_filterable": true,
+  "is_creatable": true,
+  "is_updatable": false,
+  "is_formula": false,
+  "max_length": null,
+  "precision": null,
+  "scale": null,
+  "reference_entities": [
+    "lead"
+  ],
+  "options": [],
+  "default_value": null
+}
+```
+
+## 💬 具体的な要求事項
+
+- 検索対象のエンティティ項目名が存在しない場合は、「`404` : Not Found」エラーを返却してください
+- 「sub_type」フィールド : `combobox`
+  - 任意のテキスト入力を受け付けながら、選択肢による入力補助機能を利用するフィールドの場合に`combobox` を設定します
+  - 「options」フィールドに対しての選択肢一覧の設定も必要になります（[comboboxフィールドの挙動サンプル](/combobox.mp4)）
+- 「is_formula」フィールド
+  - このフィールドの値が `true` である場合（計算によって表現されるフィールドである場合）、以下のフィールドと値の組み合わせを設定してください
+    - is_required: `false`
+    - is_filterable: `true`
+    - is_creatable: `false`
+    - is_updatable: `false`
+
+## 📚 参考資料
+
+なし
+
+## 📝 変更履歴
+
+- YYYY/MM/DD: 初版作成

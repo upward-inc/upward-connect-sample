@@ -1,0 +1,62 @@
+---
+title: エンティティ項目一覧の取得
+description: エンティティ項目一覧の取得
+sidebar:
+  order: 10
+---
+
+import ParameterTable from '../../../../components/ParameterTable.astro'
+import ParameterTableRow from '../../../../components/ParameterTableRow.astro'
+
+エンティティ項目の情報を一覧で返却する
+
+## 📬 リクエスト
+
+<code>GET \{resource_api_url\}/entities/\{entity_name\}/items</code>
+
+### リクエストヘッダ
+
+| キー | 値 |
+| --- | --- |
+| Authorization | `Bearer {アクセストークン}` |
+
+### パスパラメータ
+
+<ParameterTable>
+  <ParameterTableRow name="entity_name" type="文字列" required={true} example="account">
+    検索対象のエンティティ名
+  </ParameterTableRow>
+</ParameterTable>
+
+### クエリパラメータ
+
+なし
+
+## ✨ 成功レスポンス
+
+### ステータスコード
+
+`200` : OK
+
+### レスポンスヘッダ
+
+| キー | 値 |
+| --- | --- |
+| Content-Type | `application/json` |
+
+### レスポンスボディ
+
+[単一エンティティ項目の取得 - レスポンスボディ](/resource-api/spec/entity-item#レスポンスボディ)と同内容の配列
+
+## 💬 具体的な要求事項
+
+- 配列のソート順は任意ですが、冪等になるようルールを設定してください
+- UPWARDで完全に使用しないエンティティ項目は返却対象から除外しても構いません
+
+## 📚 参考資料
+
+なし
+
+## 📝 変更履歴
+
+- YYYY/MM/DD: 初版作成
