@@ -14,7 +14,7 @@ interface Props {
 	name: string
 	type: string
 	required: boolean
-	example: string
+	example?: string
 }
 
 const { name, type, required, example } = Astro.props
@@ -25,5 +25,5 @@ const { name, type, required, example } = Astro.props
 	<td set:html={type} />
 	<td>{required ? "YES" : "NO"}</td>
 	<td><slot /></td>
-	<td><code>{example}</code></td>
+	<td>{example ? <code>{example}</code> : ''}</td>
 </tr>
