@@ -22,9 +22,7 @@ OIDC 1.0で定められた認可やトークン更新処理を行う（各種ト
 | --- | --- |
 | Content-Type | `application/x-www-form-urlencoded` |
 
-### リクエストボディ
-
-#### grant_type: `authorization_code`
+### リクエストボディ（grant_type: `authorization_code`）
 
 <RequestBodyTable>
   <RequestBodyTableRow name="grant_type" type={`<code>authorization_code</code>（固定値）`} required={true} example='authorization_code'>
@@ -47,7 +45,7 @@ OIDC 1.0で定められた認可やトークン更新処理を行う（各種ト
   </RequestBodyTableRow>
 </RequestBodyTable>
 
-#### grant_type: `refresh_token`
+### リクエストボディ（grant_type: `refresh_token`）
 
 <RequestBodyTable>
   <RequestBodyTableRow name="grant_type" type={`<code>refresh_token</code>（固定値）`} required={true} example='refresh_token'>
@@ -76,9 +74,7 @@ OIDC 1.0で定められた認可やトークン更新処理を行う（各種ト
 | --- | --- |
 | Content-Type | `application/json` |
 
-### レスポンスボディ
-
-#### grant_type: `authorization_code`
+### レスポンスボディ（grant_type: `authorization_code`）
 
 <ResponseBodyTable>
   <ResponseBodyTableRow name="token_type" type={`<code>Bearer</code>（固定値）`} required={true} example='Bearer'>
@@ -98,6 +94,8 @@ OIDC 1.0で定められた認可やトークン更新処理を行う（各種ト
   </ResponseBodyTableRow>
 </ResponseBodyTable>
 
+#### レスポンスボディのサンプル
+
 ```json title="レスポンスボディのサンプル"
 {
   "token_type": "Bearer",
@@ -108,7 +106,7 @@ OIDC 1.0で定められた認可やトークン更新処理を行う（各種ト
 }
 ```
 
-#### grant_type: `refresh_token`
+### レスポンスボディ（grant_type: `refresh_token`）
 
 <ResponseBodyTable>
   <ResponseBodyTableRow name="token_type" type={`<code>Bearer</code>（固定値）`} required={true} example='Bearer'>
@@ -124,6 +122,8 @@ OIDC 1.0で定められた認可やトークン更新処理を行う（各種ト
     アクセストークンの有効期限（秒）
   </ResponseBodyTableRow>
 </ResponseBodyTable>
+
+#### レスポンスボディのサンプル
 
 ```json title="レスポンスボディのサンプル"
 {

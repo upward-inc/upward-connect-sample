@@ -124,16 +124,25 @@ import List from '../../../../components/List.astro'
           'サブデータ型が<code>multi</code>の場合 : <a href="#レコード参照オブジェクト">レコード参照オブジェクト</a>の配列',
         ],
       },
-      {
-        text: "「location」パラメータ指定時に追加で付与するローケーションフィールド",
-        children: [
-          "フィールド名: <code>_location</code>",
-          'フィールド形式: <a href="#ロケーションフィールドオブジェクト">ロケーションフィールドオブジェクト</a>',
-        ],
-      },
     ]} />
   </ResponseBodyTableRow>
 </ResponseBodyTable>
+
+#### レコード参照オブジェクト
+
+<ResponseBodyTable>
+  <ResponseBodyTableRow name="entity_name" type="文字列" required={true} example="lead">
+    参照レコードのエンティティ名
+  </ResponseBodyTableRow>
+  <ResponseBodyTableRow name="id" type="文字列" required={true} example="lead-00000001">
+    参照レコードのID
+  </ResponseBodyTableRow>
+  <ResponseBodyTableRow name="title" type="文字列" required={true} example="株式会社 ABC">
+    参照レコードのタイトル
+  </ResponseBodyTableRow>
+</ResponseBodyTable>
+
+#### レスポンスボディのサンプル
 
 ```json title="レスポンスボディのサンプル"
 {
@@ -152,34 +161,6 @@ import List from '../../../../components/List.astro'
     },
     ...
   ]
-}
-```
-
-#### レコード参照オブジェクト
-
-```json title="レコード参照オブジェクトのサンプル"
-{
-  "entity_name": "account",
-  "id": "account-00000001",
-  "title": "株式会社 ABC"
-}
-```
-
-#### ロケーションフィールドオブジェクト
-
-<ResponseBodyTable>
-  <ResponseBodyTableRow name="latitude" type="数値" required={true} example="35.6853504">
-    レコードの緯度
-  </ResponseBodyTableRow>
-  <ResponseBodyTableRow name="longitude" type="数値" required={true} example="139.7580205">
-    レコードの経度
-  </ResponseBodyTableRow>
-</ResponseBodyTable>
-
-```json title="ロケーションフィールドオブジェクトのサンプル"
-{
-  "latitude": 35.6853504,
-  "longitude": 139.7580205
 }
 ```
 

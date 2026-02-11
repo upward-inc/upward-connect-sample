@@ -51,6 +51,19 @@ import ResponseBodyTableRow from '../../../../components/ResponseBodyTableRow.as
     - 項目のサブデータ型が`single`の場合: [レコード参照オブジェクト](#レコード参照オブジェクト)
     - 項目のサブデータ型が`multi`の場合: [レコード参照オブジェクト](#レコード参照オブジェクト)の配列
 
+#### レコード参照オブジェクト
+
+<ResponseBodyTable>
+  <ResponseBodyTableRow name="entity_name" type="文字列" required={true} example="lead">
+    参照レコードのエンティティ名
+  </ResponseBodyTableRow>
+  <ResponseBodyTableRow name="id" type="文字列" required={true} example="lead-00000001">
+    参照レコードのID
+  </ResponseBodyTableRow>
+</ResponseBodyTable>
+
+#### リクエストボディのサンプル
+
 ```json title="リクエストボディのサンプル"
 {
   "text_field": "ABC",
@@ -70,17 +83,6 @@ import ResponseBodyTableRow from '../../../../components/ResponseBodyTableRow.as
   ]
 }
 ```
-
-#### レコード参照オブジェクト
-
-<ResponseBodyTable>
-  <ResponseBodyTableRow name="entity_name" type="文字列" required={true} example="lead">
-    参照レコードのエンティティ名
-  </ResponseBodyTableRow>
-  <ResponseBodyTableRow name="id" type="文字列" required={true} example="lead-00000001">
-    参照レコードのID
-  </ResponseBodyTableRow>
-</ResponseBodyTable>
 
 ## ✨ 成功レスポンス
 
@@ -104,6 +106,8 @@ import ResponseBodyTableRow from '../../../../components/ResponseBodyTableRow.as
     作成したレコードのID
   </ResponseBodyTableRow>
 </ResponseBodyTable>
+
+#### レスポンスボディのサンプル
 
 ```json title="レスポンスボディのサンプル"
 {

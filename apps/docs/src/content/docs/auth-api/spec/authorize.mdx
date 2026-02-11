@@ -67,7 +67,7 @@ OIDC 1.0で定められた認可処理を行う（認可コードを返却する
 | --- | --- |
 | Content-Type | `text/html` |
 
-### レスポンスボディ
+### レスポンスクエリ
 
 <ResponseBodyTable>
   <ResponseBodyTableRow name="code" type="文字列" required={true} example='xJ1pprG9aRO8WYesHQXc7t7jBb8XBhMjbHcw8s1YT_zrSKxWdZFs-qKv51l0dK9ufodw0RLQkIZerPGEcl5GFiaFR8vN0nSKh8UgSvdU4YbIKxydQgOcaTHWA3i10EqZ'>
@@ -77,6 +77,8 @@ OIDC 1.0で定められた認可処理を行う（認可コードを返却する
     リクエストで受け取ったstateパラメータの値
   </ResponseBodyTableRow>
 </ResponseBodyTable>
+
+#### レスポンスのサンプル
 
 ```plaintext title="レスポンスのサンプル（改行は掲載上の都合による）"
 HTTP/1.1 302 Found
