@@ -1,5 +1,4 @@
 import { format } from "@formkit/tempo"
-import { fi } from "zod/v4/locales"
 import { prisma } from "../../libs/prisma"
 import type { JsonValue } from "../../schema/common"
 import { collectFilterFields } from "../../schema/filter"
@@ -229,6 +228,7 @@ const covertRecords = async (
 					}
 					continue
 				}
+
 				if (type === "numeric") {
 					value = typeof value === "number" ? value : Number(value)
 				}
