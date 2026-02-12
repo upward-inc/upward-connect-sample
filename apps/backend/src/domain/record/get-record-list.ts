@@ -1,4 +1,5 @@
 import { format } from "@formkit/tempo"
+import { fi } from "zod/v4/locales"
 import { prisma } from "../../libs/prisma"
 import type { JsonValue } from "../../schema/common"
 import { collectFilterFields } from "../../schema/filter"
@@ -218,12 +219,13 @@ const covertRecords = async (
 			if (type) {
 				// nullの場合は早期リターン
 				if (value === null) {
-					data = {
-						...data,
-						[field]:
-							["option", "reference"].includes(type) && sub_type === "multi"
-								? []
-								: null,
+					if (
+						(type === "option" || type === "reference") &&
+						sub_type === "multi"
+					) {
+						data[field] = []
+					} else {
+						data[field] = null
 					}
 					continue
 				}
