@@ -215,7 +215,18 @@ const covertRecords = async (
 			const { type, sub_type } = entityItemMap.get(field) ?? {}
 			let value = row[field]
 
-			if (value !== null && type) {
+			if (type) {
+				// nullの場合は早期リターン
+				if (value === null) {
+					data = {
+						...data,
+						[field]:
+							["option", "reference"].includes(type) && sub_type === "multi"
+								? []
+								: null,
+					}
+					continue
+				}
 				if (type === "numeric") {
 					value = typeof value === "number" ? value : Number(value)
 				}
