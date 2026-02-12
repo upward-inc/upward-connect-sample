@@ -1661,4 +1661,87 @@ describe("GET /records/:entity_name - レコード一覧取得（検索）", () 
 			})
 		})
 	})
+
+	describe("空値の返却値", () => {
+		describe("option型", () => {
+			it.each([
+				{
+					title: "sub_type=single, 値=null",
+					testRecord: { name: "Record", option_single: null },
+					field: "option_single",
+					expected: null,
+				},
+				{
+					title: "sub_type=single, 値=[]",
+					testRecord: { name: "Record", option_single: "" },
+					field: "option_single",
+					expected: null,
+				},
+				{
+					title: "sub_type=multi, 値=null",
+					testRecord: { name: "Record", option_multi: null },
+					field: "option_multi",
+					expected: [],
+				},
+				{
+					title: "sub_type=multi, 値=[]",
+					testRecord: { name: "Record", option_multi: [] },
+					field: "option_multi",
+					expected: [],
+				},
+			])("$title", async ({ testRecord, field, expected }) => {
+				// Arrange
+				await createTestSample(testExecutionUser.id, testRecord)
+
+				// Act
+				const response = await requestGet("sample", { fields: field })
+
+				// Assert
+				const { data } = await response.json()
+				expect(data).toStrictEqual([{ [field]: expected }])
+			})
+		})
+
+		describe("reference型", () => {
+			it.each([
+				{
+					title: "sub_type=single, 値=null",
+					testRecord: {
+						name: "Record",
+						reference_single_target_single_id: null,
+					},
+					field: "reference_single_target_single_id",
+					expected: null,
+				},
+				{
+					title: "sub_type=multi, 値=null",
+					testRecord: {
+						name: "Record",
+						reference_multi_target_multi_id: null,
+					},
+					field: "reference_multi_target_multi_id",
+					expected: [],
+				},
+				{
+					title: "sub_type=multi, 値=[]",
+					testRecord: {
+						name: "Record",
+						reference_multi_target_multi_id: [],
+					},
+					field: "reference_multi_target_multi_id",
+					expected: [],
+				},
+			])("$title", async ({ testRecord, field, expected }) => {
+				// Arrange
+				await createTestSample(testExecutionUser.id, testRecord)
+
+				// Act
+				const response = await requestGet("sample", { fields: field })
+
+				// Assert
+				const { data } = await response.json()
+				expect(data).toStrictEqual([{ [field]: expected }])
+			})
+		})
+	})
 })
