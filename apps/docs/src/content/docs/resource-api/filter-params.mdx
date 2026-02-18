@@ -1,0 +1,190 @@
+---
+title: filterパラメータ仕様
+description: 構成データの取得
+sidebar:
+  hidden: true
+---
+
+import RequestBodyTable from '../../../components/RequestBodyTable.astro'
+import RequestBodyTableRow from '../../../components/RequestBodyTableRow.astro'
+
+「filter」は検索条件を表すオブジェクト形式のパラメータです。
+
+[単一条件式](#単一条件式)を配列に持つ[「and」プロパティ、または、「or」プロパティ](#andプロパティ--orプロパティ)により構成されます。
+
+```
+filter={ "and": [ { "field": "industry", "operator": "eq", "value": "public_admin" } ] }
+```
+
+## 単一条件式
+
+「filter」の最小構成単位は、一つの検索対象に対する条件式を表現するオブジェクトです。
+
+以下のプロパティにより構成されます：
+
+<RequestBodyTable>
+  <RequestBodyTableRow name="field" type="文字列" required={true} example="industry">
+    検索対象のフィールド
+  </RequestBodyTableRow>
+  <RequestBodyTableRow name="operator" type="固定値" required={true} example="eq">
+    比較演算子
+  </RequestBodyTableRow>
+  <RequestBodyTableRow name="value" type="（検索対象により異なる）" required={false} example="public_admin">
+    比較する値
+  </RequestBodyTableRow>
+  <RequestBodyTableRow name="is_not" type="真偽値" required={false} example="true">
+    否定条件であるかどうか
+  </RequestBodyTableRow>
+</RequestBodyTable>
+
+「field」は検索対象のフィールドを表すプロパティであり、エンティティの項目名等が該当します。
+
+「operator」は比較演算子を表すプロパティであり、検索対象フィールドの値の形式（≒ エンティティ項目データ型）ごとにサポートの必要性が異なります：
+
+| 比較演算子 | 演算子の意味 | <span className="text-green-600">文字列形式</span>のフィールドに対してサポートが必要 | <span className="text-green-600">数値形式</span>のフィールドに対してサポートが必要 | <span className="text-green-600">真偽値形式</span>のフィールドに対してサポートが必要 | <span className="text-green-600">日付や日時形式</span>のフィールドに対してサポートが必要 | <span className="text-green-600">オプション形式（単一選択）</span>のフィールドに対してサポートが必要 | <span className="text-green-600">オプション形式（複数選択）</span>のフィールドに対してサポートが必要 | <span className="text-green-600">他レコード参照形式（単一選択）</span>のフィールドに対してサポートが必要 | <span className="text-green-600">他レコード参照形式（複数選択）</span>のフィールドに対してサポートが必要 |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| `eq` (equal) | 指定した値と一致する | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| `like` | 曖昧検索 | ✅ | - | - | - | - | - | - | - | - |
+| `gt` (greater than) | 指定した値より大きい | ✅ | ✅ | - | ✅ | - | - | - | - |
+| `gte` (greater than equal) | 指定した値以上 | ✅ | ✅ | - | ✅ | - | - | - | - |
+| `lt` (less than) | 指定した値より小さい | ✅ | ✅ | - | ✅ | - | - | - | - |
+| `lte` (less than equal) | 指定した値以下 | ✅ | ✅ | - | ✅ | - | - | - | - |
+| `includes` | 指定した値を含む | - | - | - | - | - | ✅ | - | ✅ |
+| `is_set` | 値が設定されている | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+
+「operator」が`is_set` の場合は、下記「value」プロパティは渡されません。
+
+「value」は比較する値を表すプロパティであり、検索対象フィールドの値の形式（≒ エンティティ項目データ型）により設定される値の種類が異なります：
+
+- 文字列形式の場合: 文字列
+  - `like` 演算子指定時には文字列中に一つ以上の`%`が含まれます
+    - 例1: `%会社` （文字列が「会社」で終わる）
+    - 例2: `%川%` （文字列に「川」を含む）
+    - 例3: `%会社%川%工業%` （文字列に「会社」「川」「工業」をそれぞれ含み、出現順も一致する）
+- 数値形式の場合: 数値
+- 真偽値形式の場合: 真偽値
+- 日付や日時形式の場合:
+  - 日付形式の場合: ISO8601日付形式の文字列（`YYYY-MM-DD`）
+  - 時刻形式の場合: ISO8601時刻形式の文字列（`HH:MM[:SS[.s+]]`）
+  - 日時形式の場合: ISO8601日時形式の文字列（`YYYY-MM-DDTHH:MM[:SS[.s+]]Z`）
+- オプション形式の場合: 文字列（オプション名）
+- 他レコード参照形式の場合: レコード参照を表すオブジェクト（`{ "entity_name": "エンティティ名", "id": "レコードID" }`）
+
+これらのプロパティの組み合わせにより、単一の条件式が表現されます。
+
+```json title="単一条件式のサンプル"
+// 例1: 項目`item-a`（text）の値が`value-a`と一致する
+{ "field": "item-a", "operator": "eq", "value": "value-a" }
+
+// 例2: 項目`item-b`（date - datetime）の値が`2025-01-01T00:00:00Z`以上
+{ "field": "item-b", "operator": "gte", "value": "2025-01-01T00:00:00Z" }
+
+// 例3: 項目`item-c`（option - 複数選択）の値が`option1`を含む
+{ "field": "item-c", "operator": "includes", "value": "option1" }
+
+// 例4: 項目`item-d`（他レコード参照形式 - 単一選択）の値がレコード`account-00000001`（`account`エンティティ）と一致する
+{ "field": "item-d", "operator": "eq", "value": { "entity_name": "account", "id": "account-00000001" } }
+
+// 例5: 項目`item-e`の値が設定されている
+{ "field": "item-e", "operator": "is_set" }
+```
+
+これらのプロパティに「`"is_not": true`」が付与される場合、否定を表す条件となります。
+
+```json title="単一条件式のサンプル（否定条件）"
+// 例1: 項目`item-a`（text）の値が`value-a`と一致しない
+{ "field": "item-a", "operator": "eq", "value": "value-a", "is_not": true }
+
+// 例2: 項目`item-b`（date - datetime）の値が`2025-01-01T00:00:00Z`以上でない
+{ "field": "item-b", "operator": "gte", "value": "2025-01-01T00:00:00Z", "is_not": true }
+
+// 例3: 項目`item-c`（option - 複数選択）の値が`option1`を含まない
+{ "field": "item-c", "operator": "includes", "value": "option1", "is_not": true }
+
+// 例4: 項目`item-d`（他レコード参照形式 - 単一選択）の値がレコード`account-00000001`（`account`エンティティ）と一致しない
+{ "field": "item-d", "operator": "eq", "value": { "entity_name": "account", "id": "account-00000001" }, "is_not": true }
+
+// 例5: 項目`item-e`の値が設定されていない
+{ "field": "item-e", "operator": "is_set", "is_not": true }
+```
+
+### 曖昧さを含む条件について
+
+特定のプロパティの組み合わせにより、曖昧さを含む条件式となる場合が生じますが、このような曖昧さを含む条件の解釈についてUPWARDは具体的な定義や要求を行いません。<br/>
+貴社システムの都合や利便性等の観点で任意の仕様を定義してください。
+
+曖昧さが生じる例：
+
+- 「`"operator": "is_set"`」において、空文字（文字列の場合）やゼロ（数値の場合）を除外するか、否か
+
+## 「and」プロパティ / 「or」プロパティ
+
+「and」/「or」はいずれも[単一条件式](#単一条件式)、または、自身の構造と同じオブジェクトを配列に持つプロパティです。
+
+```json title="「and」プロパティ / 「or」プロパティのサンプル"
+// 例1: 項目`item-a`の値が`value-a`と一致する かつ 項目`item-b`の値が`100`以上
+{
+  "and": [
+    { "field": "item-a", "operator": "eq", "value": "value-a" },
+    { "field": "item-b", "operator": "gte", "value": 100 }
+  ]
+}
+
+// 例2: 項目`item-a`の値が`value-a`と一致する または 項目`item-b`の値が`100`以上
+{
+  "or": [
+    { "field": "item-a", "operator": "eq", "value": "value-a" },
+    { "field": "item-b", "operator": "gte", "value": 100 }
+  ]
+}
+```
+
+AND条件 / OR条件が組み合わさる検索条件を表現する場合にオブジェクトの入れ子構造が使用されます。<br/>
+（このような入れ子構造は3階層までの対応のみで良く、無制限の入れ子構造に対応する必要はありません。）
+
+```json title="「and」プロパティ / 「or」プロパティのサンプル（入れ子構造）"
+// 例1 - 2階層の入れ子構造: 項目`item-a`の値が`value-a`と一致する かつ (項目`item-b`の値が`option5`と一致する または 項目`item-b`の値が`option6`と一致する または 項目`item-b`の値が`option7`と一致する)
+{
+  "and": [
+    { "field": "item-a", "operator": "eq", "value": "value-a" },
+    {
+      "or": [
+        { "field": "item-b", "operator": "eq", "value": "option5" },
+        { "field": "item-b", "operator": "eq", "value": "option6" },
+        { "field": "item-b", "operator": "eq", "value": "option7" }
+      ]
+    }
+  ]
+}
+
+// 例2 - 2階層の入れ子構造: 項目`item-a`の値が`value-a`と一致する または (項目`item-c`の値が`100`以上 かつ 項目`item-d`の値が`true`と一致する)
+{
+  "or": [
+    { "field": "item-a", "operator": "eq", "value": "value-a" },
+    {
+      "and": [
+        { "field": "item-c", "operator": "gte", "value": 100 },
+        { "field": "item-d", "operator": "eq", "value": true }
+      ]
+    }
+  ]
+}
+
+// 例3 - 3階層の入れ子構造: 項目`item-a`の値が`value-a`と一致する かつ ((項目`item-c`の値が`100`以上 かつ 項目`item-d`の値が`true`と一致する) または 項目`item-b`の値が`option5`と一致する)
+{
+  "and": [
+    { "field": "item-a", "operator": "eq", "value": "value-a" },
+    {
+      "or": [
+        {
+          "and": [
+            { "field": "item-c", "operator": "gte", "value": 100 },
+            { "field": "item-d", "operator": "eq", "value": true }
+          ]
+        },
+        { "field": "item-b", "operator": "eq", "value": "option5" }
+      ]
+    }
+  ]
+}
+```
