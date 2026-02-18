@@ -1,0 +1,60 @@
+---
+title: 単一ファイルの取得
+description: 単一ファイルの取得
+sidebar:
+  order: 1
+---
+
+import ParameterTable from '../../../../components/ParameterTable.astro'
+import ParameterTableRow from '../../../../components/ParameterTableRow.astro'
+
+パスで指定されたIDのファイルを返却する
+
+## 📬 リクエスト
+
+<code>GET \{resource_api_url\}/files/\{id\}</code>
+
+### リクエストヘッダ
+
+| キー | 値 |
+| --- | --- |
+| Authorization | `Bearer {アクセストークン}` |
+
+### パスパラメータ
+
+<ParameterTable>
+  <ParameterTableRow name="id" type="文字列" required={true} example="file-00000001">
+    検索対象のファイルID
+  </ParameterTableRow>
+</ParameterTable>
+
+### クエリパラメータ
+
+なし
+
+## ✨ 成功レスポンス
+
+### ステータスコード
+
+`200` : OK
+
+### レスポンスヘッダ
+
+| キー | 値 |
+| --- | --- |
+| Content-Type | 返却対象ファイルのコンテンツタイプ |
+| Content-Disposition | `inline` |
+
+### レスポンスボディ
+
+対象ファイルのバイナリ
+
+## 💬 具体的な要求事項
+
+### 基本要求
+
+- 検索対象のファイルIDが存在しない場合は、「`404` : Not Found」エラーを返却してください
+
+## 📚 参考資料
+
+なし
