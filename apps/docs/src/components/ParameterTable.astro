@@ -1,0 +1,27 @@
+---
+/**
+ * パラメータ専用のテーブル
+ *
+ * @example
+ * ```
+ * <ParameterTable>
+ *   {table rows here}
+ * </ParameterTable>
+ * ```
+ */
+---
+
+<table>
+	<thead>
+		<tr>
+			<th style={{ minWidth: "10rem" }}>パラメータ</th>
+			<th style={{ minWidth: "10rem" }}>形式</th>
+			<th>必須</th>
+			<th style={{ minWidth: "25rem" }}>説明</th>
+			<th style={{ minWidth: "20rem" }}>値の例</th>
+		</tr>
+	</thead>
+	<tbody>
+		<slot />
+	</tbody>
+</table>
