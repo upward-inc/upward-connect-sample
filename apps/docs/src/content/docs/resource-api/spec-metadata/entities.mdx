@@ -49,6 +49,10 @@ sidebar:
     "name": "account",
     "type": "account",
     "display_name": "取引先",
+    "record_url_format": {
+      "app": "http://url-test.app.localhost/records/account/{id}",
+      "browser": "http://url-test.browser.localhost/records/account/{id}"
+    },
     "has_location": true,
     "item_mapping": {
       "id": "id",
@@ -66,6 +70,7 @@ sidebar:
     "name": "opportunity",
     "type": null,
     "display_name": "商談",
+    "record_url_format": null,
     "has_location": false,
     "item_mapping": {
       "id": "id",
