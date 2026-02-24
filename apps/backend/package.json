@@ -21,6 +21,7 @@
 		"@scalar/hono-api-reference": "^0.8.8",
 		"hono": "^4.7.9",
 		"jsonwebtoken": "^9.0.2",
+		"nanoid": "^5.1.6",
 		"zod": "^4.1.12"
 	},
 	"devDependencies": {
