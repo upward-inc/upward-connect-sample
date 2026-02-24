@@ -5,6 +5,7 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
+    target-branch: "develop"
     labels:
       - "dependencies"
     commit-message:
@@ -15,6 +16,7 @@ updates:
     directory: "/apps/backend"
     schedule:
       interval: "weekly"
+    target-branch: "develop"
     labels:
       - "dependencies"
       - "backend"
@@ -26,6 +28,7 @@ updates:
     directory: "/apps/frontend"
     schedule:
       interval: "weekly"
+    target-branch: "develop"
     labels:
       - "dependencies"
       - "frontend"
@@ -37,6 +40,7 @@ updates:
     directory: "/apps/docs"
     schedule:
       interval: "weekly"
+    target-branch: "develop"
     labels:
       - "dependencies"
       - "docs"
@@ -48,6 +52,7 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
+    target-branch: "develop"
     labels:
       - "dependencies"
       - "github-actions"
