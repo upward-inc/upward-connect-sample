@@ -12,7 +12,10 @@ import { Input } from "../components/input"
 import { Label } from "../components/label"
 
 const SearchParamsSchema = z.object({
-	redirect: z.string().optional(),
+	redirect: z.string().refine(
+        (url) => url.startsWith('/') && !url.startsWith('//'),
+        { message: 'Only relative paths are allowed' }
+    ).optional(),
 })
 
 const fallback = "/private" as const
