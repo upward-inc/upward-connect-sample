@@ -18,10 +18,10 @@ const SearchParamsSchema = z.object({
 const fallback = "/private" as const
 
 export const Route = createFileRoute("/login")({
-	beforeLoad: ({ context }) => {
+	beforeLoad: ({ context, search }) => {
 		// すでに認証済みの場合はリダイレクト
 		if (context.auth.isAuthenticated) {
-			throw redirect({ to: fallback })
+			throw redirect({ href: search.redirect ?? fallback })
 		}
 	},
 	component: Login,
