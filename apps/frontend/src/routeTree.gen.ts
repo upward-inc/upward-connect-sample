@@ -8,117 +8,89 @@
 // You should NOT make any changes in this file as it will be overwritten.
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
-import { Route as rootRouteImport } from './routes/__root'
-import { Route as LoginRouteImport } from './routes/login'
-import { Route as AuthRouteImport } from './routes/_auth'
-import { Route as IndexRouteImport } from './routes/index'
-import { Route as AuthPrivateRouteImport } from './routes/_auth/private'
-import { Route as AuthOauth2AuthorizeRouteImport } from './routes/_auth/oauth2/authorize'
+// Import Routes
 
-const LoginRoute = LoginRouteImport.update({
+import { Route as rootRoute } from './routes/__root'
+import { Route as LoginImport } from './routes/login'
+import { Route as AuthImport } from './routes/_auth'
+import { Route as IndexImport } from './routes/index'
+import { Route as AuthPrivateImport } from './routes/_auth/private'
+import { Route as AuthOauth2AuthorizeImport } from './routes/_auth/oauth2/authorize'
+
+// Create/Update Routes
+
+const LoginRoute = LoginImport.update({
   id: '/login',
   path: '/login',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => rootRoute,
 } as any)
-const AuthRoute = AuthRouteImport.update({
+
+const AuthRoute = AuthImport.update({
   id: '/_auth',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => rootRoute,
 } as any)
-const IndexRoute = IndexRouteImport.update({
+
+const IndexRoute = IndexImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => rootRoute,
 } as any)
-const AuthPrivateRoute = AuthPrivateRouteImport.update({
+
+const AuthPrivateRoute = AuthPrivateImport.update({
   id: '/private',
   path: '/private',
   getParentRoute: () => AuthRoute,
 } as any)
-const AuthOauth2AuthorizeRoute = AuthOauth2AuthorizeRouteImport.update({
+
+const AuthOauth2AuthorizeRoute = AuthOauth2AuthorizeImport.update({
   id: '/oauth2/authorize',
   path: '/oauth2/authorize',
   getParentRoute: () => AuthRoute,
 } as any)
 
-export interface FileRoutesByFullPath {
-  '/': typeof IndexRoute
-  '/login': typeof LoginRoute
-  '/private': typeof AuthPrivateRoute
-  '/oauth2/authorize': typeof AuthOauth2AuthorizeRoute
-}
-export interface FileRoutesByTo {
-  '/': typeof IndexRoute
-  '/login': typeof LoginRoute
-  '/private': typeof AuthPrivateRoute
-  '/oauth2/authorize': typeof AuthOauth2AuthorizeRoute
-}
-export interface FileRoutesById {
-  __root__: typeof rootRouteImport
-  '/': typeof IndexRoute
-  '/_auth': typeof AuthRouteWithChildren
-  '/login': typeof LoginRoute
-  '/_auth/private': typeof AuthPrivateRoute
-  '/_auth/oauth2/authorize': typeof AuthOauth2AuthorizeRoute
-}
-export interface FileRouteTypes {
-  fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/login' | '/private' | '/oauth2/authorize'
-  fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/login' | '/private' | '/oauth2/authorize'
-  id:
-    | '__root__'
-    | '/'
-    | '/_auth'
-    | '/login'
-    | '/_auth/private'
-    | '/_auth/oauth2/authorize'
-  fileRoutesById: FileRoutesById
-}
-export interface RootRouteChildren {
-  IndexRoute: typeof IndexRoute
-  AuthRoute: typeof AuthRouteWithChildren
-  LoginRoute: typeof LoginRoute
-}
+// Populate the FileRoutesByPath interface
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/login': {
-      id: '/login'
-      path: '/login'
-      fullPath: '/login'
-      preLoaderRoute: typeof LoginRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/_auth': {
-      id: '/_auth'
-      path: ''
-      fullPath: '/'
-      preLoaderRoute: typeof AuthRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/': {
       id: '/'
       path: '/'
       fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof IndexImport
+      parentRoute: typeof rootRoute
+    }
+    '/_auth': {
+      id: '/_auth'
+      path: ''
+      fullPath: ''
+      preLoaderRoute: typeof AuthImport
+      parentRoute: typeof rootRoute
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginImport
+      parentRoute: typeof rootRoute
     }
     '/_auth/private': {
       id: '/_auth/private'
       path: '/private'
       fullPath: '/private'
-      preLoaderRoute: typeof AuthPrivateRouteImport
-      parentRoute: typeof AuthRoute
+      preLoaderRoute: typeof AuthPrivateImport
+      parentRoute: typeof AuthImport
     }
     '/_auth/oauth2/authorize': {
       id: '/_auth/oauth2/authorize'
       path: '/oauth2/authorize'
       fullPath: '/oauth2/authorize'
-      preLoaderRoute: typeof AuthOauth2AuthorizeRouteImport
-      parentRoute: typeof AuthRoute
+      preLoaderRoute: typeof AuthOauth2AuthorizeImport
+      parentRoute: typeof AuthImport
     }
   }
 }
+
+// Create and export the route tree
 
 interface AuthRouteChildren {
   AuthPrivateRoute: typeof AuthPrivateRoute
@@ -132,11 +104,94 @@ const AuthRouteChildren: AuthRouteChildren = {
 
 const AuthRouteWithChildren = AuthRoute._addFileChildren(AuthRouteChildren)
 
+export interface FileRoutesByFullPath {
+  '/': typeof IndexRoute
+  '': typeof AuthRouteWithChildren
+  '/login': typeof LoginRoute
+  '/private': typeof AuthPrivateRoute
+  '/oauth2/authorize': typeof AuthOauth2AuthorizeRoute
+}
+
+export interface FileRoutesByTo {
+  '/': typeof IndexRoute
+  '': typeof AuthRouteWithChildren
+  '/login': typeof LoginRoute
+  '/private': typeof AuthPrivateRoute
+  '/oauth2/authorize': typeof AuthOauth2AuthorizeRoute
+}
+
+export interface FileRoutesById {
+  __root__: typeof rootRoute
+  '/': typeof IndexRoute
+  '/_auth': typeof AuthRouteWithChildren
+  '/login': typeof LoginRoute
+  '/_auth/private': typeof AuthPrivateRoute
+  '/_auth/oauth2/authorize': typeof AuthOauth2AuthorizeRoute
+}
+
+export interface FileRouteTypes {
+  fileRoutesByFullPath: FileRoutesByFullPath
+  fullPaths: '/' | '' | '/login' | '/private' | '/oauth2/authorize'
+  fileRoutesByTo: FileRoutesByTo
+  to: '/' | '' | '/login' | '/private' | '/oauth2/authorize'
+  id:
+    | '__root__'
+    | '/'
+    | '/_auth'
+    | '/login'
+    | '/_auth/private'
+    | '/_auth/oauth2/authorize'
+  fileRoutesById: FileRoutesById
+}
+
+export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
+  AuthRoute: typeof AuthRouteWithChildren
+  LoginRoute: typeof LoginRoute
+}
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthRoute: AuthRouteWithChildren,
   LoginRoute: LoginRoute,
 }
-export const routeTree = rootRouteImport
+
+export const routeTree = rootRoute
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+/* ROUTE_MANIFEST_START
+{
+  "routes": {
+    "__root__": {
+      "filePath": "__root.tsx",
+      "children": [
+        "/",
+        "/_auth",
+        "/login"
+      ]
+    },
+    "/": {
+      "filePath": "index.tsx"
+    },
+    "/_auth": {
+      "filePath": "_auth.tsx",
+      "children": [
+        "/_auth/private",
+        "/_auth/oauth2/authorize"
+      ]
+    },
+    "/login": {
+      "filePath": "login.tsx"
+    },
+    "/_auth/private": {
+      "filePath": "_auth/private.tsx",
+      "parent": "/_auth"
+    },
+    "/_auth/oauth2/authorize": {
+      "filePath": "_auth/oauth2/authorize.tsx",
+      "parent": "/_auth"
+    }
+  }
+}
+ROUTE_MANIFEST_END */
