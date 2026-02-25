@@ -1,8 +1,8 @@
 import starlight from "@astrojs/starlight"
 import tailwindcss from "@tailwindcss/vite"
-import mermaid from "astro-mermaid"
 // @ts-check
 import { defineConfig } from "astro/config"
+import mermaid from "astro-mermaid"
 import starlightLinksValidator from "starlight-links-validator"
 import starlightThemeNova from "starlight-theme-nova"
 
