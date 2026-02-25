@@ -96,6 +96,7 @@ export const updateRecord = async (
 					value: escapeStringValue(JSON.stringify(result.value)),
 				}
 			}
+			return undefined
 		})
 		.filter((v) => !!v)
 		.map(({ column, value }) => `${escapeName(column)} = ${value}`)

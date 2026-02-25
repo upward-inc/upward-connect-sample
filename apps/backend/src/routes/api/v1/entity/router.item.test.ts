@@ -5,9 +5,9 @@ import {
 	setupEntityMetadata,
 } from "../../../../test/utils/entity"
 import {
-	type TestExecutionUser,
 	createTestExecutionUser,
 	deleteTestExecutionUser,
+	type TestExecutionUser,
 } from "../../../../test/utils/execution-user"
 
 const textValidation = (value: object) => {
@@ -276,7 +276,7 @@ describe("エンティティ項目の取得", () => {
 	/**
 	 * 指定されたnameの項目をdata配列から検索して返す
 	 */
-	// biome-ignore lint/suspicious/noExplicitAny: <explanation>
+	// biome-ignore lint/suspicious/noExplicitAny: テストヘルパー関数のため型定義を省略
 	const findField = (data: any, name: string) => {
 		return data.find((item: { name: string }) => item.name === name)
 	}

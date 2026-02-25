@@ -82,6 +82,7 @@ export const createRecord = async (
 			if (result.kind === "reference-input-array") {
 				return escapeStringValue(JSON.stringify(result.value))
 			}
+			return undefined
 		})
 		.join(", ")
 		.concat(
