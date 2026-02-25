@@ -86,7 +86,7 @@ function Login() {
 				<form ref={formRef} className="mt-8 space-y-6" onSubmit={handleSubmit}>
 					<div>
 						<Label htmlFor="username">ユーザー名</Label>
-						<Input id="username" name="username" type="username" required />
+						<Input id="username" name="username" type="text" required />
 					</div>
 
 					<div>
