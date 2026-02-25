@@ -1,5 +1,5 @@
 import { execSync } from "node:child_process"
-import { readFileSync, readdirSync } from "node:fs"
+import { readdirSync, readFileSync } from "node:fs"
 import { extname, join } from "node:path"
 import { PrismaClient } from "@prisma/client"
 import { MSSQLServerContainer } from "@testcontainers/mssqlserver"
