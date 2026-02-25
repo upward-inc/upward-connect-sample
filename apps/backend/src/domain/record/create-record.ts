@@ -1,6 +1,7 @@
 import { getEntityItemList } from "../../domain/entity"
 import { prisma } from "../../libs/prisma"
 import type { PostRecordResponse } from "../../schema/record"
+import { assertNever } from "../../utility/assert"
 import { escapeName, escapeStringValue } from "../../utility/sql"
 import type { ValidateCreateRecordBodyResultSuccess } from "./validate-create-record-body"
 
@@ -82,7 +83,7 @@ export const createRecord = async (
 			if (result.kind === "reference-input-array") {
 				return escapeStringValue(JSON.stringify(result.value))
 			}
-			return undefined
+			return assertNever(result)
 		})
 		.join(", ")
 		.concat(
