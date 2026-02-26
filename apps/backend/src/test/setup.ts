@@ -1,4 +1,5 @@
-import { PrismaClient } from "@prisma/client"
+import { PrismaMssql } from "@prisma/adapter-mssql"
+import { PrismaClient } from "../../prisma/generated/client"
 import { prisma } from "../libs/prisma"
 
 // globalSetup で設定された環境変数から接続文字列を取得
@@ -11,13 +12,8 @@ if (!testDatabaseUrl) {
 }
 
 // テストデータベース用の Prisma クライアントを作成
-const testPrisma = new PrismaClient({
-	datasources: {
-		db: {
-			url: testDatabaseUrl,
-		},
-	},
-})
+const adapter = new PrismaMssql(testDatabaseUrl)
+const testPrisma = new PrismaClient({ adapter })
 
 // 利用するprisma クライアントをテストデータベース用に更新
 Object.assign(prisma, testPrisma)

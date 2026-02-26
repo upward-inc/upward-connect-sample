@@ -1,6 +1,7 @@
 import { z } from "./libs/zod"
 
 const envSchema = z.object({
+	DATABASE_URL: z.string().startsWith("sqlserver://"),
 	APP_NAME: z.string(),
 	PORT: z.coerce.number().min(1000).max(65535),
 	FRONTEND_URL: z.union([
