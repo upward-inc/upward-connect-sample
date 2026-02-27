@@ -5,9 +5,9 @@ import {
 	setupEntityMetadata,
 } from "../../../../test/utils/entity"
 import {
-	type TestExecutionUser,
 	createTestExecutionUser,
 	deleteTestExecutionUser,
+	type TestExecutionUser,
 } from "../../../../test/utils/execution-user"
 
 describe("エンティティの取得", () => {

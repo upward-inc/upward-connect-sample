@@ -99,8 +99,9 @@ export async function seedAccountsAddressAndLocation(
 	const accounts = await prisma.account.findMany()
 
 	const result = await Promise.all(
-		accounts.map((account) => {
-			if (getRandomBoolean(0.9)) {
+		accounts
+			.filter(() => getRandomBoolean(0.9))
+			.map((account) => {
 				const address = getAnyRow(addresses)
 
 				const query = `
@@ -114,8 +115,7 @@ export async function seedAccountsAddressAndLocation(
 					`
 
 				return prisma.$executeRawUnsafe(query)
-			}
-		}),
+			}),
 	)
 	console.log(`>> account records updated: ${result.length}`)
 }

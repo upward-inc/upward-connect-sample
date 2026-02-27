@@ -12,10 +12,12 @@ import { Input } from "../components/input"
 import { Label } from "../components/label"
 
 const SearchParamsSchema = z.object({
-	redirect: z.string().refine(
-        (url) => url.startsWith('/') && !url.startsWith('//'),
-        { message: 'Only relative paths are allowed' }
-    ).optional(),
+	redirect: z
+		.string()
+		.refine((url) => url.startsWith("/") && !url.startsWith("//"), {
+			message: "Only relative paths are allowed",
+		})
+		.optional(),
 })
 
 const fallback = "/private" as const
@@ -59,7 +61,7 @@ function Login() {
 
 			// リダイレクト処理
 			navigate({ href: redirect ?? fallback })
-		} catch (error) {
+		} catch {
 			setErrorMessage(
 				"ログインに失敗しました。ユーザー名とパスワードを確認してください。",
 			)
@@ -84,7 +86,7 @@ function Login() {
 				<form ref={formRef} className="mt-8 space-y-6" onSubmit={handleSubmit}>
 					<div>
 						<Label htmlFor="username">ユーザー名</Label>
-						<Input id="username" name="username" type="username" required />
+						<Input id="username" name="username" type="text" required />
 					</div>
 
 					<div>

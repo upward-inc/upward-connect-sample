@@ -1,18 +1,20 @@
 @layer base, starlight, theme, components, utilities;
 
-@import '@astrojs/starlight-tailwind';
-@import 'tailwindcss/theme.css' layer(theme);
-@import 'tailwindcss/utilities.css' layer(utilities);
-@import 'starlight-theme-nova/tailwind.css';
+@import "@astrojs/starlight-tailwind";
+@import "tailwindcss/theme.css" layer(theme);
+@import "tailwindcss/utilities.css" layer(utilities);
+@import "starlight-theme-nova/tailwind.css";
 
 @theme {
 	/*
 	Configure your Tailwind theme that will be used by Starlight.
 	https://starlight.astro.build/guides/css-and-tailwind/#styling-starlight-with-tailwind
 	*/
-	--font-sans: 'Helvetica Neue', Arial, 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', 'Noto Sans JP', sans-serif;
+	--font-sans:
+		"Helvetica Neue", Arial, "Hiragino Kaku Gothic ProN", "Hiragino Sans",
+		"Noto Sans JP", sans-serif;
 
-	--color-brand: #0046EB;
+	--color-brand: #0046eb;
 }
 
 /*

@@ -52,6 +52,7 @@ export const validateUpdateRecordBody = async (
 			if (entityItem?.is_updatable) {
 				return { entityItem, value }
 			}
+			return undefined
 		})
 		.filter((v) => !!v)
 

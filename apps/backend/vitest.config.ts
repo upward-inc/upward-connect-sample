@@ -12,11 +12,10 @@ export default defineConfig({
 		sequence: {
 			concurrent: false,
 		},
+		fileParallelism: false,
 		pool: "forks",
-		poolOptions: {
-			forks: {
-				singleFork: true,
-			},
+		forks: {
+			singleInstance: true,
 		},
 		// Test environment variables (will be overridden by testcontainers)
 		env: {

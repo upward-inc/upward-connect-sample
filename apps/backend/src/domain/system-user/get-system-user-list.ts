@@ -1,7 +1,7 @@
 import { format } from "@formkit/tempo"
 import { prisma } from "../../libs/prisma"
 import type { JsonValue } from "../../schema/common"
-import { type Filter, collectFilterFields } from "../../schema/filter"
+import { collectFilterFields, type Filter } from "../../schema/filter"
 import {
 	type Field,
 	OrderByClauseSchema,
