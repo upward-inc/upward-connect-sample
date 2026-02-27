@@ -34,7 +34,7 @@ export default async function globalSetup() {
 
 	// マイグレーションを実行（テーブル作成）
 	try {
-		execSync("npx prisma migrate deploy", {
+		execSync("bun run prisma migrate deploy", {
 			stdio: "inherit",
 			env: { ...process.env, DATABASE_URL: sqlServerConnectionString },
 		})
