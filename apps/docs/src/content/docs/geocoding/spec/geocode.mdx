@@ -94,7 +94,7 @@ import ResponseBodyTableRow from '../../../../components/ResponseBodyTableRow.as
   <ResponseBodyTableRow name="result" type={`<a href="#ジオコーディング変換結果オブジェクト">ジオコーディング変換結果オブジェクト</a>`} required={false} example='null'>
     住所文字列の変換結果（「status」フィールドが<code>FAILED</code>の場合はnull）
   </ResponseBodyTableRow>
-  <ResponseBodyTableRow name="error" type="文字列" required={false} example='住所形式不正'>
+  <ResponseBodyTableRow name="error" type="文字列" required={false} example='Status:-100'>
     エラー内容（「status」フィールドが<code>SUCCEEDED</code>の場合はnull）
   </ResponseBodyTableRow>
 </ResponseBodyTable>
@@ -111,7 +111,7 @@ import ResponseBodyTableRow from '../../../../components/ResponseBodyTableRow.as
   <ResponseBodyTableRow name="matchingLv" type="<ul><li><code>1</code>（都道府県）</li><li><code>2</code>（特別区、市区郡）</li><li><code>3</code>（町、大字）</li><li><code>4</code>（丁目・字）</li><li><code>5</code>（地番街区符号、枝番住居番号）</li></ul>" required={true} example='4'>
     住所のどの要素のレベルまでマッチしたかを示す数値
   </ResponseBodyTableRow>
-  <ResponseBodyTableRow name="responseAddress" type="文字列" required={true} example='東京都千代田区千代田1-4-1'>
+  <ResponseBodyTableRow name="responseAddress" type="文字列" required={true} example='東京都千代田区丸の内１丁目4番'>
     マッチした要素のレベルまでの正規化された住所文字列
   </ResponseBodyTableRow>
 </ResponseBodyTable>
