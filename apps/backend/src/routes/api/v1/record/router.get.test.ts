@@ -207,8 +207,8 @@ describe("GET /records/:entity_name - レコード一覧取得（検索）", () 
 					{ name: "Record 06", text: "prefix C / text C-2 / suffix C" },
 					{ name: "Record 07", text: "" },
 					{ name: "Record 08", text: null },
-					{ name: "Record 09", text: "prefix C / text C-% / suffix C" }, // ワイルドカードが含む
-					{ name: "Record 10", text: "prefix C / text C\\% / suffix C" }, // ワイルドカードとエスケープ文字が含む
+					{ name: "Record 09", text: "prefix C / text C-% / suffix C" }, // ワイルドカードを含む
+					{ name: "Record 10", text: "prefix C / text C\\% / suffix C" }, // ワイルドカードとエスケープ文字を含む
 				]
 
 				const baseTestCases = [
@@ -246,13 +246,13 @@ describe("GET /records/:entity_name - レコード一覧取得（検索）", () 
 					{
 						title: "like (ワイルドカード)",
 						operator: "like",
-						value: "%\\%%", // 「%」が含む文字列検索
+						value: "%\\%%", // 「%」を含む文字列検索
 						expected: { data: [{ name: "Record 09" }, { name: "Record 10" }] },
 					},
 					{
 						title: "like (エスケープ文字)",
 						operator: "like",
-						value: "%\\\\%%", // 「\%」が含む文字列検索
+						value: "%\\\\%%", // 「\%」を含む文字列検索
 						expected: { data: [{ name: "Record 10" }] },
 					},
 					{
