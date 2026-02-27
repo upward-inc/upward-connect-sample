@@ -20,6 +20,7 @@
 		"@prisma/adapter-mssql": "^7.4.1",
 		"@prisma/client": "^7.4.1",
 		"@scalar/hono-api-reference": "^0.9.45",
+		"dotenv": "^17.3.1",
 		"hono": "^4.7.9",
 		"jsonwebtoken": "^9.0.2",
 		"nanoid": "^5.1.6",
