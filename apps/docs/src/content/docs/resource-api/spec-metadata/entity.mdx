@@ -61,11 +61,25 @@ import ResponseBodyTableRow from '../../../../components/ResponseBodyTableRow.as
   <ResponseBodyTableRow name="display_name" type="文字列" required={true} example="取引先名">
     エンティティの表示名
   </ResponseBodyTableRow>
+  <ResponseBodyTableRow name="record_url_format" type={`<a href="#record_url_formatオブジェクト">record_url_formatオブジェクト</a>`} required={false} example='{ "app": "sampleapp://record_detail?entity=account&id={id}", "browser": "https://example.com/record_detail?entity=account&id={id}" }'>
+    レコードのURLを表す文字列フォーマット
+  </ResponseBodyTableRow>
   <ResponseBodyTableRow name="has_location" type="真偽値" required={true} example="true">
     エンティティが位置情報を保持しているかどうか
   </ResponseBodyTableRow>
   <ResponseBodyTableRow name="item_mapping" type={`<a href="#item_mappingオブジェクト">item_mappingオブジェクト</a>`} required={true} example='{ "id": "id", "title": "name", "owner": "owner", "created_at": "created_at", "created_by": "created_by", "modified_at": "modified_at", "modified_by": "modified_by", "latitude": "latitude", "longitude": "longitude" }'>
     UPWARDが標準的に扱う項目名のマッピング
+  </ResponseBodyTableRow>
+</ResponseBodyTable>
+
+#### record_url_formatオブジェクト
+
+<ResponseBodyTable>
+  <ResponseBodyTableRow name="app" type="文字列" required={false} example="sampleapp://record_detail?entity=account&id={id}">
+    このエンティティのレコードをモバイルアプリで開く際のURL形式
+  </ResponseBodyTableRow>
+  <ResponseBodyTableRow name="browser" type="文字列" required={false} example="https://example.com/record_detail?entity=account&id={id}">
+    このエンティティのレコードをPC（Webブラウザ）で開く際のURL形式
   </ResponseBodyTableRow>
 </ResponseBodyTable>
 
@@ -108,6 +122,10 @@ import ResponseBodyTableRow from '../../../../components/ResponseBodyTableRow.as
   "name": "account",
   "type": "account",
   "display_name": "取引先",
+  "record_url_format": {
+    "app": "http://url-test.app.localhost/records/account/{id}",
+    "browser": "http://url-test.browser.localhost/records/account/{id}"
+  },
   "has_location": true,
   "item_mapping": {
     "id": "id",

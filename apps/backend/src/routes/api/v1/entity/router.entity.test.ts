@@ -93,6 +93,10 @@ describe("エンティティの取得", () => {
 					name: "user",
 					type: "user",
 					display_name: "ユーザー",
+					record_url_format: {
+						app: "http://url-test.app.localhost/records/user/{id}",
+						browser: "http://url-test.browser.localhost/records/user/{id}",
+					},
 					has_location: false,
 					item_mapping: {
 						id: "id",
@@ -110,6 +114,10 @@ describe("エンティティの取得", () => {
 					name: "account",
 					type: "account",
 					display_name: "取引先",
+					record_url_format: {
+						app: "http://url-test.app.localhost/records/account/{id}",
+						browser: "http://url-test.browser.localhost/records/account/{id}",
+					},
 					has_location: true,
 					item_mapping: {
 						id: "id",
@@ -127,6 +135,10 @@ describe("エンティティの取得", () => {
 					name: "lead",
 					type: "lead",
 					display_name: "リード",
+					record_url_format: {
+						app: "http://url-test.app.localhost/records/lead/{id}",
+						browser: "http://url-test.browser.localhost/records/lead/{id}",
+					},
 					has_location: true,
 					item_mapping: {
 						id: "id",
@@ -144,6 +156,10 @@ describe("エンティティの取得", () => {
 					name: "activity",
 					type: "activity",
 					display_name: "活動",
+					record_url_format: {
+						app: "http://url-test.app.localhost/records/activity/{id}",
+						browser: "http://url-test.browser.localhost/records/activity/{id}",
+					},
 					has_location: false,
 					item_mapping: {
 						id: "id",
@@ -161,6 +177,11 @@ describe("エンティティの取得", () => {
 					name: "phone_call",
 					type: "phone_call",
 					display_name: "通話",
+					record_url_format: {
+						app: "http://url-test.app.localhost/records/phone_call/{id}",
+						browser:
+							"http://url-test.browser.localhost/records/phone_call/{id}",
+					},
 					has_location: false,
 					item_mapping: {
 						id: "id",
@@ -178,6 +199,10 @@ describe("エンティティの取得", () => {
 					name: "contact",
 					type: "contact",
 					display_name: "取引先責任者",
+					record_url_format: {
+						app: "http://url-test.app.localhost/records/contact/{id}",
+						browser: "http://url-test.browser.localhost/records/contact/{id}",
+					},
 					has_location: false,
 					item_mapping: {
 						id: "id",
@@ -195,6 +220,11 @@ describe("エンティティの取得", () => {
 					name: "opportunity",
 					type: null,
 					display_name: "商談",
+					record_url_format: {
+						app: "http://url-test.app.localhost/records/opportunity/{id}",
+						browser:
+							"http://url-test.browser.localhost/records/opportunity/{id}",
+					},
 					has_location: false,
 					item_mapping: {
 						id: "id",
@@ -212,6 +242,10 @@ describe("エンティティの取得", () => {
 					name: "case",
 					type: null,
 					display_name: "ケース",
+					record_url_format: {
+						app: "http://url-test.app.localhost/records/case/{id}",
+						browser: "http://url-test.browser.localhost/records/case/{id}",
+					},
 					has_location: false,
 					item_mapping: {
 						id: "id",
@@ -229,6 +263,10 @@ describe("エンティティの取得", () => {
 					name: "product",
 					type: null,
 					display_name: "製品",
+					record_url_format: {
+						app: "http://url-test.app.localhost/records/product/{id}",
+						browser: "http://url-test.browser.localhost/records/product/{id}",
+					},
 					has_location: false,
 					item_mapping: {
 						id: "id",
@@ -246,6 +284,10 @@ describe("エンティティの取得", () => {
 					name: "campaign",
 					type: null,
 					display_name: "キャンペーン",
+					record_url_format: {
+						app: "http://url-test.app.localhost/records/campaign/{id}",
+						browser: "http://url-test.browser.localhost/records/campaign/{id}",
+					},
 					has_location: false,
 					item_mapping: {
 						id: "id",
@@ -263,6 +305,10 @@ describe("エンティティの取得", () => {
 					name: "sample",
 					type: null,
 					display_name: "サンプル",
+					record_url_format: {
+						app: "http://url-test.app.localhost/records/sample/{id}",
+						browser: "http://url-test.browser.localhost/records/sample/{id}",
+					},
 					has_location: true,
 					item_mapping: {
 						id: "id",
@@ -307,6 +353,10 @@ describe("エンティティの取得", () => {
 				name: "sample",
 				type: null,
 				display_name: "サンプル",
+				record_url_format: {
+					app: "http://url-test.app.localhost/records/sample/{id}",
+					browser: "http://url-test.browser.localhost/records/sample/{id}",
+				},
 				has_location: true,
 				item_mapping: {
 					id: "id",
