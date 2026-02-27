@@ -67,6 +67,15 @@ export default defineConfig({
 						},
 					],
 				},
+				{
+					label: "ジオコーディングAPI",
+					items: [
+						{
+							label: "API仕様",
+							autogenerate: { directory: "geocoding/spec" },
+						},
+					],
+				},
 			],
 		}),
 
