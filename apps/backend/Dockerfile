@@ -21,7 +21,10 @@ FROM base AS prisma
 WORKDIR /usr/src/app
 # prisma generateに必要なdev依存をコピー
 COPY --from=install /temp/dev/node_modules ./node_modules
+COPY prisma.config.ts .
 COPY prisma ./prisma/
+# prisma generateの実行にはDATABASE_URLが必要のため、ダミーの値を設定
+ENV DATABASE_URL="sqlserver://localhost:1433"
 RUN bun run prisma generate
 
 # copy node_modules from temp directory
