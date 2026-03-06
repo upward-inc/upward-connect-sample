@@ -1,0 +1,132 @@
+---
+title: レコードの作成
+description: レコードの作成
+sidebar:
+  order: 2
+---
+
+import ParameterTable from '../../../../components/ParameterTable.astro'
+import ParameterTableRow from '../../../../components/ParameterTableRow.astro'
+import ResponseBodyTable from '../../../../components/ResponseBodyTable.astro'
+import ResponseBodyTableRow from '../../../../components/ResponseBodyTableRow.astro'
+
+パスで指定されたエンティティに対し、リクエストボディの内容でレコードを作成する
+
+## 📬 リクエスト
+
+<code>POST \{resource_api_url\}/records/\{entity_name\}</code>
+
+### リクエストヘッダ
+
+| キー | 値 |
+| --- | --- |
+| Authorization | `Bearer {アクセストークン}` |
+| Content-Type | `application/json` |
+
+### パスパラメータ
+
+<ParameterTable>
+  <ParameterTableRow name="entity_name" type="文字列" required={true} example="account">
+    作成対象レコードのエンティティ名
+  </ParameterTableRow>
+</ParameterTable>
+
+### リクエストボディ
+
+- 更新対象のエンティティ項目名と値を持つJSONオブジェクト
+- 値の形式
+  - 項目のデータ型が`text`の場合: 文字列
+  - 項目のデータ型が`numeric`の場合
+    - 項目のサブデータ型が`integer`の場合: 整数値
+    - 項目のサブデータ型が`decimal`の場合: 小数を含む数値
+  - 項目のデータ型が`boolean`の場合: 真偽値
+  - 項目のデータ型が`date`の場合
+    - 項目のサブデータ型が`date`の場合: ISO8601日付形式の文字列（`YYYY-MM-DD`）
+    - 項目のサブデータ型が`datetime`の場合: ISO8601日時形式の文字列（`YYYY-MM-DDTHH:MM[:SS[.s+]]Z`）
+    - 項目のサブデータ型が`time`の場合: ISO8601時刻形式の文字列（`HH:MM[:SS[.s+]]`）
+  - 項目のデータ型が`option`の場合
+    - 項目のサブデータ型が`single`の場合: 文字列（オプション名）
+    - 項目のサブデータ型が`multi`の場合: 文字列（オプション名）の配列
+  - 項目のデータ型が`reference`の場合
+    - 項目のサブデータ型が`single`の場合: [レコード参照オブジェクト](#レコード参照オブジェクト)
+    - 項目のサブデータ型が`multi`の場合: [レコード参照オブジェクト](#レコード参照オブジェクト)の配列
+
+#### レコード参照オブジェクト
+
+<ResponseBodyTable>
+  <ResponseBodyTableRow name="entity_name" type="文字列" required={true} example="lead">
+    参照レコードのエンティティ名
+  </ResponseBodyTableRow>
+  <ResponseBodyTableRow name="id" type="文字列" required={true} example="lead-00000001">
+    参照レコードのID
+  </ResponseBodyTableRow>
+</ResponseBodyTable>
+
+#### リクエストボディのサンプル
+
+```json title="リクエストボディのサンプル"
+{
+  "text_field": "ABC",
+  "textarea_field": "ABC\nDEF",
+  "integer_field": 123,
+  "decimal_field": 123.45,
+  "boolean_field": true,
+  "date_field": "2025-01-01",
+  "datetime_field": "2025-01-01T12:34:56Z",
+  "time_field": "12:34:56",
+  "single_option_field": "option-a",
+  "multi_option_field": ["option-a", "option-b"],
+  "single_reference_field": { "entity_name": "lead", "id": "lead-00000001" },
+  "multi_reference_field": [
+    { "entity_name": "lead", "id": "lead-00000001" },
+    { "entity_name": "lead", "id": "lead-00000002" }
+  ]
+}
+```
+
+## ✨ 成功レスポンス
+
+### ステータスコード
+
+`201` : Created
+
+### レスポンスヘッダ
+
+| キー | 値 |
+| --- | --- |
+| Content-Type | `application/json` |
+
+### レスポンスボディ
+
+<ResponseBodyTable>
+  <ResponseBodyTableRow name="entity_name" type="文字列" required={true} example="account">
+    作成したレコードのエンティティ名
+  </ResponseBodyTableRow>
+  <ResponseBodyTableRow name="id" type="文字列" required={true} example="account-00000001">
+    作成したレコードのID
+  </ResponseBodyTableRow>
+</ResponseBodyTable>
+
+#### レスポンスボディのサンプル
+
+```json title="レスポンスボディのサンプル"
+{
+  "entity_name": "account",
+  "id": "account-00000001"
+}
+```
+
+## 💬 具体的な要求事項
+
+### 基本要求
+
+- 指定されたエンティティ名とフィールドの値を元に新規レコードを作成してください
+
+### その他（補足等）
+
+- UPWARDから送信されるリクエストボディには、「is_creatable」フィールドが`true`の項目のみ含まれます（`false`の項目についてはサポートする必要はありません）
+- 必要に応じて、貴社が定める仕様に基づいてリクエストボディのバリデーションを行ってください
+
+## 📚 参考資料
+
+なし

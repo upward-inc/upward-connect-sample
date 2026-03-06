@@ -1,0 +1,162 @@
+---
+title: ジオコーディング
+description: リクエストボディで指定された住所リストを経緯度形式に変換して返却する
+sidebar:
+  order: 1
+---
+
+import RequestBodyTable from '../../../../components/RequestBodyTable.astro'
+import RequestBodyTableRow from '../../../../components/RequestBodyTableRow.astro'
+import ResponseBodyTable from '../../../../components/ResponseBodyTable.astro'
+import ResponseBodyTableRow from '../../../../components/ResponseBodyTableRow.astro'
+
+リクエストボディで指定された住所リストを経緯度形式に変換して返却する
+
+## 📬 リクエスト
+
+`POST https://engine-prod-je-apim.azure-api.net/connect/api/v1/geocode`
+
+### リクエストヘッダ
+
+| キー | 値 |
+| --- | --- |
+| Content-Type | `application/json` |
+| X-API-Key | 認証用のAPIキー |
+
+### リクエストボディ
+
+<RequestBodyTable>
+  <RequestBodyTableRow name="requests" type={`<a href="#requestオブジェクト">requestオブジェクト</a>の配列`} required={true} example='[ { "id": "address-001", "address": "東京都千代田区丸の内１丁目４−１" }, ... ]'>
+    経緯度変換対象の住所リスト（最大100件）
+  </RequestBodyTableRow>
+</RequestBodyTable>
+
+#### requestオブジェクト
+
+<RequestBodyTable>
+  <RequestBodyTableRow name="id" type="文字列" required={true} example='address-001'>
+    `requests`の配列内で一意となる任意の文字列（最大255文字）
+  </RequestBodyTableRow>
+  <RequestBodyTableRow name="address" type="文字列" required={true} example='東京都千代田区丸の内１丁目４−１'>
+    住所文字列（最大512文字）
+  </RequestBodyTableRow>
+</RequestBodyTable>
+
+#### リクエストボディのサンプル
+
+```json title="リクエストボディのサンプル"
+{
+  "requests": [
+    {
+      "id": "address-001",
+      "address": "東京都千代田区丸の内１丁目４−１"
+    },
+    {
+      "id": "address-002",
+      "address": "存在しない住所文字列"
+    }
+  ]
+}
+```
+
+## ✨ 成功レスポンス
+
+### ステータスコード
+
+`200` : OK
+
+### レスポンスヘッダ
+
+| キー | 値 |
+| --- | --- |
+| Content-Type | `application/json` |
+
+### レスポンスボディ
+
+<ResponseBodyTable>
+  <ResponseBodyTableRow name="results" type={`<a href="#ジオコーディング結果オブジェクト">ジオコーディング結果オブジェクト</a>の配列`} required={true} example='[ { "id": "address-001", "requestAddress": "東京都千代田区丸の内１丁目４−１", "status": "SUCCEEDED", "result": { ... } }, ... ]'>
+    ジオコーディング結果の配列
+  </ResponseBodyTableRow>
+</ResponseBodyTable>
+
+#### ジオコーディング結果オブジェクト
+
+<ResponseBodyTable>
+  <ResponseBodyTableRow name="id" type="文字列" required={true} example='address-001'>
+    リクエスト時に指定されたID
+  </ResponseBodyTableRow>
+  <ResponseBodyTableRow name="requestAddress" type="文字列" required={true} example='東京都千代田区丸の内１丁目４−１'>
+    リクエスト時に指定された住所文字列
+  </ResponseBodyTableRow>
+  <ResponseBodyTableRow name="status" type="<ul><li><code>SUCCEEDED</code>（成功）</li><li><code>FAILED</code>（失敗）</li></ul>" required={true} example='SUCCEEDED'>
+    結果ステータス
+  </ResponseBodyTableRow>
+  <ResponseBodyTableRow name="result" type={`<a href="#ジオコーディング変換結果オブジェクト">ジオコーディング変換結果オブジェクト</a>`} required={false} example='null'>
+    住所文字列の変換結果（「status」フィールドが<code>FAILED</code>の場合はnull）
+  </ResponseBodyTableRow>
+  <ResponseBodyTableRow name="error" type="文字列" required={false} example='Status:-100'>
+    エラー内容（「status」フィールドが<code>SUCCEEDED</code>の場合はnull）
+  </ResponseBodyTableRow>
+</ResponseBodyTable>
+
+#### ジオコーディング変換結果オブジェクト
+
+<ResponseBodyTable>
+  <ResponseBodyTableRow name="x" type="数値（小数点以下最大8桁）" required={true} example='139.764414'>
+    経度
+  </ResponseBodyTableRow>
+  <ResponseBodyTableRow name="y" type="数値（小数点以下最大8桁）" required={true} example='35.683961'>
+    緯度
+  </ResponseBodyTableRow>
+  <ResponseBodyTableRow name="matchingLv" type="<ul><li><code>1</code>（都道府県）</li><li><code>2</code>（特別区、市区郡）</li><li><code>3</code>（町、大字）</li><li><code>4</code>（丁目・字）</li><li><code>5</code>（地番街区符号、枝番住居番号）</li></ul>" required={true} example='4'>
+    住所のどの要素のレベルまでマッチしたかを示す数値
+  </ResponseBodyTableRow>
+  <ResponseBodyTableRow name="responseAddress" type="文字列" required={true} example='東京都千代田区丸の内１丁目4番'>
+    マッチした要素のレベルまでの正規化された住所文字列
+  </ResponseBodyTableRow>
+</ResponseBodyTable>
+
+#### レスポンスボディのサンプル
+
+```json title="レスポンスボディのサンプル"
+{
+  "results": [
+    {
+      "id": "address-001",
+      "requestAddress": "東京都千代田区丸の内１丁目４−１",
+      "status": "SUCCEEDED",
+      "result": {
+        "x": 139.764414,
+        "y": 35.683961,
+        "matchingLv": 4,
+        "responseAddress": "東京都千代田区丸の内１丁目4番"
+      }
+    },
+    {
+      "id": "address-002",
+      "requestAddress": "存在しない住所文字列",
+      "status": "FAILED",
+      "result": null,
+      "error": "Status:-100"
+    }
+  ]
+}
+```
+
+## 💥 失敗レスポンス
+
+| HTTPコード | 考えられる原因 |
+| --- | --- |
+| `400`: Bad Request | リクエストボディの形式が不正 / 「id」の重複 / 100件以上のリクエストを指定 |
+| `401`: Unauthorized | リクエストヘッダに「X-API-Key」の値がない / 「X-API-Key」の値が不正 |
+| `429`: Too Many Requests | レート制限を超過（リクエストが短時間に大量に送信された場合など）<br/><br/>レスポンスヘッダの「Retry-After」に待機秒数を設定するので、指定秒数経過後に再送してください |
+
+## 💬 具体的な要求事項
+
+- リクエストの配列順序とレスポンスの配列順序は一致しません。必ず、「id」フィールドを用いた突き合わせを行ってください
+- すべてのリクエストがジオコーディングできない場合も成功レスポンスとして「`200` : OK」を返却しますのでご注意ください
+- ジオコーディング精度向上にあたっては、[マッチングレベルの向上施策](https://navi.upward.jp/documentation/setup/setup-salesforce-platform/geocoding/matching-level/)も合わせてご確認ください
+
+## 📚 参考資料
+
+- [マッチングレベルの向上施策](https://navi.upward.jp/documentation/setup/setup-salesforce-platform/geocoding/matching-level/)

@@ -1,0 +1,70 @@
+---
+title: ファイルの保存
+description: ファイルの保存
+sidebar:
+  order: 2
+---
+
+import RequestBodyTable from '../../../../components/RequestBodyTable.astro'
+import RequestBodyTableRow from '../../../../components/RequestBodyTableRow.astro'
+import ResponseBodyTable from '../../../../components/ResponseBodyTable.astro'
+import ResponseBodyTableRow from '../../../../components/ResponseBodyTableRow.astro'
+
+送信されたファイルを保存する
+
+## 📬 リクエスト
+
+<code>POST \{resource_api_url\}/files</code>
+
+### リクエストヘッダ
+
+| キー | 値 |
+| --- | --- |
+| Authorization | `Bearer {アクセストークン}` |
+| Content-Type | `multipart/form-data` |
+
+### リクエストボディ
+
+<RequestBodyTable>
+  <RequestBodyTableRow name="file" type="Blob" required={true} example=''>
+    投稿するBlob（画像ファイル等）
+  </RequestBodyTableRow>
+</RequestBodyTable>
+
+## ✨ 成功レスポンス
+
+### ステータスコード
+
+`201` : Created
+
+### レスポンスヘッダ
+
+| キー | 値 |
+| --- | --- |
+| Content-Type | `application/json` |
+
+### レスポンスボディ
+
+<ResponseBodyTable>
+  <ResponseBodyTableRow name="id" type="文字列" required={true} example="file-00000001">
+    作成したファイルのID
+  </ResponseBodyTableRow>
+</ResponseBodyTable>
+
+#### レスポンスボディのサンプル
+
+```json title="レスポンスボディのサンプル"
+{
+  "id": "file-00000001"
+}
+```
+
+## 💬 具体的な要求事項
+
+### 基本要求
+
+- 送信されたファイルを貴社システム内に保存し、ファイルの識別子を返却してください
+
+## 📚 参考資料
+
+なし

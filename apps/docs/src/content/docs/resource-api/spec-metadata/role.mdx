@@ -1,0 +1,80 @@
+---
+title: 単一ロールの取得
+description: 単一ロールの取得
+sidebar:
+  order: 7
+---
+
+import ParameterTable from '../../../../components/ParameterTable.astro'
+import ParameterTableRow from '../../../../components/ParameterTableRow.astro'
+import ResponseBodyTable from '../../../../components/ResponseBodyTable.astro'
+import ResponseBodyTableRow from '../../../../components/ResponseBodyTableRow.astro'
+
+パスで指定された単一のロール情報を返却する
+
+## 📬 リクエスト
+
+<code>GET \{resource_api_url\}/roles/\{name\}</code>
+
+### リクエストヘッダ
+
+| キー | 値 |
+| --- | --- |
+| Authorization | `Bearer {アクセストークン}` |
+
+### パスパラメータ
+
+<ParameterTable>
+  <ParameterTableRow name="name" type="文字列" required={true} example="sales_department">
+    検索対象のロール名
+  </ParameterTableRow>
+</ParameterTable>
+
+### クエリパラメータ
+
+なし
+
+## ✨ 成功レスポンス
+
+### ステータスコード
+
+`200` : OK
+
+### レスポンスヘッダ
+
+| キー | 値 |
+| --- | --- |
+| Content-Type | `application/json` |
+
+### レスポンスボディ
+
+<ResponseBodyTable>
+  <ResponseBodyTableRow name="name" type="文字列" required={true} example="sales_department">
+    ロール名
+  </ResponseBodyTableRow>
+  <ResponseBodyTableRow name="display_name" type="文字列" required={true} example="営業本部">
+    ロールの表示名
+  </ResponseBodyTableRow>
+  <ResponseBodyTableRow name="parent_name" type="文字列" required={false} example="null">
+    親ロール名
+  </ResponseBodyTableRow>
+</ResponseBodyTable>
+
+#### レスポンスボディのサンプル
+
+```json title="レスポンスボディのサンプル"
+{
+  "name": "sales_department",
+  "display_name": "営業本部",
+  "parent_name": null
+}
+```
+
+## 💬 具体的な要求事項
+
+- 検索対象のロールが存在しない場合は、「`404` : Not Found」エラーを返却してください
+- システム内でロールの情報を階層構造で保持する場合、「parent_name」には対象ロールの1階層上のロール名を設定してください
+
+## 📚 参考資料
+
+なし

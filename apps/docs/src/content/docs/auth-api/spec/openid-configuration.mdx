@@ -1,0 +1,105 @@
+---
+title: OIDC 1.0プロバイダーコンフィグレーションの取得
+description: OIDC 1.0で定められた OpenID プロバイダーに関する情報を返却する
+sidebar:
+  order: 1
+---
+
+import ResponseBodyTable from '../../../../components/ResponseBodyTable.astro'
+import ResponseBodyTableRow from '../../../../components/ResponseBodyTableRow.astro'
+
+OIDC 1.0で定められた OpenID プロバイダーに関する情報を返却する
+
+## 📬 リクエスト
+
+<code>GET \{auth_api_url\}/.well-known/openid-configuration</code>
+
+### リクエストヘッダ
+
+なし
+
+### パスパラメータ
+
+なし
+
+### クエリパラメータ
+
+なし
+
+## ✨ 成功レスポンス
+
+### ステータスコード
+
+`200` : OK
+
+### レスポンスヘッダ
+
+| キー | 値 |
+| --- | --- |
+| Content-Type | `application/json` |
+
+### レスポンスボディ
+
+<ResponseBodyTable>
+  <ResponseBodyTableRow name="issuer" type="文字列" required={true} example="https://auth.example.com">
+    OpenIDプロバイダーを一意に識別するURL
+  </ResponseBodyTableRow>
+  <ResponseBodyTableRow name="authorization_endpoint" type="文字列" required={true} example="https://auth.example.com/oauth2/authorize">
+    認可処理エンドポイントのURL
+  </ResponseBodyTableRow>
+  <ResponseBodyTableRow name="token_endpoint" type="文字列" required={true} example="https://auth.example.com/oauth2/token">
+    トークン交換処理エンドポイントのURL
+  </ResponseBodyTableRow>
+  <ResponseBodyTableRow name="userinfo_endpoint" type="文字列" required={true} example="https://auth.example.com/oauth2/userinfo">
+    ユーザー情報取得エンドポイントのURL
+  </ResponseBodyTableRow>
+  <ResponseBodyTableRow name="jwks_uri" type="文字列" required={true} example="https://auth.example.com/oauth2/jwks">
+    公開鍵群が公開されているURL
+  </ResponseBodyTableRow>
+  <ResponseBodyTableRow name="scopes_supported" type={`<code>["openid", "profile", "email", "offline_access"]</code>（固定値）`} required={true} example='["openid", "profile", "email", "offline_access"]'>
+    サポートするscope一覧
+  </ResponseBodyTableRow>
+  <ResponseBodyTableRow name="response_types_supported" type={`<code>["code"]</code>（固定値）`} required={true} example='["code"]'>
+    サポートするresponse type一覧
+  </ResponseBodyTableRow>
+  <ResponseBodyTableRow name="subject_types_supported" type={`<code>["public"]</code>（固定値）`} required={true} example='["public"]'>
+    サポートするsubのタイプ一覧
+  </ResponseBodyTableRow>
+  <ResponseBodyTableRow name="id_token_signing_alg_values_supported" type={`<code>["RS256"]</code>（固定値）`} required={true} example='["RS256"]'>
+    サポートするJWSサインアルゴリズム一覧
+  </ResponseBodyTableRow>
+</ResponseBodyTable>
+
+#### レスポンスボディのサンプル
+
+```json title="レスポンスボディのサンプル"
+{
+  "issuer": "https://auth.example.com",
+  "authorization_endpoint": "https://auth.example.com/oauth2/authorize",
+  "token_endpoint": "https://auth.example.com/oauth2/token",
+  "userinfo_endpoint": "https://auth.example.com/oauth2/userinfo",
+  "jwks_uri": "https://auth.example.com/oauth2/jwks",
+  "scopes_supported": ["openid", "profile", "email", "offline_access"],
+  "response_types_supported": ["code"],
+  "subject_types_supported": ["public"],
+  "id_token_signing_alg_values_supported": ["RS256"]
+}
+```
+
+
+## 💬 具体的な要求事項
+
+### 基本要求
+
+- OIDC 1.0プロバイダー構成エンドポイントの仕様に従い実装してください
+
+### その他（補足等）
+
+- OpenID Provider Metadataで列挙されたオプションのうち、[レスポンスボディ](#レスポンスボディ)に記載されてないフィールドについては、UPWARDから参照しないためサポートする必要はありません
+
+## 📚 参考資料
+
+- [OpenID Connect Discovery 1.0](https://openid.net/specs/openid-connect-discovery-1_0.html)
+  - [3. OpenID Provider Metadata](https://openid.net/specs/openid-connect-discovery-1_0.html#ProviderMetadata)
+  - [4.1. OpenID Provider Configuration Request](https://openid.net/specs/openid-connect-discovery-1_0.html#ProviderConfigurationRequest)
+  - [4.2. OpenID Provider Configuration Response](https://openid.net/specs/openid-connect-discovery-1_0.html#ProviderConfigurationResponse)

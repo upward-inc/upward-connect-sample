@@ -1,4 +1,5 @@
 import { render, screen, waitFor } from "@testing-library/react"
+import "@testing-library/jest-dom"
 import userEvent from "@testing-library/user-event"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
@@ -249,19 +250,19 @@ describe("AuthorizePage", () => {
 				paramKey: "code_challenge",
 				expectedUrl: `${baseSearchParams.redirect_uri}?error=invalid_request&state=${baseSearchParams.state}`,
 			},
-		])(
-			"$titleの場合、適切なエラーを付与してリダイレクトURIへ遷移する",
-			async ({ paramKey, expectedUrl }) => {
-				// 該当パラメータを未指定にする
-				useSearchMock.mockReturnValue({
-					...baseSearchParams,
-					[paramKey]: undefined,
-				})
+		])("$titleの場合、適切なエラーを付与してリダイレクトURIへ遷移する", async ({
+			paramKey,
+			expectedUrl,
+		}) => {
+			// 該当パラメータを未指定にする
+			useSearchMock.mockReturnValue({
+				...baseSearchParams,
+				[paramKey]: undefined,
+			})
 
-				renderAuthorizePage()
+			renderAuthorizePage()
 
-				expect(locationHref).toBe(expectedUrl)
-			},
-		)
+			expect(locationHref).toBe(expectedUrl)
+		})
 	})
 })

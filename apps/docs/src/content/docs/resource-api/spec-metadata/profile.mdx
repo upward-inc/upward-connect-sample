@@ -1,0 +1,75 @@
+---
+title: 単一プロファイルの取得
+description: 単一プロファイルの取得
+sidebar:
+  order: 5
+---
+
+import ParameterTable from '../../../../components/ParameterTable.astro'
+import ParameterTableRow from '../../../../components/ParameterTableRow.astro'
+import ResponseBodyTable from '../../../../components/ResponseBodyTable.astro'
+import ResponseBodyTableRow from '../../../../components/ResponseBodyTableRow.astro'
+
+パスで指定された単一のプロファイル情報を返却する
+
+## 📬 リクエスト
+
+<code>GET \{resource_api_url\}/prifiles/\{name\}</code>
+
+### リクエストヘッダ
+
+| キー | 値 |
+| --- | --- |
+| Authorization | `Bearer {アクセストークン}` |
+
+### パスパラメータ
+
+<ParameterTable>
+  <ParameterTableRow name="name" type="文字列" required={true} example="admin">
+    検索対象のプロファイル名
+  </ParameterTableRow>
+</ParameterTable>
+
+### クエリパラメータ
+
+なし
+
+## ✨ 成功レスポンス
+
+### ステータスコード
+
+`200` : OK
+
+### レスポンスヘッダ
+
+| キー | 値 |
+| --- | --- |
+| Content-Type | `application/json` |
+
+### レスポンスボディ
+
+<ResponseBodyTable>
+  <ResponseBodyTableRow name="name" type="文字列" required={true} example="admin">
+    プロファイル名
+  </ResponseBodyTableRow>
+  <ResponseBodyTableRow name="display_name" type="文字列" required={true} example="システム管理者">
+    プロファイルの表示名
+  </ResponseBodyTableRow>
+</ResponseBodyTable>
+
+#### レスポンスボディのサンプル
+
+```json title="レスポンスボディのサンプル"
+{
+  "name": "admin",
+  "display_name": "システム管理者"
+}
+```
+
+## 💬 具体的な要求事項
+
+- 検索対象のプロファイルが存在しない場合は、「`404` : Not Found」エラーを返却してください
+
+## 📚 参考資料
+
+なし

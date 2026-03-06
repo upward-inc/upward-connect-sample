@@ -4,9 +4,9 @@ import { configuration } from "../../configuration"
 import { app } from "../../index"
 import { createExpiredToken, createValidToken } from "../../test/utils/auth"
 import {
-	type TestExecutionUser,
 	createTestExecutionUser,
 	deleteTestExecutionUser,
+	type TestExecutionUser,
 } from "../../test/utils/execution-user"
 
 describe("GET /oauth2/userinfo - ユーザー情報取得", () => {

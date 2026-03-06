@@ -1,0 +1,27 @@
+---
+/**
+ * レスポンスボディ専用のテーブル
+ *
+ * @example
+ * ```
+ * <ResponseBodyTable>
+ *   {table rows here}
+ * </ResponseBodyTable>
+ * ```
+ */
+---
+
+<table>
+	<thead>
+		<tr>
+			<th style={{ minWidth: "10rem" }}>フィールド</th>
+			<th style={{ minWidth: "10rem" }}>形式</th>
+			<th>必須</th>
+			<th style={{ minWidth: "25rem" }}>説明</th>
+			<th style={{ minWidth: "20rem" }}>値の例</th>
+		</tr>
+	</thead>
+	<tbody>
+		<slot />
+	</tbody>
+</table>

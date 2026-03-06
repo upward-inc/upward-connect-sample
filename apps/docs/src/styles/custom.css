@@ -1,44 +1,52 @@
 :where(:root) {
-  /* 収まらない場合に折り返す */
-  overflow-wrap: anywhere;
+	/* 収まらない場合に折り返す */
+	overflow-wrap: anywhere;
 
-  /* 単語の分割はデフォルトを使用 */
-  word-break: initial;
+	/* 単語の分割はデフォルトを使用 */
+	word-break: initial;
 
-  /* 禁則処理を厳格に適用 */
-  line-break: strict;
+	/* 禁則処理を厳格に適用 */
+	line-break: strict;
 
-  /* 英数字と日本語の間に余白を設定 */
-  text-autospace: normal;
+	/* 英数字と日本語の間に余白を設定 */
+	text-autospace: normal;
 
-  --sl-content-width: 60rem;
+	--sl-content-width: 60rem;
 }
 
 /* 特定条件下で英数字と日本語の間に余白を設定しない */
-:where(pre, time, input:not([type="button" i], [type="submit" i], [type="reset" i]), textarea, [contenteditable]) {
-  text-autospace: no-autospace;
+:where(
+		pre,
+		time,
+		input:not([type="button" i], [type="submit" i], [type="reset" i]),
+		textarea,
+		[contenteditable]
+	) {
+	text-autospace: no-autospace;
 }
 
 :where(main) {
-  table {
-    font-size: 0.9375rem; /* 15px */
-    border-spacing: 0;
-  }
+	table {
+		font-size: 0.9375rem; /* 15px */
+		border-spacing: 0;
+	}
 
-  table th, table td {
-    padding: 0.4em 0.6em;
-  }
+	table th,
+	table td {
+		padding: 0.4em 0.6em;
+	}
 
-  table th {
-    /* テーブルのヘッダー部分のテキストを折り返さない */
-    /* white-space: nowrap; */
+	table th {
+		/* テーブルのヘッダー部分のテキストを折り返さない */
+		/* white-space: nowrap; */
 
-    /* テーブルのヘッダー部の最小幅 */
-    min-width: 8rem;
-  }
+		/* テーブルのヘッダー部の最小幅 */
+		min-width: 8rem;
+	}
 
-  ul, ol {
-    /* リストのインデント */
-    padding-left: 1.5em;
-  }
+	ul,
+	ol {
+		/* リストのインデント */
+		padding-left: 1.5em;
+	}
 }

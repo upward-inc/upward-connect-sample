@@ -19,6 +19,10 @@ export const getEntityList = async (): Promise<EntityList> => {
 					? (result.name as (typeof EntityTypeEnum)[number])
 					: null,
 				display_name: result.display_name,
+				record_url_format: {
+					app: `http://url-test.app.localhost/records/${result.name}/{id}`,
+					browser: `http://url-test.browser.localhost/records/${result.name}/{id}`,
+				},
 				has_location: result.has_location,
 				item_mapping: {
 					// このサンプルにおいては、すべてのエンティティのIDフィールド名は`id`として統一する

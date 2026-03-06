@@ -39,8 +39,11 @@ export async function createTestExecutionUser(
 	})
 
 	// プロファイルとアクセスコントロールの作成
-	let testProfile = undefined
-	let testRole = undefined
+	let testProfile:
+		| Awaited<ReturnType<typeof createTestProfile>>
+		| null
+		| undefined
+	let testRole: Awaited<ReturnType<typeof createTestRole>> | null | undefined
 	if (options.withProfile) {
 		testProfile = await createTestProfile(
 			user.id,

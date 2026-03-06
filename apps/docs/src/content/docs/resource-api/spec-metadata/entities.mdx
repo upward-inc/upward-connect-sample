@@ -1,0 +1,101 @@
+---
+title: エンティティ一覧の取得
+description: エンティティ一覧の取得
+sidebar:
+  order: 8
+---
+
+エンティティの情報を一覧で返却する
+
+## 📬 リクエスト
+
+<code>GET \{resource_api_url\}/entities</code>
+
+### リクエストヘッダ
+
+| キー | 値 |
+| --- | --- |
+| Authorization | `Bearer {アクセストークン}` |
+
+### パスパラメータ
+
+なし
+
+### クエリパラメータ
+
+なし
+
+## ✨ 成功レスポンス
+
+### ステータスコード
+
+`200` : OK
+
+### レスポンスヘッダ
+
+| キー | 値 |
+| --- | --- |
+| Content-Type | `application/json` |
+
+### レスポンスボディ
+
+[単一エンティティの取得 - レスポンスボディ](/resource-api/spec-metadata/entity#レスポンスボディ)と同内容の配列
+
+#### レスポンスボディのサンプル
+
+```json title="レスポンスボディのサンプル"
+[
+  {
+    "name": "account",
+    "type": "account",
+    "display_name": "取引先",
+    "record_url_format": {
+      "app": "http://url-test.app.localhost/records/account/{id}",
+      "browser": "http://url-test.browser.localhost/records/account/{id}"
+    },
+    "has_location": true,
+    "item_mapping": {
+      "id": "id",
+      "title": "name",
+      "owner": "owner",
+      "created_at": "created_at",
+      "created_by": "created_by",
+      "modified_at": "modified_at",
+      "modified_by": "modified_by",
+      "latitude": "latitude",
+      "longitude": "longitude"
+    }
+  },
+  {
+    "name": "opportunity",
+    "type": null,
+    "display_name": "商談",
+    "record_url_format": {
+      "app": "http://url-test.app.localhost/records/opportunity/{id}",
+      "browser": "http://url-test.browser.localhost/records/opportunity/{id}"
+    },
+    "has_location": false,
+    "item_mapping": {
+      "id": "id",
+      "title": "name",
+      "owner": "owner",
+      "created_at": "created_at",
+      "created_by": "created_by",
+      "modified_at": "modified_at",
+      "modified_by": "modified_by",
+      "latitude": null,
+      "longitude": null
+    }
+  },
+  ...
+]
+```
+
+## 💬 具体的な要求事項
+
+- 配列のソート順は任意ですが、冪等になるようルールを設定してください
+- UPWARDで完全に使用しないエンティティは返却対象から除外しても構いません
+
+## 📚 参考資料
+
+なし

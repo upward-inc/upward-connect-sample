@@ -1,8 +1,8 @@
-import { configuration } from "../../configuration"
 import { prisma } from "../../libs/prisma"
 import type { PatchRecordResponse } from "../../schema/record"
+import { assertNever } from "../../utility/assert"
 import { escapeName, escapeStringValue } from "../../utility/sql"
-import { getEntityItemList } from "../entity"
+import { getEntity, getEntityItemList } from "../entity"
 import type { ValidateUpdateRecordBodyResultSuccess } from "./validate-update-record-body"
 
 export const updateRecord = async (
@@ -51,7 +51,7 @@ export const updateRecord = async (
 		updateFields.splice(updateFields.indexOf(longitudeField), 1)
 	}
 
-	const locationEntities: string[] = [...configuration.LOCATION_ENTITIES]
+	const entity = await getEntity(entityName)
 
 	const setClause = updateFields
 		.map(({ entityItem, result }) => {
@@ -97,13 +97,14 @@ export const updateRecord = async (
 					value: escapeStringValue(JSON.stringify(result.value)),
 				}
 			}
+			return assertNever(result)
 		})
 		.filter((v) => !!v)
 		.map(({ column, value }) => `${escapeName(column)} = ${value}`)
 		.join(", ")
 		// 位置情報の設定が必要な場合は、SET句に追加
 		.concat(
-			locationEntities.includes(entityName) && longitudeField && latitudeField
+			entity?.has_location && longitudeField && latitudeField
 				? `, [location] = geography::Point(${latitudeField.result.value}, ${longitudeField.result.value}, 4326)`
 				: "",
 		)

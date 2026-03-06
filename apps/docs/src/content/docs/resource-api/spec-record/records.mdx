@@ -1,0 +1,225 @@
+---
+title: レコード一覧の検索
+description: レコード一覧の検索
+sidebar:
+  order: 1
+---
+
+import ParameterTable from '../../../../components/ParameterTable.astro'
+import ParameterTableRow from '../../../../components/ParameterTableRow.astro'
+import ResponseBodyTable from '../../../../components/ResponseBodyTable.astro'
+import ResponseBodyTableRow from '../../../../components/ResponseBodyTableRow.astro'
+import List from '../../../../components/List.astro'
+
+パスで指定されたエンティティのレコードを検索し、一覧で返却する
+
+## 📬 リクエスト
+
+<code>GET \{resource_api_url\}/records/\{entity_name\}</code>
+
+### リクエストヘッダ
+
+| キー | 値 |
+| --- | --- |
+| Authorization | `Bearer {アクセストークン}` |
+
+### パスパラメータ
+
+<ParameterTable>
+  <ParameterTableRow name="entity_name" type="文字列" required={true} example="account">
+    検索対象レコードのエンティティ名
+  </ParameterTableRow>
+</ParameterTable>
+
+### クエリパラメータ
+
+<ParameterTable>
+  <ParameterTableRow name="fields" type="文字列" required={true} example="name,industry,revenue">
+    返却対象の項目名（カンマ区切り）
+  </ParameterTableRow>
+  <ParameterTableRow name="filter" type={`<a href="/resource-api/filter-params">filterパラメータ</a>オブジェクト`} required={false} example='{ "and": [ { "field": "industry", "operator": "eq", "value": "public_admin" } ] }'>
+    レコード検索条件
+  </ParameterTableRow>
+  <ParameterTableRow name="group_by" type="文字列" required={false} example="industry">
+    グループ化する項目名（カンマ区切り）
+  </ParameterTableRow>
+  <ParameterTableRow name="order_by" type={`<a href="#order_byオブジェクト">order_byオブジェクト</a>の配列`} required={false} example='[{ "field": "industry", "direction": "asc" }]'>
+    検索結果のソート条件
+  </ParameterTableRow>
+  <ParameterTableRow name="limit" type="整数値" required={false} example="100">
+    1回のリクエストで取得する最大レコード数
+  </ParameterTableRow>
+  <ParameterTableRow name="offset" type="整数値" required={false} example="0">
+    取得開始位置（スキップするレコード数）
+  </ParameterTableRow>
+  <ParameterTableRow name="location" type={`<a href="#locationオブジェクト">locationオブジェクト</a>の配列`} required={false} example='{ "point": { "latitude": 35.6795964, "longitude": 139.7460797 }, "radius": 10000 }'>
+    ロケーション検索専用オブジェクト
+  </ParameterTableRow>
+</ParameterTable>
+
+#### order_byオブジェクト
+
+<ResponseBodyTable>
+  <ResponseBodyTableRow name="field" type="文字列" required={true} example="industry">
+    ソート適用対象の項目名
+  </ResponseBodyTableRow>
+  <ResponseBodyTableRow name="direction" type="<ul><li><code>asc</code>（昇順）</li><li><code>desc</code>（降順）</li></ul>" required={false} example="asc">
+    ソート方向（省略時は昇順扱い）
+  </ResponseBodyTableRow>
+</ResponseBodyTable>
+
+#### locationオブジェクト
+
+<ResponseBodyTable>
+  <ResponseBodyTableRow name="point.latitude" type="数値" required={true} example="35.6795964">
+    検索対象の緯度
+  </ResponseBodyTableRow>
+  <ResponseBodyTableRow name="point.longitude" type="数値" required={true} example="139.7460797">
+    検索対象の経度
+  </ResponseBodyTableRow>
+  <ResponseBodyTableRow name="radius" type="数値" required={true} example="10000">
+    検索半径（単位: メートル）
+  </ResponseBodyTableRow>
+</ResponseBodyTable>
+
+## ✨ 成功レスポンス
+
+### ステータスコード
+
+`200` : OK
+
+### レスポンスヘッダ
+
+| キー | 値 |
+| --- | --- |
+| Content-Type | `application/json` |
+
+### レスポンスボディ
+
+<ResponseBodyTable>
+  <ResponseBodyTableRow name="has_next_page" type="真偽値" required={true} example="true">
+    レコード検索結果に対して、次ページが存在するかどうか
+  </ResponseBodyTableRow>
+  <ResponseBodyTableRow name="total_size" type="整数値" required={true} example="371">
+    レコード検索条件に合致するレコード総数
+  </ResponseBodyTableRow>
+  <ResponseBodyTableRow name="data" type="オブジェクトの配列" required={true} example='[ { "name": "株式会社 001132", "industry": "public_admin", "revenue": 336000000 }, ... ]'>
+    検索結果（レコード一覧）
+    <List items={[
+      "データ型が<code>text</code>の項目におけるオブジェクト要素の形式: 文字列 or null",
+      "データ型が<code>numeric</code>の項目におけるオブジェクト要素の形式: 数値 or null",
+      "データ型が<code>boolean</code>の項目におけるオブジェクト要素の形式: 真偽値 or null",
+      "データ型が<code>date</code>の項目におけるオブジェクト要素の形式: 文字列（ISO8601の日時フォーマット） or null",
+      {
+        text: "データ型が<code>option</code>の項目におけるオブジェクト要素の形式",
+        children: [
+          "サブデータ型が<code>single</code>の場合 : 文字列 or null",
+          "サブデータ型が<code>multi</code>の場合 : 文字列の配列",
+        ],
+      },
+      {
+        text: "データ型が<code>reference</code>の項目におけるオブジェクト要素の形式",
+        children: [
+          'サブデータ型が<code>single</code>の場合 : <a href="#レコード参照オブジェクト">レコード参照オブジェクト</a> or null',
+          'サブデータ型が<code>multi</code>の場合 : <a href="#レコード参照オブジェクト">レコード参照オブジェクト</a>の配列',
+        ],
+      },
+    ]} />
+  </ResponseBodyTableRow>
+</ResponseBodyTable>
+
+#### レコード参照オブジェクト
+
+<ResponseBodyTable>
+  <ResponseBodyTableRow name="entity_name" type="文字列" required={true} example="lead">
+    参照レコードのエンティティ名
+  </ResponseBodyTableRow>
+  <ResponseBodyTableRow name="id" type="文字列" required={true} example="lead-00000001">
+    参照レコードのID
+  </ResponseBodyTableRow>
+  <ResponseBodyTableRow name="title" type="文字列" required={true} example="株式会社 ABC">
+    参照レコードのタイトル
+  </ResponseBodyTableRow>
+</ResponseBodyTable>
+
+#### レスポンスボディのサンプル
+
+```json title="レスポンスボディのサンプル"
+{
+  "has_next_page": true,
+  "total_size": 371,
+  "data": [
+    {
+      "name": "株式会社 001132",
+      "industry": "public_admin",
+      "revenue": 336000000
+    },
+    {
+      "name": "株式会社 001566",
+      "industry": "it",
+      "revenue": 204000000
+    },
+    ...
+  ]
+}
+```
+
+## 💬 具体的な要求事項
+
+- 検索対象のレコードが存在しない場合は、「data」フィールドに空配列を設定してください（「`200` : OK」）
+
+### 「fields」パラメータ
+
+- 指定された項目の値のみを結果に含めてください
+
+### 「filter」パラメータ
+
+- [filterパラメータ仕様](/resource-api/filter-params)に従い実装してください
+- 「filter」パラメータが受け取るオブジェクトから貴社システムに対する検索条件を生成し、レコードの検索を行ってください
+
+### 「group_by」パラメータ
+
+- 「group_by」パラメータが指定された場合、指定の項目で結果をグルーピングする必要があります（SQLのgroup by句と同等）
+- 「fields」パラメータに指定された項目が「group_by」パラメータに含まれない場合、それらの項目を無視、もしくは、エラーとしてください
+  - UPWARDが送信するリクエストでは、そのようなパラメータの指定は行いません
+
+### 「order_by」パラメータ
+
+- 「order_by」パラメータが指定された場合、指定の項目で結果をソートする必要があります（SQLのorder by句と同等）
+- 「order_by」パラメータが指定されない場合、結果のソート順は任意ですが、冪等になるようルールを設定してください（例: ID順）
+
+### 「limit」パラメータ
+
+- 「limit」パラメータが指定された場合、指定の件数を最大値としたレコード数を返却する必要があります（SQLのlimit句と同等）
+
+### 「offset」パラメータ
+
+- 「offset」パラメータが指定された場合、指定の件数分をスキップしたレコード一覧を返却する必要があります（SQLのoffset句と同等）
+- UPWARDが送信するリクエストでは、offsetパラメータ指定時はlimitパラメータも必ず指定されます
+
+### 「location」パラメータ
+
+- [単一エンティティの取得 - レスポンスボディ](/resource-api/spec-metadata/entity#レスポンスボディ)の「has_location」が`true`のエンティティに対する検索時にのみ「location」パラメータが指定されます
+  - 該当しないエンティティにおいては対応する必要はありません
+- 「location」パラメータが指定された場合、通常の検索条件（「filter」パラメータ）に加え、位置情報と半径に基づいた近傍検索を行ってください
+  - 例: 「point」フィールド（例: `{ "latitude": 35.6795964, "longitude": 139.7460797 }`）から「radius」フィールド（例: `10000`メートル）以内のレコード
+- 「location」パラメータが指定された場合、返却するレコード一覧の順序は「point」フィールドに指定された位置から近いレコード順としてください（「order_by」パラメータの指定よりも優先してください）
+- 「location」パラメータと「group_by」パラメータが同時に指定された場合、エラーとしてください
+  - UPWARDが送信するリクエストでは、そのようなパラメータの指定は行いません
+
+### 「has_next_page」レスポンスフィールド
+
+- 「filter」パラメータ + 「limit」パラメータ + 「offset」パラメータを用いて得られる検索結果（= 「data」レスポンスフィールド）に対し、残りの検索結果（ページ）が存在するかどうかを返却してください
+
+### 「total_size」レスポンスフィールド
+
+- レコード検索条件に合致するレコード総数を返却してください
+  - この値は、「limit」パラメータ、および、「offset」パラメータを指定しない場合の「data」レスポンスフィールドの件数と合致します
+
+### 「data」レスポンスフィールド
+
+- 検索されたレコードの一覧を返却してください
+
+## 📚 参考資料
+
+- [filterパラメータ仕様](/resource-api/filter-params)

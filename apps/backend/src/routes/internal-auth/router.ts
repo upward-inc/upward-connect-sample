@@ -11,7 +11,6 @@ import {
 } from "../../domain/auth"
 import { createRoute, honoApp } from "../../libs/hono"
 import {
-	type AuthContexts,
 	GetOAuthClientParamSchema,
 	GetOAuthClientResultSchema,
 	type LoggedInUser,

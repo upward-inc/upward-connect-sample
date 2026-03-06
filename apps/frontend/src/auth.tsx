@@ -54,7 +54,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 				} else {
 					localStorage.removeItem(AUTH_USER_KEY)
 				}
-			} catch (error) {
+			} catch {
 				localStorage.removeItem(AUTH_USER_KEY)
 			}
 		}
