@@ -9,7 +9,7 @@
 		"db#pull": "prisma db pull",
 		"db#migratefile": "dir=$(mkdir -p prisma/migrations/$(date +%Y%m%d%H%M%S) && echo $_) && cp ./migration.template.sql $dir/migration.sql",
 		"db#seed": "bun run seed/index.ts",
-		"prisma#generate": "prisma generate",
+		"prisma#generate": "bun --env-file=.env run prisma generate",
 		"format": "biome format --write",
 		"lint": "biome lint --write",
 		"check": "biome check --write"
@@ -20,7 +20,6 @@
 		"@prisma/adapter-mssql": "^7.4.1",
 		"@prisma/client": "^7.4.1",
 		"@scalar/hono-api-reference": "^0.9.45",
-		"dotenv": "^17.3.1",
 		"hono": "^4.7.9",
 		"jsonwebtoken": "^9.0.2",
 		"nanoid": "^5.1.6",
