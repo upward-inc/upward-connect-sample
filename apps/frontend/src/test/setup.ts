@@ -1,6 +1,6 @@
 import "@testing-library/jest-dom/vitest"
 
-import { server } from "./msw"
+import { server } from "./mocks/server"
 
 beforeAll(() => {
 	server.listen()

@@ -1,15 +1,11 @@
 import { parse } from "@formkit/tempo"
 import { z } from "../../libs/zod"
-
+import type { JsonValue } from "../../schema/common"
 import {
-	EMailSchema,
 	ISO8601DateSchema,
 	ISO8601DatetimeSchema,
 	ISO8601TimeSchema,
-	PhoneNumberSchema,
-	UrlSchema,
 } from "../../schema/common"
-import type { JsonValue } from "../../schema/common"
 import type { EntityItem } from "../../schema/entity-item"
 import {
 	type RecordReferenceInput,

@@ -1,0 +1,29 @@
+---
+/**
+ * レスポンスボディ専用のテーブル行
+ *
+ * @example
+ * ```
+ * <ResponseBodyTableRow name="type" type="固定値" required="YES" example="text">
+ *   データ型
+ * </ResponseBodyTableRow>
+ * ```
+ */
+
+interface Props {
+	name: string
+	type: string
+	required: boolean
+	example?: string
+}
+
+const { name, type, required, example } = Astro.props
+---
+
+<tr>
+	<td>{name}</td>
+	<td set:html={type} />
+	<td>{required ? "YES" : "NO"}</td>
+	<td><slot /></td>
+	<td>{example ? <code>{example}</code> : ''}</td>
+</tr>

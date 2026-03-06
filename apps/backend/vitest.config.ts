@@ -12,14 +12,15 @@ export default defineConfig({
 		sequence: {
 			concurrent: false,
 		},
+		fileParallelism: false,
 		pool: "forks",
-		poolOptions: {
-			forks: {
-				singleFork: true,
-			},
+		forks: {
+			singleInstance: true,
 		},
 		// Test environment variables (will be overridden by testcontainers)
 		env: {
+			DATABASE_URL:
+				"sqlserver://localhost:1433;database=test;user=sa;password=Test1234!;encrypt=true;trustServerCertificate=true",
 			APP_NAME: "test app",
 			FRONTEND_URL: "http://localhost:5173",
 			APP_SESSION_SECRET: "password_at_least_32_characters_long",

@@ -3,7 +3,6 @@ import type { EntityItem } from "../../schema/entity-item"
 import type { PostRecordBody } from "../../schema/record"
 import { getEntityItemList } from "../entity"
 import {
-	type ValidateFieldValueResult,
 	type ValidateFieldValueResultSuccess,
 	validateFieldValue,
 } from "./validate-field-value"
@@ -58,6 +57,7 @@ export const validateCreateRecordBody = async (
 			if (entityItem?.is_creatable) {
 				return { entityItem, value }
 			}
+			return undefined
 		})
 		.filter((v) => !!v)
 

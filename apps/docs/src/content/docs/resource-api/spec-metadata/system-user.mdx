@@ -1,0 +1,116 @@
+---
+title: 単一システムユーザーの取得
+description: 単一システムユーザーの取得
+sidebar:
+  order: 3
+---
+
+import ParameterTable from '../../../../components/ParameterTable.astro'
+import ParameterTableRow from '../../../../components/ParameterTableRow.astro'
+import ResponseBodyTable from '../../../../components/ResponseBodyTable.astro'
+import ResponseBodyTableRow from '../../../../components/ResponseBodyTableRow.astro'
+
+パスで指定された単一のシステムユーザー情報を返却する
+
+## 📬 リクエスト
+
+<code>GET \{resource_api_url\}/system-users/\{id\}</code>
+
+### リクエストヘッダ
+
+| キー | 値 |
+| --- | --- |
+| Authorization | `Bearer {アクセストークン}` |
+
+### パスパラメータ
+
+<ParameterTable>
+  <ParameterTableRow name="id" type="文字列" required={true} example="user-00000001">
+    検索対象のシステムユーザーID
+  </ParameterTableRow>
+</ParameterTable>
+
+### クエリパラメータ
+
+なし
+
+## ✨ 成功レスポンス
+
+### ステータスコード
+
+`200` : OK
+
+### レスポンスヘッダ
+
+| キー | 値 |
+| --- | --- |
+| Content-Type | `application/json` |
+
+### レスポンスボディ
+
+<ResponseBodyTable>
+  <ResponseBodyTableRow name="id" type="文字列" required={true} example="user-00000001">
+    システムユーザーID
+  </ResponseBodyTableRow>
+  <ResponseBodyTableRow name="user_name" type="文字列" required={true} example="yosuke-tahara@example.com">
+    システム内でユニークな値となるシステムユーザー名<br/>（ログイン時に使用するシステムユーザー名等）
+  </ResponseBodyTableRow>
+  <ResponseBodyTableRow name="first_name" type="文字列" required={true} example="陽介">
+    名
+  </ResponseBodyTableRow>
+  <ResponseBodyTableRow name="last_name" type="文字列" required={true} example="田原">
+    姓
+  </ResponseBodyTableRow>
+  <ResponseBodyTableRow name="email" type="文字列" required={true} example="yosuke-tahara@example.com">
+    メールアドレス
+  </ResponseBodyTableRow>
+  <ResponseBodyTableRow name="timezone" type="文字列" required={true} example="Asia/Tokyo">
+    <a href="https://www.iana.org/time-zones">IANA - Time Zone Database</a>で管理されているタイムゾーン文字列
+  </ResponseBodyTableRow>
+  <ResponseBodyTableRow name="locale" type="文字列" required={true} example="ja-JP">
+    <a href="https://www.rfc-editor.org/rfc/bcp/bcp47.txt">BCP47</a>で定義されているロケール識別子
+  </ResponseBodyTableRow>
+  <ResponseBodyTableRow name="profile_name" type="文字列" required={false} example="admin">
+    プロファイル名
+  </ResponseBodyTableRow>
+  <ResponseBodyTableRow name="role_name" type="文字列" required={false} example="west_japan_sales_department">
+    ロール名
+  </ResponseBodyTableRow>
+  <ResponseBodyTableRow name="is_active" type="真偽値" required={true} example="true">
+    有効なシステムユーザーかどうか
+  </ResponseBodyTableRow>
+  <ResponseBodyTableRow name="created_at" type="文字列" required={true} example="2025-01-01T00:00:00Z">
+    作成日時（ISO8601の日時フォーマット）
+  </ResponseBodyTableRow>
+  <ResponseBodyTableRow name="modified_at" type="文字列" required={true} example="2025-01-01T00:00:00Z">
+    更新日時（ISO8601の日時フォーマット）
+  </ResponseBodyTableRow>
+</ResponseBodyTable>
+
+#### レスポンスボディのサンプル
+
+```json title="レスポンスボディのサンプル"
+{
+  "id": "user-00000001",
+  "user_name": "yosuke-tahara@example.com",
+  "first_name": "陽介",
+  "last_name": "田原",
+  "email": "yosuke-tahara@example.com",
+  "timezone": "Asia/Tokyo",
+  "locale": "ja-JP",
+  "profile_name": "admin",
+  "role_name": "west_japan_sales_department",
+  "is_active": true,
+  "created_at": "2025-01-01T00:00:00Z",
+  "modified_at": "2025-01-01T00:00:00Z"
+}
+```
+
+## 💬 具体的な要求事項
+
+- 検索対象のユーザーが存在しない場合は、「`404` : Not Found」エラーを返却してください
+
+## 📚 参考資料
+
+- [IANA - Time Zone Database](https://www.iana.org/time-zones)
+- [BCP47](https://www.rfc-editor.org/rfc/bcp/bcp47.txt)

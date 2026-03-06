@@ -9,7 +9,6 @@ import {
 	it,
 	vi,
 } from "vitest"
-import { de } from "zod/v4/locales"
 import { configuration } from "../../configuration"
 import { app } from "../../index"
 import { prisma } from "../../libs/prisma"
@@ -22,9 +21,9 @@ import {
 	deleteAllTestOAuthClient,
 } from "../../test/utils/auth"
 import {
-	type TestExecutionUser,
 	createTestExecutionUser,
 	deleteTestExecutionUser,
+	type TestExecutionUser,
 } from "../../test/utils/execution-user"
 import { convertJwkToPem } from "../../utility/crypto"
 

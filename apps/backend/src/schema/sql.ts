@@ -5,10 +5,10 @@ import type { Comparison, RecordReferenceValue } from "./comparison"
 import { EntityItemSubTypeSchema, EntityItemTypeSchema } from "./entity-item"
 import {
 	type Filter,
-	NestableFilterSchema,
 	isAndFilter,
 	isComparison,
 	isOrFilter,
+	NestableFilterSchema,
 } from "./filter"
 import type {
 	EqualOperator,

@@ -1,4 +1,6 @@
-import { PrismaClient } from "@prisma/client"
+import { PrismaMssql } from "@prisma/adapter-mssql"
+import { PrismaClient } from "../prisma/generated/client"
+import { configuration } from "../src/configuration"
 import {
 	seedAccounts,
 	seedAccountsAddressAndLocation,
@@ -24,7 +26,8 @@ import { seedSamples, seedSamplesAddressAndLocation } from "./sample"
 import { seedUsers } from "./user"
 import { seedUserAccessControls } from "./user-access-control"
 
-const prisma = new PrismaClient()
+const adapter = new PrismaMssql(configuration.DATABASE_URL)
+const prisma = new PrismaClient({ adapter })
 
 try {
 	console.info("starting seed execution...")

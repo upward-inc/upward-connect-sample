@@ -5,9 +5,9 @@ import {
 	setupEntityMetadata,
 } from "../../../../test/utils/entity"
 import {
-	type TestExecutionUser,
 	createTestExecutionUser,
 	deleteTestExecutionUser,
+	type TestExecutionUser,
 } from "../../../../test/utils/execution-user"
 import { generateQueryString } from "../../../../test/utils/query-string"
 import {
@@ -199,14 +199,16 @@ describe("GET /records/:entity_name - レコード一覧取得（検索）", () 
 			describe("text型", async () => {
 				const targetField = "text"
 				const testRecords = [
-					{ name: "Record 1", text: "prefix A / text A-1 / suffix A" },
-					{ name: "Record 2", text: "prefix A / text A-2 / suffix A" },
-					{ name: "Record 3", text: "prefix B / text B-1 / suffix B" },
-					{ name: "Record 4", text: "prefix B / text B-2 / suffix B" },
-					{ name: "Record 5", text: "prefix C / text C-1 / suffix C" },
-					{ name: "Record 6", text: "prefix C / text C-2 / suffix C" },
-					{ name: "Record 7", text: "" },
-					{ name: "Record 8", text: null },
+					{ name: "Record 01", text: "prefix A / text A-1 / suffix A" },
+					{ name: "Record 02", text: "prefix A / text A-2 / suffix A" },
+					{ name: "Record 03", text: "prefix B / text B-1 / suffix B" },
+					{ name: "Record 04", text: "prefix B / text B-2 / suffix B" },
+					{ name: "Record 05", text: "prefix C / text C-1 / suffix C" },
+					{ name: "Record 06", text: "prefix C / text C-2 / suffix C" },
+					{ name: "Record 07", text: "" },
+					{ name: "Record 08", text: null },
+					{ name: "Record 09", text: "prefix C / text C-% / suffix C" }, // ワイルドカードを含む
+					{ name: "Record 10", text: "prefix C / text C\\% / suffix C" }, // ワイルドカードとエスケープ文字を含む
 				]
 
 				const baseTestCases = [
@@ -214,38 +216,57 @@ describe("GET /records/:entity_name - レコード一覧取得（検索）", () 
 						title: "eq",
 						operator: "eq",
 						value: "prefix A / text A-1 / suffix A",
-						expected: { data: [{ name: "Record 1" }] },
+						expected: { data: [{ name: "Record 01" }] },
 					},
 					{
 						title: "like (contains)",
 						operator: "like",
 						value: "%text B%",
-						expected: { data: [{ name: "Record 3" }, { name: "Record 4" }] },
+						expected: { data: [{ name: "Record 03" }, { name: "Record 04" }] },
 					},
 					{
 						title: "like (starts_with)",
 						operator: "like",
 						value: "prefix A%",
-						expected: { data: [{ name: "Record 1" }, { name: "Record 2" }] },
+						expected: { data: [{ name: "Record 01" }, { name: "Record 02" }] },
 					},
 					{
 						title: "like (ends_with)",
 						operator: "like",
 						value: "%suffix B",
-						expected: { data: [{ name: "Record 3" }, { name: "Record 4" }] },
+						expected: { data: [{ name: "Record 03" }, { name: "Record 04" }] },
 					},
 					{
 						// 複数のワイルドカードを使用して、文字が順序通りに出現することを確認
 						title: "like (順序検索)",
 						operator: "like",
 						value: "%fix%A%fix%",
-						expected: { data: [{ name: "Record 1" }, { name: "Record 2" }] },
+						expected: { data: [{ name: "Record 01" }, { name: "Record 02" }] },
+					},
+					{
+						title: "like (ワイルドカード)",
+						operator: "like",
+						value: "%\\%%", // 「%」を含む文字列検索
+						expected: { data: [{ name: "Record 09" }, { name: "Record 10" }] },
+					},
+					{
+						title: "like (エスケープ文字)",
+						operator: "like",
+						value: "%\\\\%%", // 「\%」を含む文字列検索
+						expected: { data: [{ name: "Record 10" }] },
 					},
 					{
 						title: "gt",
 						operator: "gt",
 						value: "prefix B / text B-2 / suffix B",
-						expected: { data: [{ name: "Record 5" }, { name: "Record 6" }] },
+						expected: {
+							data: [
+								{ name: "Record 05" },
+								{ name: "Record 06" },
+								{ name: "Record 09" },
+								{ name: "Record 10" },
+							],
+						},
 					},
 					{
 						title: "gte",
@@ -253,9 +274,11 @@ describe("GET /records/:entity_name - レコード一覧取得（検索）", () 
 						value: "prefix B / text B-2 / suffix B",
 						expected: {
 							data: [
-								{ name: "Record 4" },
-								{ name: "Record 5" },
-								{ name: "Record 6" },
+								{ name: "Record 04" },
+								{ name: "Record 05" },
+								{ name: "Record 06" },
+								{ name: "Record 09" },
+								{ name: "Record 10" },
 							],
 						},
 					},
@@ -265,10 +288,10 @@ describe("GET /records/:entity_name - レコード一覧取得（検索）", () 
 						value: "prefix B / text B-2 / suffix B",
 						expected: {
 							data: [
-								{ name: "Record 1" },
-								{ name: "Record 2" },
-								{ name: "Record 3" },
-								{ name: "Record 7" },
+								{ name: "Record 01" },
+								{ name: "Record 02" },
+								{ name: "Record 03" },
+								{ name: "Record 07" },
 							],
 						},
 					},
@@ -278,11 +301,11 @@ describe("GET /records/:entity_name - レコード一覧取得（検索）", () 
 						value: "prefix B / text B-2 / suffix B",
 						expected: {
 							data: [
-								{ name: "Record 1" },
-								{ name: "Record 2" },
-								{ name: "Record 3" },
-								{ name: "Record 4" },
-								{ name: "Record 7" },
+								{ name: "Record 01" },
+								{ name: "Record 02" },
+								{ name: "Record 03" },
+								{ name: "Record 04" },
+								{ name: "Record 07" },
 							],
 						},
 					},
@@ -291,12 +314,14 @@ describe("GET /records/:entity_name - レコード一覧取得（検索）", () 
 						operator: "is_set",
 						expected: {
 							data: [
-								{ name: "Record 1" },
-								{ name: "Record 2" },
-								{ name: "Record 3" },
-								{ name: "Record 4" },
-								{ name: "Record 5" },
-								{ name: "Record 6" },
+								{ name: "Record 01" },
+								{ name: "Record 02" },
+								{ name: "Record 03" },
+								{ name: "Record 04" },
+								{ name: "Record 05" },
+								{ name: "Record 06" },
+								{ name: "Record 09" },
+								{ name: "Record 10" },
 							],
 						},
 					},
@@ -304,26 +329,28 @@ describe("GET /records/:entity_name - レコード一覧取得（検索）", () 
 
 				const testCases = generateFilterTestCases(testRecords, baseTestCases)
 
-				it.each(testCases)(
-					"$title",
-					async ({ operator, value, is_not, expected }) => {
-						// Arrange
-						await createManyTestSamples(testExecutionUser.id, testRecords)
+				it.each(testCases)("$title", async ({
+					operator,
+					value,
+					is_not,
+					expected,
+				}) => {
+					// Arrange
+					await createManyTestSamples(testExecutionUser.id, testRecords)
 
-						// Act
-						const response = await requestGet("sample", {
-							fields: "name",
-							filter: {
-								and: [{ field: targetField, operator, value, is_not }],
-							},
-							order_by: [{ field: "name" }],
-						})
+					// Act
+					const response = await requestGet("sample", {
+						fields: "name",
+						filter: {
+							and: [{ field: targetField, operator, value, is_not }],
+						},
+						order_by: [{ field: "name" }],
+					})
 
-						// Assert
-						const { data } = await response.json()
-						expect(data).toStrictEqual(expected.data)
-					},
-				)
+					// Assert
+					const { data } = await response.json()
+					expect(data).toStrictEqual(expected.data)
+				})
 			})
 
 			describe("numeric型", async () => {
@@ -396,26 +423,28 @@ describe("GET /records/:entity_name - レコード一覧取得（検索）", () 
 
 				const testCases = generateFilterTestCases(testRecords, baseTestCases)
 
-				it.each(testCases)(
-					"$title",
-					async ({ operator, value, is_not, expected }) => {
-						// Arrange
-						await createManyTestSamples(testExecutionUser.id, testRecords)
+				it.each(testCases)("$title", async ({
+					operator,
+					value,
+					is_not,
+					expected,
+				}) => {
+					// Arrange
+					await createManyTestSamples(testExecutionUser.id, testRecords)
 
-						// Act
-						const response = await requestGet("sample", {
-							fields: "name",
-							filter: {
-								and: [{ field: targetField, operator, value, is_not }],
-							},
-							order_by: [{ field: "name" }],
-						})
+					// Act
+					const response = await requestGet("sample", {
+						fields: "name",
+						filter: {
+							and: [{ field: targetField, operator, value, is_not }],
+						},
+						order_by: [{ field: "name" }],
+					})
 
-						// Assert
-						const { data } = await response.json()
-						expect(data).toStrictEqual(expected.data)
-					},
-				)
+					// Assert
+					const { data } = await response.json()
+					expect(data).toStrictEqual(expected.data)
+				})
 			})
 
 			describe("boolean型", async () => {
@@ -448,26 +477,28 @@ describe("GET /records/:entity_name - レコード一覧取得（検索）", () 
 
 				const testCases = generateFilterTestCases(testRecords, baseTestCases)
 
-				it.each(testCases)(
-					"$title",
-					async ({ operator, value, is_not, expected }) => {
-						// Arrange
-						await createManyTestSamples(testExecutionUser.id, testRecords)
+				it.each(testCases)("$title", async ({
+					operator,
+					value,
+					is_not,
+					expected,
+				}) => {
+					// Arrange
+					await createManyTestSamples(testExecutionUser.id, testRecords)
 
-						// Act
-						const response = await requestGet("sample", {
-							fields: "name",
-							filter: {
-								and: [{ field: targetField, operator, value, is_not }],
-							},
-							order_by: [{ field: "name" }],
-						})
+					// Act
+					const response = await requestGet("sample", {
+						fields: "name",
+						filter: {
+							and: [{ field: targetField, operator, value, is_not }],
+						},
+						order_by: [{ field: "name" }],
+					})
 
-						// Assert
-						const { data } = await response.json()
-						expect(data).toStrictEqual(expected.data)
-					},
-				)
+					// Assert
+					const { data } = await response.json()
+					expect(data).toStrictEqual(expected.data)
+				})
 			})
 
 			describe("date型（date）", async () => {
@@ -541,26 +572,28 @@ describe("GET /records/:entity_name - レコード一覧取得（検索）", () 
 
 				const testCases = generateFilterTestCases(testRecords, baseTestCases)
 
-				it.each(testCases)(
-					"$title",
-					async ({ operator, value, is_not, expected }) => {
-						// Arrange
-						await createManyTestSamples(testExecutionUser.id, testRecords)
+				it.each(testCases)("$title", async ({
+					operator,
+					value,
+					is_not,
+					expected,
+				}) => {
+					// Arrange
+					await createManyTestSamples(testExecutionUser.id, testRecords)
 
-						// Act
-						const response = await requestGet("sample", {
-							fields: "name",
-							filter: {
-								and: [{ field: targetField, operator, value, is_not }],
-							},
-							order_by: [{ field: "name" }],
-						})
+					// Act
+					const response = await requestGet("sample", {
+						fields: "name",
+						filter: {
+							and: [{ field: targetField, operator, value, is_not }],
+						},
+						order_by: [{ field: "name" }],
+					})
 
-						// Assert
-						const { data } = await response.json()
-						expect(data).toStrictEqual(expected.data)
-					},
-				)
+					// Assert
+					const { data } = await response.json()
+					expect(data).toStrictEqual(expected.data)
+				})
 			})
 
 			describe("date型（time）", async () => {
@@ -634,26 +667,28 @@ describe("GET /records/:entity_name - レコード一覧取得（検索）", () 
 
 				const testCases = generateFilterTestCases(testRecords, baseTestCases)
 
-				it.each(testCases)(
-					"$title",
-					async ({ operator, value, is_not, expected }) => {
-						// Arrange
-						await createManyTestSamples(testExecutionUser.id, testRecords)
+				it.each(testCases)("$title", async ({
+					operator,
+					value,
+					is_not,
+					expected,
+				}) => {
+					// Arrange
+					await createManyTestSamples(testExecutionUser.id, testRecords)
 
-						// Act
-						const response = await requestGet("sample", {
-							fields: "name",
-							filter: {
-								and: [{ field: targetField, operator, value, is_not }],
-							},
-							order_by: [{ field: "name" }],
-						})
+					// Act
+					const response = await requestGet("sample", {
+						fields: "name",
+						filter: {
+							and: [{ field: targetField, operator, value, is_not }],
+						},
+						order_by: [{ field: "name" }],
+					})
 
-						// Assert
-						const { data } = await response.json()
-						expect(data).toStrictEqual(expected.data)
-					},
-				)
+					// Assert
+					const { data } = await response.json()
+					expect(data).toStrictEqual(expected.data)
+				})
 			})
 
 			describe("date型（datetime）", async () => {
@@ -727,26 +762,28 @@ describe("GET /records/:entity_name - レコード一覧取得（検索）", () 
 
 				const testCases = generateFilterTestCases(testRecords, baseTestCases)
 
-				it.each(testCases)(
-					"$title",
-					async ({ operator, value, is_not, expected }) => {
-						// Arrange
-						await createManyTestSamples(testExecutionUser.id, testRecords)
+				it.each(testCases)("$title", async ({
+					operator,
+					value,
+					is_not,
+					expected,
+				}) => {
+					// Arrange
+					await createManyTestSamples(testExecutionUser.id, testRecords)
 
-						// Act
-						const response = await requestGet("sample", {
-							fields: "name",
-							filter: {
-								and: [{ field: targetField, operator, value, is_not }],
-							},
-							order_by: [{ field: "name" }],
-						})
+					// Act
+					const response = await requestGet("sample", {
+						fields: "name",
+						filter: {
+							and: [{ field: targetField, operator, value, is_not }],
+						},
+						order_by: [{ field: "name" }],
+					})
 
-						// Assert
-						const { data } = await response.json()
-						expect(data).toStrictEqual(expected.data)
-					},
-				)
+					// Assert
+					const { data } = await response.json()
+					expect(data).toStrictEqual(expected.data)
+				})
 			})
 
 			describe("option型（single）", async () => {
@@ -780,26 +817,28 @@ describe("GET /records/:entity_name - レコード一覧取得（検索）", () 
 
 				const testCases = generateFilterTestCases(testRecords, baseTestCases)
 
-				it.each(testCases)(
-					"$title",
-					async ({ operator, value, is_not, expected }) => {
-						// Arrange
-						await createManyTestSamples(testExecutionUser.id, testRecords)
+				it.each(testCases)("$title", async ({
+					operator,
+					value,
+					is_not,
+					expected,
+				}) => {
+					// Arrange
+					await createManyTestSamples(testExecutionUser.id, testRecords)
 
-						// Act
-						const response = await requestGet("sample", {
-							fields: "name",
-							filter: {
-								and: [{ field: targetField, operator, value, is_not }],
-							},
-							order_by: [{ field: "name" }],
-						})
+					// Act
+					const response = await requestGet("sample", {
+						fields: "name",
+						filter: {
+							and: [{ field: targetField, operator, value, is_not }],
+						},
+						order_by: [{ field: "name" }],
+					})
 
-						// Assert
-						const { data } = await response.json()
-						expect(data).toStrictEqual(expected.data)
-					},
-				)
+					// Assert
+					const { data } = await response.json()
+					expect(data).toStrictEqual(expected.data)
+				})
 			})
 
 			describe("option型（multi）", async () => {
@@ -840,26 +879,28 @@ describe("GET /records/:entity_name - レコード一覧取得（検索）", () 
 
 				const testCases = generateFilterTestCases(testRecords, baseTestCases)
 
-				it.each(testCases)(
-					"$title",
-					async ({ operator, value, is_not, expected }) => {
-						// Arrange
-						await createManyTestSamples(testExecutionUser.id, testRecords)
+				it.each(testCases)("$title", async ({
+					operator,
+					value,
+					is_not,
+					expected,
+				}) => {
+					// Arrange
+					await createManyTestSamples(testExecutionUser.id, testRecords)
 
-						// Act
-						const response = await requestGet("sample", {
-							fields: "name",
-							filter: {
-								and: [{ field: targetField, operator, value, is_not }],
-							},
-							order_by: [{ field: "name" }],
-						})
+					// Act
+					const response = await requestGet("sample", {
+						fields: "name",
+						filter: {
+							and: [{ field: targetField, operator, value, is_not }],
+						},
+						order_by: [{ field: "name" }],
+					})
 
-						// Assert
-						const { data } = await response.json()
-						expect(data).toStrictEqual(expected.data)
-					},
-				)
+					// Assert
+					const { data } = await response.json()
+					expect(data).toStrictEqual(expected.data)
+				})
 			})
 
 			describe("reference型（single）", async () => {
@@ -914,26 +955,28 @@ describe("GET /records/:entity_name - レコード一覧取得（検索）", () 
 
 				const testCases = generateFilterTestCases(testRecords, baseTestCases)
 
-				it.each(testCases)(
-					"$title",
-					async ({ operator, value, is_not, expected }) => {
-						// Arrange
-						await createManyTestSamples(testExecutionUser.id, testRecords)
+				it.each(testCases)("$title", async ({
+					operator,
+					value,
+					is_not,
+					expected,
+				}) => {
+					// Arrange
+					await createManyTestSamples(testExecutionUser.id, testRecords)
 
-						// Act
-						const response = await requestGet("sample", {
-							fields: "name",
-							filter: {
-								and: [{ field: targetField, operator, value, is_not }],
-							},
-							order_by: [{ field: "name" }],
-						})
+					// Act
+					const response = await requestGet("sample", {
+						fields: "name",
+						filter: {
+							and: [{ field: targetField, operator, value, is_not }],
+						},
+						order_by: [{ field: "name" }],
+					})
 
-						// Assert
-						const { data } = await response.json()
-						expect(data).toStrictEqual(expected.data)
-					},
-				)
+					// Assert
+					const { data } = await response.json()
+					expect(data).toStrictEqual(expected.data)
+				})
 			})
 
 			describe("reference型（multi）", async () => {
@@ -1006,26 +1049,28 @@ describe("GET /records/:entity_name - レコード一覧取得（検索）", () 
 
 				const testCases = generateFilterTestCases(testRecords, baseTestCases)
 
-				it.each(testCases)(
-					"$title",
-					async ({ operator, value, is_not, expected }) => {
-						// Arrange
-						await createManyTestSamples(testExecutionUser.id, testRecords)
+				it.each(testCases)("$title", async ({
+					operator,
+					value,
+					is_not,
+					expected,
+				}) => {
+					// Arrange
+					await createManyTestSamples(testExecutionUser.id, testRecords)
 
-						// Act
-						const response = await requestGet("sample", {
-							fields: "name",
-							filter: {
-								and: [{ field: targetField, operator, value, is_not }],
-							},
-							order_by: [{ field: "name" }],
-						})
+					// Act
+					const response = await requestGet("sample", {
+						fields: "name",
+						filter: {
+							and: [{ field: targetField, operator, value, is_not }],
+						},
+						order_by: [{ field: "name" }],
+					})
 
-						// Assert
-						const { data } = await response.json()
-						expect(data).toStrictEqual(expected.data)
-					},
-				)
+					// Assert
+					const { data } = await response.json()
+					expect(data).toStrictEqual(expected.data)
+				})
 			})
 		})
 
@@ -1658,6 +1703,89 @@ describe("GET /records/:entity_name - レコード一覧取得（検索）", () 
 				// Assert
 				const json = await response.json()
 				expect(json).toStrictEqual(expected)
+			})
+		})
+	})
+
+	describe("空値の返却値", () => {
+		describe("option型", () => {
+			it.each([
+				{
+					title: "sub_type=single, 値=null",
+					testRecord: { name: "Record", option_single: null },
+					field: "option_single",
+					expected: null,
+				},
+				{
+					title: "sub_type=single, 値=[]",
+					testRecord: { name: "Record", option_single: "" },
+					field: "option_single",
+					expected: null,
+				},
+				{
+					title: "sub_type=multi, 値=null",
+					testRecord: { name: "Record", option_multi: null },
+					field: "option_multi",
+					expected: [],
+				},
+				{
+					title: "sub_type=multi, 値=[]",
+					testRecord: { name: "Record", option_multi: [] },
+					field: "option_multi",
+					expected: [],
+				},
+			])("$title", async ({ testRecord, field, expected }) => {
+				// Arrange
+				await createTestSample(testExecutionUser.id, testRecord)
+
+				// Act
+				const response = await requestGet("sample", { fields: field })
+
+				// Assert
+				const { data } = await response.json()
+				expect(data).toStrictEqual([{ [field]: expected }])
+			})
+		})
+
+		describe("reference型", () => {
+			it.each([
+				{
+					title: "sub_type=single, 値=null",
+					testRecord: {
+						name: "Record",
+						reference_single_target_single_id: null,
+					},
+					field: "reference_single_target_single_id",
+					expected: null,
+				},
+				{
+					title: "sub_type=multi, 値=null",
+					testRecord: {
+						name: "Record",
+						reference_multi_target_multi_id: null,
+					},
+					field: "reference_multi_target_multi_id",
+					expected: [],
+				},
+				{
+					title: "sub_type=multi, 値=[]",
+					testRecord: {
+						name: "Record",
+						reference_multi_target_multi_id: [],
+					},
+					field: "reference_multi_target_multi_id",
+					expected: [],
+				},
+			])("$title", async ({ testRecord, field, expected }) => {
+				// Arrange
+				await createTestSample(testExecutionUser.id, testRecord)
+
+				// Act
+				const response = await requestGet("sample", { fields: field })
+
+				// Assert
+				const { data } = await response.json()
+				expect(data).toStrictEqual([{ [field]: expected }])
 			})
 		})
 	})
