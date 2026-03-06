@@ -1,0 +1,68 @@
+---
+title: ロール一覧の取得
+description: ロール一覧の取得
+sidebar:
+  order: 6
+---
+
+ロールの情報を一覧で返却する
+
+## 📬 リクエスト
+
+<code>GET \{resource_api_url\}/roles</code>
+
+### リクエストヘッダ
+
+| キー | 値 |
+| --- | --- |
+| Authorization | `Bearer {アクセストークン}` |
+
+### パスパラメータ
+
+なし
+
+### クエリパラメータ
+
+なし
+
+## ✨ 成功レスポンス
+
+### ステータスコード
+
+`200` : OK
+
+### レスポンスヘッダ
+
+| キー | 値 |
+| --- | --- |
+| Content-Type | `application/json` |
+
+### レスポンスボディ
+
+[単一ロールの取得 - レスポンスボディ](/resource-api/spec-metadata/role#レスポンスボディ)と同内容の配列
+
+#### レスポンスボディのサンプル
+
+```json title="レスポンスボディのサンプル"
+[
+  {
+    "name": "sales_department",
+    "display_name": "営業本部",
+    "parent_name": null
+  },
+  {
+    "name": "east_japan_sales_department",
+    "display_name": "東日本営業部",
+    "parent_name": "sales_department"
+  },
+  ...
+]
+```
+
+## 💬 具体的な要求事項
+
+- 配列のソート順は任意ですが、冪等になるようルールを設定してください
+
+## 📚 参考資料
+
+なし

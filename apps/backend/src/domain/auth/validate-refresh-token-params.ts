@@ -76,7 +76,7 @@ export const validateRefreshTokenParams = async (
 			user_name: user.user_name,
 			client_id: client.id,
 		}
-	} catch (error) {
+	} catch {
 		return { success: false, error_message: "Invalid refresh token" }
 	}
 }

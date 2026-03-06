@@ -1,5 +1,6 @@
 import { prisma } from "../../libs/prisma"
 import type { PatchRecordResponse } from "../../schema/record"
+import { assertNever } from "../../utility/assert"
 import { escapeName, escapeStringValue } from "../../utility/sql"
 import { getEntity, getEntityItemList } from "../entity"
 import type { ValidateUpdateRecordBodyResultSuccess } from "./validate-update-record-body"
@@ -96,6 +97,7 @@ export const updateRecord = async (
 					value: escapeStringValue(JSON.stringify(result.value)),
 				}
 			}
+			return assertNever(result)
 		})
 		.filter((v) => !!v)
 		.map(({ column, value }) => `${escapeName(column)} = ${value}`)
