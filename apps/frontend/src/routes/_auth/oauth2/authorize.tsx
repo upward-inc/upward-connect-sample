@@ -1,10 +1,9 @@
 import { createFileRoute, useSearch } from "@tanstack/react-router"
-import { useEffect, useState } from "react"
 import { Button } from "../../../components/button"
 import { env } from "../../../env"
 import { useAuthorizeValidation } from "../../../hooks/auth/use-authorize-validation"
+import { useOAuthClient } from "../../../hooks/auth/use-oauth-client"
 import {
-	type AuthorizeError,
 	AuthorizeParamsSchema,
 	type AuthorizeResultFailure,
 	type AuthorizeResultSuccess,
@@ -20,76 +19,10 @@ const scopeDescriptions: Record<(typeof specifiedScopes)[number], string> = {
 	offline_access: "リフレッシュトークン発行",
 } as const
 
-type OAuthClientFetchResult =
-	| (OAuthClientFetchResultSuccess | OAuthClientFetchResultFailure)
-	| { isFetching: true }
-
-interface OAuthClientFetchResultSuccess {
-	isSuccess: true
-	name: string
-	isFetching: false
-}
-
-interface OAuthClientFetchResultFailure {
-	isSuccess: false
-	error: AuthorizeError
-	error_description?: string
-	isFetching: false
-}
-
 export const Route = createFileRoute("/_auth/oauth2/authorize")({
 	validateSearch: SearchParamsSchema,
 	component: AuthorizePage,
 })
-
-/**
- * クライアント情報を取得するフック
- */
-function useOAuthClient(
-	isValidating: boolean,
-	clientId: string | undefined,
-): OAuthClientFetchResult {
-	const [clientName, setClientName] = useState<string | null>(null)
-	const [isFetching, setIsFetching] = useState(true)
-
-	useEffect(() => {
-		if (!isValidating && clientId) {
-			const fetchClientInfo = async () => {
-				try {
-					setIsFetching(true)
-
-					const response = await fetch(
-						`${env.API_URL}/auth/clients/${clientId}`,
-						{
-							credentials: "include",
-						},
-					)
-
-					const client = await response.json()
-
-					if (response.ok && client.name) {
-						setClientName(client.name)
-					}
-				} finally {
-					setIsFetching(false)
-				}
-			}
-
-			fetchClientInfo()
-		} else if (!isValidating) {
-			setIsFetching(false)
-		}
-	}, [isValidating, clientId])
-
-	if (isFetching) {
-		return { isFetching }
-	}
-	if (!clientName) {
-		// 見つからない場合は全てエラーとする
-		return { isSuccess: false, error: "unauthorized_client", isFetching }
-	}
-	return { isSuccess: true, name: clientName, isFetching }
-}
 
 // リクエスト成功時のリダイレクト処理
 const redirectSuccess = (url: string, code: string, state?: string) => {

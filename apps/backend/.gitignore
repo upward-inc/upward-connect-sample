@@ -3,3 +3,6 @@
 
 # Local db files
 mssql/
+
+# Prisma generated client
+prisma/generated/

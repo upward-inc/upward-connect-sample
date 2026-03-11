@@ -1,11 +1,11 @@
 generator client {
-  provider        = "prisma-client-js"
+  provider        = "prisma-client"
+  output          = "../prisma/generated"
   previewFeatures = ["views"]
 }
 
 datasource db {
   provider = "sqlserver"
-  url      = env("DATABASE_URL")
 }
 
 model account {
@@ -39,6 +39,7 @@ model activity {
   id                     String    @id(map: "pk_activity") @default(dbgenerated("newid()"), map: "df_activity_id") @db.UniqueIdentifier
   subject                String?   @db.NVarChar(256)
   target                 String?   @db.NVarChar(256)
+  contact                String?   @db.NVarChar(256)
   start_date_time        DateTime? @db.DateTime
   end_date_time          DateTime? @db.DateTime
   is_all_day_event       Boolean   @default(false, map: "df_activity_is_all_day_event")

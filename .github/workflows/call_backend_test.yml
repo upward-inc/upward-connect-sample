@@ -14,13 +14,13 @@ jobs:
       - name: Setup Bun
         uses: oven-sh/setup-bun@v2
         with:
-          bun-version: 1.2.12
+          bun-version: 1.3.9
 
       - name: Cache Bun dependencies
         uses: actions/cache@v4
         with:
           path: ~/.bun/install/cache
-          key: ${{ runner.os }}-bun-backend-${{ hashFiles('apps/backend/bun.lock') }}
+          key: ${{ runner.os }}-bun-backend-${{ hashFiles('bun.lock') }}
           restore-keys: |
             ${{ runner.os }}-bun-backend-
 
@@ -30,6 +30,8 @@ jobs:
 
       - name: Generate Prisma Client
         working-directory: ./apps/backend
+        env:
+          DATABASE_URL: "sqlserver://localhost:1433"
         run: bun run prisma#generate
 
       - name: Test

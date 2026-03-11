@@ -26,7 +26,45 @@ export async function seedActivities(
 
 	const accounts = await prisma.account.findMany()
 	const leads = await prisma.lead.findMany()
-	const contacts = await prisma.contact.findMany()
+	const contacts = await prisma.contact.findMany({
+		where: {
+			account: {
+				in: accounts.map(({ id }) =>
+					JSON.stringify({ entity_name: "account", id }),
+				),
+			},
+		},
+	})
+	const accountIdToContactIdMap = new Map<string, string[]>()
+	for (const contact of contacts) {
+		const account = JSON.parse(contact.account || "{}")
+		if (account.id) {
+			if (!accountIdToContactIdMap.has(account.id)) {
+				accountIdToContactIdMap.set(account.id, [])
+			}
+			accountIdToContactIdMap.get(account.id)?.push(contact.id)
+		}
+	}
+	const getAnyTargetAndContact = () => {
+		if (getRandomBoolean(0.9)) {
+			if (getRandomBoolean(0.5)) {
+				const account = getAnyRow(accounts)
+				const contactId = getAnyRow(
+					accountIdToContactIdMap.get(account.id) || [],
+				)
+				return {
+					target: { entity_name: "account", id: account.id },
+					contact: contactId ? { entity_name: "contact", id: contactId } : null,
+				}
+			}
+			const lead = getAnyRow(leads)
+			return {
+				target: { entity_name: "lead", id: lead.id },
+				contact: null,
+			}
+		}
+		return { target: null, contact: null }
+	}
 
 	const getAnyOption = (itemName: string, name?: string) => {
 		const entityItem = entityItems.find((item) => item.name === itemName)
@@ -50,9 +88,7 @@ export async function seedActivities(
 	}).map((_, index) => {
 		const code = getZeroPaddingString(index + 1, 6)
 		const user = getAnyRow(users)
-		const account = getAnyRow(accounts)
-		const lead = getAnyRow(leads)
-		const contact = getAnyRow(contacts)
+		const { target, contact } = getAnyTargetAndContact()
 		const userRecordReference = JSON.stringify({
 			entity_name: "user",
 			id: user.id,
@@ -74,15 +110,8 @@ export async function seedActivities(
 
 		return {
 			subject: getAnyOption("subject").display_name,
-			target: getRandomBoolean(0.9)
-				? JSON.stringify(
-						getRandomBoolean(0.5)
-							? { entity_name: "account", id: account.id }
-							: getRandomBoolean(0.5)
-								? { entity_name: "lead", id: lead.id }
-								: { entity_name: "contact", id: contact.id },
-					)
-				: null,
+			target: target ? JSON.stringify(target) : null,
+			contact: contact ? JSON.stringify(contact) : null,
 			start_date_time: startDateTime,
 			end_date_time: endDateTime,
 			is_all_day_event: false,

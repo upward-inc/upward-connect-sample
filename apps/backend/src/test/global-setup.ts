@@ -1,8 +1,9 @@
 import { execSync } from "node:child_process"
-import { readFileSync, readdirSync } from "node:fs"
+import { readdirSync, readFileSync } from "node:fs"
 import { extname, join } from "node:path"
-import { PrismaClient } from "@prisma/client"
+import { PrismaMssql } from "@prisma/adapter-mssql"
 import { MSSQLServerContainer } from "@testcontainers/mssqlserver"
+import { PrismaClient } from "../../prisma/generated/client"
 
 export default async function globalSetup() {
 	console.log("🚀 テストセットアップ開始")
@@ -25,20 +26,15 @@ export default async function globalSetup() {
 	const sqlServerConnectionString = `sqlserver://${host}:${port};database=master;user=${username};password=${password};encrypt=true;trustServerCertificate=true;connection_limit=1;pool_timeout=10`
 
 	// テストデータベース用の Prisma クライアントを作成
-	const prisma = new PrismaClient({
-		datasources: {
-			db: {
-				url: sqlServerConnectionString,
-			},
-		},
-	})
+	const adapter = new PrismaMssql(sqlServerConnectionString)
+	const prisma = new PrismaClient({ adapter })
 
 	// データベースに接続
 	await prisma.$connect()
 
 	// マイグレーションを実行（テーブル作成）
 	try {
-		execSync("npx prisma migrate deploy", {
+		execSync("bun run prisma migrate deploy", {
 			stdio: "inherit",
 			env: { ...process.env, DATABASE_URL: sqlServerConnectionString },
 		})
