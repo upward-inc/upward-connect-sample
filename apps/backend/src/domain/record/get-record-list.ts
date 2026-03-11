@@ -59,7 +59,7 @@ export const getRecordList = async (
 	)
 
 	const filterFields = collectFilterFields(filter)
-	const needFormulaField = [
+	const hasFormulaField = [
 		...fields,
 		...filterFields,
 		...(group_by ?? []),
@@ -80,7 +80,7 @@ export const getRecordList = async (
 		: select
 
 	// 数式が必要な場合のみビューを参照
-	const fromClause = `FROM [${entity_name}${needFormulaField ? "_view" : ""}]`
+	const fromClause = `FROM [${entity_name}${hasFormulaField ? "_view" : ""}] AS [${entity_name}]`
 
 	const where = WhereClauseSchema.parse({
 		items: Array.from(entityItemMap.values()),
@@ -215,7 +215,20 @@ const covertRecords = async (
 			const { type, sub_type } = entityItemMap.get(field) ?? {}
 			let value = row[field]
 
-			if (value !== null && type) {
+			if (type) {
+				// nullの場合は早期リターン
+				if (value === null) {
+					if (
+						(type === "option" || type === "reference") &&
+						sub_type === "multi"
+					) {
+						data[field] = []
+					} else {
+						data[field] = null
+					}
+					continue
+				}
+
 				if (type === "numeric") {
 					value = typeof value === "number" ? value : Number(value)
 				}

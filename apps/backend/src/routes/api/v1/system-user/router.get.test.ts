@@ -5,11 +5,11 @@ import {
 	setupEntityMetadata,
 } from "../../../../test/utils/entity"
 import {
-	type TestExecutionUser,
 	createTestExecutionUser,
 	createTestUsers,
 	deleteTestExecutionUser,
 	deleteTestUsers,
+	type TestExecutionUser,
 } from "../../../../test/utils/execution-user"
 import { generateQueryString } from "../../../../test/utils/query-string"
 
@@ -372,25 +372,27 @@ describe("GET /api/v1/system-users - システムユーザー一覧取得", () =
 
 				const testCases = generateFilterTestCases(testUsers, baseTestCases)
 
-				it.each(testCases)(
-					"$title",
-					async ({ operator, value, is_not, expected }) => {
-						// Arrange
-						await createTestUsers(testExecutionUser.id, testUsers)
+				it.each(testCases)("$title", async ({
+					operator,
+					value,
+					is_not,
+					expected,
+				}) => {
+					// Arrange
+					await createTestUsers(testExecutionUser.id, testUsers)
 
-						// Act
-						const response = await requestGetList({
-							fields: "user_name",
-							filter: {
-								and: [{ field: targetField, operator, value, is_not }],
-							},
-						})
+					// Act
+					const response = await requestGetList({
+						fields: "user_name",
+						filter: {
+							and: [{ field: targetField, operator, value, is_not }],
+						},
+					})
 
-						// Assert
-						const { data } = await response.json()
-						expect(data).toStrictEqual(expected.data)
-					},
-				)
+					// Assert
+					const { data } = await response.json()
+					expect(data).toStrictEqual(expected.data)
+				})
 			})
 
 			describe("profileのフィールドによる絞り込み", () => {
@@ -508,25 +510,27 @@ describe("GET /api/v1/system-users - システムユーザー一覧取得", () =
 
 				const testCases = generateFilterTestCases(testUsers, baseTestCases)
 
-				it.each(testCases)(
-					"$title",
-					async ({ operator, value, is_not, expected }) => {
-						// Arrange
-						await createTestUsers(testExecutionUser.id, testUsers)
+				it.each(testCases)("$title", async ({
+					operator,
+					value,
+					is_not,
+					expected,
+				}) => {
+					// Arrange
+					await createTestUsers(testExecutionUser.id, testUsers)
 
-						// Act
-						const response = await requestGetList({
-							fields: "user_name",
-							filter: {
-								and: [{ field: targetField, operator, value, is_not }],
-							},
-						})
+					// Act
+					const response = await requestGetList({
+						fields: "user_name",
+						filter: {
+							and: [{ field: targetField, operator, value, is_not }],
+						},
+					})
 
-						// Assert
-						const { data } = await response.json()
-						expect(data).toStrictEqual(expected.data)
-					},
-				)
+					// Assert
+					const { data } = await response.json()
+					expect(data).toStrictEqual(expected.data)
+				})
 			})
 
 			describe("roleのフィールドによる絞り込み", () => {
@@ -644,25 +648,27 @@ describe("GET /api/v1/system-users - システムユーザー一覧取得", () =
 
 				const testCases = generateFilterTestCases(testUsers, baseTestCases)
 
-				it.each(testCases)(
-					"$title",
-					async ({ operator, value, is_not, expected }) => {
-						// Arrange
-						await createTestUsers(testExecutionUser.id, testUsers)
+				it.each(testCases)("$title", async ({
+					operator,
+					value,
+					is_not,
+					expected,
+				}) => {
+					// Arrange
+					await createTestUsers(testExecutionUser.id, testUsers)
 
-						// Act
-						const response = await requestGetList({
-							fields: "user_name",
-							filter: {
-								and: [{ field: targetField, operator, value, is_not }],
-							},
-						})
+					// Act
+					const response = await requestGetList({
+						fields: "user_name",
+						filter: {
+							and: [{ field: targetField, operator, value, is_not }],
+						},
+					})
 
-						// Assert
-						const { data } = await response.json()
-						expect(data).toStrictEqual(expected.data)
-					},
-				)
+					// Assert
+					const { data } = await response.json()
+					expect(data).toStrictEqual(expected.data)
+				})
 			})
 
 			describe("存在しないフィールドによる絞り込み", () => {

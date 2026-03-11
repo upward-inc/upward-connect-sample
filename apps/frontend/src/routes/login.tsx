@@ -12,16 +12,21 @@ import { Input } from "../components/input"
 import { Label } from "../components/label"
 
 const SearchParamsSchema = z.object({
-	redirect: z.string().optional(),
+	redirect: z
+		.string()
+		.refine((url) => url.startsWith("/") && !url.startsWith("//"), {
+			message: "Only relative paths are allowed",
+		})
+		.optional(),
 })
 
 const fallback = "/private" as const
 
 export const Route = createFileRoute("/login")({
-	beforeLoad: ({ context }) => {
+	beforeLoad: ({ context, search }) => {
 		// すでに認証済みの場合はリダイレクト
 		if (context.auth.isAuthenticated) {
-			throw redirect({ to: fallback })
+			throw redirect({ href: search.redirect ?? fallback })
 		}
 	},
 	component: Login,
@@ -56,7 +61,7 @@ function Login() {
 
 			// リダイレクト処理
 			navigate({ href: redirect ?? fallback })
-		} catch (error) {
+		} catch {
 			setErrorMessage(
 				"ログインに失敗しました。ユーザー名とパスワードを確認してください。",
 			)
@@ -81,7 +86,7 @@ function Login() {
 				<form ref={formRef} className="mt-8 space-y-6" onSubmit={handleSubmit}>
 					<div>
 						<Label htmlFor="username">ユーザー名</Label>
-						<Input id="username" name="username" type="username" required />
+						<Input id="username" name="username" type="text" required />
 					</div>
 
 					<div>

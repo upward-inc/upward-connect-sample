@@ -1,5 +1,22 @@
 import { z } from "../libs/zod"
 
+const recordUrlFormat = z
+	.object({
+		app: z.string().nullable().meta({
+			description:
+				"このエンティティのレコードをモバイルアプリで開く際のURL形式",
+			example: "sampleapp://record_detail?entity=account&id={id}",
+		}),
+		browser: z.string().nullable().meta({
+			description:
+				"このエンティティのレコードをPC（Webブラウザ）で開く際のURL形式",
+			example: "https://example.com/record_detail?entity=account&id={id}",
+		}),
+	})
+	.meta({
+		description: "レコードのURLを表す文字列フォーマット",
+	})
+
 const itemMapping = z
 	.object({
 		id: z.string().meta({
@@ -71,6 +88,11 @@ export const EntitySchema = z
 		display_name: z.string().meta({
 			description: "エンティティの表示名",
 			examples: ["取引先", "商談"],
+		}),
+		record_url_format: recordUrlFormat.nullable().meta({
+			description: "レコードのURLを表す文字列フォーマット",
+			example:
+				'{ "app": "sampleapp://record_detail?entity=account&id={id}", "browser": "https://example.com/record_detail?entity=account&id={id}" }',
 		}),
 		has_location: z.boolean().meta({
 			description: "エンティティが位置情報を保持しているかどうか",

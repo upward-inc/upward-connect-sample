@@ -1,11 +1,14 @@
 import { render, screen, waitFor } from "@testing-library/react"
+import "@testing-library/jest-dom"
 import userEvent from "@testing-library/user-event"
-import { http, HttpResponse } from "msw"
-import type { HttpHandler } from "msw"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
 import type { SearchParams } from "../../../schema/auth"
-import { setRequestHandlers } from "../../../test/msw"
+import {
+	createAuthorizeHandler,
+	createClientHandler,
+} from "../../../test/mocks/handlers"
+import { setRequestHandlers } from "../../../test/mocks/server"
 import { AuthorizePage } from "./authorize"
 
 const { API_URL } = vi.hoisted(() => ({
@@ -35,24 +38,6 @@ const baseSearchParams: Required<SearchParams> = {
 	code_challenge_method: "S256",
 }
 
-const createClientHandler = (
-	status: number,
-	body: Record<string, unknown>,
-): HttpHandler => {
-	return http.get(`${API_URL}/auth/clients/:clientId`, () =>
-		HttpResponse.json(body, { status }),
-	)
-}
-
-const createAuthorizeHandler = (
-	status: number,
-	body: Record<string, unknown>,
-): HttpHandler => {
-	return http.post(`${API_URL}/auth/authorize`, async () => {
-		return HttpResponse.json(body, { status })
-	})
-}
-
 const renderAuthorizePage = () => {
 	render(<AuthorizePage />)
 }
@@ -61,12 +46,12 @@ describe("AuthorizePage", () => {
 	const originalLocation = window.location
 	let locationHref = baseSearchParams.redirect_uri
 
-	beforeEach(() => {
+	beforeEach(async () => {
 		useSearchMock.mockReturnValue(baseSearchParams)
 
 		setRequestHandlers(
-			createClientHandler(200, { name: "Sample App" }),
-			createAuthorizeHandler(200, {
+			await createClientHandler(API_URL, 200, { name: "Sample App" }),
+			createAuthorizeHandler(API_URL, 200, {
 				code: "AUTH_CODE",
 				state: baseSearchParams.state,
 			}),
@@ -138,7 +123,7 @@ describe("AuthorizePage", () => {
 
 	it("クライアント情報の取得に失敗したとき、unauthorized_clientエラーを付与してリダイレクトURIへ遷移する", async () => {
 		// クライアント情報の取得に失敗するように上書き
-		setRequestHandlers(createClientHandler(404, {}))
+		setRequestHandlers(await createClientHandler(API_URL, 404, {}))
 
 		renderAuthorizePage()
 
@@ -151,7 +136,7 @@ describe("AuthorizePage", () => {
 
 	it("認可APIがinvalid_request_uriエラーを返したとき、オープンリダイレクト攻撃を防ぐため例外を投げる", async () => {
 		setRequestHandlers(
-			createAuthorizeHandler(400, { error: "invalid_request_uri" }),
+			createAuthorizeHandler(API_URL, 400, { error: "invalid_request_uri" }),
 		)
 
 		renderAuthorizePage()
@@ -184,7 +169,7 @@ describe("AuthorizePage", () => {
 	it("認可APIがconsent_requiredエラーを返したとき、エラーとエラー説明とstateパラメータを付与してリダイレクトURIへ遷移する", async () => {
 		// ユーザーの同意が必要である旨のエラーを返すように上書き
 		setRequestHandlers(
-			createAuthorizeHandler(400, {
+			createAuthorizeHandler(API_URL, 400, {
 				error: "consent_required",
 				error_description: "consent required",
 				state: baseSearchParams.state,
@@ -203,7 +188,7 @@ describe("AuthorizePage", () => {
 
 	it("認可APIが503ステータスを返したとき、temporarily_unavailableエラーを付与してリダイレクトURIへ遷移する", async () => {
 		// サーバーエラーを返すように上書き
-		setRequestHandlers(createAuthorizeHandler(503, {}))
+		setRequestHandlers(createAuthorizeHandler(API_URL, 503, {}))
 
 		renderAuthorizePage()
 		const user = userEvent.setup()
@@ -265,19 +250,19 @@ describe("AuthorizePage", () => {
 				paramKey: "code_challenge",
 				expectedUrl: `${baseSearchParams.redirect_uri}?error=invalid_request&state=${baseSearchParams.state}`,
 			},
-		])(
-			"$titleの場合、適切なエラーを付与してリダイレクトURIへ遷移する",
-			async ({ paramKey, expectedUrl }) => {
-				// 該当パラメータを未指定にする
-				useSearchMock.mockReturnValue({
-					...baseSearchParams,
-					[paramKey]: undefined,
-				})
+		])("$titleの場合、適切なエラーを付与してリダイレクトURIへ遷移する", async ({
+			paramKey,
+			expectedUrl,
+		}) => {
+			// 該当パラメータを未指定にする
+			useSearchMock.mockReturnValue({
+				...baseSearchParams,
+				[paramKey]: undefined,
+			})
 
-				renderAuthorizePage()
+			renderAuthorizePage()
 
-				expect(locationHref).toBe(expectedUrl)
-			},
-		)
+			expect(locationHref).toBe(expectedUrl)
+		})
 	})
 })

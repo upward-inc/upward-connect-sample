@@ -18,9 +18,9 @@ import {
 	deleteAllTestOAuthClient,
 } from "../../test/utils/auth"
 import {
-	type TestExecutionUser,
 	createTestExecutionUser,
 	deleteTestExecutionUser,
+	type TestExecutionUser,
 } from "../../test/utils/execution-user"
 import { convertJwkToPem } from "../../utility/crypto"
 
@@ -226,40 +226,42 @@ describe("POST /auth/authorize - 認可エンドポイント", () => {
 				redirectUri: "https://malicious-site.com/callback",
 				expectedError: "invalid_request_uri",
 			},
-		])(
-			"$title",
-			async ({ clientName, clientIdOverride, redirectUri, expectedError }) => {
-				// Arrange
-				const testClient = await createTestOAuthClient({
-					name: clientName,
-					secret: "test_secret_12345",
-					redirect_uris: "https://example.com/callback",
-					scopes: "openid,profile,email",
-				})
+		])("$title", async ({
+			clientName,
+			clientIdOverride,
+			redirectUri,
+			expectedError,
+		}) => {
+			// Arrange
+			const testClient = await createTestOAuthClient({
+				name: clientName,
+				secret: "test_secret_12345",
+				redirect_uris: "https://example.com/callback",
+				scopes: "openid,profile,email",
+			})
 
-				const stateValue = "state-for-error-test"
+			const stateValue = "state-for-error-test"
 
-				// Act
-				const response = await requestAuthorize({
-					response_type: "code",
-					client_id: clientIdOverride || testClient.id,
-					redirect_uri: redirectUri,
-					scope: "openid profile email",
-					state: stateValue,
-					nonce: "random_nonce_12345",
-					code_challenge: "E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM",
-					code_challenge_method: "S256",
-				})
+			// Act
+			const response = await requestAuthorize({
+				response_type: "code",
+				client_id: clientIdOverride || testClient.id,
+				redirect_uri: redirectUri,
+				scope: "openid profile email",
+				state: stateValue,
+				nonce: "random_nonce_12345",
+				code_challenge: "E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM",
+				code_challenge_method: "S256",
+			})
 
-				// Assert
-				const data = await response.json()
-				expect(response.status).toBe(400)
-				expect(data).toEqual({
-					error: expectedError,
-					state: stateValue,
-				})
-			},
-		)
+			// Assert
+			const data = await response.json()
+			expect(response.status).toBe(400)
+			expect(data).toEqual({
+				error: expectedError,
+				state: stateValue,
+			})
+		})
 	})
 
 	it("不正なresponse_typeの場合に400エラーを返すこと", async () => {

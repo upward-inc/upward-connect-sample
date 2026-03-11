@@ -206,8 +206,9 @@ export async function seedSamplesAddressAndLocation(
 	const records = await prisma.sample.findMany()
 
 	const result = await Promise.all(
-		records.map((record) => {
-			if (getRandomBoolean(0.9)) {
+		records
+			.filter(() => getRandomBoolean(0.9))
+			.map((record) => {
 				const address = getAnyRow(addresses)
 
 				const query = `
@@ -221,8 +222,7 @@ export async function seedSamplesAddressAndLocation(
 				`
 
 				return prisma.$executeRawUnsafe(query)
-			}
-		}),
+			}),
 	)
 	console.log(`>> sample records updated: ${result.length}`)
 }

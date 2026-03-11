@@ -48,7 +48,6 @@ export async function seedLeads(
 			const code = getZeroPaddingString(index + 1, 6)
 			const user = getAnyRow(users)
 			const person = getAnyRow(persons)
-			const address = getAnyRow(addresses)
 			const userRecordReference = JSON.stringify({
 				entity_name: "user",
 				id: user.id,
@@ -104,8 +103,9 @@ export async function seedLeadsAddressAndLocation(
 	const records = await prisma.lead.findMany()
 
 	const result = await Promise.all(
-		records.map((record) => {
-			if (getRandomBoolean(0.9)) {
+		records
+			.filter(() => getRandomBoolean(0.9))
+			.map((record) => {
 				const address = getAnyRow(addresses)
 
 				const query = `
@@ -119,8 +119,7 @@ export async function seedLeadsAddressAndLocation(
 				`
 
 				return prisma.$executeRawUnsafe(query)
-			}
-		}),
+			}),
 	)
 	console.log(`>> lead records updated: ${result.length}`)
 }
