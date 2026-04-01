@@ -1,7 +1,7 @@
 version: 2
 updates:
   # ルートディレクトリのnpm依存関係
-  - package-ecosystem: "npm"
+  - package-ecosystem: "bun"
     directory: "/"
     schedule:
       interval: "weekly"
@@ -10,42 +10,47 @@ updates:
       - "dependencies"
     commit-message:
       prefix: "deps"
+    cooldown:
+      default-days: 7
 
   # backend ワークスペース
-  - package-ecosystem: "npm"
+  - package-ecosystem: "bun"
     directory: "/apps/backend"
     schedule:
       interval: "weekly"
     target-branch: "develop"
     labels:
       - "dependencies"
-      - "backend"
     commit-message:
       prefix: "deps(backend)"
+    cooldown:
+      default-days: 7
 
   # frontend ワークスペース
-  - package-ecosystem: "npm"
+  - package-ecosystem: "bun"
     directory: "/apps/frontend"
     schedule:
       interval: "weekly"
     target-branch: "develop"
     labels:
       - "dependencies"
-      - "frontend"
     commit-message:
       prefix: "deps(frontend)"
+    cooldown:
+      default-days: 7
 
   # docs ワークスペース
-  - package-ecosystem: "npm"
+  - package-ecosystem: "bun"
     directory: "/apps/docs"
     schedule:
       interval: "weekly"
     target-branch: "develop"
     labels:
       - "dependencies"
-      - "docs"
     commit-message:
       prefix: "deps(docs)"
+    cooldown:
+      default-days: 7
 
   # GitHub Actions
   - package-ecosystem: "github-actions"
@@ -55,6 +60,7 @@ updates:
     target-branch: "develop"
     labels:
       - "dependencies"
-      - "github-actions"
     commit-message:
       prefix: "deps(github-actions)"
+    cooldown:
+      default-days: 7

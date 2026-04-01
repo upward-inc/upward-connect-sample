@@ -34,12 +34,12 @@ jobs:
     environment: ${{ inputs.environment }}
     steps:
       - name: Azure Login
-        uses: azure/login@v2
+        uses: azure/login@a457da9ea143d694b1b9c7c869ebb04ebe844ef5 # v2.3.0
         with:
           creds: ${{ secrets.DEPLOY_APP_CREDENTIALS }}
 
       - name: Deploy to containerapp
-        uses: azure/CLI@v2
+        uses: azure/CLI@9f7ce6f37c31b777ec6c6b6d1dfe7db79f497956 # v2.2.0
         with:
           inlineScript: |
             az config set extension.use_dynamic_install=yes_without_prompt
