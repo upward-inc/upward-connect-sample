@@ -10,6 +10,8 @@ updates:
       - "dependencies"
     commit-message:
       prefix: "deps"
+    cooldown:
+      default-days: 7
 
   # backend ワークスペース
   - package-ecosystem: "npm"
@@ -22,6 +24,8 @@ updates:
       - "backend"
     commit-message:
       prefix: "deps(backend)"
+    cooldown:
+      default-days: 7
 
   # frontend ワークスペース
   - package-ecosystem: "npm"
@@ -34,6 +38,8 @@ updates:
       - "frontend"
     commit-message:
       prefix: "deps(frontend)"
+    cooldown:
+      default-days: 7
 
   # docs ワークスペース
   - package-ecosystem: "npm"
@@ -46,6 +52,8 @@ updates:
       - "docs"
     commit-message:
       prefix: "deps(docs)"
+    cooldown:
+      default-days: 7
 
   # GitHub Actions
   - package-ecosystem: "github-actions"
@@ -58,3 +66,5 @@ updates:
       - "github-actions"
     commit-message:
       prefix: "deps(github-actions)"
+    cooldown:
+      default-days: 7
