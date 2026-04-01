@@ -1,6 +1,6 @@
 version: 2
 updates:
-  # ルートディレクトリのnpm依存関係
+  # ルートディレクトリ
   - package-ecosystem: "bun"
     directory: "/"
     schedule:
