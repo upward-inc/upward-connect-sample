@@ -1,7 +1,7 @@
 version: 2
 updates:
   # ルートディレクトリのnpm依存関係
-  - package-ecosystem: "npm"
+  - package-ecosystem: "bun"
     directory: "/"
     schedule:
       interval: "weekly"
@@ -14,7 +14,7 @@ updates:
       default-days: 7
 
   # backend ワークスペース
-  - package-ecosystem: "npm"
+  - package-ecosystem: "bun"
     directory: "/apps/backend"
     schedule:
       interval: "weekly"
@@ -28,7 +28,7 @@ updates:
       default-days: 7
 
   # frontend ワークスペース
-  - package-ecosystem: "npm"
+  - package-ecosystem: "bun"
     directory: "/apps/frontend"
     schedule:
       interval: "weekly"
@@ -42,7 +42,7 @@ updates:
       default-days: 7
 
   # docs ワークスペース
-  - package-ecosystem: "npm"
+  - package-ecosystem: "bun"
     directory: "/apps/docs"
     schedule:
       interval: "weekly"
