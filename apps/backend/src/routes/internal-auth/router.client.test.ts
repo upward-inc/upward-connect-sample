@@ -43,7 +43,8 @@ describe("GET /auth/clients/:id - OAuthクライアント情報取得エンド�
 	// テストOAuthクライアント
 	let testOAuthClient: TestOAuthClient
 
-	beforeAll(async ({ id: taskId }) => {
+	beforeAll(async () => {
+		const taskId = crypto.randomUUID()
 		const { user, client } = await setup(taskId)
 		testExecutionUser = user
 		testOAuthClient = client
