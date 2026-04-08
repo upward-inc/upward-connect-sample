@@ -1,60 +1,81 @@
 version: 2
 updates:
-  # ルートディレクトリのnpm依存関係
-  - package-ecosystem: "npm"
+  # ルートディレクトリ
+  - package-ecosystem: "bun"
     directory: "/"
     schedule:
-      interval: "weekly"
+      interval: "daily"
+      time: "00:00"
+      timezone: "Asia/Tokyo"
     target-branch: "develop"
     labels:
       - "dependencies"
     commit-message:
       prefix: "deps"
+    cooldown:
+      default-days: 7
+    open-pull-requests-limit: 999
 
   # backend ワークスペース
-  - package-ecosystem: "npm"
+  - package-ecosystem: "bun"
     directory: "/apps/backend"
     schedule:
-      interval: "weekly"
+      interval: "daily"
+      time: "00:00"
+      timezone: "Asia/Tokyo"
     target-branch: "develop"
     labels:
       - "dependencies"
-      - "backend"
     commit-message:
       prefix: "deps(backend)"
+    cooldown:
+      default-days: 7
+    open-pull-requests-limit: 999
 
   # frontend ワークスペース
-  - package-ecosystem: "npm"
+  - package-ecosystem: "bun"
     directory: "/apps/frontend"
     schedule:
-      interval: "weekly"
+      interval: "daily"
+      time: "00:00"
+      timezone: "Asia/Tokyo"
     target-branch: "develop"
     labels:
       - "dependencies"
-      - "frontend"
     commit-message:
       prefix: "deps(frontend)"
+    cooldown:
+      default-days: 7
+    open-pull-requests-limit: 999
 
   # docs ワークスペース
-  - package-ecosystem: "npm"
+  - package-ecosystem: "bun"
     directory: "/apps/docs"
     schedule:
-      interval: "weekly"
+      interval: "daily"
+      time: "00:00"
+      timezone: "Asia/Tokyo"
     target-branch: "develop"
     labels:
       - "dependencies"
-      - "docs"
     commit-message:
       prefix: "deps(docs)"
+    cooldown:
+      default-days: 7
+    open-pull-requests-limit: 999
 
   # GitHub Actions
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
-      interval: "weekly"
+      interval: "daily"
+      time: "00:00"
+      timezone: "Asia/Tokyo"
     target-branch: "develop"
     labels:
       - "dependencies"
-      - "github-actions"
     commit-message:
       prefix: "deps(github-actions)"
+    cooldown:
+      default-days: 7
+    open-pull-requests-limit: 999
