@@ -13,7 +13,8 @@ describe("POST /api/v1/files - ファイル作成", () => {
 	// テスト実施ユーザー
 	let testExecutionUser: TestExecutionUser
 
-	beforeAll(async ({ id: taskId }) => {
+	beforeAll(async () => {
+		const taskId = crypto.randomUUID()
 		const { user } = await setup(taskId)
 		testExecutionUser = user
 	})

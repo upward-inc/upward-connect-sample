@@ -217,7 +217,8 @@ describe("エンティティ項目の取得", () => {
 	// テスト実施ユーザー
 	let testExecutionUser: TestExecutionUser
 
-	beforeAll(async ({ id: taskId }) => {
+	beforeAll(async () => {
+		const taskId = crypto.randomUUID()
 		const { user } = await setup(taskId)
 		testExecutionUser = user
 	})
