@@ -24,6 +24,7 @@ type RecordReference = {
 }
 
 describe("POST /records/:entity_name - レコード作成", () => {
+	const taskId = crypto.randomUUID()
 	// テスト実施ユーザー
 	let testExecutionUser: TestExecutionUser
 
@@ -31,14 +32,14 @@ describe("POST /records/:entity_name - レコード作成", () => {
 	let accountRecordReference: RecordReference
 	let leadRecordReference: RecordReference
 
-	beforeAll(async ({ id: taskId }) => {
+	beforeAll(async () => {
 		const { user, account, lead } = await setup(taskId)
 		testExecutionUser = user
 		accountRecordReference = { entity_name: "account", id: account.id }
 		leadRecordReference = { entity_name: "lead", id: lead.id }
 	})
 
-	afterAll(async ({ id: taskId }) => {
+	afterAll(async () => {
 		await cleanup(taskId)
 	})
 

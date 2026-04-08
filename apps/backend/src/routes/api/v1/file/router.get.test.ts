@@ -13,7 +13,8 @@ describe("GET /api/v1/files/:id - ファイル取得", () => {
 	// テスト実施ユーザー
 	let testExecutionUser: TestExecutionUser
 
-	beforeAll(async ({ id: taskId }) => {
+	beforeAll(async () => {
+		const taskId = crypto.randomUUID()
 		const { user } = await setup(taskId)
 		testExecutionUser = user
 	})
