@@ -1,0 +1,4 @@
+version: 3
+ignore_actions:
+  - name: upward-inc/org-workflows/.github/workflows/dependabot-security-alert.yml
+    ref: main
