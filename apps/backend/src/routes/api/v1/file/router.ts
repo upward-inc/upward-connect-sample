@@ -5,6 +5,7 @@ import { ResourceApiErrorResultSchema } from "../../../../schema/error"
 import {
 	GetFileParamSchema,
 	PostFileFormSchema,
+	PostFileHeaderSchema,
 	PostFileResultSchema,
 } from "../../../../schema/file"
 
@@ -55,6 +56,7 @@ export const fileRouter = honoApp<{ Variables: AuthContexts }>()
 			path: "/",
 			description: "送信されたファイルを保存する",
 			request: {
+				headers: PostFileHeaderSchema,
 				body: {
 					content: {
 						"multipart/form-data": { schema: PostFileFormSchema },
@@ -88,7 +90,14 @@ export const fileRouter = honoApp<{ Variables: AuthContexts }>()
 				throw new Error("User not found")
 			}
 
-			const id = await createFile(file, user.id)
+			const recordEntity = c.req.header("X-Record-Entity")
+			const recordId = c.req.header("X-Record-Id")
+			const sourceRecord =
+				recordEntity && recordId
+					? JSON.stringify({ entity_name: recordEntity, id: recordId })
+					: undefined
+
+			const id = await createFile(file, user.id, sourceRecord)
 
 			return c.json({ id }, 201)
 		},
