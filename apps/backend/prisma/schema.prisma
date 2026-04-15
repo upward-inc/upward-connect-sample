@@ -203,6 +203,7 @@ model file {
   name                        String   @db.NVarChar(255)
   type                        String   @db.NVarChar(20)
   content                     Bytes
+  source_record               String?  @db.NVarChar(Max)
   created_at                  DateTime @default(dbgenerated("getutcdate()"), map: "df_file_created_at")
   created_by                  String   @db.UniqueIdentifier
   modified_at                 DateTime @default(dbgenerated("getutcdate()"), map: "df_file_modified_at")
@@ -532,6 +533,7 @@ view activity_view {
   id                     String    @unique @db.UniqueIdentifier
   subject                String?   @db.NVarChar(256)
   target                 String?   @db.NVarChar(256)
+  contact                String?   @db.NVarChar(256)
   start_date_time        DateTime? @db.DateTime
   end_date_time          DateTime? @db.DateTime
   is_all_day_event       Boolean
@@ -720,7 +722,7 @@ view sample_view {
   created_by                                String                    @db.NVarChar(Max)
   modified_at                               DateTime
   modified_by                               String                    @db.NVarChar(Max)
-  formula_text                              String?                   @db.NVarChar(4000)
+  formula_text                              String?                   @db.NVarChar(Max)
   formula_integer                           Decimal?                  @db.Decimal(20, 0)
   formula_boolean                           Int
   formula_date                              DateTime?                 @db.Date
