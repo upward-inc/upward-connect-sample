@@ -24,6 +24,16 @@ export const GetFileParamSchema = z.object({
 	id: FileIdSchema,
 })
 
+export const PostFileHeaderSchema = z.object({
+	"X-Record-Entity": z.string().optional().meta({
+		description: "このファイルの出所となったレコードのエンティティ名",
+	}),
+	"X-Record-Id": z
+		.string()
+		.optional()
+		.meta({ description: "このファイルの出所となったレコードID" }),
+})
+
 export const PostFileFormSchema = z.object({
 	// TODO: z.file() が使えるようになったらそちらに変更する
 	// @see https://github.com/honojs/middleware/issues/1316#issuecomment-3094398624
