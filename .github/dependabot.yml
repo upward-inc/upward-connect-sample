@@ -5,7 +5,7 @@ updates:
     directory: "/"
     schedule:
       interval: "daily"
-      time: "00:00"
+      time: "07:00"
       timezone: "Asia/Tokyo"
     target-branch: "develop"
     labels:
@@ -21,7 +21,7 @@ updates:
     directory: "/apps/backend"
     schedule:
       interval: "daily"
-      time: "00:00"
+      time: "07:00"
       timezone: "Asia/Tokyo"
     target-branch: "develop"
     labels:
@@ -37,7 +37,7 @@ updates:
     directory: "/apps/frontend"
     schedule:
       interval: "daily"
-      time: "00:00"
+      time: "07:00"
       timezone: "Asia/Tokyo"
     target-branch: "develop"
     labels:
@@ -53,7 +53,7 @@ updates:
     directory: "/apps/docs"
     schedule:
       interval: "daily"
-      time: "00:00"
+      time: "07:00"
       timezone: "Asia/Tokyo"
     target-branch: "develop"
     labels:
@@ -69,7 +69,7 @@ updates:
     directory: "/"
     schedule:
       interval: "daily"
-      time: "00:00"
+      time: "07:00"
       timezone: "Asia/Tokyo"
     target-branch: "develop"
     labels:
