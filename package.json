@@ -19,7 +19,7 @@
 		"check": "bun run --filter '*' check"
 	},
 	"devDependencies": {
-		"@biomejs/biome": "^2.4.9"
+		"@biomejs/biome": "^2.4.12"
 	},
 	"workspaces": ["apps/*"]
 }
