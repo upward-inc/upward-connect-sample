@@ -49,10 +49,14 @@ describe("POST /api/v1/files - ファイル作成", () => {
 	async function requestPost(
 		formData: FormData,
 		authToken = testExecutionUser.access_token,
+		extraHeaders: Record<string, string> = {},
 	) {
 		return await app.request("/api/v1/files", {
 			method: "POST",
-			headers: authToken ? { Authorization: `Bearer ${authToken}` } : {},
+			headers: {
+				...(authToken ? { Authorization: `Bearer ${authToken}` } : {}),
+				...extraHeaders,
+			},
 			body: formData,
 		})
 	}
@@ -185,6 +189,53 @@ describe("POST /api/v1/files - ファイル作成", () => {
 		expect(savedFile?.name).toBe("test.png")
 		expect(savedFile?.type).toBe("image/png")
 		expect(new Uint8Array(savedFile?.content || [])).toEqual(binaryContent)
+	})
+
+	describe("source_record の保存", () => {
+		it.each([
+			{
+				title: "X-Record-Entity と X-Record-Id の両方が指定された場合",
+				headers: {
+					"X-Record-Entity": "account",
+					"X-Record-Id": "acc-001",
+				} as Record<string, string>,
+				expected: JSON.stringify({ entity_name: "account", id: "acc-001" }),
+			},
+			{
+				title: "X-Record-Entity のみ指定された場合",
+				headers: {
+					"X-Record-Entity": "account",
+				} as Record<string, string>,
+				expected: null,
+			},
+			{
+				title: "X-Record-Id のみ指定された場合",
+				headers: { "X-Record-Id": "acc-001" } as Record<string, string>,
+				expected: null,
+			},
+			{
+				title: "両方のヘッダーが未指定の場合",
+				headers: {} as Record<string, string>,
+				expected: null,
+			},
+		])("$title", async ({ headers, expected }) => {
+			// Arrange
+			const testFile = createTestFile("test.txt", "Hello, World!")
+			const formData = new FormData()
+			formData.append("file", testFile)
+
+			// Act
+			const response = await requestPost(formData, undefined, headers)
+
+			// Assert
+			const data = await response.json()
+			expect(response.status).toBe(201)
+
+			const savedFile = await testPrisma.file.findUnique({
+				where: { id: data.id },
+			})
+			expect(savedFile?.source_record).toBe(expected)
+		})
 	})
 
 	describe("バリデーションエラーの場合に400エラーを返すこと", () => {
