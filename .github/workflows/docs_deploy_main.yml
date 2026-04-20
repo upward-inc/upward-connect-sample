@@ -25,10 +25,11 @@ on:
 
 # 同一ブランチでの重複実行を制御
 # - PR操作時: 古い実行をキャンセルして最新のみ実行
+#   - closedイベントはキャンセル対象外（プレビュー環境削除のみのため、キャンセルしない）
 # - Push時: キャンセルせず順番に実行（デプロイの安全性確保）
 concurrency:
   group: docs-deploy-main-${{ github.ref }}
-  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' && github.event.action != 'closed' }}
 
 jobs:
   # コード品質チェック
