@@ -1,0 +1,9 @@
+# OSV-Scanner configuration
+# 仕様: https://google.github.io/osv-scanner/configuration/
+
+# 個別 waiver はここに追加する。
+# 例:
+# [[IgnoredVulns]]
+# id = "GHSA-xxxx-xxxx-xxxx"
+# ignoreUntil = "2026-12-31"
+# reason = "脆弱関数が当アプリで未使用。次回のメジャー更新で解消予定。"
