@@ -4,16 +4,12 @@
 useDefault = true
 
 [[allowlists]]
-description = "テストファイル / テスト設定内のダミー機密 (アクセストークン・private key 等) は本物の機密ではないため除外"
+description = "テスト設定内のダミー機密 (アクセストークン・private key 等) は本物の機密ではないため除外"
 paths = [
-	# テスト用 setup / fixture ディレクトリ配下
-	'''^apps/backend/.*/test/''',
-	'''^apps/frontend/.*/test/''',
 	# vitest 設定ファイル (現行パス apps/backend/, リネーム前パス apps/api/)
-	'''^apps/backend/vitest(\..*)?\.config\.ts$''',
-	'''^apps/api/vitest(\..*)?\.config\.ts$''',
-	# 個別のテストファイル (*.test.ts)
-	'''.*\.test\.ts$''',
+	'''^apps/backend/vitest\.config\.ts$''',
+	'''^apps/api/vitest\.config\.ts$''',
+	'''^apps/api/vitest\.integration\.config\.ts$''',
 ]
 
 [[allowlists]]
@@ -26,4 +22,18 @@ paths = [
 description = ".env.template はプレースホルダ値のみで本物の機密ではないため除外"
 paths = [
 	'''(^|/)\.env\.template$''',
+]
+
+[[allowlists]]
+description = "過去にテスト用として使われた expiredToken は本物の機密ではないため、対象 commit / path / 値 が全一致した時のみ除外"
+condition = "AND"
+commits = [
+	"db68ad4ff05ecc41cb1fc493b7ced829bd7e82b3",
+]
+paths = [
+	'''^apps/backend/src/routes/api/v1/file/router\.(get|post)\.test\.ts$''',
+]
+regexTarget = "secret"
+regexes = [
+	'''^eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9\.eyJ1c2VyX2lkIjoidGVzdCIsImV4cCI6MH0\.invalid$''',
 ]
