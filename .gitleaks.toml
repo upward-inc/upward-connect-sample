@@ -1,0 +1,20 @@
+# gitleaks 設定
+# 既定ルールセット (gitleaks 同梱の default) を継承し、本リポジトリ固有の allowlist を追加する。
+[extend]
+useDefault = true
+
+[[allowlists]]
+description = "テストフィクスチャ内のダミー機密 (アクセストークン・private key 等) は本物の機密ではないため除外"
+paths = [
+	'''^apps/backend/.*/test/''',
+	'''^apps/frontend/.*/test/''',
+	# vitest.config 系のテスト用環境変数 (OIDC_TOKEN_SECRET 等のダミー値)
+	'''^apps/backend/vitest\..*\.config\.ts$''',
+	'''^apps/backend/vitest\.config\.ts$''',
+]
+
+[[allowlists]]
+description = "API 仕様ドキュメント内の JWT/OAuth トークン形式サンプルは本物の機密ではないため除外"
+paths = [
+	'''^apps/docs/src/content/docs/.*\.mdx$''',
+]
