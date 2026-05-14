@@ -4,17 +4,26 @@
 useDefault = true
 
 [[allowlists]]
-description = "テストフィクスチャ内のダミー機密 (アクセストークン・private key 等) は本物の機密ではないため除外"
+description = "テストファイル / テスト設定内のダミー機密 (アクセストークン・private key 等) は本物の機密ではないため除外"
 paths = [
+	# テスト用 setup / fixture ディレクトリ配下
 	'''^apps/backend/.*/test/''',
 	'''^apps/frontend/.*/test/''',
-	# vitest.config 系のテスト用環境変数 (OIDC_TOKEN_SECRET 等のダミー値)
-	'''^apps/backend/vitest\..*\.config\.ts$''',
-	'''^apps/backend/vitest\.config\.ts$''',
+	# vitest 設定ファイル (現行パス apps/backend/, リネーム前パス apps/api/)
+	'''^apps/backend/vitest(\..*)?\.config\.ts$''',
+	'''^apps/api/vitest(\..*)?\.config\.ts$''',
+	# 個別のテストファイル (*.test.ts)
+	'''.*\.test\.ts$''',
 ]
 
 [[allowlists]]
 description = "API 仕様ドキュメント内の JWT/OAuth トークン形式サンプルは本物の機密ではないため除外"
 paths = [
 	'''^apps/docs/src/content/docs/.*\.mdx$''',
+]
+
+[[allowlists]]
+description = ".env.template はプレースホルダ値のみで本物の機密ではないため除外"
+paths = [
+	'''(^|/)\.env\.template$''',
 ]
