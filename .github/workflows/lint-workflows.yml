@@ -1,0 +1,55 @@
+name: Lint GitHub Actions workflows
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/**"
+      - ".github/actions/**"
+      - ".ghalint.yaml"
+
+permissions: {}
+
+env:
+  ACTIONLINT_VERSION: v1.7.12
+  GHALINT_VERSION: v1.5.5
+
+jobs:
+  # https://github.com/rhysd/actionlint
+  actionlint:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+
+      - name: Install actionlint
+        run: |
+          curl -sSfL "https://github.com/rhysd/actionlint/releases/download/${ACTIONLINT_VERSION}/actionlint_${ACTIONLINT_VERSION#v}_linux_amd64.tar.gz" | tar xz
+          sudo install actionlint /usr/local/bin/
+
+      - name: Run actionlint
+        run: actionlint -color
+
+  # https://github.com/suzuki-shunsuke/ghalint
+  ghalint:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+
+      - name: Install ghalint
+        run: |
+          curl -sSfL "https://github.com/suzuki-shunsuke/ghalint/releases/download/${GHALINT_VERSION}/ghalint_${GHALINT_VERSION#v}_linux_amd64.tar.gz" | tar xz
+          sudo install ghalint /usr/local/bin/
+
+      - name: Run ghalint
+        run: ghalint run
