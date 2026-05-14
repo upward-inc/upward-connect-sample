@@ -35,6 +35,8 @@ jobs:
   # コード品質チェック
   lint:
     if: github.event.action != 'closed'
+    permissions:
+      contents: read
     uses: ./.github/workflows/call_frontend_lint.yml
     with:
       target: 'docs'
@@ -43,6 +45,8 @@ jobs:
   build:
     if: github.event.action != 'closed'
     needs: [lint]
+    permissions:
+      contents: read
     uses: ./.github/workflows/call_frontend_build.yml
     with:
       environment: 'main'
@@ -52,6 +56,9 @@ jobs:
   deploy:
     if: github.event_name != 'pull_request'
     needs: build
+    permissions:
+      contents: read
+      pull-requests: write
     uses: ./.github/workflows/call_frontend_deploy.yml
     with:
       environment: 'main'
@@ -61,6 +68,9 @@ jobs:
   # プレビュー環境の削除
   close_pull_request:
     if: github.event_name == 'pull_request' && github.event.action == 'closed'
+    permissions:
+      contents: read
+      pull-requests: write
     uses: ./.github/workflows/call_frontend_close_pull_request.yml
     with:
       environment: 'main'
