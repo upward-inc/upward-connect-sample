@@ -1,0 +1,16 @@
+excludes:
+  # pinact で検証済みのため除外
+  - policy_name: action_ref_should_be_full_length_commit_sha
+    action_name: "*/*"
+  - policy_name: action_ref_should_be_full_length_commit_sha
+    action_name: "*/*/*"
+  # org 内部の reusable workflow は @main 参照を許容
+  - policy_name: action_ref_should_be_full_length_commit_sha
+    action_name: "upward-inc/org-workflows/.github/workflows/*"
+  # claude-code-action が内部で git fetch を行うため persist-credentials が必要
+  - policy_name: checkout_persist_credentials_should_be_false
+    workflow_file_path: .github/workflows/claude-code-review.yml
+    job_name: claude-review
+  - policy_name: checkout_persist_credentials_should_be_false
+    workflow_file_path: .github/workflows/claude.yml
+    job_name: claude

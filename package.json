@@ -6,6 +6,7 @@
 		"be#test": "bun run --filter backend test",
 		"fe#dev": "bun run --filter frontend dev",
 		"fe#test": "bun run --filter frontend test",
+		"fe#build": "bun run --filter frontend build",
 		"docs#dev": "bun run --filter docs dev",
 		"db#up": "bun run --filter backend db#up",
 		"db#down": "bun run --filter backend db#down",
@@ -16,10 +17,14 @@
 		"prisma#generate": "bun run --filter backend prisma#generate",
 		"format": "bun run --filter '*' format",
 		"lint": "bun run --filter '*' lint",
-		"check": "bun run --filter '*' check"
+		"check": "bun run --filter '*' check",
+		"postinstall": "lefthook install"
 	},
 	"devDependencies": {
-		"@biomejs/biome": "^2.4.12"
+		"@biomejs/biome": "^2.4.12",
+		"lefthook": "^2.1.6"
 	},
-	"workspaces": ["apps/*"]
+	"workspaces": [
+		"apps/*"
+	]
 }
