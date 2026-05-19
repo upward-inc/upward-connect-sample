@@ -1,0 +1,108 @@
+post-checkout:
+  jobs:
+    # ブランチ切替で依存ファイルが変わっていたら `bun install` を実施
+    - name: sync-deps
+      run: |
+        prev="{1}"
+        next="{2}"
+        flag="{3}"
+        # ファイル checkout / 同一 SHA / 初回 clone はスキップ
+        if [ "$flag" != "1" ] || [ "$prev" = "$next" ] || [ "$prev" = "0000000000000000000000000000000000000000" ]; then
+          exit 0
+        fi
+        if git diff --name-only "$prev" "$next" 2>/dev/null | grep -qE '^(package\.json|bun\.lock|apps/[^/]+/package\.json)$'; then
+          bun install
+        fi
+
+post-merge:
+  jobs:
+    # マージ / pull で依存ファイルが変わっていたら `bun install` を実施
+    - name: sync-deps
+      files: git diff --name-only ORIG_HEAD HEAD
+      glob:
+        - "package.json"
+        - "bun.lock"
+        - "apps/*/package.json"
+      run: bun install
+
+pre-commit:
+  parallel: true
+  jobs:
+    # コミット前にコード整形を実施
+    - name: auto-fix
+      group:
+        piped: true
+        jobs:
+          - name: oxlint
+            glob: "*.{ts,tsx,js,jsx}"
+            exclude:
+              - "**/prisma/generated/**"
+              - "**/routeTree.gen.ts"
+            run: bun --bun run biome lint --write {staged_files}
+            stage_fixed: true
+          - name: oxfmt
+            glob: "*.{ts,tsx,js,jsx}"
+            exclude:
+              - "**/prisma/generated/**"
+              - "**/routeTree.gen.ts"
+            run: bun --bun run biome format --write {staged_files}
+            stage_fixed: true
+
+    # コミット前にステージ済みファイルに機密情報が含まれていないかを検証
+    - name: gitleaks
+      run: |
+        if ! command -v gitleaks >/dev/null 2>&1; then
+          echo ""
+          echo "gitleaks is not installed. Install it before committing."
+          echo "  macOS:  brew install gitleaks"
+          echo "  Linux:  https://github.com/gitleaks/gitleaks/releases"
+          echo "See docs/security/secret-scanning.md for details."
+          exit 1
+        fi
+        gitleaks git --pre-commit --staged --redact --no-banner --verbose
+
+pre-push:
+  parallel: true
+  jobs:
+    # Push 前に依存定義 (package.json / bun.lock) が変わっていたら `bun install` 起因の `bun.lock` 更新漏れ検知を実施
+    - name: bun-lockfile-drift
+      glob:
+        - "package.json"
+        - "bun.lock"
+        - "apps/*/package.json"
+      run: |
+        set -euo pipefail
+        if ! bun install --ignore-scripts; then
+          echo ""
+          echo "bun install --ignore-scripts failed; cannot verify bun.lock drift"
+          echo "See the error output above for details"
+          exit 1
+        fi
+        if ! git diff --quiet -- bun.lock; then
+          echo ""
+          echo "bun.lock is out of sync"
+          git --no-pager diff --stat -- bun.lock
+          echo ""
+          echo "Commit the updated bun.lock and push again"
+          exit 1
+        fi
+
+    # Push 前にルート定義が変わっていたら `routeTree.gen.ts` のコミット漏れ検知を実施
+    - name: tanstack-routes-drift
+      glob: "apps/frontend/src/routes/**"
+      run: |
+        set -euo pipefail
+        if ! bun run fe#build; then
+          echo ""
+          echo "bun run fe#build failed; cannot verify apps/frontend/src/routeTree.gen.ts drift"
+          echo "See the error output above for details"
+          exit 1
+        fi
+        if ! git diff --quiet -- apps/frontend/src/routeTree.gen.ts; then
+          echo ""
+          echo "apps/frontend/src/routeTree.gen.ts is out of sync"
+          git --no-pager diff --stat -- apps/frontend/src/routeTree.gen.ts
+          echo ""
+          echo "Commit the regenerated apps/frontend/src/routeTree.gen.ts and push again"
+          exit 1
+        fi
