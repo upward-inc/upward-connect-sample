@@ -46,7 +46,7 @@ export default defineConfig({
 						},
 						{
 							label: "API仕様",
-							autogenerate: { directory: "auth-api/spec" },
+							items: [{ autogenerate: { directory: "auth-api/spec" } }],
 						},
 					],
 				},
@@ -55,15 +55,21 @@ export default defineConfig({
 					items: [
 						{
 							label: "API仕様 - メタデータ操作",
-							autogenerate: { directory: "resource-api/spec-metadata" },
+							items: [
+								{ autogenerate: { directory: "resource-api/spec-metadata" } },
+							],
 						},
 						{
 							label: "API仕様 - レコード操作",
-							autogenerate: { directory: "resource-api/spec-record" },
+							items: [
+								{ autogenerate: { directory: "resource-api/spec-record" } },
+							],
 						},
 						{
 							label: "API仕様 - その他",
-							autogenerate: { directory: "resource-api/spec-other" },
+							items: [
+								{ autogenerate: { directory: "resource-api/spec-other" } },
+							],
 						},
 					],
 				},
@@ -72,7 +78,7 @@ export default defineConfig({
 					items: [
 						{
 							label: "API仕様",
-							autogenerate: { directory: "geocoding/spec" },
+							items: [{ autogenerate: { directory: "geocoding/spec" } }],
 						},
 					],
 				},
