@@ -35,6 +35,11 @@ jobs:
           private-key: ${{ secrets.GIT_PR_RELEASE_PRIVATE_KEY }}
           permission-contents: read
           permission-pull-requests: write
+      - name: Configure git authentication
+        env:
+          TOKEN: ${{ steps.generate_token.outputs.token }}
+        run: |
+          git remote set-url origin "https://x-access-token:${TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
       - name: Set up environment variables
         env:
           TZ: 'Asia/Tokyo'
