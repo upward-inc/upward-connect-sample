@@ -16,12 +16,12 @@
 
 /* 特定条件下で英数字と日本語の間に余白を設定しない */
 :where(
-		pre,
-		time,
-		input:not([type="button" i], [type="submit" i], [type="reset" i]),
-		textarea,
-		[contenteditable]
-	) {
+	pre,
+	time,
+	input:not([type="button" i], [type="submit" i], [type="reset" i]),
+	textarea,
+	[contenteditable]
+) {
 	text-autospace: no-autospace;
 }
 

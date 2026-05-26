@@ -27,14 +27,26 @@ on:
         description: 'ビルドコンテキストのパス'
         required: true
         type: string
+    secrets:
+      CONTAINER_REGISTRY_USERNAME:
+        description: 'コンテナレジストリのユーザー名'
+        required: true
+      CONTAINER_REGISTRY_PASSWORD:
+        description: 'コンテナレジストリのパスワード'
+        required: true
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
     environment: ${{ inputs.environment }}
     steps:
       - name: Checkout to the branch
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@4d04d5d9486b7bd6fa91e7baf45bbb4f8b9deedd # v4.0.0
@@ -47,7 +59,7 @@ jobs:
           password: ${{ secrets.CONTAINER_REGISTRY_PASSWORD }}
 
       - name: Build and push container image to registry
-        uses: docker/build-push-action@d08e5c354a6adb9ed34480a06d141179aa583294 # v7.0.0
+        uses: docker/build-push-action@bcafcacb16a39f128d818304e6c9c0c18556b85f # v7.1.0
         with:
           push: true
           tags: ${{ inputs.registry_domain }}/${{ inputs.repository_name }}:${{ inputs.tag }}

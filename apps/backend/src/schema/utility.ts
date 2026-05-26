@@ -39,6 +39,9 @@ export const ToDateSchema = z.preprocess((value) => {
  */
 export const ToJsonObjectSchema = <T extends ZodJsonType>(schema: T) => {
 	return z.preprocess((value) => {
+		if (value === undefined || value === null) {
+			return value
+		}
 		return JSON.parse(typeof value === "string" ? value : String(value))
 	}, schema)
 }

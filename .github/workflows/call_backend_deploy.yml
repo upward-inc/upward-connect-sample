@@ -27,10 +27,23 @@ on:
         description: 'コンテナイメージのタグ'
         required: true
         type: string
+    secrets:
+      DEPLOY_APP_CREDENTIALS:
+        description: 'Azure ログイン用のサービスプリンシパル認証情報'
+        required: true
+      CONTAINER_REGISTRY_USERNAME:
+        description: 'コンテナレジストリのユーザー名'
+        required: true
+      CONTAINER_REGISTRY_PASSWORD:
+        description: 'コンテナレジストリのパスワード'
+        required: true
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
     environment: ${{ inputs.environment }}
     steps:
       - name: Azure Login

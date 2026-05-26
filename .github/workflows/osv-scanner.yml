@@ -1,0 +1,40 @@
+name: OSV-Scanner
+
+on:
+  pull_request:
+    branches: [develop, staging, main]
+  schedule:
+    # 業務開始前に scheduled scan を完了させ、新規 disclosure を 24h 以内に可視化する (毎朝 8:00 JST)。
+    # Dependabot 全件 (毎日 7:10 JST) と時刻をずらして Actions タブの可読性を確保する。
+    - cron: "0 8 * * *"
+      timezone: "Asia/Tokyo"
+  workflow_dispatch:
+
+jobs:
+  pr-scan:
+    if: ${{ github.event_name == 'pull_request' }}
+    permissions:
+      # OSV-Scanner reusable workflow が SARIF を CodeQL にアップロードするために必要。
+      actions: read
+      contents: read
+      security-events: write
+    # v2.3.6+ で追加された "Export results" が old/new JSON を job outputs に書き込み GitHub Actions の 1MB 制限と衝突するため v2.3.5 に固定している。
+    # 脆弱性件数を十分に削減して JSON 出力が 1MB 未満に収まるか、upstream で Export results が修正された段階で最新版に追従する。
+    uses: google/osv-scanner-action/.github/workflows/osv-scanner-reusable-pr.yml@c51854704019a247608d928f370c98740469d4b5 # v2.3.5
+    with:
+      scan-args: |-
+        --recursive
+        ./
+
+  scheduled-scan:
+    if: ${{ github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' }}
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+    # pr-scan と同様の理由で v2.3.5 を使用
+    uses: google/osv-scanner-action/.github/workflows/osv-scanner-reusable.yml@c51854704019a247608d928f370c98740469d4b5 # v2.3.5
+    with:
+      scan-args: |-
+        --recursive
+        ./
