@@ -1,0 +1,66 @@
+name: Lint GitHub Actions workflows
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/**"
+      - ".github/actions/**"
+      - ".ghalint.yaml"
+
+permissions: {}
+
+env:
+  # NOTE: バージョン更新時は対応する linux_amd64 tar.gz の SHA256 (`*_checksums.txt`) も差し替えること
+  ACTIONLINT_VERSION: v1.7.12
+  ACTIONLINT_SHA256: 8aca8db96f1b94770f1b0d72b6dddcb1ebb8123cb3712530b08cc387b349a3d8
+  GHALINT_VERSION: v1.5.5
+  GHALINT_SHA256: 579cbf9024f86a8255ce8acdd56c7792f0f9a7e76063d64cfb7b66ff65c396e4
+
+jobs:
+  # https://github.com/rhysd/actionlint
+  actionlint:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+
+      - name: Install actionlint
+        run: |
+          set -euo pipefail
+          archive="actionlint_${ACTIONLINT_VERSION#v}_linux_amd64.tar.gz"
+          curl -sSfL "https://github.com/rhysd/actionlint/releases/download/${ACTIONLINT_VERSION}/${archive}" -o "${archive}"
+          echo "${ACTIONLINT_SHA256}  ${archive}" | sha256sum --check -
+          tar xzf "${archive}"
+          sudo install actionlint /usr/local/bin/
+
+      - name: Run actionlint
+        run: actionlint -color
+
+  # https://github.com/suzuki-shunsuke/ghalint
+  ghalint:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+
+      - name: Install ghalint
+        run: |
+          set -euo pipefail
+          archive="ghalint_${GHALINT_VERSION#v}_linux_amd64.tar.gz"
+          curl -sSfL "https://github.com/suzuki-shunsuke/ghalint/releases/download/${GHALINT_VERSION}/${archive}" -o "${archive}"
+          echo "${GHALINT_SHA256}  ${archive}" | sha256sum --check -
+          tar xzf "${archive}"
+          sudo install ghalint /usr/local/bin/
+
+      - name: Run ghalint
+        run: ghalint run

@@ -1,0 +1,39 @@
+# gitleaks 設定
+# 既定ルールセット (gitleaks 同梱の default) を継承し、本リポジトリ固有の allowlist を追加する。
+[extend]
+useDefault = true
+
+[[allowlists]]
+description = "テスト設定内のダミー機密 (アクセストークン・private key 等) は本物の機密ではないため除外"
+paths = [
+	# vitest 設定ファイル (現行パス apps/backend/, リネーム前パス apps/api/)
+	'''^apps/backend/vitest\.config\.ts$''',
+	'''^apps/api/vitest\.config\.ts$''',
+	'''^apps/api/vitest\.integration\.config\.ts$''',
+]
+
+[[allowlists]]
+description = "API 仕様ドキュメント内の JWT/OAuth トークン形式サンプルは本物の機密ではないため除外"
+paths = [
+	'''^apps/docs/src/content/docs/.*\.mdx$''',
+]
+
+[[allowlists]]
+description = ".env.template はプレースホルダ値のみで本物の機密ではないため除外"
+paths = [
+	'''(^|/)\.env\.template$''',
+]
+
+[[allowlists]]
+description = "過去にテスト用として使われた expiredToken は本物の機密ではないため、対象 commit / path / 値 が全一致した時のみ除外"
+condition = "AND"
+commits = [
+	"db68ad4ff05ecc41cb1fc493b7ced829bd7e82b3",
+]
+paths = [
+	'''^apps/backend/src/routes/api/v1/file/router\.(get|post)\.test\.ts$''',
+]
+regexTarget = "secret"
+regexes = [
+	'''^eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9\.eyJ1c2VyX2lkIjoidGVzdCIsImV4cCI6MH0\.invalid$''',
+]
