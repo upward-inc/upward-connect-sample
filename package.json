@@ -21,8 +21,8 @@
 		"postinstall": "lefthook install"
 	},
 	"devDependencies": {
-		"@biomejs/biome": "^2.4.15",
-		"lefthook": "^2.1.8"
+		"@biomejs/biome": "^2.5.2",
+		"lefthook": "^2.1.9"
 	},
 	"workspaces": [
 		"apps/*"
