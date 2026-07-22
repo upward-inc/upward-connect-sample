@@ -15,7 +15,7 @@ on:
 jobs:
   close_pull_request:
     name: Close Pull Request
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 5
     permissions:
       contents: read

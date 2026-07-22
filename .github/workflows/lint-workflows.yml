@@ -19,7 +19,7 @@ env:
 jobs:
   # https://github.com/rhysd/actionlint
   actionlint:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 5
     permissions:
       contents: read
@@ -43,7 +43,7 @@ jobs:
 
   # https://github.com/suzuki-shunsuke/ghalint
   ghalint:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 5
     permissions:
       contents: read
