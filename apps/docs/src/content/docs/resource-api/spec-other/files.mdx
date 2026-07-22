@@ -1,6 +1,6 @@
 ---
-title: ファイルID一覧の取得
-description: ファイルID一覧の取得
+title: ファイルメタデータ一覧の取得
+description: ファイルメタデータ一覧の取得
 sidebar:
   order: 1
 ---
@@ -10,7 +10,7 @@ import ParameterTableRow from '../../../../components/ParameterTableRow.astro'
 import ResponseBodyTable from '../../../../components/ResponseBodyTable.astro'
 import ResponseBodyTableRow from '../../../../components/ResponseBodyTableRow.astro'
 
-クエリパラメータで指定されたレコードに紐づくファイルのID一覧を返却する
+クエリパラメータで指定されたレコードに紐づくファイルのメタデータ一覧を返却する
 
 ## 📬 リクエスト
 
@@ -32,10 +32,10 @@ import ResponseBodyTableRow from '../../../../components/ResponseBodyTableRow.as
     レコードID（単一指定のみ）
   </ParameterTableRow>
   <ParameterTableRow name="limit" type="整数値" required={false} example="100">
-    1回のリクエストで取得する最大ファイルID数
+    1回のリクエストで取得する最大ファイルメタデータ数
   </ParameterTableRow>
   <ParameterTableRow name="offset" type="整数値" required={false} example="0">
-    取得開始位置（スキップするファイルID数）
+    取得開始位置（スキップするファイルメタデータ数）
   </ParameterTableRow>
 </ParameterTable>
 
@@ -60,8 +60,19 @@ import ResponseBodyTableRow from '../../../../components/ResponseBodyTableRow.as
   <ResponseBodyTableRow name="total_size" type="整数値" required={true} example="2">
     指定されたレコードに紐づくファイルの総数
   </ResponseBodyTableRow>
-  <ResponseBodyTableRow name="data" type="文字列の配列" required={true} example='[ "file-00000001", "file-00000002" ]'>
-    紐づくファイルのID一覧
+  <ResponseBodyTableRow name="data" type={`<a href="#ファイルメタデータオブジェクト">ファイルメタデータオブジェクト</a>の配列`} required={true} example='[ { "id": "file-00000001", "type": "image/jpeg" }, ... ]'>
+    紐づくファイルのメタデータ一覧
+  </ResponseBodyTableRow>
+</ResponseBodyTable>
+
+#### ファイルメタデータオブジェクト
+
+<ResponseBodyTable>
+  <ResponseBodyTableRow name="id" type="文字列" required={true} example="file-00000001">
+    ファイルのID
+  </ResponseBodyTableRow>
+  <ResponseBodyTableRow name="type" type="文字列" required={true} example="image/jpeg">
+    ファイルのMIMEタイプ
   </ResponseBodyTableRow>
 </ResponseBodyTable>
 
@@ -72,8 +83,14 @@ import ResponseBodyTableRow from '../../../../components/ResponseBodyTableRow.as
   "has_next_page": false,
   "total_size": 2,
   "data": [
-    "file-00000001",
-    "file-00000002"
+    {
+      "id": "file-00000001",
+      "type": "image/jpeg"
+    },
+    {
+      "id": "file-00000002",
+      "type": "audio/mpeg"
+    }
   ]
 }
 ```
@@ -82,17 +99,17 @@ import ResponseBodyTableRow from '../../../../components/ResponseBodyTableRow.as
 
 ### 基本要求
 
-- クエリパラメータで指定されたレコードに紐づくファイルのID一覧を返却してください
+- クエリパラメータで指定されたレコードに紐づくファイルのメタデータ一覧を返却してください
 - 紐づくファイルが存在しない場合、または、指定されたレコードが存在しない場合は、「data」フィールドに空配列を設定してください（「`200` : OK」）
 - 結果のソート順は任意ですが、冪等になるようルールを設定してください（例: ID順）
 
 ### 「limit」パラメータ
 
-- 「limit」パラメータが指定された場合、指定の件数を最大値としたファイルID数を返却する必要があります（SQLのlimit句と同等）
+- 「limit」パラメータが指定された場合、指定の件数を最大値としたファイルメタデータ数を返却する必要があります（SQLのlimit句と同等）
 
 ### 「offset」パラメータ
 
-- 「offset」パラメータが指定された場合、指定の件数分をスキップしたファイルID一覧を返却する必要があります（SQLのoffset句と同等）
+- 「offset」パラメータが指定された場合、指定の件数分をスキップしたファイルメタデータ一覧を返却する必要があります（SQLのoffset句と同等）
 - UPWARDが送信するリクエストでは、offsetパラメータ指定時はlimitパラメータも必ず指定されます
 
 ### 「has_next_page」レスポンスフィールド
@@ -106,9 +123,11 @@ import ResponseBodyTableRow from '../../../../components/ResponseBodyTableRow.as
 
 ### 「data」レスポンスフィールド
 
-- 紐づくファイルのID一覧を返却してください
-  - MIMEタイプやファイルコンテンツは[単一ファイルの取得](/resource-api/spec-other/file)を通じて取得するため、本APIで返却する必要はありません
+- 紐づくファイルのメタデータ一覧を返却してください
+  - ファイルコンテンツは[単一ファイルの取得](/resource-api/spec-other/file)を通じて取得するため、本APIで返却する必要はありません
+- 「type」フィールドは[Internet Assigned Numbers Authority (IANA)](https://www.iana.org/assignments/media-types/media-types.xhtml)で定義されているMIMEタイプを設定してください
 
 ## 📚 参考資料
 
 - [単一ファイルの取得](/resource-api/spec-other/file)
+- [Internet Assigned Numbers Authority (IANA)](https://www.iana.org/assignments/media-types/media-types.xhtml)
