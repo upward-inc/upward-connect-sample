@@ -56,7 +56,7 @@ Issue ID の書き方（NG / OK）:
 
 Type は同名の Issue Template に 1:1 で対応するため、テンプレート選択は Type の選択基準で判定する。
 その基準は Linear ドキュメント「Issue Type 選択の基準」を単一の情報源とし、インラインには定義しない。
-スキル実行時に `get_document`（slug: `issue-type-選択の基準-2de582bc9b5a`）で取得し、基準表と各境界の判定ルールに従ってテンプレートを選ぶ。
+スキル実行時に `get_document`（slug: `issue-type-選択の基準-7fc724e9e02f`）で取得し、基準表と各境界の判定ルールに従ってテンプレートを選ぶ。
 
 ### Feature
 
