@@ -1,12 +1,15 @@
 import {
 	createFile,
 	getFile,
+	getFileList,
 	toSourceRecordJson,
 } from "../../../../domain/file"
 import { createRoute, honoApp } from "../../../../libs/hono"
 import type { AuthContexts } from "../../../../schema/auth"
 import { ResourceApiErrorResultSchema } from "../../../../schema/error"
 import {
+	GetFileListQuerySchema,
+	GetFileListResponseSchema,
 	GetFileParamSchema,
 	PostFileFormSchema,
 	PostFileHeaderSchema,
@@ -14,6 +17,38 @@ import {
 } from "../../../../schema/file"
 
 export const fileRouter = honoApp<{ Variables: AuthContexts }>()
+	.openapi(
+		createRoute({
+			method: "get",
+			path: "/",
+			description:
+				"クエリパラメータで指定されたレコードに紐づくファイルのメタデータ一覧を返却する",
+			request: {
+				query: GetFileListQuerySchema,
+			},
+			responses: {
+				200: {
+					description: "Success",
+					content: {
+						"application/json": { schema: GetFileListResponseSchema },
+					},
+				},
+				400: {
+					description: "Bad Request",
+					content: {
+						"application/json": { schema: ResourceApiErrorResultSchema },
+					},
+				},
+			},
+		}),
+		async (c) => {
+			const query = c.req.valid("query")
+
+			const result = await getFileList(query)
+
+			return c.json(result, 200)
+		},
+	)
 	.openapi(
 		createRoute({
 			method: "get",

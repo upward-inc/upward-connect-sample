@@ -1,4 +1,5 @@
 import { z } from "../libs/zod"
+import { LimitQuerySchema, OffsetQuerySchema } from "./paging"
 
 export const FileIdSchema = z.string().meta({
 	description: "ファイルID",
@@ -22,6 +23,45 @@ export const FileRecordSchema = z
 
 export const GetFileParamSchema = z.object({
 	id: FileIdSchema,
+})
+
+export const GetFileListQuerySchema = z.object({
+	record_entity: z.string().meta({
+		description: "ファイル検索対象レコードのエンティティ名",
+		example: "account",
+	}),
+	record_id: z.string().meta({
+		description: "ファイル検索対象のレコードID（単一指定のみ）",
+		example: "account-00000001",
+	}),
+	limit: LimitQuerySchema.optional(),
+	offset: OffsetQuerySchema.optional(),
+})
+
+export const FileMetadataSchema = z
+	.object({
+		id: FileIdSchema,
+		type: z.string().meta({
+			description: "ファイルのMIMEタイプ",
+			example: "image/jpeg",
+		}),
+	})
+	.meta({
+		description: "ファイルメタデータ",
+	})
+
+export const GetFileListResponseSchema = z.object({
+	has_next_page: z.boolean().meta({
+		description: "同一の検索条件にて次ページが存在するかどうか",
+		example: false,
+	}),
+	total_size: z.number().meta({
+		description: "同一の検索条件にて取得可能なデータの総数",
+		example: 2,
+	}),
+	data: z.array(FileMetadataSchema).meta({
+		description: "紐づくファイルのメタデータ一覧",
+	}),
 })
 
 export const PostFileHeaderSchema = z.object({
@@ -55,3 +95,5 @@ export const PostFileResultSchema = z
 
 export type File = z.infer<typeof FileSchema>
 export type FileRecord = z.infer<typeof FileRecordSchema>
+export type GetFileListQuery = z.infer<typeof GetFileListQuerySchema>
+export type GetFileListResponse = z.infer<typeof GetFileListResponseSchema>
