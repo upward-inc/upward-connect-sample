@@ -3,7 +3,7 @@ function resolveGitDir(): string | null {
 	try {
 		const result = Bun.spawnSync(["git", "rev-parse", "--git-dir"])
 		if (!result.success) return null
-		return result.stdout.toString()
+		return result.stdout.toString().trim()
 	} catch {
 		return null
 	}
@@ -24,5 +24,8 @@ if (/[/\\]worktrees[/\\]/.test(gitDir)) {
 	process.exit(0)
 }
 
-const result = Bun.spawnSync(["lefthook", "install"], { stdout: "inherit", stderr: "inherit" })
+const result = Bun.spawnSync(["lefthook", "install"], {
+	stdout: "inherit",
+	stderr: "inherit",
+})
 process.exit(result.exitCode ?? 0)
