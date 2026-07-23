@@ -1,4 +1,8 @@
-import { createFile, getFile } from "../../../../domain/file"
+import {
+	createFile,
+	getFile,
+	toSourceRecordJson,
+} from "../../../../domain/file"
 import { createRoute, honoApp } from "../../../../libs/hono"
 import type { AuthContexts } from "../../../../schema/auth"
 import { ResourceApiErrorResultSchema } from "../../../../schema/error"
@@ -94,7 +98,7 @@ export const fileRouter = honoApp<{ Variables: AuthContexts }>()
 			const recordId = c.req.header("X-Record-Id")
 			const sourceRecord =
 				recordEntity && recordId
-					? JSON.stringify({ entity_name: recordEntity, id: recordId })
+					? toSourceRecordJson(recordEntity, recordId)
 					: undefined
 
 			const id = await createFile(file, user.id, sourceRecord)
