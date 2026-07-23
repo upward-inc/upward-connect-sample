@@ -18,21 +18,23 @@ export function createTestFile(
 
 /**
  * テスト用ファイルの作成
+ * @param sourceRecord - 出所レコードを表すJSON文字列（`JSON.stringify({ entity_name, id })`）
  */
 export async function createTestFileInDB(
 	userId: string,
 	name: string,
 	content: string | Uint8Array,
 	type: string,
+	sourceRecord?: string,
 ) {
-	const contentBuffer =
-		typeof content === "string" ? Buffer.from(content) : Buffer.from(content)
+	const contentBuffer = Buffer.from(content)
 
 	return await testPrisma.file.create({
 		data: {
 			name,
 			content: contentBuffer,
 			type,
+			source_record: sourceRecord,
 			created_by: userId,
 			modified_by: userId,
 		},
