@@ -38,32 +38,33 @@ describe("useAuthorizeValidation", () => {
 				title: "空文字",
 				redirect_uri: "",
 			},
-		])("redirect_uriが$titleの場合、エラーをthrowすること", async ({
-			redirect_uri,
-		}) => {
-			// Arrange
-			global.alert = vi.fn() // alertをモック化
-			const searchParams: SearchParams = {
-				response_type: "code",
-				client_id: "valid_client_id",
-				redirect_uri,
-				scope: "openid profile email offline_access",
-				state: "valid_state",
-				nonce: "valid_nonce",
-				code_challenge: "valid_code_challenge_string_with_43_chars_minimum",
-				code_challenge_method: "S256",
-			}
-			const redirectFail = vi.fn()
+		])(
+			"redirect_uriが$titleの場合、エラーをthrowすること",
+			async ({ redirect_uri }) => {
+				// Arrange
+				global.alert = vi.fn() // alertをモック化
+				const searchParams: SearchParams = {
+					response_type: "code",
+					client_id: "valid_client_id",
+					redirect_uri,
+					scope: "openid profile email offline_access",
+					state: "valid_state",
+					nonce: "valid_nonce",
+					code_challenge: "valid_code_challenge_string_with_43_chars_minimum",
+					code_challenge_method: "S256",
+				}
+				const redirectFail = vi.fn()
 
-			// Act & Assert
-			await waitFor(() =>
-				expect(() => {
-					renderHook(() => useAuthorizeValidation(searchParams, redirectFail))
-				}).toThrow("invalid redirect_uri"),
-			)
-			expect(global.alert).toHaveBeenCalledWith("redirect_uriが不正です")
-			expect(redirectFail).not.toHaveBeenCalled()
-		})
+				// Act & Assert
+				await waitFor(() =>
+					expect(() => {
+						renderHook(() => useAuthorizeValidation(searchParams, redirectFail))
+					}).toThrow("invalid redirect_uri"),
+				)
+				expect(global.alert).toHaveBeenCalledWith("redirect_uriが不正です")
+				expect(redirectFail).not.toHaveBeenCalled()
+			},
+		)
 	})
 
 	describe("stateの検証", () => {
@@ -118,34 +119,35 @@ describe("useAuthorizeValidation", () => {
 				title: "code以外",
 				response_type: "token",
 			},
-		])("response_typeが$titleの場合、redirectFailが呼ばれること", async ({
-			response_type,
-		}) => {
-			// Arrange
-			const searchParams: SearchParams = {
-				response_type,
-				client_id: "valid_client_id",
-				redirect_uri: "https://client.test.local/callback",
-				scope: "openid profile email offline_access",
-				state: "valid_state",
-				nonce: "valid_nonce",
-				code_challenge: "valid_code_challenge_string_with_43_chars_minimum",
-				code_challenge_method: "S256",
-			}
-			const redirectFail = vi.fn()
+		])(
+			"response_typeが$titleの場合、redirectFailが呼ばれること",
+			async ({ response_type }) => {
+				// Arrange
+				const searchParams: SearchParams = {
+					response_type,
+					client_id: "valid_client_id",
+					redirect_uri: "https://client.test.local/callback",
+					scope: "openid profile email offline_access",
+					state: "valid_state",
+					nonce: "valid_nonce",
+					code_challenge: "valid_code_challenge_string_with_43_chars_minimum",
+					code_challenge_method: "S256",
+				}
+				const redirectFail = vi.fn()
 
-			// Act
-			const { result } = renderHook(() =>
-				useAuthorizeValidation(searchParams, redirectFail),
-			)
+				// Act
+				const { result } = renderHook(() =>
+					useAuthorizeValidation(searchParams, redirectFail),
+				)
 
-			// Assert
-			await waitFor(() => expect(result.current.isValidating).toBe(false))
-			expect(redirectFail).toHaveBeenCalledWith(
-				"https://client.test.local/callback",
-				{ error: "unsupported_response_type", state: "valid_state" },
-			)
-		})
+				// Assert
+				await waitFor(() => expect(result.current.isValidating).toBe(false))
+				expect(redirectFail).toHaveBeenCalledWith(
+					"https://client.test.local/callback",
+					{ error: "unsupported_response_type", state: "valid_state" },
+				)
+			},
+		)
 	})
 
 	describe("client_idの検証", () => {
@@ -158,34 +160,35 @@ describe("useAuthorizeValidation", () => {
 				title: "空文字",
 				client_id: "",
 			},
-		])("client_idが$titleの場合、redirectFailが呼ばれること", async ({
-			client_id,
-		}) => {
-			// Arrange
-			const searchParams: SearchParams = {
-				response_type: "code",
-				client_id,
-				redirect_uri: "https://client.test.local/callback",
-				scope: "openid profile email offline_access",
-				state: "valid_state",
-				nonce: "valid_nonce",
-				code_challenge: "valid_code_challenge_string_with_43_chars_minimum",
-				code_challenge_method: "S256",
-			}
-			const redirectFail = vi.fn()
+		])(
+			"client_idが$titleの場合、redirectFailが呼ばれること",
+			async ({ client_id }) => {
+				// Arrange
+				const searchParams: SearchParams = {
+					response_type: "code",
+					client_id,
+					redirect_uri: "https://client.test.local/callback",
+					scope: "openid profile email offline_access",
+					state: "valid_state",
+					nonce: "valid_nonce",
+					code_challenge: "valid_code_challenge_string_with_43_chars_minimum",
+					code_challenge_method: "S256",
+				}
+				const redirectFail = vi.fn()
 
-			// Act
-			const { result } = renderHook(() =>
-				useAuthorizeValidation(searchParams, redirectFail),
-			)
+				// Act
+				const { result } = renderHook(() =>
+					useAuthorizeValidation(searchParams, redirectFail),
+				)
 
-			// Assert
-			await waitFor(() => expect(result.current.isValidating).toBe(false))
-			expect(redirectFail).toHaveBeenCalledWith(
-				"https://client.test.local/callback",
-				{ error: "unauthorized_client", state: "valid_state" },
-			)
-		})
+				// Assert
+				await waitFor(() => expect(result.current.isValidating).toBe(false))
+				expect(redirectFail).toHaveBeenCalledWith(
+					"https://client.test.local/callback",
+					{ error: "unauthorized_client", state: "valid_state" },
+				)
+			},
+		)
 	})
 
 	describe("scopeの検証", () => {
@@ -286,34 +289,35 @@ describe("useAuthorizeValidation", () => {
 				title: "128文字超過",
 				code_challenge: "a".repeat(129),
 			},
-		])("code_challengeが$titleの場合、redirectFailが呼ばれること", async ({
-			code_challenge,
-		}) => {
-			// Arrange
-			const searchParams: SearchParams = {
-				response_type: "code",
-				client_id: "valid_client_id",
-				redirect_uri: "https://client.test.local/callback",
-				scope: "openid profile email offline_access",
-				state: "valid_state",
-				nonce: "valid_nonce",
-				code_challenge,
-				code_challenge_method: "S256",
-			}
-			const redirectFail = vi.fn()
+		])(
+			"code_challengeが$titleの場合、redirectFailが呼ばれること",
+			async ({ code_challenge }) => {
+				// Arrange
+				const searchParams: SearchParams = {
+					response_type: "code",
+					client_id: "valid_client_id",
+					redirect_uri: "https://client.test.local/callback",
+					scope: "openid profile email offline_access",
+					state: "valid_state",
+					nonce: "valid_nonce",
+					code_challenge,
+					code_challenge_method: "S256",
+				}
+				const redirectFail = vi.fn()
 
-			// Act
-			const { result } = renderHook(() =>
-				useAuthorizeValidation(searchParams, redirectFail),
-			)
+				// Act
+				const { result } = renderHook(() =>
+					useAuthorizeValidation(searchParams, redirectFail),
+				)
 
-			// Assert
-			await waitFor(() => expect(result.current.isValidating).toBe(false))
-			expect(redirectFail).toHaveBeenCalledWith(
-				"https://client.test.local/callback",
-				{ error: "invalid_request", state: "valid_state" },
-			)
-		})
+				// Assert
+				await waitFor(() => expect(result.current.isValidating).toBe(false))
+				expect(redirectFail).toHaveBeenCalledWith(
+					"https://client.test.local/callback",
+					{ error: "invalid_request", state: "valid_state" },
+				)
+			},
+		)
 	})
 
 	describe("code_challenge_methodの検証", () => {
@@ -330,33 +334,34 @@ describe("useAuthorizeValidation", () => {
 				title: "S256以外",
 				code_challenge_method: "plain",
 			},
-		])("code_challenge_methodが$titleの場合、redirectFailが呼ばれること", async ({
-			code_challenge_method,
-		}) => {
-			// Arrange
-			const searchParams: SearchParams = {
-				response_type: "code",
-				client_id: "valid_client_id",
-				redirect_uri: "https://client.test.local/callback",
-				scope: "openid profile email offline_access",
-				state: "valid_state",
-				nonce: "valid_nonce",
-				code_challenge: "valid_code_challenge_string_with_43_chars_minimum",
-				code_challenge_method,
-			}
-			const redirectFail = vi.fn()
+		])(
+			"code_challenge_methodが$titleの場合、redirectFailが呼ばれること",
+			async ({ code_challenge_method }) => {
+				// Arrange
+				const searchParams: SearchParams = {
+					response_type: "code",
+					client_id: "valid_client_id",
+					redirect_uri: "https://client.test.local/callback",
+					scope: "openid profile email offline_access",
+					state: "valid_state",
+					nonce: "valid_nonce",
+					code_challenge: "valid_code_challenge_string_with_43_chars_minimum",
+					code_challenge_method,
+				}
+				const redirectFail = vi.fn()
 
-			// Act
-			const { result } = renderHook(() =>
-				useAuthorizeValidation(searchParams, redirectFail),
-			)
+				// Act
+				const { result } = renderHook(() =>
+					useAuthorizeValidation(searchParams, redirectFail),
+				)
 
-			// Assert
-			await waitFor(() => expect(result.current.isValidating).toBe(false))
-			expect(redirectFail).toHaveBeenCalledWith(
-				"https://client.test.local/callback",
-				{ error: "invalid_request", state: "valid_state" },
-			)
-		})
+				// Assert
+				await waitFor(() => expect(result.current.isValidating).toBe(false))
+				expect(redirectFail).toHaveBeenCalledWith(
+					"https://client.test.local/callback",
+					{ error: "invalid_request", state: "valid_state" },
+				)
+			},
+		)
 	})
 })
