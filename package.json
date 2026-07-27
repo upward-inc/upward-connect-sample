@@ -29,6 +29,7 @@
 		"apps/*"
 	],
 	"overrides": {
-		"protobufjs": "^7.5.5"
+		"protobufjs": "^7.5.5",
+		"find-my-way": "^9.7.0"
 	}
 }
