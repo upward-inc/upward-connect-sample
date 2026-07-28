@@ -1,2 +1,13 @@
-# deps
+# OS
+.DS_Store
+
+# Dependencies
 node_modules/
+
+# Claude Code
+CLAUDE.local.md
+.claude/settings.local.json
+.claude/worktrees
+
+# Plan file
+docs/plans

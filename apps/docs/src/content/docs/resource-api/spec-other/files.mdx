@@ -1,0 +1,133 @@
+---
+title: ファイルメタデータ一覧の取得
+description: ファイルメタデータ一覧の取得
+sidebar:
+  order: 3
+---
+
+import ParameterTable from '../../../../components/ParameterTable.astro'
+import ParameterTableRow from '../../../../components/ParameterTableRow.astro'
+import ResponseBodyTable from '../../../../components/ResponseBodyTable.astro'
+import ResponseBodyTableRow from '../../../../components/ResponseBodyTableRow.astro'
+
+クエリパラメータで指定されたレコードに紐づくファイルのメタデータ一覧を返却する
+
+## 📬 リクエスト
+
+<code>GET \{resource_api_url\}/files</code>
+
+### リクエストヘッダ
+
+| キー | 値 |
+| --- | --- |
+| Authorization | `Bearer {アクセストークン}` |
+
+### クエリパラメータ
+
+<ParameterTable>
+  <ParameterTableRow name="record_entity" type="文字列" required={true} example="account">
+    レコードのエンティティ名
+  </ParameterTableRow>
+  <ParameterTableRow name="record_id" type="文字列" required={true} example="account-00000001">
+    レコードID（単一指定のみ）
+  </ParameterTableRow>
+  <ParameterTableRow name="limit" type="整数値" required={false} example="100">
+    1回のリクエストで取得する最大ファイルメタデータ数
+  </ParameterTableRow>
+  <ParameterTableRow name="offset" type="整数値" required={false} example="0">
+    取得開始位置（スキップするファイルメタデータ数）
+  </ParameterTableRow>
+</ParameterTable>
+
+## ✨ 成功レスポンス
+
+### ステータスコード
+
+`200` : OK
+
+### レスポンスヘッダ
+
+| キー | 値 |
+| --- | --- |
+| Content-Type | `application/json` |
+
+### レスポンスボディ
+
+<ResponseBodyTable>
+  <ResponseBodyTableRow name="has_next_page" type="真偽値" required={true} example="false">
+    取得結果に対して、次ページが存在するかどうか
+  </ResponseBodyTableRow>
+  <ResponseBodyTableRow name="total_size" type="整数値" required={true} example="2">
+    指定されたレコードに紐づくファイルの総数
+  </ResponseBodyTableRow>
+  <ResponseBodyTableRow name="data" type={`<a href="#ファイルメタデータオブジェクト">ファイルメタデータオブジェクト</a>の配列`} required={true} example='[ { "id": "file-00000001", "type": "image/jpeg" }, ... ]'>
+    紐づくファイルのメタデータ一覧
+  </ResponseBodyTableRow>
+</ResponseBodyTable>
+
+#### ファイルメタデータオブジェクト
+
+<ResponseBodyTable>
+  <ResponseBodyTableRow name="id" type="文字列" required={true} example="file-00000001">
+    ファイルのID
+  </ResponseBodyTableRow>
+  <ResponseBodyTableRow name="type" type="文字列" required={true} example="image/jpeg">
+    ファイルのMIMEタイプ
+  </ResponseBodyTableRow>
+</ResponseBodyTable>
+
+#### レスポンスボディのサンプル
+
+```json title="レスポンスボディのサンプル"
+{
+  "has_next_page": false,
+  "total_size": 2,
+  "data": [
+    {
+      "id": "file-00000001",
+      "type": "image/jpeg"
+    },
+    {
+      "id": "file-00000002",
+      "type": "audio/mpeg"
+    }
+  ]
+}
+```
+
+## 💬 具体的な要求事項
+
+### 基本要求
+
+- クエリパラメータで指定されたレコードに紐づくファイルのメタデータ一覧を返却してください
+- 紐づくファイルが存在しない場合、または、指定されたレコードが存在しない場合は、「data」フィールドに空配列を設定してください（「`200` : OK」）
+- 結果のソート順は任意ですが、冪等になるようルールを設定してください（例: ID順）
+
+### 「limit」パラメータ
+
+- 「limit」パラメータが指定された場合、指定の件数を最大値としたファイルメタデータ数を返却する必要があります（SQLのlimit句と同等）
+
+### 「offset」パラメータ
+
+- 「offset」パラメータが指定された場合、指定の件数分をスキップしたファイルメタデータ一覧を返却する必要があります（SQLのoffset句と同等）
+- UPWARDが送信するリクエストでは、offsetパラメータ指定時はlimitパラメータも必ず指定されます
+
+### 「has_next_page」レスポンスフィールド
+
+- 「limit」パラメータ + 「offset」パラメータを用いて得られる取得結果（= 「data」レスポンスフィールド）に対し、残りの取得結果（ページ）が存在するかどうかを返却してください
+
+### 「total_size」レスポンスフィールド
+
+- 指定されたレコードに紐づくファイルの総数を返却してください
+  - この値は、「limit」パラメータ、および、「offset」パラメータを指定しない場合の「data」レスポンスフィールドの件数と合致します
+
+### 「data」レスポンスフィールド
+
+- 紐づくファイルのメタデータ一覧を返却してください
+  - ファイルコンテンツは[単一ファイルの取得](/resource-api/spec-other/file)を通じて取得するため、本APIで返却する必要はありません
+- 「type」フィールドは[Internet Assigned Numbers Authority (IANA)](https://www.iana.org/assignments/media-types/media-types.xhtml)で定義されているMIMEタイプを設定してください
+
+## 📚 参考資料
+
+- [単一ファイルの取得](/resource-api/spec-other/file)
+- [Internet Assigned Numbers Authority (IANA)](https://www.iana.org/assignments/media-types/media-types.xhtml)

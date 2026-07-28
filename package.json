@@ -2,6 +2,7 @@
 	"name": "upward-connect-internal",
 	"version": "1.0.0",
 	"scripts": {
+		"postinstall": "bun scripts/install-lefthook.ts",
 		"be#dev": "bun run --filter backend dev",
 		"be#test": "bun run --filter backend test",
 		"fe#dev": "bun run --filter frontend dev",
@@ -17,17 +18,18 @@
 		"prisma#generate": "bun run --filter backend prisma#generate",
 		"format": "bun run --filter '*' format",
 		"lint": "bun run --filter '*' lint",
-		"check": "bun run --filter '*' check",
-		"postinstall": "lefthook install"
+		"check": "bun run --filter '*' check"
 	},
 	"devDependencies": {
-		"@biomejs/biome": "^2.4.15",
-		"lefthook": "^2.1.8"
+		"@biomejs/biome": "^2.5.2",
+		"@types/bun": "latest",
+		"lefthook": "^2.1.9"
 	},
 	"workspaces": [
 		"apps/*"
 	],
 	"overrides": {
-		"protobufjs": "^7.5.5"
+		"protobufjs": "^7.5.5",
+		"find-my-way": "^9.7.0"
 	}
 }
