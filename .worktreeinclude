@@ -1,0 +1,2 @@
+# node_modules はコピーよりも bun install の方が高速なため対象外（worktree 作成後に bun install する）
+# node_modules/

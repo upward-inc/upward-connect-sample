@@ -33,14 +33,14 @@ pre-commit:
       group:
         piped: true
         jobs:
-          - name: oxlint
+          - name: lint
             glob: "*.{ts,tsx,js,jsx}"
             exclude:
               - "**/prisma/generated/**"
               - "**/routeTree.gen.ts"
             run: bun --bun run biome lint --write {staged_files}
             stage_fixed: true
-          - name: oxfmt
+          - name: format
             glob: "*.{ts,tsx,js,jsx}"
             exclude:
               - "**/prisma/generated/**"

@@ -1,0 +1,32 @@
+name: Security Alert
+
+on:
+  schedule:
+    # リポジトリでのアラート生成タイミングに合わせる
+    - cron: "10 22 * * 0-4" # 平日 7:10 JST
+
+  # テスト用
+  workflow_dispatch:
+
+jobs:
+  dependabot:
+    uses: upward-inc/github-foundation/.github/workflows/dependabot-security-alert.yml@main
+    permissions: {}
+    secrets:
+      SLACK_WEBHOOK_URL: ${{ secrets.SLACK_MAIN_CHANNEL_WEBHOOK_URL }}
+      UPWARD_SHARED_WORKFLOWS_APP_ID: ${{ vars.UPWARD_SHARED_WORKFLOWS_APP_ID }}
+      UPWARD_SHARED_WORKFLOWS_APP_PRIVATE_KEY: ${{ secrets.UPWARD_SHARED_WORKFLOWS_APP_PRIVATE_KEY }}
+    with:
+      severity: ${{ vars.SECURITY_ALERT_SEVERITY }}
+      mentions: ${{ vars.SECURITY_ALERT_MENTIONS }}
+
+  code-scanning:
+    uses: upward-inc/github-foundation/.github/workflows/code-scanning-security-alert.yml@main
+    permissions: {}
+    secrets:
+      SLACK_WEBHOOK_URL: ${{ secrets.SLACK_MAIN_CHANNEL_WEBHOOK_URL }}
+      UPWARD_SHARED_WORKFLOWS_APP_ID: ${{ vars.UPWARD_SHARED_WORKFLOWS_APP_ID }}
+      UPWARD_SHARED_WORKFLOWS_APP_PRIVATE_KEY: ${{ secrets.UPWARD_SHARED_WORKFLOWS_APP_PRIVATE_KEY }}
+    with:
+      severity: ${{ vars.SECURITY_ALERT_SEVERITY }}
+      mentions: ${{ vars.SECURITY_ALERT_MENTIONS }}

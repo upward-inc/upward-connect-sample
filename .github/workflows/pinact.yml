@@ -4,18 +4,19 @@ permissions:
   contents: read
 jobs:
   pinact:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 5
     permissions:
       contents: read
     steps:
       - name: Check out code
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           persist-credentials: false
       - name: Verify dependencies sha pinning with pinact
-        uses: suzuki-shunsuke/pinact-action@cf51507d80d4d6522a07348e3d58790290eaf0b6 # v2.0.0
+        uses: suzuki-shunsuke/pinact-action@896d595f299e71d65b9d28349d6956abe144390a # v3.0.0
         with:
           skip_push: true # Validationのみ、PRにコミットを追加しない
+          fix: false # v3 で fix の既定が true になったため明示的に無効化し検証のみに固定する
           verify: true
           min_age: "7" # cooldownの期間を7日に設定（dependabot.ymlと合わせる）
