@@ -18,12 +18,13 @@
 		"check": "bun run --filter '*' check"
 	},
 	"devDependencies": {
-		"@biomejs/biome": "^2.4.15"
+		"@biomejs/biome": "^2.5.2"
 	},
 	"workspaces": [
 		"apps/*"
 	],
 	"overrides": {
-		"protobufjs": "^7.5.5"
+		"protobufjs": "^7.5.5",
+		"find-my-way": "^9.7.0"
 	}
 }

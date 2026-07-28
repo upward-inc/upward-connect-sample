@@ -19,18 +19,18 @@
 		"@hono/zod-openapi": "^1.4.0",
 		"@prisma/adapter-mssql": "^7.8.0",
 		"@prisma/client": "^7.8.0",
-		"@scalar/hono-api-reference": "^0.10.16",
-		"hono": "^4.12.21",
+		"@scalar/hono-api-reference": "^0.11.7",
+		"hono": "^4.12.27",
 		"jsonwebtoken": "^9.0.3",
-		"nanoid": "^5.1.11",
+		"nanoid": "^5.1.16",
 		"zod": "^4.4.3"
 	},
 	"devDependencies": {
-		"@testcontainers/mssqlserver": "^11.14.0",
+		"@testcontainers/mssqlserver": "^12.0.4",
 		"@types/bun": "latest",
 		"@types/jsonwebtoken": "^9.0.10",
-		"@vitest/ui": "^4.1.7",
+		"@vitest/ui": "^4.1.9",
 		"prisma": "^7.8.0",
-		"vitest": "^4.1.7"
+		"vitest": "^4.1.9"
 	}
 }
