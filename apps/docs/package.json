@@ -13,19 +13,19 @@
 		"check": "biome check --write"
 	},
 	"dependencies": {
-		"@astrojs/starlight": "^0.41.2",
+		"@astrojs/starlight": "^0.41.11",
 		"@astrojs/starlight-tailwind": "^5.0.0",
-		"@tailwindcss/vite": "^4.3.2",
+		"@tailwindcss/vite": "^4.3.3",
 		"astro": "^7.3.2",
 		"astro-mermaid": "^2.1.0",
-		"mermaid": "^11.16.0",
+		"mermaid": "^11.17.2",
 		"sharp": "^0.35.4",
-		"starlight-theme-nova": "^0.12.1",
-		"tailwindcss": "^4.3.2"
+		"starlight-theme-nova": "^0.12.3",
+		"tailwindcss": "^4.3.3"
 	},
 	"devDependencies": {
-		"starlight-links-validator": "^0.25.2",
-		"vite": "^8.1.2",
-		"zod": "^4.4.3"
+		"starlight-links-validator": "^0.25.3",
+		"vite": "^8.2.2",
+		"zod": "^4.6.1"
 	}
 }

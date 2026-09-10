@@ -21,15 +21,17 @@
 		"check": "bun run --filter '*' check"
 	},
 	"devDependencies": {
-		"@biomejs/biome": "^2.5.2",
+		"@biomejs/biome": "^2.5.12",
 		"@types/bun": "latest",
-		"lefthook": "^2.1.9"
+		"lefthook": "^2.1.12"
 	},
 	"workspaces": [
 		"apps/*"
 	],
 	"overrides": {
 		"protobufjs": "^7.5.5",
-		"find-my-way": "^9.7.0"
+		"find-my-way": "^9.7.0",
+		"deepmerge-ts": "^8.0.0",
+		"mysql2": "^3.23.1"
 	}
 }
