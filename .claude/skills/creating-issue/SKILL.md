@@ -18,13 +18,13 @@ UPWARD Connect チームの Linear に Issue を起票する。
 
 ## 実行フロー
 
-1. 「テンプレート選択の基準」に従い `get_document` で選択基準を取得し、Issue 種別に最も適合するテンプレートを選ぶ
-2. `list_templates`（team: チーム識別子, type: `issue`）で一覧を取得し、選んだ Type のテンプレートを `get_template` で取得する。`content.description` のセクション構成を下書きの骨格にする
-3. `list_issue_labels` でラベル一覧を取得し、タイトル・説明文・ラベルを決定する（`Type` はテンプレートと1:1で対応するものを選ぶ。`Type` 以外は文脈に明確に合うものだけを付け、無ければ `Type` だけでよい）
+1. 「テンプレート選択の基準」に従い `mcp__linear-server__get_document` で選択基準を取得し、Issue 種別に最も適合するテンプレートを選ぶ
+2. `mcp__linear-server__list_templates`（team: チーム識別子, type: `issue`）で一覧を取得し、選んだ Type のテンプレートを `mcp__linear-server__get_template` で取得する。`content.description` のセクション構成を下書きの骨格にする
+3. `mcp__linear-server__list_issue_labels` でラベル一覧を取得し、タイトル・説明文・ラベルを決定する（`Type` はテンプレートと1:1で対応するものを選ぶ。`Type` 以外は文脈に明確に合うものだけを付け、無ければ `Type` だけでよい）
 4. 会話の文脈に参考リンクがあれば `links` フィールドに設定する。文脈に無いリンクは補わない
 5. 下書きを「記述の原則」の各判定に照らして点検し、外れていれば直す
 6. 下書きをユーザーに提示して確認を取る（ラベルは名前で表示する）
-7. 承認後、`save_issue`（team: チーム識別子）で Issue を作成する。ラベルはステップ3で取得済みのラベルIDを渡す
+7. 承認後、`mcp__linear-server__save_issue`（team: チーム識別子）で Issue を作成する。ラベルはステップ3で取得済みのラベルIDを渡す
 
 いずれかの取得に失敗したらユーザーへ伝えて中断する。取得できなかった内容を推測で補わない。
 
@@ -107,4 +107,4 @@ Issue ID の書き方（NG / OK）:
 
 Type は同名の Issue Template に 1:1 で対応するため、テンプレート選択は Type の選択基準で判定する。
 その基準は Linear ドキュメント「Issue Type 選択の基準」を単一の情報源とし、インラインには定義しない。
-スキル実行時に `get_document`（前提の slug）で取得し、基準表と各境界の判定ルールに従ってテンプレートを選ぶ。
+スキル実行時に `mcp__linear-server__get_document`（前提の slug）で取得し、基準表と各境界の判定ルールに従ってテンプレートを選ぶ。
