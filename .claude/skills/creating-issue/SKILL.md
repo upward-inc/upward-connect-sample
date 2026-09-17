@@ -2,6 +2,7 @@
 name: creating-issue
 description: |
   Use when the user wants to file an issue: a bug discovered during work, a feature or improvement identified in conversation, or any explicit request to create or log an issue in Linear.
+model: sonnet
 effort: medium
 ---
 
