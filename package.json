@@ -21,7 +21,7 @@
 		"check": "bun run --filter '*' check"
 	},
 	"devDependencies": {
-		"@biomejs/biome": "^2.5.12",
+		"@biomejs/biome": "^2.5.15",
 		"@types/bun": "latest",
 		"lefthook": "^2.1.12"
 	},
