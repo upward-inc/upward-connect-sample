@@ -17,9 +17,9 @@ jobs:
       UPWARD_SHARED_WORKFLOWS_APP_PRIVATE_KEY: ${{ secrets.UPWARD_SHARED_WORKFLOWS_APP_PRIVATE_KEY }}
       SLACK_DEVOPS_BOT_TOKEN: ${{ secrets.SLACK_DEVOPS_BOT_TOKEN }}
     with:
-      severity: ${{ vars.SECURITY_ALERT_SEVERITY }}
       slack-channel: ${{ vars.SECURITY_ALERT_SLACK_CHANNEL_ID }}
-      mentions: ${{ vars.SECURITY_ALERT_MENTIONS }}
+      slack-severity: ${{ vars.SECURITY_ALERT_SEVERITY }}
+      slack-mentions: ${{ vars.SECURITY_ALERT_MENTIONS }}
 
   code-scanning:
     uses: upward-inc/github-foundation/.github/workflows/code-scanning-security-alert.yml@main
@@ -29,6 +29,6 @@ jobs:
       UPWARD_SHARED_WORKFLOWS_APP_PRIVATE_KEY: ${{ secrets.UPWARD_SHARED_WORKFLOWS_APP_PRIVATE_KEY }}
       SLACK_DEVOPS_BOT_TOKEN: ${{ secrets.SLACK_DEVOPS_BOT_TOKEN }}
     with:
-      severity: ${{ vars.SECURITY_ALERT_SEVERITY }}
       slack-channel: ${{ vars.SECURITY_ALERT_SLACK_CHANNEL_ID }}
-      mentions: ${{ vars.SECURITY_ALERT_MENTIONS }}
+      slack-severity: ${{ vars.SECURITY_ALERT_SEVERITY }}
+      slack-mentions: ${{ vars.SECURITY_ALERT_MENTIONS }}
