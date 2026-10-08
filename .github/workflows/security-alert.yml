@@ -13,20 +13,22 @@ jobs:
     uses: upward-inc/github-foundation/.github/workflows/dependabot-security-alert.yml@main
     permissions: {}
     secrets:
-      SLACK_WEBHOOK_URL: ${{ secrets.SLACK_MAIN_CHANNEL_WEBHOOK_URL }}
       UPWARD_SHARED_WORKFLOWS_APP_ID: ${{ vars.UPWARD_SHARED_WORKFLOWS_APP_ID }}
       UPWARD_SHARED_WORKFLOWS_APP_PRIVATE_KEY: ${{ secrets.UPWARD_SHARED_WORKFLOWS_APP_PRIVATE_KEY }}
+      SLACK_DEVOPS_BOT_TOKEN: ${{ secrets.SLACK_DEVOPS_BOT_TOKEN }}
     with:
       severity: ${{ vars.SECURITY_ALERT_SEVERITY }}
+      slack-channel: ${{ vars.SECURITY_ALERT_SLACK_CHANNEL_ID }}
       mentions: ${{ vars.SECURITY_ALERT_MENTIONS }}
 
   code-scanning:
     uses: upward-inc/github-foundation/.github/workflows/code-scanning-security-alert.yml@main
     permissions: {}
     secrets:
-      SLACK_WEBHOOK_URL: ${{ secrets.SLACK_MAIN_CHANNEL_WEBHOOK_URL }}
       UPWARD_SHARED_WORKFLOWS_APP_ID: ${{ vars.UPWARD_SHARED_WORKFLOWS_APP_ID }}
       UPWARD_SHARED_WORKFLOWS_APP_PRIVATE_KEY: ${{ secrets.UPWARD_SHARED_WORKFLOWS_APP_PRIVATE_KEY }}
+      SLACK_DEVOPS_BOT_TOKEN: ${{ secrets.SLACK_DEVOPS_BOT_TOKEN }}
     with:
       severity: ${{ vars.SECURITY_ALERT_SEVERITY }}
+      slack-channel: ${{ vars.SECURITY_ALERT_SLACK_CHANNEL_ID }}
       mentions: ${{ vars.SECURITY_ALERT_MENTIONS }}
