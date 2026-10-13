@@ -11,7 +11,10 @@ on:
 jobs:
   dependabot:
     uses: upward-inc/github-foundation/.github/workflows/dependabot-security-alert.yml@main
-    permissions: {}
+    # 共有ワークフローの Webhook を送る job が contents: write を宣言している。
+    # 呼び出し側がそれより狭い権限しか与えないと、Webhook を使わなくても起動時の検査で startup_failure になる。
+    permissions:
+      contents: write
     secrets:
       UPWARD_SHARED_WORKFLOWS_APP_ID: ${{ vars.UPWARD_SHARED_WORKFLOWS_APP_ID }}
       UPWARD_SHARED_WORKFLOWS_APP_PRIVATE_KEY: ${{ secrets.UPWARD_SHARED_WORKFLOWS_APP_PRIVATE_KEY }}
@@ -23,7 +26,10 @@ jobs:
 
   code-scanning:
     uses: upward-inc/github-foundation/.github/workflows/code-scanning-security-alert.yml@main
-    permissions: {}
+    # 共有ワークフローの Webhook を送る job が contents: write を宣言している。
+    # 呼び出し側がそれより狭い権限しか与えないと、Webhook を使わなくても起動時の検査で startup_failure になる。
+    permissions:
+      contents: write
     secrets:
       UPWARD_SHARED_WORKFLOWS_APP_ID: ${{ vars.UPWARD_SHARED_WORKFLOWS_APP_ID }}
       UPWARD_SHARED_WORKFLOWS_APP_PRIVATE_KEY: ${{ secrets.UPWARD_SHARED_WORKFLOWS_APP_PRIVATE_KEY }}
