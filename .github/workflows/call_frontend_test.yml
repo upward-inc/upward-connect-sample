@@ -23,7 +23,7 @@ jobs:
       - name: Setup Bun
         uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
         with:
-          bun-version: 1.4.0
+          bun-version: 1.4.3
 
       # bunfig.toml の `[run] bun = true` は `bun install` のライフサイクルスクリプトに効かないため、`node` を Bun に差し替えてランナーの Node.js を使わないようにする
       - name: Use Bun as node
