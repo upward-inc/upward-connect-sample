@@ -31,6 +31,13 @@ jobs:
         with:
           bun-version: 1.4.0
 
+      # bunfig.toml の `[run] bun = true` は `bun install` のライフサイクルスクリプトに効かないため、`node` を Bun に差し替えてランナーの Node.js を使わないようにする
+      - name: Use Bun as node
+        run: |
+          mkdir -p "$RUNNER_TEMP/bun-as-node"
+          ln -s "$(command -v bun)" "$RUNNER_TEMP/bun-as-node/node"
+          echo "$RUNNER_TEMP/bun-as-node" >> "$GITHUB_PATH"
+
       - name: Cache Bun dependencies
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
