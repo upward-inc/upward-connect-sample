@@ -29,8 +29,8 @@
 		"@testcontainers/mssqlserver": "^12.1.0",
 		"@types/bun": "latest",
 		"@types/jsonwebtoken": "^9.0.10",
-		"@vitest/ui": "^4.1.11",
+		"@vitest/ui": "^4.1.12",
 		"prisma": "^7.10.0",
-		"vitest": "^4.1.11"
+		"vitest": "^4.1.12"
 	}
 }
