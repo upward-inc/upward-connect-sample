@@ -201,7 +201,7 @@ model entity_item_option {
 model file {
   id                          String   @id(map: "pk_file") @default(dbgenerated("newid()"), map: "df_file_id") @db.UniqueIdentifier
   name                        String   @db.NVarChar(255)
-  type                        String   @db.NVarChar(20)
+  type                        String   @db.NVarChar(255)
   content                     Bytes
   source_record               String?  @db.NVarChar(Max)
   created_at                  DateTime @default(dbgenerated("getutcdate()"), map: "df_file_created_at")

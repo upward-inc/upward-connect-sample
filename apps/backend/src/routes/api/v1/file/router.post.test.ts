@@ -191,6 +191,27 @@ describe("POST /api/v1/files - ファイル作成", () => {
 		expect(new Uint8Array(savedFile?.content || [])).toEqual(binaryContent)
 	})
 
+	it("長いMIMEタイプ（docx）のファイルを作成できること", async () => {
+		// Arrange
+		const docxType =
+			"application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+		const docxFile = createTestFile("test.docx", "dummy", docxType)
+		const formData = new FormData()
+		formData.append("file", docxFile)
+
+		// Act
+		const response = await requestPost(formData)
+
+		// Assert
+		const data = await response.json()
+		expect(response.status).toBe(201)
+
+		const savedFile = await testPrisma.file.findUnique({
+			where: { id: data.id },
+		})
+		expect(savedFile?.type).toBe(docxType)
+	})
+
 	describe("source_record の保存", () => {
 		it.each([
 			{
