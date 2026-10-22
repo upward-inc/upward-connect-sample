@@ -9,9 +9,8 @@ import {
 } from "../../../../test/utils/execution-user"
 import { createTestFile } from "../../../../test/utils/file"
 
-// 保存される type の期待値は、送信した Content-Type ではなくファイル名の拡張子で決まる
-// Bun ランタイムでは、multipart のパートの Content-Type を無視して拡張子から MIME タイプを推測し、テキスト系には charset を付与するため
-// Node で実行すると（IDE の Vitest 拡張や `bunx vitest` など bunfig.toml が効かない経路）期待値が一致しない
+// Bun ランタイムでは、multipart のパートの Content-Type ではなくファイル名の拡張子から MIME タイプが推測される
+// そのため各テストは、送信する Content-Type をファイル名の拡張子と一致させている
 describe("POST /api/v1/files - ファイル作成", () => {
 	// テスト実施ユーザー
 	let testExecutionUser: TestExecutionUser
@@ -135,7 +134,7 @@ describe("POST /api/v1/files - ファイル作成", () => {
 		})
 		expect(savedFile).toBeTruthy()
 		expect(savedFile?.name).toBe("test.txt")
-		expect(savedFile?.type).toBe("text/plain;charset=utf-8")
+		expect(savedFile?.type).toBe("text/plain")
 		expect(savedFile?.created_by).toBe(testExecutionUser.id)
 		expect(savedFile?.modified_by).toBe(testExecutionUser.id)
 	})
@@ -163,7 +162,7 @@ describe("POST /api/v1/files - ファイル作成", () => {
 			where: { id: data.id },
 		})
 		expect(savedFile?.name).toBe("data.json")
-		expect(savedFile?.type).toBe("application/json;charset=utf-8")
+		expect(savedFile?.type).toBe("application/json")
 		expect(Buffer.from(savedFile?.content || []).toString()).toEqual(
 			jsonContent,
 		)
