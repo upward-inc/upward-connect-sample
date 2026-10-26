@@ -38,14 +38,14 @@ pre-commit:
             exclude:
               - "**/prisma/generated/**"
               - "**/routeTree.gen.ts"
-            run: bun --bun run biome lint --write {staged_files}
+            run: bun run biome lint --write {staged_files}
             stage_fixed: true
           - name: format
             glob: "*.{ts,tsx,js,jsx}"
             exclude:
               - "**/prisma/generated/**"
               - "**/routeTree.gen.ts"
-            run: bun --bun run biome format --write {staged_files}
+            run: bun run biome format --write {staged_files}
             stage_fixed: true
 
     # コミット前にステージ済みファイルに機密情報が含まれていないかを検証

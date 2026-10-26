@@ -9,6 +9,7 @@ on:
       - 'apps/docs/**'
       - '.github/workflows/docs_deploy_develop.yml'
       - '.github/workflows/call_frontend_*.yml'
+      - 'staticwebapp.config.json'
 
   # developブランチへのPR操作時（closed含む：プレビュー環境削除のため）
   pull_request:
@@ -19,6 +20,7 @@ on:
       - 'apps/docs/**'
       - '.github/workflows/docs_deploy_develop.yml'
       - '.github/workflows/call_frontend_*.yml'
+      - 'staticwebapp.config.json'
 
   # 手動トリガー
   workflow_dispatch:
