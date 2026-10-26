@@ -106,10 +106,10 @@ import List from '../../../../components/List.astro'
         ],
       },
       {
-        text: "データ型が<code>reference</code>の場合",
+        text: "データ型が<code>reference</code>の場合（<code>null</code>の場合は<code>single</code>と同じ扱い）",
         children: [
           "<code>single</code> : 単一のレコードが設定可能なフィールドに対して設定する",
-          "<code>multi</code> : 複数のレコードが設定可能なフィールドに対して設定する",
+          "<code>multi</code> : 指定不可",
         ],
       },
     ]} />
@@ -167,13 +167,7 @@ import List from '../../../../components/List.astro'
           'サブデータ型が<code>multi</code>の場合: <a href="#optionオブジェクト">optionオブジェクト</a>の<code>name</code>の配列',
         ],
       },
-      {
-        text: "データ型が<code>reference</code>の場合",
-        children: [
-          'サブデータ型が<code>single</code>の場合: <a href="#レコード参照オブジェクト">レコード参照オブジェクト</a>',
-          'サブデータ型が<code>multi</code>の場合: <a href="#レコード参照オブジェクト">レコード参照オブジェクト</a>の配列',
-        ],
-      },
+      'データ型が<code>reference</code>の場合: <a href="#レコード参照オブジェクト">レコード参照オブジェクト</a>',
     ]} />
   </ResponseBodyTableRow>
 </ResponseBodyTable>
@@ -306,6 +300,9 @@ import List from '../../../../components/List.astro'
     - is_filterable: `true`
     - is_creatable: `false`
     - is_updatable: `false`
+- 「sub_type」フィールド : データ型が`reference`の場合
+  - `multi` は設定しないでください（複数のレコードを設定できる参照項目は認めません）
+  - `null` の場合は `single` と同じ扱いになります
 - 「reference_entities」フィールド
   - データ型が`reference`の場合は、参照先のエンティティ名を1つだけ設定してください
   - 複数のエンティティを参照する多態参照は認めません
