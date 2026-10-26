@@ -9,6 +9,8 @@ import {
 } from "../../../../test/utils/execution-user"
 import { createTestFile } from "../../../../test/utils/file"
 
+// Bun ランタイムでは、multipart のパートの Content-Type ではなくファイル名の拡張子から MIME タイプが推測される
+// そのため各テストは、送信する Content-Type をファイル名の拡張子と一致させている
 describe("POST /api/v1/files - ファイル作成", () => {
 	// テスト実施ユーザー
 	let testExecutionUser: TestExecutionUser
@@ -189,6 +191,27 @@ describe("POST /api/v1/files - ファイル作成", () => {
 		expect(savedFile?.name).toBe("test.png")
 		expect(savedFile?.type).toBe("image/png")
 		expect(new Uint8Array(savedFile?.content || [])).toEqual(binaryContent)
+	})
+
+	it("長いMIMEタイプ（docx）のファイルを作成できること", async () => {
+		// Arrange
+		const docxType =
+			"application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+		const docxFile = createTestFile("test.docx", "dummy", docxType)
+		const formData = new FormData()
+		formData.append("file", docxFile)
+
+		// Act
+		const response = await requestPost(formData)
+
+		// Assert
+		const data = await response.json()
+		expect(response.status).toBe(201)
+
+		const savedFile = await testPrisma.file.findUnique({
+			where: { id: data.id },
+		})
+		expect(savedFile?.type).toBe(docxType)
 	})
 
 	describe("source_record の保存", () => {
