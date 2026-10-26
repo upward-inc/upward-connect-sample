@@ -33,10 +33,10 @@ import List from '../../../../components/List.astro'
   <ParameterTableRow name="fields" type="文字列" required={true} example="id, user_name, is_active">
     返却対象のフィールド名（カンマ区切り）
   </ParameterTableRow>
-  <ParameterTableRow name="filter" type={`<a href="/resource-api/filter-params">filterパラメータ</a>オブジェクト`} required={false} example='{ "and": [ { "field": "industry", "operator": "eq", "value": "public_admin" } ] }'>
+  <ParameterTableRow name="filter" type={`<a href="/resource-api/filter-params">filterパラメータ</a>オブジェクト`} required={false} example='{ "and": [ { "field": "is_active", "operator": "eq", "value": true } ] }'>
     検索条件
   </ParameterTableRow>
-  <ParameterTableRow name="order_by" type="オブジェクトの配列" required={false} example='[{ field: "id", direction: "asc" }]'>
+  <ParameterTableRow name="order_by" type="オブジェクトの配列" required={false} example='[{ "field": "id", "direction": "asc" }]'>
     検索結果のソート条件
   </ParameterTableRow>
   <ParameterTableRow name="limit" type="整数値" required={false} example="100">
