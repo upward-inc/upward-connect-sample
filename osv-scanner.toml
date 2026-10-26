@@ -5,5 +5,10 @@
 # 例:
 # [[IgnoredVulns]]
 # id = "GHSA-xxxx-xxxx-xxxx"
-# ignoreUntil = "2026-12-31"
+# ignoreUntil = 2026-12-31T00:00:00Z
 # reason = "脆弱関数が当アプリで未使用。次回のメジャー更新で解消予定。"
+
+[[IgnoredVulns]]
+id = "GHSA-hp3w-g68c-fv3c"
+ignoreUntil = 2027-01-08T00:00:00Z
+reason = "sprintf-js は修正版が未公開。backend の tedious は書式文字列をリテラルで渡しており、精度指定を外部から注入する経路がない。"
