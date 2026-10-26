@@ -139,8 +139,8 @@ import List from '../../../../components/List.astro'
     データ型が<code>numeric</code>の場合の小数点以下の桁数
   </ResponseBodyTableRow>
   <ResponseBodyTableRow name="reference_entities" type="文字列の配列" required={false} example="null">
-    データ型が<code>reference</code>の場合の参照先のエンティティ名一覧<br />
-    要素は1つのみ（複数のエンティティを参照する多態参照は不可）
+    データ型が<code>reference</code>の場合の参照先のエンティティ名（配列で表すが、要素は1つのみ）<br />
+    複数のエンティティを参照する多態参照は不可
   </ResponseBodyTableRow>
   <ResponseBodyTableRow name="options" type={`<a href="#optionオブジェクト">optionオブジェクト</a>の配列`} required={false} example="[]">
     データ型が<code>option</code>の場合、または、サブデータ型が<code>combobox</code>の場合の選択肢一覧
