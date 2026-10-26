@@ -1,0 +1,8 @@
+# `bun run` のスクリプトを Node.js ではなく Bun ランタイムで実行する（`bun --bun run` と同等）
+# CLI の shebang が `node` を指していても、環境にインストールされた Node.js を使わなくなる
+# `bun install` のライフサイクルスクリプトと `bunx` には効かない（CI では `node` を Bun に差し替えて対処している）
+#
+# Bun は cwd の bunfig.toml しか読まないため、同じ内容を各 app（apps/*/bunfig.toml）にも置いている
+# CI やテストは app のディレクトリを cwd にして実行するので、app を追加するときは bunfig.toml も複製すること
+[run]
+bun = true
