@@ -26,3 +26,6 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITLEAKS_LICENSE: ${{ secrets.GITLEAKS_LICENSE_KEY }}
+          # action の既定 (8.24.3) は .gitleaks.toml の [[allowlists]] (8.25.0 以降で対応) を無視するため、バージョンを固定する
+          # TODO: UC-42 で betterleaks へ移行するまでの暫定対応
+          GITLEAKS_VERSION: 8.30.1
