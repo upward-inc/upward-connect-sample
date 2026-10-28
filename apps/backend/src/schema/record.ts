@@ -106,11 +106,7 @@ export const PostRecordBodySchema = z
 			time_field: "12:34:56",
 			single_option_field: "option-a",
 			multi_option_field: ["option-a", "option-b"],
-			single_reference_field: { entity_name: "lead", id: "lead-00000001" },
-			multi_reference_field: [
-				{ entity_name: "lead", id: "lead-00000001" },
-				{ entity_name: "lead", id: "lead-00000002" },
-			],
+			reference_field: { entity_name: "lead", id: "lead-00000001" },
 		},
 	})
 
