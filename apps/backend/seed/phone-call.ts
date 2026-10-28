@@ -24,8 +24,6 @@ export async function seedPhoneCalls(
 		where: { entity_item_id: { in: entityItems.map(({ id }) => id) } },
 	})
 
-	const accounts = await prisma.account.findMany()
-	const leads = await prisma.lead.findMany()
 	const contacts = await prisma.contact.findMany()
 
 	const getAnyOption = (itemName: string, name?: string) => {
@@ -51,8 +49,6 @@ export async function seedPhoneCalls(
 		const code = getZeroPaddingString(index + 1, 6)
 
 		const user = getAnyRow(users)
-		const account = getAnyRow(accounts)
-		const lead = getAnyRow(leads)
 		const contact = getAnyRow(contacts)
 		const userRecordReference = JSON.stringify({
 			entity_name: "user",
@@ -79,26 +75,11 @@ export async function seedPhoneCalls(
 			tz: "Asia/Tokyo",
 		})
 
-		const their = getRandomBoolean(0.5)
-			? {
-					reference: { entity_name: "account", id: account.id },
-					phoneNumber: account.main_phone_number,
-				}
-			: getRandomBoolean(0.5)
-				? {
-						reference: { entity_name: "lead", id: lead.id },
-						phoneNumber: lead.phone_number,
-					}
-				: {
-						reference: { entity_name: "contact", id: contact.id },
-						phoneNumber: contact.mobile_phone_number,
-					}
-
 		return {
 			subject: status.display_name,
 			user: userRecordReference,
-			their: JSON.stringify(their.reference),
-			phone_number: their.phoneNumber,
+			their: JSON.stringify({ entity_name: "contact", id: contact.id }),
+			phone_number: contact.mobile_phone_number,
 			direction: JSON.stringify([getAnyOption("direction").name]),
 			start_date_time: startDateTime,
 			end_date_time: endDateTime,

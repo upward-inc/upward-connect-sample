@@ -392,5 +392,34 @@ describe("エンティティ項目の取得", () => {
 				validationFn(data)
 			})
 		})
+
+		describe("参照項目の参照先が1つのエンティティであること", () => {
+			it.each([
+				{ entityName: "activity", itemName: "target", expected: ["account"] },
+				{
+					entityName: "activity",
+					itemName: "required_attendees",
+					expected: ["user"],
+				},
+				{
+					entityName: "activity",
+					itemName: "optional_attendees",
+					expected: ["user"],
+				},
+				{ entityName: "activity", itemName: "organizer", expected: ["user"] },
+				{ entityName: "phone_call", itemName: "their", expected: ["contact"] },
+			])(
+				"$entityName の $itemName",
+				async ({ entityName, itemName, expected }) => {
+					// Act
+					const response = await requestGetEntityItem(entityName, itemName)
+
+					// Assert
+					expect(response.status).toBe(200)
+					const data = await response.json()
+					expect(data.reference_entities).toStrictEqual(expected)
+				},
+			)
+		})
 	})
 })

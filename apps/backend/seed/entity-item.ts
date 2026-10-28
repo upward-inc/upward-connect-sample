@@ -486,13 +486,7 @@ export async function seedEntityItems(prisma: Prisma.TransactionClient) {
 			display_name: "活動先",
 			type: "reference",
 			sub_type: "single",
-			reference_entities: JSON.stringify([
-				"account",
-				"lead",
-				"opportunity",
-				"case",
-				"campaign",
-			]),
+			reference_entities: JSON.stringify(["account"]),
 		},
 		{
 			name: "contact",
@@ -553,21 +547,21 @@ export async function seedEntityItems(prisma: Prisma.TransactionClient) {
 			display_name: "必須出席者",
 			type: "reference",
 			sub_type: "single",
-			reference_entities: JSON.stringify(["user", "contact"]),
+			reference_entities: JSON.stringify(["user"]),
 		},
 		{
 			name: "optional_attendees",
 			display_name: "任意出席者",
 			type: "reference",
 			sub_type: "single",
-			reference_entities: JSON.stringify(["user", "contact"]),
+			reference_entities: JSON.stringify(["user"]),
 		},
 		{
 			name: "organizer",
 			display_name: "開催者",
 			type: "reference",
 			sub_type: "single",
-			reference_entities: JSON.stringify(["user", "contact"]),
+			reference_entities: JSON.stringify(["user"]),
 		},
 		{
 			name: "meeting_url",
@@ -673,7 +667,7 @@ export async function seedEntityItems(prisma: Prisma.TransactionClient) {
 			type: "reference",
 			sub_type: "single",
 			is_required: true,
-			reference_entities: JSON.stringify(["account", "lead", "contact"]),
+			reference_entities: JSON.stringify(["contact"]),
 		},
 		{
 			name: "phone_number",
