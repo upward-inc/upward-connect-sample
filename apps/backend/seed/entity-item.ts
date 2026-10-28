@@ -1287,27 +1287,6 @@ export async function seedEntityItems(prisma: Prisma.TransactionClient) {
 			sub_type: "single",
 			reference_entities: JSON.stringify(["account"]),
 		},
-		{
-			name: "reference_single_target_multi_id",
-			display_name: "単一参照先、複数ID",
-			type: "reference",
-			sub_type: "multi",
-			reference_entities: JSON.stringify(["account"]),
-		},
-		{
-			name: "reference_multi_target_single_id",
-			display_name: "複数参照先、単一ID",
-			type: "reference",
-			sub_type: "single",
-			reference_entities: JSON.stringify(["account", "lead"]),
-		},
-		{
-			name: "reference_multi_target_multi_id",
-			display_name: "複数参照先、複数ID",
-			type: "reference",
-			sub_type: "multi",
-			reference_entities: JSON.stringify(["account", "lead"]),
-		},
 		...commonAddressItems,
 		...commonLocationItems,
 		{
