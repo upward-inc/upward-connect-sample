@@ -301,11 +301,11 @@ import List from '../../../../components/List.astro'
     - is_creatable: `false`
     - is_updatable: `false`
 - 「sub_type」フィールド : データ型が`reference`の場合
-  - `multi` は設定しないでください（複数のレコードを設定できる参照項目は認めません）
+  - `multi` は設定しないでください（複数のレコードを設定できる参照項目はサポートされていません）
   - `null` の場合は `single` と同じ扱いになります
 - 「reference_entities」フィールド
   - データ型が`reference`の場合は、参照先のエンティティ名を1つだけ設定してください
-  - 複数のエンティティを参照する多態参照は認めません
+  - 複数のエンティティを参照する多態参照はサポートされていません
 
 ## 📚 参考資料
 
