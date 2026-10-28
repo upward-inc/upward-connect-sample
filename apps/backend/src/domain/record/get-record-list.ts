@@ -196,10 +196,6 @@ const appendIdToOrderBy = (
 	return [...baseOrderBy, { field: "id", direction: "asc" as const }]
 }
 
-const isArray = <T>(maybeArray: T | readonly T[]): maybeArray is T[] => {
-	return Array.isArray(maybeArray)
-}
-
 // 一部のフィールド型において、Prisma($queryRawUnsafe)経由で取得したデータ型と結果として返却したいデータ型が一致しないので、適切な型に変換する
 const covertRecords = async (
 	records: DBRecord[],
@@ -218,10 +214,7 @@ const covertRecords = async (
 			if (type) {
 				// nullの場合は早期リターン
 				if (value === null) {
-					if (
-						(type === "option" || type === "reference") &&
-						sub_type === "multi"
-					) {
+					if (type === "option" && sub_type === "multi") {
 						data[field] = []
 					} else {
 						data[field] = null
@@ -258,22 +251,11 @@ const covertRecords = async (
 				}
 
 				if (type === "reference") {
-					const references: Reference | Reference[] = JSON.parse(String(value))
-
-					const getValue = (entity_name: string, id: string) => {
-						return {
-							entity_name,
-							id,
-							title: referenceRecords.get(entity_name)?.get(id) ?? "",
-						}
-					}
-
-					if (!isArray(references)) {
-						value = getValue(references.entity_name, references.id)
-					} else {
-						value = references.map((reference) =>
-							getValue(reference.entity_name, reference.id),
-						)
+					const { entity_name, id }: Reference = JSON.parse(String(value))
+					value = {
+						entity_name,
+						id,
+						title: referenceRecords.get(entity_name)?.get(id) ?? "",
 					}
 				}
 			}
@@ -315,10 +297,8 @@ const getReferenceRecords = async (
 				({ column_name, type }) =>
 					type === "reference" && !!record[column_name],
 			)
-			.flatMap(({ column_name }) => {
-				const value = record[column_name]
-				const references: Reference | Reference[] = JSON.parse(String(value))
-				return isArray(references) ? references : [references]
+			.map(({ column_name }): Reference => {
+				return JSON.parse(String(record[column_name]))
 			})
 	})
 

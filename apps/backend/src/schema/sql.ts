@@ -252,8 +252,9 @@ const comparisonToPredicate = (items: Field[], filter: Comparison) => {
 	if (
 		item.type === "reference" &&
 		(filter.filter_type === "string" || filter.filter_type === "object") &&
-		(filter.operator === "eq" || filter.operator === "includes")
+		filter.operator === "eq"
 	) {
+		// 値が文字列（ID）の場合は、項目の参照先のエンティティ（多態参照はサポートされていないため1つのみ）のレコードとして扱う
 		const value =
 			typeof filter.value === "string"
 				? {
@@ -264,13 +265,7 @@ const comparisonToPredicate = (items: Field[], filter: Comparison) => {
 
 		return withPredicatePrefix(
 			filter.is_not,
-			getReferenceComparisonPredicate(
-				item.table_name,
-				item.column_name,
-				filter.operator,
-				value,
-				item.sub_type,
-			),
+			getReferenceComparisonPredicate(item.table_name, item.column_name, value),
 		)
 	}
 
@@ -358,21 +353,13 @@ const getOptionComparisonPredicate = (
 const getReferenceComparisonPredicate = (
 	tableName: Field["table_name"],
 	columnName: Field["column_name"],
-	operator: EqualOperator | IncludesOperator,
 	value: RecordReferenceValue,
-	subType?: Field["sub_type"],
 ) => {
 	const safeColumnName = `[${tableName}].[${columnName}]`
 	const withClause = "WITH (entity_name NVARCHAR(MAX), id NVARCHAR(MAX))"
 	const valueCondition = `${withClause} WHERE entity_name = '${value.entity_name}' AND id = '${value.id}'`
 
-	// multi type + eqの場合のみ完全一致チェック（配列要素数1かつ値が一致）が必要
-	if (operator === "eq" && subType === "multi") {
-		return getJsonArrayExactMatchPredicate(safeColumnName, valueCondition)
-	}
-
-	// 単一参照のカラムには単一の値しか設定されない前提であるため、
-	// （single + eq、または includes）は値が含まれているかのチェックで十分
+	// 参照のカラムには単一の値しか設定されない前提であるため、値が含まれているかのチェックで十分
 	return getJsonArrayIncludesPredicate(safeColumnName, valueCondition)
 }
 
