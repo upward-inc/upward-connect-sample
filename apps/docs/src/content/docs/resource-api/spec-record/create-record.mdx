@@ -47,9 +47,7 @@ import ResponseBodyTableRow from '../../../../components/ResponseBodyTableRow.as
   - 項目のデータ型が`option`の場合
     - 項目のサブデータ型が`single`の場合: 文字列（オプション名）
     - 項目のサブデータ型が`multi`の場合: 文字列（オプション名）の配列
-  - 項目のデータ型が`reference`の場合
-    - 項目のサブデータ型が`single`の場合: [レコード参照オブジェクト](#レコード参照オブジェクト)
-    - 項目のサブデータ型が`multi`の場合: [レコード参照オブジェクト](#レコード参照オブジェクト)の配列
+  - 項目のデータ型が`reference`の場合: [レコード参照オブジェクト](#レコード参照オブジェクト)
 
 #### レコード参照オブジェクト
 
@@ -76,11 +74,7 @@ import ResponseBodyTableRow from '../../../../components/ResponseBodyTableRow.as
   "time_field": "12:34:56",
   "single_option_field": "option-a",
   "multi_option_field": ["option-a", "option-b"],
-  "single_reference_field": { "entity_name": "lead", "id": "lead-00000001" },
-  "multi_reference_field": [
-    { "entity_name": "lead", "id": "lead-00000001" },
-    { "entity_name": "lead", "id": "lead-00000002" }
-  ]
+  "reference_field": { "entity_name": "lead", "id": "lead-00000001" }
 }
 ```
 
