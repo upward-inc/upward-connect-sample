@@ -41,7 +41,7 @@ import ResponseBodyTableRow from '../../../../components/ResponseBodyTableRow.as
 ### レスポンスボディ
 
 <ResponseBodyTable>
-  <ResponseBodyTableRow name="keys" type={`<a href="#jwkオブジェクト">JWKオブジェクト</a>の配列`} required={true} example='[ { "kty": "RSA", "n": "w76VbIRgafxBJyL9lmeCG-Z...", "e": "AQAB", "alg": "RS256", "use": "sig", "kid": "00001" }, ... ]'>
+  <ResponseBodyTableRow name="keys" type={`<a href="#jwkオブジェクト">JWKオブジェクト</a>の配列`} required={true} example='[ { "kty": "RSA", "n": "72qvmBg2ZhkndaFZP0s388w...", "e": "AQAB", "alg": "RS256", "use": "sig", "kid": "00001" }, ... ]'>
     `id_token`の署名を検証するための公開鍵の配列
   </ResponseBodyTableRow>
 </ResponseBodyTable>
@@ -61,7 +61,7 @@ import ResponseBodyTableRow from '../../../../components/ResponseBodyTableRow.as
   <ResponseBodyTableRow name="kid" type="文字列" required={true} example='00001'>
     公開鍵ID
   </ResponseBodyTableRow>
-  <ResponseBodyTableRow name="n" type="文字列" required={true} example='w76VbIRgafxBJyL9lmeCG-ZuQyTD0-wvV-Ruaf8M6cMbkh5mC9S23GsT7ttnhjh0Xb8JmblHDS-M9_f0euwmTkXd7I49-_vde6_ysjk7Q8HnOWvIaUgEiNHH6J7-NQ-NREkPOQ3bRz8wtFEpOkqZFPNATyhgOs3MW_iYUE5McQs9dMTg5xBB_JeIIDe-IxKjAKMgsus4pxbk4QeoXjjgtJkqjl9Y_-fUJiyWDjIAv9ijMpmMqzhEwfMx41gHS-FMEHs9IwHl358ecFsaoWYevyX4g0F_Vv9zeggmkPt3gk26w0fAlnkP13--7BrwBLJvDWmUxwANzStVKyB6crv5IvMrm0g4y7SNpmjh_dmJO8cjytKn1Vts783rf1vQgGCIGfIQMljIFIcHLEEG8t4P65lCQVvflBXypDGCdVagBsubSsZNVzwpLA9zXqoa-Zv_5XOerdgfSlle5ry443x46sU-hDVexps48Ql3XPAljbDF42YscWUDLV0vQtaUUCBVpO-zrI_6kePkQ62bSeaJ3GIVcn4Zhs5ddG1OoqifxTxDzyTikguvNyaZFfeawI8sXitJoC2weD9QYaxlaeWaIYYZuXcu6IneN7z1Kxg6-XEni0waccd24ggkrAQl5ghxhXLF_RuPC5uKDARXP2bT6kSB2DVK-Ie-LGWhTWsqiGs'>
+  <ResponseBodyTableRow name="n" type="文字列" required={true} example='72qvmBg2ZhkndaFZP0s388w6WM1bvNmeo3IRVrIWsOKgKZO9Syy29MzBgZI7UepmcGN3uKOuFw2C1uMB4ulQjVqUyGIq8NxQ4OLCLmmmZVkeUYv3k87URUzsEy_zpTcd_d4devN-Qq308IdOW1TE9_u11yzoaDWjm1CE_2SkukPPk-oumSQ-K33zDvNU7lIXWq5D_1JRM3PXapLcxGJXViWeGsjE3bTWaACO1MT9OMmTSRwBsLmUOrbd6m8vnlD1YG9K6Dbf6IKIXNdKJCg-si0fn1WhL2zBykp526RpL6TXwOVTBzxd_iZnA14H3q-Vu-hpGsu4ChfjGrmaiSmtkFKoZHUFy9ZIO7DyZBzbRqiO_HvZykFDfMokKM6nDprsiNaJEGR7RWvLklKbPnX45Dfwuys9z-mrOVvkWkl1lf3utWL70_M6Kt4l_SljAszo-5_ohU4SFU7H2qsK7b1HWlcGJV78fj1rljIPBQAQaeSQ5RPkMpxTXzOc1vNHkqLQTN13pniT8VfssIs_02tddg0WArxk7ufcaoMXwqMxAIoYM7lrP1nLOHlVVTobYjV2eafpg31_vOloJ9W4070vVmGEhKolsxi66bAFGiiuSuTXruREMmO41LuDa_m21iB9dLrjkzgG3WQaUQlatIMqCiceRS8hvCXrWM5DxPci7D8'>
     公開鍵を復元するための公開鍵の絶対値（modulus）
   </ResponseBodyTableRow>
   <ResponseBodyTableRow name="e" type="文字列" required={true} example='AQAB'>
@@ -76,7 +76,7 @@ import ResponseBodyTableRow from '../../../../components/ResponseBodyTableRow.as
   "keys": [
     {
       "kty": "RSA",
-      "n": "w76VbIRgafxBJyL9lmeCG-ZuQyTD0-wvV-Ruaf8M6cMbkh5mC9S23GsT7ttnhjh0Xb8JmblHDS-M9_f0euwmTkXd7I49-_vde6_ysjk7Q8HnOWvIaUgEiNHH6J7-NQ-NREkPOQ3bRz8wtFEpOkqZFPNATyhgOs3MW_iYUE5McQs9dMTg5xBB_JeIIDe-IxKjAKMgsus4pxbk4QeoXjjgtJkqjl9Y_-fUJiyWDjIAv9ijMpmMqzhEwfMx41gHS-FMEHs9IwHl358ecFsaoWYevyX4g0F_Vv9zeggmkPt3gk26w0fAlnkP13--7BrwBLJvDWmUxwANzStVKyB6crv5IvMrm0g4y7SNpmjh_dmJO8cjytKn1Vts783rf1vQgGCIGfIQMljIFIcHLEEG8t4P65lCQVvflBXypDGCdVagBsubSsZNVzwpLA9zXqoa-Zv_5XOerdgfSlle5ry443x46sU-hDVexps48Ql3XPAljbDF42YscWUDLV0vQtaUUCBVpO-zrI_6kePkQ62bSeaJ3GIVcn4Zhs5ddG1OoqifxTxDzyTikguvNyaZFfeawI8sXitJoC2weD9QYaxlaeWaIYYZuXcu6IneN7z1Kxg6-XEni0waccd24ggkrAQl5ghxhXLF_RuPC5uKDARXP2bT6kSB2DVK-Ie-LGWhTWsqiGs",
+      "n": "72qvmBg2ZhkndaFZP0s388w6WM1bvNmeo3IRVrIWsOKgKZO9Syy29MzBgZI7UepmcGN3uKOuFw2C1uMB4ulQjVqUyGIq8NxQ4OLCLmmmZVkeUYv3k87URUzsEy_zpTcd_d4devN-Qq308IdOW1TE9_u11yzoaDWjm1CE_2SkukPPk-oumSQ-K33zDvNU7lIXWq5D_1JRM3PXapLcxGJXViWeGsjE3bTWaACO1MT9OMmTSRwBsLmUOrbd6m8vnlD1YG9K6Dbf6IKIXNdKJCg-si0fn1WhL2zBykp526RpL6TXwOVTBzxd_iZnA14H3q-Vu-hpGsu4ChfjGrmaiSmtkFKoZHUFy9ZIO7DyZBzbRqiO_HvZykFDfMokKM6nDprsiNaJEGR7RWvLklKbPnX45Dfwuys9z-mrOVvkWkl1lf3utWL70_M6Kt4l_SljAszo-5_ohU4SFU7H2qsK7b1HWlcGJV78fj1rljIPBQAQaeSQ5RPkMpxTXzOc1vNHkqLQTN13pniT8VfssIs_02tddg0WArxk7ufcaoMXwqMxAIoYM7lrP1nLOHlVVTobYjV2eafpg31_vOloJ9W4070vVmGEhKolsxi66bAFGiiuSuTXruREMmO41LuDa_m21iB9dLrjkzgG3WQaUQlatIMqCiceRS8hvCXrWM5DxPci7D8",
       "e": "AQAB",
       "alg": "RS256",
       "use": "sig",

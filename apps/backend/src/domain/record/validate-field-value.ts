@@ -25,7 +25,6 @@ export type ValidateFieldValueResultSuccess =
 	| ValidateFieldValueResultSuccessDate
 	| ValidateFieldValueResultSuccessStringArray
 	| ValidateFieldValueResultSuccessReferenceInput
-	| ValidateFieldValueResultSuccessReferenceInputArray
 
 export interface ValidateFieldValueResultFailure {
 	success: false
@@ -72,12 +71,6 @@ interface ValidateFieldValueResultSuccessReferenceInput {
 	success: true
 	kind: "reference-input"
 	value: RecordReferenceInput
-}
-
-interface ValidateFieldValueResultSuccessReferenceInputArray {
-	success: true
-	kind: "reference-input-array"
-	value: RecordReferenceInput[]
 }
 
 export const validateFieldValue = async (
@@ -290,89 +283,47 @@ const validateReferenceValue = async (
 	value: JsonValue,
 ): Promise<
 	| ValidateFieldValueResultSuccessReferenceInput
-	| ValidateFieldValueResultSuccessReferenceInputArray
 	| ValidateFieldValueResultFailure
 > => {
-	// single
-	if (entityItem.sub_type === "single") {
-		// 構造の妥当性チェック
-		const { success: isReferenceInput, data: referenceInput } = z
-			.union([
-				RecordReferenceInputSchema,
-				z.array(RecordReferenceInputSchema).length(1),
-			])
-			.transform((val) => (Array.isArray(val) ? val[0] : val))
-			.safeParse(value)
-
-		if (!isReferenceInput) {
-			const message = `Field '${entityItem.name}' must be a record reference input or an array containing a single record reference input`
-			return { success: false, message }
-		}
-
-		// 項目に指定可能なエンティティかどうかのチェック
-		const validEntities = entityItem.reference_entities ?? []
-		const isValidEntity = validEntities.includes(referenceInput.entity_name)
-		if (!isValidEntity) {
-			const message = `Field '${entityItem.name}' must reference one of the allowed entities: ${validEntities.join(", ")}`
-			return { success: false, message }
-		}
-
-		// レコードの存在確認
-		const isRecordExists = await getRecordExists(
-			referenceInput.entity_name,
-			referenceInput.id,
-		)
-		if (!isRecordExists) {
-			const message = `Field '${entityItem.name}' references a non-existent record`
-			return { success: false, message }
-		}
-
-		return {
-			success: true,
-			kind: "reference-input",
-			value: referenceInput,
-		}
+	// sub_typeの妥当性チェック（nullはsingleと同じ扱い）
+	if (entityItem.sub_type && entityItem.sub_type !== "single") {
+		return { success: false, message: "Invalid sub_type for reference field" }
 	}
 
-	// multi
-	if (entityItem.sub_type === "multi") {
-		// 構造の妥当性チェック
-		const { success: isReferenceInputArray, data: referenceInputs } = z
-			.array(RecordReferenceInputSchema)
-			.safeParse(value)
+	// 構造の妥当性チェック
+	const { success: isReferenceInput, data: referenceInput } = z
+		.union([
+			RecordReferenceInputSchema,
+			z.array(RecordReferenceInputSchema).length(1),
+		])
+		.transform((val) => (Array.isArray(val) ? val[0] : val))
+		.safeParse(value)
 
-		if (!isReferenceInputArray) {
-			const message = `Field '${entityItem.name}' must be an array of record reference input`
-			return { success: false, message }
-		}
-
-		// 各参照の妥当性チェック
-		for (const referenceInput of referenceInputs) {
-			// 項目に指定可能なエンティティかどうかのチェック
-			const validEntities = entityItem.reference_entities ?? []
-			const isValidEntity = validEntities.includes(referenceInput.entity_name)
-			if (!isValidEntity) {
-				const message = `Field '${entityItem.name}' must reference one of the allowed entities: ${validEntities.join(", ")}`
-				return { success: false, message }
-			}
-
-			// レコードの存在確認
-			const isRecordExists = await getRecordExists(
-				referenceInput.entity_name,
-				referenceInput.id,
-			)
-			if (!isRecordExists) {
-				const message = `Field '${entityItem.name}' references a non-existent record`
-				return { success: false, message }
-			}
-		}
-
-		return {
-			success: true,
-			kind: "reference-input-array",
-			value: referenceInputs,
-		}
+	if (!isReferenceInput) {
+		const message = `Field '${entityItem.name}' must be a record reference input or an array containing a single record reference input`
+		return { success: false, message }
 	}
 
-	return { success: false, message: "Invalid sub_type for reference field" }
+	// 項目の参照先のエンティティかどうかのチェック（多態参照はサポートされていないため、参照先は1つのみ）
+	const referenceEntity = entityItem.reference_entities?.at(0)
+	if (referenceInput.entity_name !== referenceEntity) {
+		const message = `Field '${entityItem.name}' must reference the '${referenceEntity}' entity`
+		return { success: false, message }
+	}
+
+	// レコードの存在確認
+	const isRecordExists = await getRecordExists(
+		referenceInput.entity_name,
+		referenceInput.id,
+	)
+	if (!isRecordExists) {
+		const message = `Field '${entityItem.name}' references a non-existent record`
+		return { success: false, message }
+	}
+
+	return {
+		success: true,
+		kind: "reference-input",
+		value: referenceInput,
+	}
 }

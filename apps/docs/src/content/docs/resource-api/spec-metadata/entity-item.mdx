@@ -106,10 +106,10 @@ import List from '../../../../components/List.astro'
         ],
       },
       {
-        text: "データ型が<code>reference</code>の場合",
+        text: "データ型が<code>reference</code>の場合（<code>null</code>の場合は<code>single</code>と同じ扱い）",
         children: [
           "<code>single</code> : 単一のレコードが設定可能なフィールドに対して設定する",
-          "<code>multi</code> : 複数のレコードが設定可能なフィールドに対して設定する",
+          "<code>multi</code> : 指定不可",
         ],
       },
     ]} />
@@ -139,7 +139,8 @@ import List from '../../../../components/List.astro'
     データ型が<code>numeric</code>の場合の小数点以下の桁数
   </ResponseBodyTableRow>
   <ResponseBodyTableRow name="reference_entities" type="文字列の配列" required={false} example="null">
-    データ型が<code>reference</code>の場合の参照先のエンティティ名一覧
+    データ型が<code>reference</code>の場合の参照先のエンティティ名（配列で表すが、要素は1つのみ）<br />
+    複数のエンティティを参照する多態参照は不可
   </ResponseBodyTableRow>
   <ResponseBodyTableRow name="options" type={`<a href="#optionオブジェクト">optionオブジェクト</a>の配列`} required={false} example="[]">
     データ型が<code>option</code>の場合、または、サブデータ型が<code>combobox</code>の場合の選択肢一覧
@@ -166,13 +167,7 @@ import List from '../../../../components/List.astro'
           'サブデータ型が<code>multi</code>の場合: <a href="#optionオブジェクト">optionオブジェクト</a>の<code>name</code>の配列',
         ],
       },
-      {
-        text: "データ型が<code>reference</code>の場合",
-        children: [
-          'サブデータ型が<code>single</code>の場合: <a href="#レコード参照オブジェクト">レコード参照オブジェクト</a>',
-          'サブデータ型が<code>multi</code>の場合: <a href="#レコード参照オブジェクト">レコード参照オブジェクト</a>の配列',
-        ],
-      },
+      'データ型が<code>reference</code>の場合: <a href="#レコード参照オブジェクト">レコード参照オブジェクト</a>',
     ]} />
   </ResponseBodyTableRow>
 </ResponseBodyTable>
@@ -276,7 +271,7 @@ import List from '../../../../components/List.astro'
   "name": "originating_lead",
   "display_name": "元のリード",
   "type": "reference",
-  "sub_type": null,
+  "sub_type": "single",
   "is_required": false,
   "is_filterable": true,
   "is_creatable": true,
@@ -305,6 +300,12 @@ import List from '../../../../components/List.astro'
     - is_filterable: `true`
     - is_creatable: `false`
     - is_updatable: `false`
+- 「sub_type」フィールド : データ型が`reference`の場合
+  - `multi` は設定しないでください（複数のレコードを設定できる参照項目はサポートされていません）
+  - `null` の場合は `single` と同じ扱いになります
+- 「reference_entities」フィールド
+  - データ型が`reference`の場合は、参照先のエンティティ名を1つだけ設定してください
+  - 複数のエンティティを参照する多態参照はサポートされていません
 
 ## 📚 参考資料
 

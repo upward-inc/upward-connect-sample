@@ -27,7 +27,6 @@ export async function seedSamples(
 	})
 
 	const accounts = await prisma.account.findMany()
-	const leads = await prisma.lead.findMany()
 
 	const getAnyOption = (itemName: string, name?: string) => {
 		const entityItem = entityItems.find((item) => item.name === itemName)
@@ -99,52 +98,6 @@ export async function seedSamples(
 			})
 		}
 
-		const getReferenceSingleTargetMultiId = () => {
-			if (getRandomBoolean(0.1)) {
-				return null
-			}
-			if (getRandomBoolean(0.1)) {
-				return "[]"
-			}
-			return JSON.stringify([
-				{ entity_name: "account", id: getAnyRow(accounts).id },
-				{ entity_name: "account", id: getAnyRow(accounts).id },
-			])
-		}
-
-		const getReferenceMultiTargetSingleId = () => {
-			if (getRandomBoolean(0.1)) {
-				return null
-			}
-			if (getRandomBoolean(0.5)) {
-				return JSON.stringify({
-					entity_name: "account",
-					id: getAnyRow(accounts).id,
-				})
-			}
-			return JSON.stringify({ entity_name: "lead", id: getAnyRow(leads).id })
-		}
-
-		const getReferenceMultiTargetMultiId = () => {
-			if (getRandomBoolean(0.1)) {
-				return null
-			}
-			if (getRandomBoolean(0.1)) {
-				return "[]"
-			}
-			return JSON.stringify(
-				distinctBy(
-					[
-						{ entity_name: "account", id: getAnyRow(accounts).id },
-						{ entity_name: "account", id: getAnyRow(accounts).id },
-						{ entity_name: "lead", id: getAnyRow(leads).id },
-						{ entity_name: "lead", id: getAnyRow(leads).id },
-					],
-					({ entity_name, id }) => `${entity_name}:${id}`,
-				),
-			)
-		}
-
 		return {
 			name: `Sample ${code}`,
 			text: getRandomBoolean(0.9) ? "text" : null,
@@ -184,9 +137,6 @@ export async function seedSamples(
 			option_single: getOptionSingle(),
 			option_multi: getOptionMulti(),
 			reference_single_target_single_id: getReferenceSingleTargetSingleId(),
-			reference_single_target_multi_id: getReferenceSingleTargetMultiId(),
-			reference_multi_target_single_id: getReferenceMultiTargetSingleId(),
-			reference_multi_target_multi_id: getReferenceMultiTargetMultiId(),
 			owner: userRecordReference,
 			created_by: userRecordReference,
 			modified_by: userRecordReference,

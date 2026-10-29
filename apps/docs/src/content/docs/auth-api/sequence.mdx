@@ -31,7 +31,7 @@ sequenceDiagram
 	Note over User,IdP: 認可コード取得
 
 	UA->>UA: PKCEパラメータ生成<br/>（code_verifier, code_challenge）
-	UA->>IdP: 認可エンドポイント（`/oauth2/authorize`）へリダイレクト<br/>（w/ response_type=code, client_id, redirect_uri,<br/>scope=openid profile email offline_acces, state, nonce,<br/>code_challenge, code_challenge_method=S256）
+	UA->>IdP: 認可エンドポイント（`/oauth2/authorize`）へリダイレクト<br/>（w/ response_type=code, client_id, redirect_uri,<br/>scope=openid profile email offline_access, state, nonce,<br/>code_challenge, code_challenge_method=S256）
 
 	opt 貴社システムに未ログインの場合
 		loop ログイン処理

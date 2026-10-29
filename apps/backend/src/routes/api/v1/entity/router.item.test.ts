@@ -325,6 +325,32 @@ describe("エンティティ項目の取得", () => {
 				findField(data, "reference_single_target_single_id"),
 			)
 		})
+
+		it("すべてのエンティティの参照項目は、参照先のエンティティが1つで、サブデータ型がmultiでないこと", async () => {
+			// Arrange
+			const entitiesResponse = await app.request("/api/v1/entities", {
+				method: "GET",
+				headers: { Authorization: `Bearer ${testExecutionUser.access_token}` },
+			})
+			const entities: { name: string }[] = await entitiesResponse.json()
+			expect(entities.length).toBeGreaterThan(0)
+
+			for (const { name: entityName } of entities) {
+				// Act
+				const response = await requestGetEntityItemList(entityName)
+
+				// Assert
+				expect(response.status, entityName).toBe(200)
+				const data: { name: string; type: string; sub_type: string | null }[] =
+					await response.json()
+				const referenceItems = data.filter((item) => item.type === "reference")
+				for (const item of referenceItems) {
+					const label = `${entityName}.${item.name}`
+					expect(item, label).toHaveProperty("reference_entities.length", 1)
+					expect(item.sub_type, label).not.toBe("multi")
+				}
+			}
+		})
 	})
 
 	describe("GET /api/v1/entities/{entity_name}/items/{name} - 単一エンティティ項目の取得", () => {
@@ -391,6 +417,35 @@ describe("エンティティ項目の取得", () => {
 				const data = await response.json()
 				validationFn(data)
 			})
+		})
+
+		describe("参照項目の参照先が1つのエンティティであること", () => {
+			it.each([
+				{ entityName: "activity", itemName: "target", expected: ["account"] },
+				{
+					entityName: "activity",
+					itemName: "required_attendees",
+					expected: ["user"],
+				},
+				{
+					entityName: "activity",
+					itemName: "optional_attendees",
+					expected: ["user"],
+				},
+				{ entityName: "activity", itemName: "organizer", expected: ["user"] },
+				{ entityName: "phone_call", itemName: "their", expected: ["contact"] },
+			])(
+				"$entityName の $itemName",
+				async ({ entityName, itemName, expected }) => {
+					// Act
+					const response = await requestGetEntityItem(entityName, itemName)
+
+					// Assert
+					expect(response.status).toBe(200)
+					const data = await response.json()
+					expect(data.reference_entities).toStrictEqual(expected)
+				},
+			)
 		})
 	})
 })

@@ -58,7 +58,7 @@ import ResponseBodyTableRow from '../../../../components/ResponseBodyTableRow.as
     UPWARDが標準的に扱うエンティティに該当する場合、その種別を設定する
     該当しない場合は、`null`を設定する
   </ResponseBodyTableRow>
-  <ResponseBodyTableRow name="display_name" type="文字列" required={true} example="取引先名">
+  <ResponseBodyTableRow name="display_name" type="文字列" required={true} example="取引先">
     エンティティの表示名
   </ResponseBodyTableRow>
   <ResponseBodyTableRow name="record_url_format" type={`<a href="#record_url_formatオブジェクト">record_url_formatオブジェクト</a>`} required={false} example='{ "app": "sampleapp://record_detail?entity=account&id={id}", "browser": "https://example.com/record_detail?entity=account&id={id}" }'>

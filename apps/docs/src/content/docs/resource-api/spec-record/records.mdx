@@ -52,7 +52,7 @@ import List from '../../../../components/List.astro'
   <ParameterTableRow name="offset" type="整数値" required={false} example="0">
     取得開始位置（スキップするレコード数）
   </ParameterTableRow>
-  <ParameterTableRow name="location" type={`<a href="#locationオブジェクト">locationオブジェクト</a>の配列`} required={false} example='{ "point": { "latitude": 35.6795964, "longitude": 139.7460797 }, "radius": 10000 }'>
+  <ParameterTableRow name="location" type={`<a href="#locationオブジェクト">locationオブジェクト</a>`} required={false} example='{ "point": { "latitude": 35.6795964, "longitude": 139.7460797 }, "radius": 10000 }'>
     ロケーション検索専用オブジェクト
   </ParameterTableRow>
 </ParameterTable>
@@ -109,7 +109,14 @@ import List from '../../../../components/List.astro'
       "データ型が<code>text</code>の項目におけるオブジェクト要素の形式: 文字列 or null",
       "データ型が<code>numeric</code>の項目におけるオブジェクト要素の形式: 数値 or null",
       "データ型が<code>boolean</code>の項目におけるオブジェクト要素の形式: 真偽値 or null",
-      "データ型が<code>date</code>の項目におけるオブジェクト要素の形式: 文字列（ISO8601の日時フォーマット） or null",
+      {
+        text: "データ型が<code>date</code>の項目におけるオブジェクト要素の形式",
+        children: [
+          "サブデータ型が<code>date</code>の場合 : ISO8601日付形式の文字列（<code>YYYY-MM-DD</code>） or null",
+          "サブデータ型が<code>time</code>の場合 : ISO8601時刻形式の文字列（<code>HH:MM[:SS[.s+]]</code>） or null",
+          "サブデータ型が<code>datetime</code>の場合 : ISO8601日時形式の文字列（<code>YYYY-MM-DDTHH:MM[:SS[.s+]]Z</code>） or null",
+        ],
+      },
       {
         text: "データ型が<code>option</code>の項目におけるオブジェクト要素の形式",
         children: [
@@ -117,13 +124,7 @@ import List from '../../../../components/List.astro'
           "サブデータ型が<code>multi</code>の場合 : 文字列の配列",
         ],
       },
-      {
-        text: "データ型が<code>reference</code>の項目におけるオブジェクト要素の形式",
-        children: [
-          'サブデータ型が<code>single</code>の場合 : <a href="#レコード参照オブジェクト">レコード参照オブジェクト</a> or null',
-          'サブデータ型が<code>multi</code>の場合 : <a href="#レコード参照オブジェクト">レコード参照オブジェクト</a>の配列',
-        ],
-      },
+      'データ型が<code>reference</code>の項目におけるオブジェクト要素の形式: <a href="#レコード参照オブジェクト">レコード参照オブジェクト</a> or null',
     ]} />
   </ResponseBodyTableRow>
 </ResponseBodyTable>
