@@ -41,16 +41,16 @@ filter={ "and": [ { "field": "industry", "operator": "eq", "value": "public_admi
 
 「operator」は比較演算子を表すプロパティであり、検索対象フィールドの値の形式（≒ エンティティ項目データ型）ごとにサポートの必要性が異なります：
 
-| 比較演算子 | 演算子の意味 | <span className="text-green-600">文字列形式</span>のフィールドに対してサポートが必要 | <span className="text-green-600">数値形式</span>のフィールドに対してサポートが必要 | <span className="text-green-600">真偽値形式</span>のフィールドに対してサポートが必要 | <span className="text-green-600">日付や日時形式</span>のフィールドに対してサポートが必要 | <span className="text-green-600">オプション形式（単一選択）</span>のフィールドに対してサポートが必要 | <span className="text-green-600">オプション形式（複数選択）</span>のフィールドに対してサポートが必要 | <span className="text-green-600">他レコード参照形式（単一選択）</span>のフィールドに対してサポートが必要 | <span className="text-green-600">他レコード参照形式（複数選択）</span>のフィールドに対してサポートが必要 |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| `eq` (equal) | 指定した値と一致する | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| `like` | 曖昧検索 | ✅ | - | - | - | - | - | - | - |
-| `gt` (greater than) | 指定した値より大きい | ✅ | ✅ | - | ✅ | - | - | - | - |
-| `gte` (greater than equal) | 指定した値以上 | ✅ | ✅ | - | ✅ | - | - | - | - |
-| `lt` (less than) | 指定した値より小さい | ✅ | ✅ | - | ✅ | - | - | - | - |
-| `lte` (less than equal) | 指定した値以下 | ✅ | ✅ | - | ✅ | - | - | - | - |
-| `includes` | 指定した値を含む | - | - | - | - | - | ✅ | - | ✅ |
-| `is_set` | 値が設定されている | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| 比較演算子 | 演算子の意味 | <span className="text-green-600">文字列形式</span>のフィールドに対してサポートが必要 | <span className="text-green-600">数値形式</span>のフィールドに対してサポートが必要 | <span className="text-green-600">真偽値形式</span>のフィールドに対してサポートが必要 | <span className="text-green-600">日付や日時形式</span>のフィールドに対してサポートが必要 | <span className="text-green-600">オプション形式（単一選択）</span>のフィールドに対してサポートが必要 | <span className="text-green-600">オプション形式（複数選択）</span>のフィールドに対してサポートが必要 | <span className="text-green-600">他レコード参照形式</span>のフィールドに対してサポートが必要 |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| `eq` (equal) | 指定した値と一致する | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| `like` | 曖昧検索 | ✅ | - | - | - | - | - | - |
+| `gt` (greater than) | 指定した値より大きい | ✅ | ✅ | - | ✅ | - | - | - |
+| `gte` (greater than equal) | 指定した値以上 | ✅ | ✅ | - | ✅ | - | - | - |
+| `lt` (less than) | 指定した値より小さい | ✅ | ✅ | - | ✅ | - | - | - |
+| `lte` (less than equal) | 指定した値以下 | ✅ | ✅ | - | ✅ | - | - | - |
+| `includes` | 指定した値を含む | - | - | - | - | - | ✅ | - |
+| `is_set` | 値が設定されている | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
 
 「operator」が`is_set` の場合は、下記「value」プロパティは渡されません。
 
@@ -82,7 +82,7 @@ filter={ "and": [ { "field": "industry", "operator": "eq", "value": "public_admi
 // 例3: 項目`item-c`（option - 複数選択）の値が`option1`を含む
 { "field": "item-c", "operator": "includes", "value": "option1" }
 
-// 例4: 項目`item-d`（他レコード参照形式 - 単一選択）の値がレコード`account-00000001`（`account`エンティティ）と一致する
+// 例4: 項目`item-d`（他レコード参照形式）の値がレコード`account-00000001`（`account`エンティティ）と一致する
 { "field": "item-d", "operator": "eq", "value": { "entity_name": "account", "id": "account-00000001" } }
 
 // 例5: 項目`item-e`の値が設定されている
@@ -101,7 +101,7 @@ filter={ "and": [ { "field": "industry", "operator": "eq", "value": "public_admi
 // 例3: 項目`item-c`（option - 複数選択）の値が`option1`を含まない
 { "field": "item-c", "operator": "includes", "value": "option1", "is_not": true }
 
-// 例4: 項目`item-d`（他レコード参照形式 - 単一選択）の値がレコード`account-00000001`（`account`エンティティ）と一致しない
+// 例4: 項目`item-d`（他レコード参照形式）の値がレコード`account-00000001`（`account`エンティティ）と一致しない
 { "field": "item-d", "operator": "eq", "value": { "entity_name": "account", "id": "account-00000001" }, "is_not": true }
 
 // 例5: 項目`item-e`の値が設定されていない

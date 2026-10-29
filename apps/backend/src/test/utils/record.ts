@@ -56,18 +56,12 @@ export interface SampleData
 		Prisma.sampleCreateInput,
 		| "option_multi"
 		| "reference_single_target_single_id"
-		| "reference_single_target_multi_id"
-		| "reference_multi_target_single_id"
-		| "reference_multi_target_multi_id"
 		| "owner"
 		| "created_by"
 		| "modified_by"
 	> {
 	option_multi?: string[] | null
 	reference_single_target_single_id?: RecordReference | null
-	reference_single_target_multi_id?: RecordReference[] | null
-	reference_multi_target_single_id?: RecordReference | null
-	reference_multi_target_multi_id?: RecordReference[] | null
 	latitude?: number | null
 	longitude?: number | null
 	owner?: RecordReference
@@ -379,15 +373,6 @@ function toSampleCreateInput(
 		option_multi: data.option_multi ? JSON.stringify(data.option_multi) : null,
 		reference_single_target_single_id: data.reference_single_target_single_id
 			? JSON.stringify(data.reference_single_target_single_id)
-			: null,
-		reference_single_target_multi_id: data.reference_single_target_multi_id
-			? JSON.stringify(data.reference_single_target_multi_id)
-			: null,
-		reference_multi_target_single_id: data.reference_multi_target_single_id
-			? JSON.stringify(data.reference_multi_target_single_id)
-			: null,
-		reference_multi_target_multi_id: data.reference_multi_target_multi_id
-			? JSON.stringify(data.reference_multi_target_multi_id)
 			: null,
 		owner: data.owner ? JSON.stringify(data.owner) : userReference,
 		created_by: data.created_by

@@ -91,12 +91,6 @@ export const updateRecord = async (
 					value: escapeStringValue(JSON.stringify(result.value)),
 				}
 			}
-			if (result.kind === "reference-input-array") {
-				return {
-					column: entityItem.name,
-					value: escapeStringValue(JSON.stringify(result.value)),
-				}
-			}
 			return assertNever(result)
 		})
 		.filter((v) => !!v)

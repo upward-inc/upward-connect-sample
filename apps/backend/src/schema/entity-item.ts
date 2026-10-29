@@ -176,9 +176,11 @@ export const EntityItemSchema = z
 		reference_entities: z
 			.array(z.string())
 			.min(1)
+			.max(1)
 			.meta({
-				description: "データ型が`reference`の場合の参照先のエンティティ名一覧",
-				example: [],
+				description:
+					"データ型が`reference`の場合の参照先のエンティティ名（配列で表すが、要素は1つのみ）。複数のエンティティを参照する多態参照はサポートされていない",
+				example: ["lead"],
 			})
 			.nullish(),
 		options: EntityItemOptionListSchema.meta({
@@ -193,7 +195,6 @@ export const EntityItemSchema = z
 				z.boolean(),
 				z.array(z.string()),
 				RecordReferenceInputSchema,
-				z.array(RecordReferenceInputSchema),
 			])
 			.meta({
 				description: "レコード作成時に画面表示されるデフォルト値",
