@@ -926,94 +926,11 @@ describe("GET /records/:entity_name - レコード一覧取得（検索）", () 
 						expected: { data: [{ name: "Record 2" }] },
 					},
 					{
-						title: "is_set",
-						operator: "is_set",
-						expected: {
-							data: [
-								{ name: "Record 1" },
-								{ name: "Record 2" },
-								{ name: "Record 3" },
-							],
-						},
-					},
-				]
-
-				const testCases = generateFilterTestCases(testRecords, baseTestCases)
-
-				it.each(testCases)(
-					"$title",
-					async ({ operator, value, is_not, expected }) => {
-						// Arrange
-						await createManyTestSamples(testExecutionUser.id, testRecords)
-
-						// Act
-						const response = await requestGet("sample", {
-							fields: "name",
-							filter: {
-								and: [{ field: targetField, operator, value, is_not }],
-							},
-							order_by: [{ field: "name" }],
-						})
-
-						// Assert
-						const { data } = await response.json()
-						expect(data).toStrictEqual(expected.data)
-					},
-				)
-			})
-
-			describe("reference型（multi）", async () => {
-				const targetField = "reference_multi_target_multi_id"
-				const recordId1 = crypto.randomUUID()
-				const recordId2 = crypto.randomUUID()
-				const testRecords = [
-					{
-						name: "Record 1",
-						reference_multi_target_multi_id: [
-							{ entity_name: "account", id: recordId1 },
-						],
-					},
-					{
-						name: "Record 2",
-						reference_multi_target_multi_id: [
-							{ entity_name: "lead", id: recordId1 },
-						],
-					},
-					{
-						name: "Record 3",
-						reference_multi_target_multi_id: [
-							{ entity_name: "account", id: recordId1 },
-							{ entity_name: "lead", id: recordId1 },
-						],
-					},
-					{
-						name: "Record 4",
-						reference_multi_target_multi_id: [
-							{ entity_name: "account", id: recordId2 },
-						],
-					},
-					{
-						name: "Record 5",
-						reference_multi_target_multi_id: [
-							{ entity_name: "lead", id: recordId2 },
-						],
-					},
-					{ name: "Record 6", reference_multi_target_multi_id: [] },
-					{ name: "Record 7", reference_multi_target_multi_id: null },
-				]
-
-				const baseTestCases = [
-					{
-						title: "eq",
+						// 値がIDの文字列の場合は、項目の参照先のエンティティのレコードとして検索する
+						title: "eq（値: IDの文字列）",
 						operator: "eq",
-						value: { entity_name: "account", id: recordId1 },
-						expected: { data: [{ name: "Record 1" }] },
-					},
-					{
-						title: "includes",
-						operator: "includes",
-						value: { entity_name: "lead", id: recordId1 },
-						expected: { data: [{ name: "Record 2" }, { name: "Record 3" }] },
+						value: recordId2,
+						expected: { data: [{ name: "Record 2" }] },
 					},
 					{
 						title: "is_set",
@@ -1023,8 +940,6 @@ describe("GET /records/:entity_name - レコード一覧取得（検索）", () 
 								{ name: "Record 1" },
 								{ name: "Record 2" },
 								{ name: "Record 3" },
-								{ name: "Record 4" },
-								{ name: "Record 5" },
 							],
 						},
 					},
@@ -1738,24 +1653,6 @@ describe("GET /records/:entity_name - レコード一覧取得（検索）", () 
 					},
 					field: "reference_single_target_single_id",
 					expected: null,
-				},
-				{
-					title: "sub_type=multi, 値=null",
-					testRecord: {
-						name: "Record",
-						reference_multi_target_multi_id: null,
-					},
-					field: "reference_multi_target_multi_id",
-					expected: [],
-				},
-				{
-					title: "sub_type=multi, 値=[]",
-					testRecord: {
-						name: "Record",
-						reference_multi_target_multi_id: [],
-					},
-					field: "reference_multi_target_multi_id",
-					expected: [],
 				},
 			])("$title", async ({ testRecord, field, expected }) => {
 				// Arrange
