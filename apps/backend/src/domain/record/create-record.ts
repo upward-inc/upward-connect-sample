@@ -80,9 +80,6 @@ export const createRecord = async (
 			if (result.kind === "reference-input") {
 				return escapeStringValue(JSON.stringify(result.value))
 			}
-			if (result.kind === "reference-input-array") {
-				return escapeStringValue(JSON.stringify(result.value))
-			}
 			return assertNever(result)
 		})
 		.join(", ")

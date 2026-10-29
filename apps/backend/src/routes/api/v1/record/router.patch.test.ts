@@ -1,9 +1,10 @@
-import { afterAll, beforeAll, describe, expect, it } from "vitest"
+import { afterAll, afterEach, beforeAll, describe, expect, it } from "vitest"
 import { app } from "../../../../index"
 import { testPrisma } from "../../../../test/setup"
 import {
 	cleanupEntityMetadata,
 	setupEntityMetadata,
+	updateEntityItemSubType,
 } from "../../../../test/utils/entity"
 import {
 	createTestExecutionUser,
@@ -165,12 +166,6 @@ describe("PATCH /records/:entity_name/:id - レコード更新", () => {
 			option_single: "option2",
 			option_multi: ["option2", "option3"],
 			reference_single_target_single_id: accountRecordReference,
-			reference_single_target_multi_id: [accountRecordReference],
-			reference_multi_target_single_id: accountRecordReference,
-			reference_multi_target_multi_id: [
-				accountRecordReference,
-				leadRecordReference,
-			],
 			address_zipcode: "1000001",
 			address_prefecture: "東京都",
 			address_municipality: "千代田区",
@@ -202,15 +197,6 @@ describe("PATCH /records/:entity_name/:id - レコード更新", () => {
 		expect(record?.option_multi).toBe(JSON.stringify(["option2", "option3"]))
 		expect(record?.reference_single_target_single_id).toBe(
 			JSON.stringify(accountRecordReference),
-		)
-		expect(record?.reference_single_target_multi_id).toBe(
-			JSON.stringify([accountRecordReference]),
-		)
-		expect(record?.reference_multi_target_single_id).toBe(
-			JSON.stringify(accountRecordReference),
-		)
-		expect(record?.reference_multi_target_multi_id).toBe(
-			JSON.stringify([accountRecordReference, leadRecordReference]),
 		)
 		expect(record?.address_zipcode).toBe("1000001")
 		expect(record?.address_prefecture).toBe("東京都")
@@ -258,6 +244,62 @@ describe("PATCH /records/:entity_name/:id - レコード更新", () => {
 		expect(record?.text).toBe("Updated Text Only") // 変更された
 		expect(record?.integer?.toNumber()).toBe(100) // 変更されていない
 		expect(record?.boolean).toBe(true) // 変更されていない
+	})
+
+	describe("参照項目のサブデータ型", () => {
+		const updateReferenceItemSubType = (subType: string | null) =>
+			updateEntityItemSubType(
+				"sample",
+				"reference_single_target_single_id",
+				subType,
+			)
+
+		afterEach(async () => {
+			await updateReferenceItemSubType("single")
+		})
+
+		it("サブデータ型がnullの場合、singleと同じく単一の参照値でレコードを更新できること", async () => {
+			// Arrange
+			await updateReferenceItemSubType(null)
+			const sample = await createTestSample(testExecutionUser.id, {
+				name: "Test Sample",
+			})
+
+			// Act
+			const response = await requestPatch("sample", sample.id, {
+				reference_single_target_single_id: accountRecordReference,
+			})
+
+			// Assert
+			expect(response.status).toBe(200)
+			const record = await testPrisma.sample.findUnique({
+				where: { id: sample.id },
+			})
+			expect(record?.reference_single_target_single_id).toBe(
+				JSON.stringify(accountRecordReference),
+			)
+		})
+
+		it("サブデータ型がmultiの場合、400エラーを返すこと", async () => {
+			// Arrange
+			await updateReferenceItemSubType("multi")
+			const sample = await createTestSample(testExecutionUser.id, {
+				name: "Test Sample",
+			})
+
+			// Act
+			const response = await requestPatch("sample", sample.id, {
+				reference_single_target_single_id: [accountRecordReference],
+			})
+
+			// Assert
+			const json = await response.json()
+			expect(response.status).toBe(400)
+			expect(json).toHaveProperty(
+				"message",
+				"Invalid sub_type for reference field",
+			)
+		})
 	})
 
 	it("更新時に指定不可能な項目（is_updatable: false）を無視すること", async () => {
@@ -652,75 +694,69 @@ describe("PATCH /records/:entity_name/:id - レコード更新", () => {
 			})
 		})
 
-		describe("無効な参照先", () => {
-			it.each([
-				{
-					title: "単一参照先",
-					field: "reference_single_target_single_id", // 参照先: account
-					getValue: (reference: RecordReference) => reference,
-				},
-				{
-					title: "複数参照先",
-					field: "reference_single_target_multi_id", // 参照先: account
-					getValue: (reference: RecordReference) => [
-						accountRecordReference,
-						reference,
-					],
-				},
-			])("$title", async ({ field, getValue }) => {
-				// Arrange
-				const sample = await createTestSample(testExecutionUser.id, {
-					name: "Test Sample",
-				})
-				const invalidReference = leadRecordReference
-
-				// Act
-				const response = await requestPatch("sample", sample.id, {
-					[field]: getValue(invalidReference),
-				})
-
-				// Assert
-				const json = await response.json()
-				expect(response.status).toBe(400)
-				expect(json).toHaveProperty("message")
+		it("無効な参照先", async () => {
+			// Arrange
+			const sample = await createTestSample(testExecutionUser.id, {
+				name: "Test Sample",
 			})
+			const invalidReference = leadRecordReference
+
+			// Act
+			const response = await requestPatch("sample", sample.id, {
+				reference_single_target_single_id: invalidReference, // 参照先: account
+			})
+
+			// Assert
+			const json = await response.json()
+			expect(response.status).toBe(400)
+			expect(json).toHaveProperty(
+				"message",
+				"Field 'reference_single_target_single_id' must reference the 'account' entity",
+			)
 		})
 
-		describe("存在しない参照先", () => {
-			it.each([
-				{
-					title: "単一参照先",
-					field: "reference_single_target_single_id", // 参照先: account
-					getValue: (reference: RecordReference) => reference,
-				},
-				{
-					title: "複数参照先",
-					field: "reference_single_target_multi_id", // 参照先: account
-					getValue: (reference: RecordReference) => [
-						accountRecordReference,
-						reference,
-					],
-				},
-			])("$title", async ({ field, getValue }) => {
-				// Arrange
-				const sample = await createTestSample(testExecutionUser.id, {
-					name: "Test Sample",
-				})
-				const nonExistentReference = {
-					entity_name: "account",
-					id: crypto.randomUUID(),
-				}
-
-				// Act
-				const response = await requestPatch("sample", sample.id, {
-					[field]: getValue(nonExistentReference),
-				})
-
-				// Assert
-				const json = await response.json()
-				expect(response.status).toBe(400)
-				expect(json).toHaveProperty("message")
+		it("複数のレコード参照", async () => {
+			// Arrange
+			const sample = await createTestSample(testExecutionUser.id, {
+				name: "Test Sample",
 			})
+
+			// Act
+			const response = await requestPatch("sample", sample.id, {
+				reference_single_target_single_id: [
+					accountRecordReference,
+					accountRecordReference,
+				],
+			})
+
+			// Assert
+			const json = await response.json()
+			expect(response.status).toBe(400)
+			expect(json).toHaveProperty(
+				"message",
+				"Field 'reference_single_target_single_id' must be a record reference input or an array containing a single record reference input",
+			)
+		})
+
+		it("存在しない参照先", async () => {
+			// Arrange
+			const sample = await createTestSample(testExecutionUser.id, {
+				name: "Test Sample",
+			})
+			const nonExistentReference = {
+				entity_name: "account",
+				id: crypto.randomUUID(),
+			}
+
+			// Act
+			const response = await requestPatch("sample", sample.id, {
+				reference_single_target_single_id: nonExistentReference, // 参照先: account
+			})
+
+			// Assert
+			const json = await response.json()
+			expect(response.status).toBe(400)
+			expect(json).toHaveProperty("message")
 		})
 	})
 })
