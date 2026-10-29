@@ -25,7 +25,6 @@ export async function seedActivities(
 	})
 
 	const accounts = await prisma.account.findMany()
-	const leads = await prisma.lead.findMany()
 	const contacts = await prisma.contact.findMany({
 		where: {
 			account: {
@@ -47,20 +46,11 @@ export async function seedActivities(
 	}
 	const getAnyTargetAndContact = () => {
 		if (getRandomBoolean(0.9)) {
-			if (getRandomBoolean(0.5)) {
-				const account = getAnyRow(accounts)
-				const contactId = getAnyRow(
-					accountIdToContactIdMap.get(account.id) || [],
-				)
-				return {
-					target: { entity_name: "account", id: account.id },
-					contact: contactId ? { entity_name: "contact", id: contactId } : null,
-				}
-			}
-			const lead = getAnyRow(leads)
+			const account = getAnyRow(accounts)
+			const contactId = getAnyRow(accountIdToContactIdMap.get(account.id) ?? [])
 			return {
-				target: { entity_name: "lead", id: lead.id },
-				contact: null,
+				target: { entity_name: "account", id: account.id },
+				contact: contactId ? { entity_name: "contact", id: contactId } : null,
 			}
 		}
 		return { target: null, contact: null }
@@ -144,9 +134,10 @@ async function findLatLng(
 	prisma: Prisma.TransactionClient,
 	target: { entity_name: string; id: string },
 ) {
-	if (["account", "lead"].includes(target.entity_name)) {
+	// 活動先の参照先は取引先のみ
+	if (target.entity_name === "account") {
 		const query = `SELECT [location].[Lat] as latitude, [location].[Long] as longitude
-			FROM [${target.entity_name}]
+			FROM [account]
 			WHERE [id] = '${target.id}'`
 
 		const result =

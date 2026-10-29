@@ -133,9 +133,7 @@ export const OptionFieldComparisonSchema = z
 export const ReferenceFieldStringComparisonSchema = z
 	.object({
 		field: FieldSchema,
-		operator: z
-			.union([EqualOperatorSchema, IncludesOperatorSchema])
-			.meta({ description: "演算子" }),
+		operator: EqualOperatorSchema.meta({ description: "演算子" }),
 		value: z
 			.string()
 			.meta({ description: "検索値", example: "account-00000001" }),
@@ -151,9 +149,7 @@ export const ReferenceFieldStringComparisonSchema = z
 export const ReferenceFieldObjectComparisonSchema = z
 	.object({
 		field: FieldSchema,
-		operator: z
-			.union([EqualOperatorSchema, IncludesOperatorSchema])
-			.meta({ description: "演算子" }),
+		operator: EqualOperatorSchema.meta({ description: "演算子" }),
 		value: RecordReferenceValueSchema.meta({
 			description: "検索値",
 			example: { entity_name: "account", id: "account-00000001" },
