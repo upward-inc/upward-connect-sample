@@ -143,9 +143,11 @@ UPWARDは、認可リクエストの`scope`に既定で`openid profile email off
 
 ### 追加スコープの送信方法
 
+- 追加スコープは1つの組織に複数設定できます
 - UPWARDは、既定の4つのスコープに追加スコープをスペース区切りで加えて送信します
-  - 例: 追加スコープに`example_scope`を設定した場合は`scope=openid profile email offline_access example_scope`
+  - 例: 追加スコープに`example_scope1`と`example_scope2`を設定した場合は`scope=openid profile email offline_access example_scope1 example_scope2`
 - 追加スコープを設定しても、既定の4つのスコープは常に送信します
+- 既定の4つのスコープと同じ値を追加スコープに指定しても、重複して送信しません
 - 追加スコープには、[RFC 6749 3.3](https://datatracker.ietf.org/doc/html/rfc6749#section-3.3)（[日本語](https://openid-foundation-japan.github.io/rfc6749.ja.html#scope)）で定められたscope-tokenとして使える文字列のみ指定できます
 
 ### 貴社で行うこと
