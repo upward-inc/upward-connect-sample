@@ -56,7 +56,7 @@ OIDC 1.0で定められた OpenID プロバイダーに関する情報を返却�
   <ResponseBodyTableRow name="jwks_uri" type="文字列" required={true} example="https://auth.example.com/oauth2/jwks">
     公開鍵群が公開されているURL
   </ResponseBodyTableRow>
-  <ResponseBodyTableRow name="scopes_supported" type={`<code>["openid", "profile", "email", "offline_access"]</code>（固定値）`} required={true} example='["openid", "profile", "email", "offline_access"]'>
+  <ResponseBodyTableRow name="scopes_supported" type={`文字列の配列（<code>"openid"</code>, <code>"profile"</code>, <code>"email"</code>, <code>"offline_access"</code>を必ず含む）`} required={true} example='["openid", "profile", "email", "offline_access"]'>
     サポートするscope一覧
   </ResponseBodyTableRow>
   <ResponseBodyTableRow name="response_types_supported" type={`<code>["code"]</code>（固定値）`} required={true} example='["code"]'>
@@ -96,6 +96,7 @@ OIDC 1.0で定められた OpenID プロバイダーに関する情報を返却�
 ### その他（補足等）
 
 - OpenID Provider Metadataで列挙されたオプションのうち、[レスポンスボディ](#レスポンスボディ)に記載されてないフィールドについては、UPWARDから参照しないためサポートする必要はありません
+- [追加スコープ](/auth-api/guide#追加スコープ)を使う場合に、その値を`scopes_supported`に含めるかは任意です
 
 ## 📚 参考資料
 
