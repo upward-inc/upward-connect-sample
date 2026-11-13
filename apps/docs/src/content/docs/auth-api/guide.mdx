@@ -50,10 +50,11 @@ Web API実装以外の実装内容として、以下のUIが別途必要とな�
   | クライアント名 | 文字列 | `UPWARD` |
   | クライアントシークレット | 文字列 | 十分にランダムで推測不可能な任意の文字列<br/><br/>推奨値：<ul><li>文字種: 英数字と記号</li><li>文字列長: 64文字以上</li><li>生成方法: 暗号学的に安全な乱数生成器を使用</li></ul> |
   | リダイレクトURI一覧 | 文字列の配列 | <ul><li>`https://app.upward.jp/callback/`</li><li>`https://mobile.upward.jp/callback/`</li><li>`msauth.jp.upward.agent://auth`<ul><li>認証プロバイダにMicrosoft Entraを使用する場合のみ指定</li><li>この値はバンドルIDに`jp.upward.agent`を指定することで自動で生成されます</li></ul></li></ul> |
-  | スコープ一覧 | 文字列の配列 | <ul><li>`openid`</li><li>`profile`</li><li>`email`</li><li>`offline_access`</li></ul> |
+  | スコープ一覧 | 文字列の配列 | <ul><li>`openid`</li><li>`profile`</li><li>`email`</li><li>`offline_access`</li></ul>[追加スコープ](#追加スコープ)を使う場合は、その値も登録します |
   | アプリのロゴ | 画像（任意） | UPWARDロゴ（[png](/upward.png), [svg](/upward.svg)）
   | プライバシーポリシーURL | 文字列（任意） | [`https://www.upward.jp/privacy`](https://www.upward.jp/privacy)|
 - 登録したデータのうち、「クライアントID」「クライアントシークレット」をUPWARDに情報提供して頂く必要があります
+  - [追加スコープ](#追加スコープ)を使う場合は、その値も情報提供して頂く必要があります
 
 ## 具体的な実装内容
 
@@ -113,6 +114,7 @@ Web API実装以外の実装内容として、以下のUIが別途必要とな�
   - `profile`: プロフィール情報
   - `email`: メールアドレス
   - `offline_access`: リフレッシュトークン発行
+  - [追加スコープ](#追加スコープ)を使う場合は、そのスコープの説明
 - アクセス許可ボタン
 - アクセス拒否ボタン
 
@@ -125,3 +127,35 @@ Web API実装以外の実装内容として、以下のUIが別途必要とな�
 ### トークン失効エンドポイント: 任意
 
 必要に応じて、ログアウト時等に有効期限を迎えていないアクセストークンを失効させる機能を実装してください。
+
+## 追加スコープ
+
+UPWARDは認可リクエストの`scope`に既定で`openid profile email offline_access`の4つを送信します。
+
+貴社のIdP製品の制約により、既定のスコープだけではUPWARDが必要とするクレームを返せない場合に限り、既定のスコープに加えて任意のスコープ（以下、追加スコープ）を送信するようUPWARD側で設定できます。
+追加スコープは組織ごとにUPWARD側での設定が必要になるため、既定のスコープで対応する方法を優先してください。
+
+追加スコープを使わない場合、本節の対応は不要です。
+
+### 追加スコープを使う場面
+
+- IdP製品の仕様上、UserInfoの`user_id` / `user_name`を既定のスコープでは返せず、別のスコープで要求されたときにしか返せない場合（[OIDC 1.0ユーザー情報の取得](/auth-api/spec/userinfo#その他補足等)を参照）
+
+### 追加スコープの設定と送信
+
+- 追加スコープは1つの組織に複数設定できます
+- UPWARDは既定の4つのスコープに追加スコープをスペース区切りで加えて送信します
+  - 例: 追加スコープに`example_scope1`と`example_scope2`を設定した場合は`scope=openid profile email offline_access example_scope1 example_scope2`
+- 追加スコープを設定しても、既定の4つのスコープは常に送信します
+- 既定の4つのスコープと同じ値を追加スコープに指定しても、重複して送信しません
+- 追加スコープには[RFC 6749 3.3](https://datatracker.ietf.org/doc/html/rfc6749#section-3.3)（[日本語](https://openid-foundation-japan.github.io/rfc6749.ja.html#scope)）で定められたscope-tokenとして使える文字列のみ指定できます
+
+### 貴社で行うこと
+
+追加スコープを使う場合は、以下の対応が必要です：
+
+1. OAuthクライアントの「スコープ一覧」に追加スコープを登録する（[データ登録](#データ登録)を参照）
+2. 追加スコープの値をUPWARDに情報提供する
+3. 同意画面を実装する場合は、追加スコープの説明も表示する（[同意画面](#同意画面-任意)を参照）
+
+なお、[OIDC 1.0プロバイダーコンフィグレーションの取得](/auth-api/spec/openid-configuration#その他補足等)の`scopes_supported`に追加スコープを含めるかは任意です。
