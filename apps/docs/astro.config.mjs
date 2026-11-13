@@ -14,6 +14,9 @@ export default defineConfig({
 			plugins: [starlightLinksValidator(), starlightThemeNova()],
 			customCss: ["./src/styles/global.css", "./src/styles/custom.css"],
 			title: "UPWARD CONNECT構築ガイド",
+			locales: {
+				root: { label: "日本語", lang: "ja" },
+			},
 			social: [
 				{
 					icon: "github",
