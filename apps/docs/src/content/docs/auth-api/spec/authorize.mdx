@@ -39,7 +39,7 @@ OIDC 1.0で定められた認可処理を行う（認可コードを返却する
     認可コードが返却されるリダイレクションURL
   </ParameterTableRow>
   <ParameterTableRow name="scope" type={`<code>openid profile email offline_access</code>（既定値）`} required={true} example='openid profile email offline_access'>
-    クライアントが要求するアクセス範囲<br/><br/>UPWARD側で<a href="/auth-api/guide/#追加スコープ">追加スコープ</a>を設定した場合は、既定値に追加スコープをスペース区切りで加えた値
+    クライアントが要求するアクセス範囲<br/><br/>UPWARD側で<a href="/auth-api/guide#追加スコープ">追加スコープ</a>を設定した場合は、既定値に追加スコープをスペース区切りで加えた値
   </ParameterTableRow>
   <ParameterTableRow name="state" type="文字列" required={true} example='WVwJX4KDmLTs8piK'>
     CSRF攻撃防止のために使用するランダムな文字列

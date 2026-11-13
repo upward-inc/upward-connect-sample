@@ -105,7 +105,7 @@ OIDC 1.0で定められたユーザー情報（UserInfo）を返却する
   - user_id / user_nameは非標準クレームのため、OIDC 1.0の仕様ではどのスコープで返すかが定められていません
   - UPWARDは既定のスコープ（`openid profile email offline_access`）を常に送信するため、既定のスコープで要求されたときにuser_id / user_nameを返してください
     - 例: スコープに関係なく返す / `profile`スコープで要求されたときに返す
-  - IdP製品の制約により既定のスコープでは返せない場合に限り、UPWARD側の設定で[追加スコープ](/auth-api/guide#追加スコープ)を送信し、user_id / user_nameを要求できます
+  - IdP製品の制約により既定のスコープでは返せない場合に限り、UPWARD側で設定すれば、UPWARDが[追加スコープ](/auth-api/guide#追加スコープ)を送信してuser_id / user_nameを要求できます
     - 追加スコープは組織ごとにUPWARD側での設定が必要になるため、既定のスコープで返す方法を優先してください
 
 ## 📚 参考資料
