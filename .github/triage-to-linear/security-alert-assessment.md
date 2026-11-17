@@ -14,6 +14,7 @@
 
 ### 対処の候補
 
+方針の根拠は `docs/security/dependency-vulnerability-policy.md` の waiver と overrides の節にある。
 依存パッケージのアラート（`kind` が `dependency`）では、「対処の候補」の「リポジトリの方針に従った対処」を、次の順で検討する。
 
 1. ルートの `package.json` の `overrides` で修正版へ引き上げるか。下限は、上流が宣言する major の中で最も低い修正版にする。0.x のパッケージは、minor を跨ぐ上書きも major を跨ぐ場合と同じに扱う
