@@ -146,6 +146,10 @@ describe("GET /auth/clients/:id - OAuthクライアント情報取得エンド�
 
 		expect(data).toHaveProperty("id", testOAuthClient.id)
 		expect(data).toHaveProperty("name", testOAuthClient.name)
+		expect(data).toHaveProperty("scopes", ["openid", "profile", "email"])
+		expect(data).toHaveProperty("redirect_uris", [
+			"https://example.com/callback",
+		])
 	})
 
 	it("対象のOAuthクライアントが存在しない場合、404エラーを返すこと", async () => {
