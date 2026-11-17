@@ -22,8 +22,7 @@
 	},
 	"devDependencies": {
 		"@biomejs/biome": "^2.5.15",
-		"@types/bun": "latest",
-		"lefthook": "^2.1.12"
+		"@types/bun": "latest"
 	},
 	"workspaces": [
 		"apps/*"
