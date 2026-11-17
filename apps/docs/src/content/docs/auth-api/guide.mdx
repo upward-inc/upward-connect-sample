@@ -49,12 +49,24 @@ Web API実装以外の実装内容として、以下のUIが別途必要とな�
   | クライアントID | 文字列 | 任意の識別子（例: UUID） |
   | クライアント名 | 文字列 | `UPWARD` |
   | クライアントシークレット | 文字列 | 十分にランダムで推測不可能な任意の文字列<br/><br/>推奨値：<ul><li>文字種: 英数字と記号</li><li>文字列長: 64文字以上</li><li>生成方法: 暗号学的に安全な乱数生成器を使用</li></ul> |
-  | リダイレクトURI一覧 | 文字列の配列 | <ul><li>`https://app.upward.jp/callback/`</li><li>`https://mobile.upward.jp/callback/`</li><li>`msauth.jp.upward.agent://auth`<ul><li>認証プロバイダにMicrosoft Entraを使用する場合のみ指定</li><li>この値はバンドルIDに`jp.upward.agent`を指定することで自動で生成されます</li></ul></li></ul> |
-  | スコープ一覧 | 文字列の配列 | <ul><li>`openid`</li><li>`profile`</li><li>`email`</li><li>`offline_access`</li></ul>[追加スコープ](#追加スコープ)を使う場合は、その値も登録します |
+  | リダイレクトURI一覧 | 文字列の配列 | <ul><li>`https://app.upward.jp/callback/`</li><li>`https://mobile.upward.jp/callback/`</li><li>`msauth.jp.upward.agent://auth`<ul><li>認証プロバイダにMicrosoft Entraを使用する場合のみ指定</li><li>この値はバンドルIDに`jp.upward.agent`を指定すると自動で生成される</li></ul></li></ul> |
+  | スコープ一覧 | 文字列の配列 | <ul><li>`openid`</li><li>`profile`</li><li>`email`</li><li>`offline_access`</li><li>[追加スコープ](#追加スコープ)の値（使う場合のみ）</li></ul> |
   | アプリのロゴ | 画像（任意） | UPWARDロゴ（[png](/upward.png), [svg](/upward.svg)）
   | プライバシーポリシーURL | 文字列（任意） | [`https://www.upward.jp/privacy`](https://www.upward.jp/privacy)|
-- 登録したデータのうち、「クライアントID」「クライアントシークレット」をUPWARDに情報提供して頂く必要があります
-  - [追加スコープ](#追加スコープ)を使う場合は、その値も情報提供して頂く必要があります
+
+#### UPWARDへ提供する情報
+
+UPWARDでテナントを登録するため、以下の情報を提供していただく必要があります：
+
+| 項目 | 形式 | 内容 |
+| --- | --- | --- |
+| 組織コード | 文字列 | 貴社で決める、組織を識別するコード（例: `examplecorp`）<ul><li>UPWARDアプリへの初回ログイン時に利用者が入力</li><li>UPWARDを利用する全企業の中で一意な、貴社の組織と判別できる値</li><li>255文字以内。半角英数字（小文字）を推奨</li><li>運用開始後の変更にはUPWARDでの対応が必要</li></ul> |
+| クライアントID | 文字列 | 上記のOAuthクライアント情報に登録したクライアントID |
+| クライアントシークレット | 文字列 | 上記のOAuthクライアント情報に登録したクライアントシークレット |
+| 認証・認可APIのベースURL | URL | [OIDC 1.0プロバイダーコンフィグレーションの取得](/auth-api/spec/openid-configuration)で`{auth_api_url}`と表記しているURL（例: `https://auth.example.com`） |
+| リソースAPIのベースURL | URL | [エンティティ一覧の取得](/resource-api/spec-metadata/entities)などのリソースAPIの仕様で`{resource_api_url}`と表記しているURL（例: `https://api.example.com`） |
+
+[追加スコープ](#追加スコープ)を使う場合は、その値も情報提供していただく必要があります。
 
 ## 具体的な実装内容
 
