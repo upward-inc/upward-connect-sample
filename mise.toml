@@ -1,0 +1,28 @@
+# mise.lock は lockfile format v4 で書かれ、2026.11.1 より古い mise は読めない。
+min_version = "2026.11.1"
+
+[settings]
+# 導入物のハッシュを mise.lock に記録し、mise install で検証する。
+lockfile = true
+
+# CI でも使うツールの版は CI と揃える。
+# CI はまだ mise を使わず各ワークフローで版を指定しているため、版を上げるときはコメントに挙げたファイルも書き換えること。
+#
+# 次のツールは mise で管理しない。
+# - Docker / Azure CLI: CI では action が用意し、ローカルで版を揃える必要がない
+# - Biome: package.json の devDependencies で管理している
+[tools]
+# .github/workflows/call_*.yml の setup-bun と apps/backend/Dockerfile のベースイメージ
+bun = "1.4.4"
+# pre-commit の lefthook から呼ぶ。.github/workflows/gitleaks.yml の GITLEAKS_VERSION
+gitleaks = "8.30.1"
+# Git フックの実行にだけ使い、CI では使わない
+lefthook = "2.2.0"
+# .github/workflows/pinact.yml の pinact-action が同梱する aqua の設定（aqua/imports/pinact.yaml）
+pinact = "4.0.0"
+# .github/workflows/lint-workflows.yml の GHALINT_VERSION
+ghalint = "1.5.5"
+# .github/workflows/lint-workflows.yml の ACTIONLINT_VERSION
+actionlint = "1.7.12"
+# .github/workflows/osv-scanner.yml の osv-scanner-action が使う Docker イメージのタグ
+osv-scanner = "2.3.5"
