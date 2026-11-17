@@ -14,9 +14,10 @@ export type OAuthClientFetchResult =
 	| (OAuthClientFetchResultSuccess | OAuthClientFetchResultFailure)
 	| { isFetching: true }
 
-export interface OAuthClientFetchResultSuccess extends OAuthClient {
+export interface OAuthClientFetchResultSuccess {
 	isSuccess: true
 	isFetching: false
+	client: OAuthClient
 }
 
 export interface OAuthClientFetchResultFailure {

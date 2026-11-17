@@ -34,11 +34,13 @@ describe("useOAuthClient", () => {
 		await waitFor(() =>
 			expect(result.current).toEqual({
 				isSuccess: true,
-				id: "valid_client_id",
-				name: "Sample App",
-				scopes: ["openid", "profile", "email", "offline_access"],
-				redirect_uris: ["https://client.test.local/callback"],
 				isFetching: false,
+				client: {
+					id: "valid_client_id",
+					name: "Sample App",
+					scopes: ["openid", "profile", "email", "offline_access"],
+					redirect_uris: ["https://client.test.local/callback"],
+				},
 			}),
 		)
 	})
@@ -119,11 +121,13 @@ describe("useOAuthClient", () => {
 		await waitFor(() =>
 			expect(result.current).toEqual({
 				isSuccess: true,
-				id: clientId,
-				name: "Sample App",
-				scopes: ["openid"],
-				redirect_uris: ["https://client.test.local/callback"],
 				isFetching: false,
+				client: {
+					id: clientId,
+					name: "Sample App",
+					scopes: ["openid"],
+					redirect_uris: ["https://client.test.local/callback"],
+				},
 			}),
 		)
 	})
@@ -255,11 +259,13 @@ describe("useOAuthClient", () => {
 		await waitFor(() =>
 			expect(result.current).toEqual({
 				isSuccess: true,
-				id: secondClientId,
-				name: "Second Client",
-				scopes: ["openid", "profile"],
-				redirect_uris: ["https://second.test.local/callback"],
 				isFetching: false,
+				client: {
+					id: secondClientId,
+					name: "Second Client",
+					scopes: ["openid", "profile"],
+					redirect_uris: ["https://second.test.local/callback"],
+				},
 			}),
 		)
 	})

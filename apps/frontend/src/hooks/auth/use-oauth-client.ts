@@ -76,6 +76,6 @@ export function useOAuthClient(
 		if (!fetched.client) {
 			return { isSuccess: false, isFetching: false }
 		}
-		return { isSuccess: true, ...fetched.client, isFetching: false }
+		return { isSuccess: true, isFetching: false, client: fetched.client }
 	}, [clientId, fetched])
 }

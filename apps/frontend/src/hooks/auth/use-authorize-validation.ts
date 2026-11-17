@@ -59,7 +59,7 @@ const judge = (
 			errorMessage: "invalid client_id",
 		}
 	}
-	const { isSuccess, isFetching, ...client } = oauthClientFetchResult
+	const { client } = oauthClientFetchResult
 
 	// `redirect_uri`がクライアントに登録されたものと一致することの検証
 	if (!client.redirect_uris.includes(redirectUri)) {

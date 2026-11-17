@@ -20,10 +20,12 @@ const validSearchParams: Required<SearchParams> = {
 const registeredClient: OAuthClientFetchResult = {
 	isSuccess: true,
 	isFetching: false,
-	id: "valid_client_id",
-	name: "Sample App",
-	scopes: ["openid", "profile", "email", "offline_access", "example_scope"],
-	redirect_uris: [redirectUri],
+	client: {
+		id: "valid_client_id",
+		name: "Sample App",
+		scopes: ["openid", "profile", "email", "offline_access", "example_scope"],
+		redirect_uris: [redirectUri],
+	},
 }
 
 describe("useAuthorizeValidation", () => {
