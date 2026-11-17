@@ -79,3 +79,10 @@ updates:
     cooldown:
       default-days: 7
     open-pull-requests-limit: 999
+    # upward-inc/triage-to-linear は internal リポジトリで Dependabot から到達できない。
+    # 到達できないと更新チェックが失敗し、github-actions の更新の job 全体が error 終了する。
+    # SHA で参照しており、版は手で上げる（.github/workflows/security-alert-intake.yml のコメント）。
+    # reusable workflow の依存名は owner/repo にワークフローファイルのパスまで含む形になるため、パターンもパスを含めて書く。
+    # dependency-name は ref を条件に取れないため、参照の形を変えるときはこの ignore も見直す。
+    ignore:
+      - dependency-name: "upward-inc/triage-to-linear/.github/workflows/*"

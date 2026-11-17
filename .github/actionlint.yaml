@@ -1,0 +1,6 @@
+paths:
+  .github/workflows/security-alert-intake.yml:
+    ignore:
+      # actionlint の権限の一覧に、GitHub の文書にある権限 `vulnerability-alerts`（Dependabot のアラートを読む）がないため
+      # 文書: https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax
+      - 'unknown permission scope "vulnerability-alerts"'
