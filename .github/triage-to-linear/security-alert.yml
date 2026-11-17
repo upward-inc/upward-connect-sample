@@ -1,0 +1,29 @@
+# triage-to-linear の Security Alert の自動起票の設定。項目は triage-to-linear の docs/security-alert/settings.md を参照。
+# 値を決めた理由は docs/security/security-alert-intake.md を参照。
+linear:
+  teamId: 47f7c66a-ef47-4343-9522-00f23c77ddb6
+  templateId: 609275fc-f115-4a21-9127-a974c85cea3f
+  readyStateName: Todo
+  labelCandidates:
+    excludeGroups: [Type]
+  sourceLabels:
+    dependabot: "Source: Dependabot"
+    codeql: "Source: CodeQL"
+    osvScanner: "Source: OSV-Scanner"
+  sections:
+    what: 問題の説明（What）
+    why: 影響と背景（Why）
+    dod: 完了の定義（DoD）
+    notes: 補足
+    implementation: 実装案
+assessment:
+  locations:
+    deployment: "`apps/` の各アプリが、デプロイ先で実行時に使う依存。サーバーの実行時の依存と、Web の配信物（フロントエンドとドキュメントのサイト）のバンドルに含まれる依存があたる"
+    developer: インストール時のスクリプト、開発サーバー、ビルドツール、エディタ連携、`scripts/` のスクリプト、git hooks（lefthook）、Claude Code の hooks
+    ci: GitHub Actions の中で動くもの全般で、テストとビルドに加えて、ワークフローから呼ぶリポジトリ内の自動化を含む
+  instructionsFile: security-alert-assessment.md
+priority:
+  - severity: critical
+    priority: urgent
+issue:
+  dependencyWaiver: "`osv-scanner.toml` に、理由と期限を付けた waiver がある"
