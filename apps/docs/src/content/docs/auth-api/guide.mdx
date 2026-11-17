@@ -50,7 +50,7 @@ Web API実装以外の実装内容として、以下のUIが別途必要とな�
   | クライアント名 | 文字列 | `UPWARD` |
   | クライアントシークレット | 文字列 | 十分にランダムで推測不可能な任意の文字列<br/><br/>推奨値：<ul><li>文字種: 英数字と記号</li><li>文字列長: 64文字以上</li><li>生成方法: 暗号学的に安全な乱数生成器を使用</li></ul> |
   | リダイレクトURI一覧 | 文字列の配列 | <ul><li>`https://app.upward.jp/callback/`</li><li>`https://mobile.upward.jp/callback/`</li><li>`msauth.jp.upward.agent://auth`<ul><li>認証プロバイダにMicrosoft Entraを使用する場合のみ指定</li><li>この値はバンドルIDに`jp.upward.agent`を指定すると自動で生成される</li></ul></li></ul> |
-  | スコープ一覧 | 文字列の配列 | <ul><li>`openid`</li><li>`profile`</li><li>`email`</li><li>`offline_access`</li></ul>[追加スコープ](#追加スコープ)を使う場合は、その値も登録します |
+  | スコープ一覧 | 文字列の配列 | <ul><li>`openid`</li><li>`profile`</li><li>`email`</li><li>`offline_access`</li><li>[追加スコープ](#追加スコープ)の値（使う場合のみ）</li></ul> |
   | アプリのロゴ | 画像（任意） | UPWARDロゴ（[png](/upward.png), [svg](/upward.svg)）
   | プライバシーポリシーURL | 文字列（任意） | [`https://www.upward.jp/privacy`](https://www.upward.jp/privacy)|
 
