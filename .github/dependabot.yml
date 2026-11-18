@@ -112,10 +112,28 @@ updates:
     cooldown:
       default-days: 7
     open-pull-requests-limit: 999
-    # upward-inc/triage-to-linear は internal リポジトリで Dependabot から到達できない。
-    # 到達できないと更新チェックが失敗し、github-actions の更新の job 全体が error 終了する。
-    # SHA で参照しており、版は手で上げる（.github/workflows/security-alert-intake.yml のコメント）。
+    groups:
+      # osv-scanner-action は pr-scan と scheduled-scan が別の reusable workflow を参照し、別々の依存として扱われる。
+      # 片方だけ更新されるとマージ前の検査と定期スキャンでバージョンがずれるため、1 つの PR にまとめる。
+      # 現在は v2.3.5 に意図的に固定しているため（.github/workflows/osv-scanner.yml のコメント）、固定を解除するまでこのグループの PR はマージしない。
+      osv-scanner-action:
+        patterns:
+          - "google/osv-scanner-action/.github/workflows/*"
+      # applies-to を省略したグループは version updates にしか適用されないため、security updates は別名のグループでまとめる。
+      # まとまるのは脆弱性が見つかった依存だけで、グループ内の全依存が更新されるわけではない。
+      osv-scanner-action-security:
+        applies-to: security-updates
+        patterns:
+          - "google/osv-scanner-action/.github/workflows/*"
+    # upward-inc/github-foundation は internal リポジトリで Dependabot から到達できない。
+    # 更新チェックが git_dependencies_not_reachable になり、job 全体が error 終了する。
+    # dependency-name だけを書いた ignore は全バージョン無視として扱われ、更新チェックの手前で対象から外れる。
     # reusable workflow の依存名は owner/repo にワークフローファイルのパスまで含む形になるため、パターンもパスを含めて書く。
-    # dependency-name は ref を条件に取れないため、参照の形を変えるときはこの ignore も見直す。
+    # 参照は @main で tag も release も無く更新 PR は元々生成されないため、ignore で失う更新機会はない。
+    # dependency-name は ref を条件に取れないため、参照を tag に変えるときはこの ignore も見直す。
     ignore:
+      - dependency-name: "upward-inc/github-foundation/.github/workflows/*"
+      # upward-inc/triage-to-linear も internal リポジトリで、上と同じ理由で到達できない。
+      # こちらは SHA で参照しており、版は手で上げる（.github/workflows/security-alert-intake.yml のコメント）。
+      # dependency-name は ref を条件に取れないため、参照の形を変えるときはこの ignore も見直す。
       - dependency-name: "upward-inc/triage-to-linear/.github/workflows/*"
