@@ -26,7 +26,7 @@ if (/[/\\]worktrees[/\\]/.test(gitDir)) {
 
 // フックを入れられなかった、または更新できなかったとき、コミット前の検査が行われない恐れと復旧手順を伝える。
 const HOOKS_NOT_INSTALLED_HINT =
-	"Git hooks may not be installed or up to date, so commits may not be checked (biome, gitleaks). Fix the cause, then run `bun install` again. See the setup steps in README.md"
+	"Git hooks may not be installed or up to date, so commits may not be checked (biome, gitleaks). Fix the cause, then run `bun install` again. See docs/development/setup.md"
 
 // lefthook は mise.toml で版を固定しているため、mise 経由で起動する。
 // mise 未インストール環境では実行ファイルが見つからず spawnSync が例外を投げる。
