@@ -66,10 +66,13 @@ updates:
           - "@tailwindcss/vite"
       # react-router と router-plugin はどちらも router-core に完全一致のバージョンで依存する。
       # 片方だけ上がると router-core が 2 つのバージョンで入るため、同一実行に出た更新を 1 つの PR にまとめる。
-      # 2 つのバージョン番号は別の系列で、番号そのものはそろわない。
+      # react-router-devtools は react-router と router-core を peer に取り、peer の下限は同時期にリリースされた版になっている（1.167.2 は react-router ^1.170.36）。
+      # devtools だけが上がると peer を満たさなくなるおそれがあるため、同じグループに入れる。
+      # 3 つのバージョン番号は別の系列で、番号そのものはそろわない。
       tanstack-router:
         patterns:
           - "@tanstack/react-router"
+          - "@tanstack/react-router-devtools"
           - "@tanstack/router-plugin"
       # applies-to を省略したグループは version updates にしか適用されないため、security updates は別名のグループでまとめる。
       # まとまるのは脆弱性が見つかった依存だけで、グループ内の全依存が更新されるわけではない。
@@ -77,6 +80,7 @@ updates:
         applies-to: security-updates
         patterns:
           - "@tanstack/react-router"
+          - "@tanstack/react-router-devtools"
           - "@tanstack/router-plugin"
       # @vitest/ui は vitest を完全一致のバージョンで peer に取るため、片方だけ上がると peer を満たさなくなる。
       # 同一実行に出た更新を 1 つの PR にまとめる。
