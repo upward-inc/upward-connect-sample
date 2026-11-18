@@ -96,8 +96,9 @@ Location: https://sample-app.upward.com/callback
   - 有効なユーザーセッションが存在しない場合: ログイン処理を経由
   - パラメータ検証成功時: 「redirect_uri」へ成功リダイレクト（w/ code、state）
   - パラメータ検証失敗時
-    - 「redirect_uri」以外のパラメータに不備がある場合: 「redirect_uri」へエラーリダイレクト（w/ error, error_description, state）
-    - 「redirect_uri」パラメータに不備がある場合: エラー内容を画面に表示（オープンリダイレクト攻撃防止の観点で、リダイレクトを行わない）
+    - 「client_id」が未指定、または登録されていない場合: エラー内容を画面に表示（「redirect_uri」がクライアントに登録されたものか確認できないため、リダイレクトを行わない）
+    - 「redirect_uri」が未指定、またはクライアントに登録されたものと一致しない場合: エラー内容を画面に表示（オープンリダイレクト攻撃防止の観点で、リダイレクトを行わない）
+    - 上記以外のパラメータに不備がある場合: 「redirect_uri」へエラーリダイレクト（w/ error, error_description, state）
   - ユーザーアクセス拒否時: 「redirect_uri」へエラーリダイレクト（w/ error, error_description, state）
 
 ### その他（補足等）

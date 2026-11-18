@@ -4,15 +4,16 @@ import { env } from "../../../env"
 import { useAuthorizeValidation } from "../../../hooks/auth/use-authorize-validation"
 import { useOAuthClient } from "../../../hooks/auth/use-oauth-client"
 import {
-	AuthorizeParamsSchema,
+	type AuthorizeParams,
 	type AuthorizeResultFailure,
 	type AuthorizeResultSuccess,
 	SearchParamsSchema,
-	type specifiedScopes,
 } from "../../../schema/auth"
 
 // スコープの説明
-const scopeDescriptions: Record<(typeof specifiedScopes)[number], string> = {
+// 説明のないスコープ（追加スコープ等）は、同意画面にスコープ名のみを表示する
+// 追加スコープの説明を表示する場合は、ここに追加する
+const scopeDescriptions: Readonly<Record<string, string>> = {
 	openid: "IDトークン発行",
 	profile: "プロフィール情報",
 	email: "メールアドレス",
@@ -53,19 +54,18 @@ const redirectFail = (url: string, result: AuthorizeResultFailure) => {
 export function AuthorizePage() {
 	const searchParams = useSearch({ from: "/_auth/oauth2/authorize" })
 
-	// ページリクエスト時のバリデーション（クライアントサイドでの最低限の検証）
-	const { isValidating } = useAuthorizeValidation(searchParams, redirectFail)
+	// redirect_uri の検証に必要なクライアント情報を取得
+	const oauthClientFetchResult = useOAuthClient(searchParams.client_id)
 
-	// バリデーション完了後にクライアント情報を取得
-	const oauthClientFetchResult = useOAuthClient(
-		isValidating,
-		searchParams.client_id,
+	// ページリクエスト時のバリデーション（クライアントサイドでの最低限の検証）
+	const validationResult = useAuthorizeValidation(
+		searchParams,
+		oauthClientFetchResult,
+		redirectFail,
 	)
 
 	// 許可時の処理
-	const handleAuthorize = async () => {
-		const strictQueryParams = AuthorizeParamsSchema.parse(searchParams)
-
+	const handleAuthorize = async (strictQueryParams: AuthorizeParams) => {
 		const formData = new FormData()
 		formData.append("client_id", strictQueryParams.client_id)
 		formData.append("redirect_uri", strictQueryParams.redirect_uri)
@@ -96,6 +96,12 @@ export function AuthorizePage() {
 				throw new Error("invalid redirect_uri")
 			}
 
+			if (result.error === "unauthorized_client") {
+				// クライアントを特定できない場合（同意画面の表示後に削除された等）は`redirect_uri`を検証できないため、エラーをスロー
+				alert("client_idが不正です")
+				throw new Error("invalid client_id")
+			}
+
 			redirectFail(strictQueryParams.redirect_uri, {
 				error:
 					response.status === 503 ? "temporarily_unavailable" : result.error,
@@ -111,33 +117,19 @@ export function AuthorizePage() {
 	}
 
 	// 拒否時の処理
-	const handleDeny = () => {
-		const strictQueryParams = AuthorizeParamsSchema.parse(searchParams)
-
+	const handleDeny = (strictQueryParams: AuthorizeParams) => {
 		redirectFail(strictQueryParams.redirect_uri, {
 			error: "access_denied",
 			state: strictQueryParams.state,
 		})
 	}
 
-	if (isValidating) {
+	if (!validationResult.isValid) {
+		// 検証中、または検証に失敗した場合（useAuthorizeValidation がリダイレクト、または例外を送出済み）は何も表示しない
 		return null
 	}
 
-	if (oauthClientFetchResult.isFetching) {
-		return null
-	}
-
-	if (!oauthClientFetchResult.isSuccess) {
-		// クライアント情報の取得に失敗した場合（≒ 不適切なクライアントIDの指定）は、エラーをリダイレクト
-		const strictQueryParams = AuthorizeParamsSchema.parse(searchParams)
-		redirectFail(strictQueryParams.redirect_uri, {
-			error: oauthClientFetchResult.error,
-			error_description: oauthClientFetchResult.error_description,
-			state: strictQueryParams.state,
-		})
-		return null
-	}
+	const { params: strictQueryParams, client } = validationResult
 
 	return (
 		<div className="flex items-center justify-center min-h-screen bg-gray-100">
@@ -150,11 +142,11 @@ export function AuthorizePage() {
 
 				<div>
 					<p className="text-sm text-gray-800">
-						「{oauthClientFetchResult.name}
+						「{client.name}
 						」が以下のスコープへのアクセスを要求しています
 					</p>
 					<ul className="list-disc pl-5 mb-4">
-						{searchParams.scope?.split(" ").map((scope) => (
+						{strictQueryParams.scope.split(" ").map((scope) => (
 							<li key={scope} className="mb-1">
 								{scope}
 								{scopeDescriptions[scope]
@@ -169,10 +161,12 @@ export function AuthorizePage() {
 				</div>
 
 				<div className="space-y-3">
-					<Button onClick={handleAuthorize}>許可する</Button>
+					<Button onClick={() => handleAuthorize(strictQueryParams)}>
+						許可する
+					</Button>
 					<Button
 						className="bg-neutral-600 hover:bg-neutral-700"
-						onClick={handleDeny}
+						onClick={() => handleDeny(strictQueryParams)}
 					>
 						拒否する
 					</Button>
