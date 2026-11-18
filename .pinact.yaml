@@ -2,3 +2,8 @@ version: 3
 ignore_actions:
   - name: upward-inc/github-foundation/.github/workflows/.*
     ref: main
+  # triage-to-linear は internal のリポジトリで、pinact-action の GITHUB_TOKEN では読めず SHA とコメントの版を照合できないため除外する。
+  # SHA で固定しており、版は手で上げる（.github/workflows/security-alert-intake.yml のコメント）。
+  # 除外は完全な commit の SHA の参照に限り、タグやブランチでの参照は検査で落とす。
+  - name: upward-inc/triage-to-linear/.github/workflows/.*
+    ref: "^[0-9a-f]{40}$"
