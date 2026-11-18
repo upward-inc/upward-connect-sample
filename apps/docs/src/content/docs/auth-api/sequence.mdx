@@ -84,11 +84,9 @@ sequenceDiagram
 
 	RP->>RP: IDトークンの検証
 
-	opt 追加のユーザー情報が必要な場合
-		RP->>IdP: UserInfoリクエスト（`/oauth2/userinfo`）<br/>（w/ Authorization: Bearer {access_token}）
-		IdP->>IdP: アクセストークンの検証
-		IdP->>RP: 成功レスポンス<br/>（w/ sub, name, ...）
-	end
+	RP->>IdP: UserInfoリクエスト（`/oauth2/userinfo`）<br/>（w/ Authorization: Bearer {access_token}）
+	IdP->>IdP: アクセストークンの検証
+	IdP->>RP: 成功レスポンス<br/>（w/ sub, name, ...）
 
 	RP->>RP: セッション確立
 	RP->>RP: ユーザー情報の保存
