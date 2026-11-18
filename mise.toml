@@ -26,3 +26,20 @@ ghalint = "1.5.5"
 actionlint = "1.7.12"
 # .github/workflows/osv-scanner.yml の osv-scanner-action が使う Docker イメージのタグ
 osv-scanner = "2.3.5"
+
+# 各アプリの .env.template から .env を作る。
+# 手元で値を調整した .env を消さないよう、既にある .env は上書きせずに残す。
+[tasks."env#init"]
+description = "Create .env files from .env.template (existing .env files are kept)"
+run = '''
+for app in backend frontend; do
+  template="apps/$app/.env.template"
+  env_file="apps/$app/.env"
+  if [ -e "$env_file" ]; then
+    echo "skip: $env_file already exists"
+  else
+    cp "$template" "$env_file"
+    echo "created: $env_file"
+  fi
+done
+'''
