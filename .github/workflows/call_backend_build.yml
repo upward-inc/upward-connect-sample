@@ -19,6 +19,15 @@ on:
         description: 'コンテナイメージのタグ'
         required: true
         type: string
+      additional_tag:
+        description: '追加タグ'
+        required: false
+        type: string
+        default: ''
+      push:
+        description: 'イメージをレジストリに push するか'
+        required: true
+        type: boolean
       dockerfile_path:
         description: 'Dockerfileのパス'
         required: true
@@ -51,18 +60,35 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@d7f5e7f509e45cec5c76c4d5afdd7de93d0b3df5 # v4.1.0
 
+      # push しないときはログインを省く。
+      # Dependabot が作る PR には Actions secrets も environment secrets も渡らず、ログインすると認証情報が空で失敗するため。
       - name: Log in to container registry
+        if: ${{ inputs.push }}
         uses: docker/login-action@650006c6eb7dba73a995cc03b0b2d7f5ca915bee # v4.2.0
         with:
           registry: ${{ inputs.registry_domain }}
           username: ${{ secrets.CONTAINER_REGISTRY_USERNAME }}
           password: ${{ secrets.CONTAINER_REGISTRY_PASSWORD }}
 
+      - name: Construct image tags
+        id: meta
+        env:
+          REGISTRY: ${{ inputs.registry_domain }}
+          REPO: ${{ inputs.repository_name }}
+          TAG: ${{ inputs.tag }}
+          ADDITIONAL_TAG: ${{ inputs.additional_tag }}
+        run: |
+          TAGS="${REGISTRY}/${REPO}:${TAG}"
+          if [ -n "${ADDITIONAL_TAG}" ]; then
+            TAGS="${TAGS},${REGISTRY}/${REPO}:${ADDITIONAL_TAG}"
+          fi
+          echo "tags=${TAGS}" >> "${GITHUB_OUTPUT}"
+
       - name: Build and push container image to registry
         uses: docker/build-push-action@f9f3042f7e2789586610d6e8b85c8f03e5195baf # v7.2.0
         with:
-          push: true
-          tags: ${{ inputs.registry_domain }}/${{ inputs.repository_name }}:${{ inputs.tag }}
+          push: ${{ inputs.push }}
+          tags: ${{ steps.meta.outputs.tags }}
           file: ${{ inputs.dockerfile_path }}
           context: ${{ inputs.context_path }}
           build-args: |

@@ -53,7 +53,10 @@ jobs:
       environment: 'staging'
       registry_domain: 'connectsamplestgjecr01.azurecr.io'
       repository_name: 'connect-sample-backend-01'
-      tag: 'latest'
+      tag: ${{ github.sha }}
+      additional_tag: 'latest'
+      # PR ではビルドの確認だけを行い、マージ前のイメージをレジストリに置かない
+      push: ${{ github.event_name != 'pull_request' }}
       dockerfile_path: './apps/backend/Dockerfile'
       context_path: './apps/backend'
     secrets:
@@ -73,7 +76,7 @@ jobs:
       resource_group: 'connect-sample-stg-je'
       registry_domain: 'connectsamplestgjecr01.azurecr.io'
       repository_name: 'connect-sample-backend-01'
-      tag: 'latest'
+      tag: ${{ github.sha }}
     secrets:
       DEPLOY_APP_CREDENTIALS: ${{ secrets.DEPLOY_APP_CREDENTIALS }}
       CONTAINER_REGISTRY_USERNAME: ${{ secrets.CONTAINER_REGISTRY_USERNAME }}
