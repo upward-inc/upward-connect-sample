@@ -3,6 +3,7 @@ min_version = "2026.11.1"
 
 [settings]
 # 導入物のハッシュを mise.lock に記録し、mise install で検証する。
+# [tools] の版を変えたら、mise install で更新される mise.lock も一緒にコミットすること。
 lockfile = true
 
 # CI でも使うツールの版は CI と揃える。

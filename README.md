@@ -43,19 +43,16 @@
    1. 例: zsh なら `~/.zshrc` に `eval "$(mise activate zsh)"` を追記する
    2. 設定しないと、リポジトリのディレクトリに入っても固定した版のツールが PATH に載らない
    3. 設定したらシェルを開き直す。今のシェルには設定が効いておらず、別に入れた bun などが使われる
-3. `mise trust`（初回のみ、リポジトリのルートで実行）
-   1. mise は、信頼していない設定ファイルを読まない
+3. （初回のみ、リポジトリのルートで実行）mise の設定ファイルの信頼
+   1. `mise trust`
 4. 開発ツールのインストール
    1. `mise install`
-   2. `mise.lock` に記録したハッシュで、取得したファイルを検証してから入れる
-   3. `mise.toml` の版を変えたら、`mise install` で更新される `mise.lock` も一緒にコミットする
 5. パッケージ依存関係のインストール
    1. `bun install`
    2. Node.js は不要（`bunfig.toml` の設定により、`bun run` のスクリプトは Bun ランタイムで実行される）
    3. Node.js がインストールされている場合、`bun install` のライフサイクルスクリプトと `bunx` はその Node.js で動くため、セキュリティ修正版に更新しておく
 6. 環境変数ファイルの作成
-   1. `mise run env#init`
-   2. `apps/backend/.env` と `apps/frontend/.env` を、それぞれの `.env.template` から作る。既にある `.env` は上書きしない
+   1. `mise run env#init`（`apps/backend/.env` と `apps/frontend/.env` を、それぞれの `.env.template` から作る。既にある `.env` は上書きしない）
 7. （必要に応じて）環境変数ファイル内の値を調整
 8. ローカルデータベース（Docker）の起動
    1. `bun db#up`
