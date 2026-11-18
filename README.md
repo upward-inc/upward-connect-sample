@@ -9,6 +9,7 @@
 
 ### 共通
 
+- [mise](https://mise.jdx.dev/) - 開発ツールのバージョン管理
 - [Bun](https://bun.sh/) - JavaScript/TypeScript ランタイム / パッケージマネージャー
 - [TypeScript](https://www.typescriptlang.org/) - 型付き JavaScript
 - [Vitest](https://vitest.dev/) - テストフレームワーク
@@ -34,25 +35,38 @@
 
 ## セットアップ
 
-1. [Bun](https://bun.sh/)のインストール
-   1. Node.js は不要（`bunfig.toml` の設定により、`bun run` のスクリプトは Bun ランタイムで実行される）
-   2. Node.js がインストールされている場合、`bun install` のライフサイクルスクリプトと `bunx` はその Node.js で動くため、セキュリティ修正版に更新しておく
-2. パッケージ依存関係のインストール
+1. [mise](https://mise.jdx.dev/) のインストール
+   1. 手順は [公式ドキュメント](https://mise.jdx.dev/getting-started.html) を参照
+   2. Bun・lefthook・gitleaks などの開発ツールは、`mise.toml` で固定した版を mise が入れる。個別にインストールする必要はない
+2. シェルの rc ファイルに `mise activate` を設定
+   1. 例: zsh なら `~/.zshrc` に `eval "$(mise activate zsh)"` を追記する
+   2. 設定しないと、リポジトリのディレクトリに入っても固定した版のツールが PATH に載らない
+3. `mise trust`（初回のみ）
+   1. mise は、信頼していない設定ファイルを読まない
+4. 開発ツールのインストール
+   1. `mise install`
+   2. `mise.lock` に記録したハッシュで、取得したファイルを検証してから入れる
+   3. `mise.toml` の版を変えたら、`mise install` で更新される `mise.lock` も一緒にコミットする
+   4. mise は読み込んだ設定のルートごとに `mise.lock` を書く。`.claude/worktrees/` 配下の worktree で実行すると、メインのチェックアウトの `mise.lock` も書き換わることがある。意図しない変更なので、メイン側で `git restore mise.lock` を実行して戻す
+5. パッケージ依存関係のインストール
    1. `bun install`
-3. 環境変数ファイルの作成
+   2. postinstall で lefthook の Git フックも入る
+   3. Node.js は不要（`bunfig.toml` の設定により、`bun run` のスクリプトは Bun ランタイムで実行される）
+   4. Node.js がインストールされている場合、`bun install` のライフサイクルスクリプトと `bunx` はその Node.js で動くため、セキュリティ修正版に更新しておく
+6. 環境変数ファイルの作成
    1. `apps/backend/.env`（`apps/backend/.env.template`をコピー）
    2. `apps/frontend/.env`（`apps/frontend/.env.template`をコピー）
-4. （必要に応じて）環境変数ファイル内の値を調整
-5. ローカルデータベース（Docker）の起動
+7. （必要に応じて）環境変数ファイル内の値を調整
+8. ローカルデータベース（Docker）の起動
    1. `bun db#up`
-6. マイグレーションの実行（テーブルの作成）
+9. マイグレーションの実行（テーブルの作成）
    1. `bun db#migrate`
-7. ビューの作成
-   1. `apps/backend/prisma/views/dbo`配下のビュー作成スクリプトを手動で実行
-8. Prismaクライアントの最新化
-   1. `bun prisma#generate`
-9. サンプルデータの投入
-   1. `bun db#seed`
+10. ビューの作成
+    1. `apps/backend/prisma/views/dbo`配下のビュー作成スクリプトを手動で実行
+11. Prismaクライアントの最新化
+    1. `bun prisma#generate`
+12. サンプルデータの投入
+    1. `bun db#seed`
 
 ## コマンド
 
