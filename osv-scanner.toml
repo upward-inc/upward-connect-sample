@@ -9,6 +9,6 @@
 # reason = "脆弱関数が当アプリで未使用。次回のメジャー更新で解消予定。"
 
 [[IgnoredVulns]]
-id = "GHSA-hp3w-g68c-fv3c"
-ignoreUntil = 2027-01-08T00:00:00Z
-reason = "sprintf-js は修正版が未公開。backend の tedious は書式文字列をリテラルで渡しており、精度指定を外部から注入する経路がない。"
+id = "GHSA-fc5q-39xc-vjpf"
+ignoreUntil = 2027-02-18T00:00:00Z
+reason = "picomatch は修正版が未公開（4.0.7 まで全版が対象）。使うのは vite・vitest・astro・@tanstack/router-plugin などビルド・開発サーバー・テストのツールだけで、照合するのは開発者が設定やコードに書いたパターンに限られ、外部から glob パターンを渡す経路がない。"

@@ -15,22 +15,22 @@
 		"check": "biome check --write"
 	},
 	"dependencies": {
-		"@formkit/tempo": "^1.1.0",
+		"@formkit/tempo": "^1.2.0",
 		"@hono/zod-openapi": "^1.6.3",
-		"@prisma/adapter-mssql": "^7.10.0",
-		"@prisma/client": "^7.10.0",
+		"@prisma/adapter-mssql": "^7.10.1",
+		"@prisma/client": "^7.10.1",
 		"@scalar/hono-api-reference": "^0.11.16",
-		"hono": "^4.13.7",
+		"hono": "^4.13.19",
 		"jsonwebtoken": "^9.0.3",
 		"nanoid": "^5.1.16",
-		"zod": "^4.6.1"
+		"zod": "^4.6.7"
 	},
 	"devDependencies": {
-		"@testcontainers/mssqlserver": "^12.1.0",
+		"@testcontainers/mssqlserver": "^12.2.1",
 		"@types/bun": "latest",
 		"@types/jsonwebtoken": "^9.0.10",
 		"@vitest/ui": "^4.1.12",
-		"prisma": "^7.10.0",
+		"prisma": "^7.10.1",
 		"vitest": "^4.1.12"
 	}
 }
