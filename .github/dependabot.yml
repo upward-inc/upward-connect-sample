@@ -1,6 +1,8 @@
 version: 2
 updates:
-  # ルートディレクトリ
+  # bun は directory: "/" の 1 本だけにする。
+  # ワークスペースメンバーを directory に指定すると Dependabot はその階層を独立プロジェクトとして扱い、lockfile が無いため bun.lock を更新しない。
+  # 結果として package.json のバージョン範囲だけが書き換わり、CI の bun install --frozen-lockfile が落ちる。
   - package-ecosystem: "bun"
     directory: "/"
     schedule:
@@ -15,54 +17,85 @@ updates:
     cooldown:
       default-days: 7
     open-pull-requests-limit: 999
-
-  # backend ワークスペース
-  - package-ecosystem: "bun"
-    directory: "/apps/backend"
-    schedule:
-      interval: "daily"
-      time: "07:00"
-      timezone: "Asia/Tokyo"
-    target-branch: "develop"
-    labels:
-      - "dependencies"
-    commit-message:
-      prefix: "deps(backend)"
-    cooldown:
-      default-days: 7
-    open-pull-requests-limit: 999
-
-  # frontend ワークスペース
-  - package-ecosystem: "bun"
-    directory: "/apps/frontend"
-    schedule:
-      interval: "daily"
-      time: "07:00"
-      timezone: "Asia/Tokyo"
-    target-branch: "develop"
-    labels:
-      - "dependencies"
-    commit-message:
-      prefix: "deps(frontend)"
-    cooldown:
-      default-days: 7
-    open-pull-requests-limit: 999
-
-  # docs ワークスペース
-  - package-ecosystem: "bun"
-    directory: "/apps/docs"
-    schedule:
-      interval: "daily"
-      time: "07:00"
-      timezone: "Asia/Tokyo"
-    target-branch: "develop"
-    labels:
-      - "dependencies"
-    commit-message:
-      prefix: "deps(docs)"
-    cooldown:
-      default-days: 7
-    open-pull-requests-limit: 999
+    # 依存が複数のグループに一致したとき、どちらへ入るかは具体的なパターンを持つ側が優先される。
+    # 公開ドキュメントは定義順と説明しており実装と食い違うため、限定的なグループを先に置いてどちらの規則でも同じ結果になるようにする。
+    groups:
+      # react と react-dom はバージョンが完全に一致しないと実行時に Incompatible React versions を投げるため、型定義も含めて同一実行に出た更新を 1 つの PR にまとめる。
+      react:
+        patterns:
+          - "react"
+          - "react-dom"
+          - "@types/react"
+          - "@types/react-dom"
+      # applies-to を省略したグループは version updates にしか適用されないため、security updates は別名のグループでまとめる。
+      # まとまるのは脆弱性が見つかった依存だけで、グループ内の全依存が更新されるわけではない。
+      react-security:
+        applies-to: security-updates
+        patterns:
+          - "react"
+          - "react-dom"
+          - "@types/react"
+          - "@types/react-dom"
+      # prisma（CLI）が生成するクライアントは @prisma/client の上で動き、Prisma は @prisma/adapter-mssql も含めて 3 つのバージョンをそろえるよう求めている。
+      # 同一実行に出た更新を 1 つの PR にまとめ、一部だけが先にマージされないようにする。
+      prisma:
+        patterns:
+          - "prisma"
+          - "@prisma/client"
+          - "@prisma/adapter-mssql"
+      # applies-to を省略したグループは version updates にしか適用されないため、security updates は別名のグループでまとめる。
+      # まとまるのは脆弱性が見つかった依存だけで、グループ内の全依存が更新されるわけではない。
+      prisma-security:
+        applies-to: security-updates
+        patterns:
+          - "prisma"
+          - "@prisma/client"
+          - "@prisma/adapter-mssql"
+      # @tailwindcss/vite は tailwindcss に完全一致のバージョンで依存し、tailwindcss は直接依存でもある。
+      # 片方だけ上がると tailwindcss が 2 つのバージョンで入るため、同一実行に出た更新を 1 つの PR にまとめる。
+      tailwindcss:
+        patterns:
+          - "tailwindcss"
+          - "@tailwindcss/vite"
+      # applies-to を省略したグループは version updates にしか適用されないため、security updates は別名のグループでまとめる。
+      # まとまるのは脆弱性が見つかった依存だけで、グループ内の全依存が更新されるわけではない。
+      tailwindcss-security:
+        applies-to: security-updates
+        patterns:
+          - "tailwindcss"
+          - "@tailwindcss/vite"
+      # react-router と router-plugin はどちらも router-core に完全一致のバージョンで依存する。
+      # 片方だけ上がると router-core が 2 つのバージョンで入るため、同一実行に出た更新を 1 つの PR にまとめる。
+      # 2 つのバージョン番号は別の系列で、番号そのものはそろわない。
+      tanstack-router:
+        patterns:
+          - "@tanstack/react-router"
+          - "@tanstack/router-plugin"
+      # applies-to を省略したグループは version updates にしか適用されないため、security updates は別名のグループでまとめる。
+      # まとまるのは脆弱性が見つかった依存だけで、グループ内の全依存が更新されるわけではない。
+      tanstack-router-security:
+        applies-to: security-updates
+        patterns:
+          - "@tanstack/react-router"
+          - "@tanstack/router-plugin"
+      # @vitest/ui は vitest を完全一致のバージョンで peer に取るため、片方だけ上がると peer を満たさなくなる。
+      # 同一実行に出た更新を 1 つの PR にまとめる。
+      vitest:
+        patterns:
+          - "vitest"
+          - "@vitest/ui"
+      # applies-to を省略したグループは version updates にしか適用されないため、security updates は別名のグループでまとめる。
+      # まとまるのは脆弱性が見つかった依存だけで、グループ内の全依存が更新されるわけではない。
+      vitest-security:
+        applies-to: security-updates
+        patterns:
+          - "vitest"
+          - "@vitest/ui"
+      patch:
+        patterns:
+          - "*"
+        update-types:
+          - "patch"
 
   # GitHub Actions
   - package-ecosystem: "github-actions"
