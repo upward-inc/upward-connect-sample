@@ -1,3 +1,4 @@
+import type { OpenAPIHono } from "@hono/zod-openapi"
 import { getEntity } from "../../../../domain/entity"
 import {
 	createRecord,
@@ -25,7 +26,7 @@ import {
 	PostRecordResponseSchema,
 } from "../../../../schema/record"
 
-export const recordRouter = honoApp<{ Variables: AuthContexts }>()
+const recordRoutes = honoApp<{ Variables: AuthContexts }>()
 	.openapi(
 		createRoute({
 			method: "get",
@@ -256,3 +257,9 @@ export const recordRouter = honoApp<{ Variables: AuthContexts }>()
 			return c.body(null, 204)
 		},
 	)
+
+// レスポンスのレコードは再帰型の JsonValue を含むため、スキーマ型を持ったまま親の `.route()` に渡すと TS2589（型の展開が深すぎる）になる。
+// ルーターのスキーマ型はどこからも参照しないため、公開する型からスキーマ型を外す。
+// RPC クライアント（`hc`）などでスキーマ型を使うようになったら、この方法を見直すこと。
+export const recordRouter: OpenAPIHono<{ Variables: AuthContexts }> =
+	recordRoutes
