@@ -1,4 +1,4 @@
-import type { Prisma } from "@prisma/client"
+import type { Prisma } from "../prisma/generated/client"
 
 export async function seedEntityItems(prisma: Prisma.TransactionClient) {
 	const entities = await prisma.entity.findMany()

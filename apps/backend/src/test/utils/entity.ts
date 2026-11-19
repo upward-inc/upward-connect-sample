@@ -1,4 +1,4 @@
-import type { user } from "@prisma/client"
+import type { user } from "../../../prisma/generated/client"
 import { seedEntities } from "../../../seed/entity"
 import { seedEntityItems } from "../../../seed/entity-item"
 import { seedEntityItemOptions } from "../../../seed/entity-item-option"
