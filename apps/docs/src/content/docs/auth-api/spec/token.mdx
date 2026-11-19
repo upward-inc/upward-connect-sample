@@ -84,7 +84,7 @@ OIDC 1.0で定められた認可やトークン更新処理を行う（各種ト
     アクセストークン
   </ResponseBodyTableRow>
   <ResponseBodyTableRow name="id_token" type="文字列" required={true} example='eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6IjAwMDAxIn0.eyJpc3MiOiJodHRwczovL2F1dGguZXhhbXBsZS5jb20iLCJzdWIiOiJodHRwczovL2V4YW1wbGUuY29tL3VzZXJzL3VzZXItMDAwMDAwMDEiLCJhdWQiOiJjbGllbnQtMDAwMDAwMDEiLCJleHAiOjE3NTg3OTU1NjgsImlhdCI6MTc1ODc5NDk2OCwibm9uY2UiOiJjbWEzM1B6eXljQkZiM0xBIiwidXNlcl9pZCI6InVzZXItMDAwMDAwMDEiLCJ1c2VyX25hbWUiOiJ5b3N1a2UtdGFoYXJhQGV4YW1wbGUuY29tIiwibmFtZSI6IueUsOWOnyDpmb3ku4siLCJnaXZlbl9uYW1lIjoi6Zm95LuLIiwiZmFtaWx5X25hbWUiOiLnlLDljp8iLCJlbWFpbCI6Inlvc3VrZS10YWhhcmFAZXhhbXBsZS5jb20iLCJ6b25laW5mbyI6IkFzaWEvVG9reW8iLCJsb2NhbGUiOiJqYS1KUCJ9.sSrm3AdLWZdXxMmasWu65UcqHREX6sCpZubUNDLLC_OASe9WqDFZDhZmUPhWv6u3tVSYSYWA3Tgxrdb8optxDp5dW98cAEcdEazCLhc9c2F_F5qYgukuiK5Fo4rcrEYi92MsSgwmtC3a3OLjgmbP5yFbCdTsCcGH_2RsaZQ53n6GCrBOCqOIMU8aC0L2558IRmsPi0vv1rlknVy8KXMJorcBoOYeT8x7krlSa84ewROO9cse9KfQz7CIuFISD3koRT1ldfs1D4YCL-ep_W9dTWujUcH43ZR4X0V3nHcQBJahCs5pjxxRIq5hQ1wcmMmDo2XT4pzkIjaOLpqN5LNYMkL9fzpRV8QOXwcdRNbO-LnOcFbO881NI7kN625tEFiXEtWsbAvXJVThvlWeQWnxz4dzpS0Hl7EYCBZYuKQO3Gigc1WE_J7S6UTF-P_gFawyIOstE2ffS8gx1ViQ3F0UoGLGDoeNwvcA30jKeDns2psCkzQ4B7oxvmNs_q26nVnayR7Xj3peBELGOpB666-_lwBEGKdRmoROwFpFe7q4rG39gvG1Gn5tAnKNUOmXKzisaJqc58SsAGmBQe8n8uC-l_tIidUZt5MYRvIaYdfNo3uQ4Hp5TreYFPiDBYLYu5PitSoLjd4hpVJVQsMqVEQyZaNVqfDoHXGHku5k8MDeJSU'>
-    IDトークン
+    IDトークン<br/>（含めるクレームは<a href="#idトークン">IDトークン</a>を参照）
   </ResponseBodyTableRow>
   <ResponseBodyTableRow name="refresh_token" type="文字列" required={true} example='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJodHRwczovL2F1dGguZXhhbXBsZS5jb20iLCJzdWIiOiJodHRwczovL2V4YW1wbGUuY29tL3VzZXJzL3VzZXItMDAwMDAwMDEiLCJhdWQiOiJjbGllbnQtMDAwMDAwMDEiLCJleHAiOjE3NzQzNDY5NjgsImlhdCI6MTc1ODc5NDk2OH0.RgJepIUk8AEpNUZW98KjaYWlP2ahGHtxT2OYvTMfrD0'>
     リフレッシュトークン
@@ -140,10 +140,27 @@ OIDC 1.0で定められた認可やトークン更新処理を行う（各種ト
 
 - OIDC 1.0トークンエンドポイント仕様（OAuth 2.0の拡張）、および、PKCEの仕様に従い実装してください
 
+### IDトークン
+
+- JWTのヘッダには、以下を設定してください
+  - `alg`: `RS256`
+  - `kid`: 署名に使った鍵の`kid`（[OIDC 1.0公開鍵群の取得](/auth-api/spec/jwks)で返す鍵の`kid`と同じ値）
+- JWTのペイロードには、以下のクレームを必ず含めてください
+  - `iss`: [OIDC 1.0プロバイダーコンフィグレーションの取得](/auth-api/spec/openid-configuration)で返す`issuer`と同じ値
+  - `sub`: [OIDC 1.0ユーザー情報の取得](/auth-api/spec/userinfo)で返す`sub`と同じ値
+  - `aud`: リクエストボディの`client_id`と同じ値
+  - `exp`: IDトークンの有効期限（UNIX時刻（秒）の整数値）
+  - `iat`: IDトークンの発行時刻（UNIX時刻（秒）の整数値）
+  - `nonce`: [OIDC 1.0認可処理](/auth-api/spec/authorize)のリクエストで受け取った`nonce`と同じ値
+- 上記以外のクレーム（`user_id`や、`profile` / `email`スコープに対応するクレーム等）をIDトークンに含めるかは任意です
+  - UPWARDが必要とするユーザー情報（`user_id`、`user_name`等）は、[OIDC 1.0ユーザー情報の取得](/auth-api/spec/userinfo)で返してください
+
 ## 📚 参考資料
 
 - OpenID Connect Core 1.0
+  - [2. ID Token](https://openid.net/specs/openid-connect-core-1_0.html#IDToken)（[日本語](https://openid-foundation-japan.github.io/openid-connect-core-1_0.ja.html#IDToken)）
   - [3.1.3. Token Endpoint](https://openid.net/specs/openid-connect-core-1_0.html#TokenEndpoint)（[日本語](https://openid-foundation-japan.github.io/openid-connect-core-1_0.ja.html#TokenEndpoint)）
+  - [3.1.3.7. ID Token Validation](https://openid.net/specs/openid-connect-core-1_0.html#IDTokenValidation)（[日本語](https://openid-foundation-japan.github.io/openid-connect-core-1_0.ja.html#IDTokenValidation)）
   - [12. Using Refresh Tokens](https://openid.net/specs/openid-connect-core-1_0.html#RefreshTokens)（[日本語](https://openid-foundation-japan.github.io/openid-connect-core-1_0.ja.html#RefreshTokens)）
 - The OAuth 2.0 Authorization Framework
   - [3.2. Token Endpoint](https://datatracker.ietf.org/doc/html/rfc6749#section-3.2)（[日本語](https://openid-foundation-japan.github.io/rfc6749.ja.html#anchor23)）
