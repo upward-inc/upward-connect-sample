@@ -20,6 +20,24 @@ post-checkout:
           mise exec bun -- bun install
         fi
 
+    # ブランチ切替で Prisma スキーマが変わっていたら Prisma Client を生成し直す
+    # 古い生成物のままだと、pre-commit の型チェックが新しいスキーマに合わない型を読んで失敗する
+    # 生成に失敗しても hook は成功扱いにする（checkout の終了コードを失敗にしない）
+    - name: sync-prisma-client
+      run: |
+        prev="{1}"
+        next="{2}"
+        flag="{3}"
+        if [ "$flag" != "1" ] || [ "$prev" = "$next" ] || [ "$prev" = "0000000000000000000000000000000000000000" ]; then
+          exit 0
+        fi
+        if git diff --name-only "$prev" "$next" 2>/dev/null | grep -qE '^apps/backend/prisma/schema\.prisma$'; then
+          if ! mise exec bun -- bun run prisma#generate; then
+            echo "prisma#generate failed (see above); continuing checkout" >&2
+          fi
+        fi
+        exit 0
+
 post-merge:
   jobs:
     # マージ / pull で依存ファイルが変わっていたら `bun install` を実施
@@ -31,11 +49,23 @@ post-merge:
         - "apps/*/package.json"
       run: mise exec bun -- bun install
 
+    # マージ / pull で Prisma スキーマが変わっていたら Prisma Client を生成し直す
+    # 生成に失敗しても hook は成功扱いにする
+    - name: sync-prisma-client
+      files: git diff --name-only ORIG_HEAD HEAD
+      glob:
+        - "apps/backend/prisma/schema.prisma"
+      run: |
+        if ! mise exec bun -- bun run prisma#generate; then
+          echo "prisma#generate failed (see above); continuing" >&2
+        fi
+        exit 0
+
 pre-commit:
   parallel: true
   jobs:
-    # コミット前にコード整形を実施
-    - name: auto-fix
+    # コミット前にコード整形と型チェックを直列で実施
+    - name: format-and-check
       group:
         piped: true
         jobs:
@@ -53,6 +83,30 @@ pre-commit:
               - "**/routeTree.gen.ts"
             run: mise exec bun -- bun run biome format --write {staged_files}
             stage_fixed: true
+          # 変更のあった app の型チェックを実施
+          #
+          # lint / format がファイルを書き換えるため、並行実行すると型チェックが整形中のファイルを読みうる。
+          # 整形の後に置く。
+          #
+          # 型チェックが読むのはステージした内容ではなく作業ツリー。
+          # ステージした内容だけを検査するには一時ディレクトリへの取り出しが必要で、pre-commit の目的に対して過剰。
+          #
+          # glob の `*` はディレクトリ区切りを跨ぐため、`apps/backend/*.ts` で直下と配下の両方が対象になる。
+          # `**` はディレクトリを 0 個含む形にマッチせず、直下のファイルを取りこぼす。
+          - name: backend-typecheck
+            glob:
+              - "apps/backend/*.ts"
+              - "apps/backend/tsconfig.json"
+            exclude:
+              - "**/prisma/generated/**"
+            run: mise exec bun -- bun run --filter backend typecheck
+          - name: frontend-typecheck
+            glob:
+              - "apps/frontend/*.{ts,tsx}"
+              - "apps/frontend/tsconfig*.json"
+            exclude:
+              - "**/routeTree.gen.ts"
+            run: mise exec bun -- bun run --filter frontend typecheck
 
     # コミット前にステージ済みファイルに機密情報が含まれていないかを検証
     - name: gitleaks
