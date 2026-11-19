@@ -13,7 +13,7 @@ lockfile = true
 # - Docker / Azure CLI: CI では action が用意し、ローカルで版を揃える必要がない
 # - Biome: package.json の devDependencies で管理している
 [tools]
-# .github/workflows/call_*.yml の setup-bun と apps/backend/Dockerfile のベースイメージ
+# .github/workflows/*.yml の setup-bun と apps/backend/Dockerfile のベースイメージ
 bun = "1.4.4"
 # pre-commit の lefthook から呼ぶ。.github/workflows/gitleaks.yml の GITLEAKS_VERSION
 gitleaks = "8.30.1"

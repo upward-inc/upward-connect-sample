@@ -1,0 +1,96 @@
+name: frontend lint
+
+# required status check に登録するため、on.paths で絞らず対象ブランチ宛の全 PR で発火させる。
+# on.paths で絞ると、一致しない PR で発火せず Expected のまま止まり merge できなくなる。
+on:
+  pull_request:
+    branches: [develop, staging, main]
+
+# 同一 PR で push が続いたとき、古い実行をキャンセルして最新のみ走らせる
+concurrency:
+  group: frontend-lint-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # job 名は required status check の context 名になるため、リポジトリ内で一意にする
+  lint:
+    name: Frontend Lint
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          persist-credentials: false
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
+        with:
+          bun-version: 1.4.4
+
+      # bunfig.toml の `[run] bun = true` は `bun install` のライフサイクルスクリプトに効かないため、`node` を Bun に差し替えてランナーの Node.js を使わないようにする
+      - name: Use Bun as node
+        run: |
+          mkdir -p "$RUNNER_TEMP/bun-as-node"
+          ln -s "$(command -v bun)" "$RUNNER_TEMP/bun-as-node/node"
+          echo "$RUNNER_TEMP/bun-as-node" >> "$GITHUB_PATH"
+
+      - name: Cache Bun dependencies
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.bun/install/cache
+          key: ${{ runner.os }}-bun-frontend-${{ hashFiles('bun.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-bun-frontend-
+
+      - name: Install dependencies
+        working-directory: ./apps/frontend
+        run: bun install --frozen-lockfile
+
+      - name: Lint
+        working-directory: ./apps/frontend
+        run: bun run lint
+
+  # deploy 側の build（tsc -b && vite build）でも型チェックは走るが、on.paths 付きのため required にできない。
+  # 全 PR で結論を出すため、ここで単独に実行する。
+  typecheck:
+    name: Frontend Typecheck
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          persist-credentials: false
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
+        with:
+          bun-version: 1.4.4
+
+      # bunfig.toml の `[run] bun = true` は `bun install` のライフサイクルスクリプトに効かないため、`node` を Bun に差し替えてランナーの Node.js を使わないようにする
+      - name: Use Bun as node
+        run: |
+          mkdir -p "$RUNNER_TEMP/bun-as-node"
+          ln -s "$(command -v bun)" "$RUNNER_TEMP/bun-as-node/node"
+          echo "$RUNNER_TEMP/bun-as-node" >> "$GITHUB_PATH"
+
+      - name: Cache Bun dependencies
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.bun/install/cache
+          key: ${{ runner.os }}-bun-frontend-${{ hashFiles('bun.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-bun-frontend-
+
+      - name: Install dependencies
+        working-directory: ./apps/frontend
+        run: bun install --frozen-lockfile
+
+      - name: Typecheck
+        working-directory: ./apps/frontend
+        run: bun run typecheck

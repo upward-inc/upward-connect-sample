@@ -25,3 +25,10 @@ backend_test:
   - *common
   - "apps/backend/**"
   - ".github/workflows/backend_test.yml"
+
+# staticwebapp-config.test.ts がリポジトリルートの staticwebapp.config.json を読むため、その変更でも走らせる。
+frontend_test:
+  - *common
+  - "apps/frontend/**"
+  - "staticwebapp.config.json"
+  - ".github/workflows/frontend_test.yml"

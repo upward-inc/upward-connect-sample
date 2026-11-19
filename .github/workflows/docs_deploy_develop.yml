@@ -34,19 +34,10 @@ concurrency:
   cancel-in-progress: ${{ github.event_name == 'pull_request' && github.event.action != 'closed' }}
 
 jobs:
-  # コード品質チェック
-  lint:
-    if: github.event.action != 'closed'
-    permissions:
-      contents: read
-    uses: ./.github/workflows/call_frontend_lint.yml
-    with:
-      target: 'docs'
-
   # フロントエンドのビルド
+  # lint は docs_lint.yml が PR 時にだけ実行する。
   build:
     if: github.event.action != 'closed'
-    needs: [lint]
     permissions:
       contents: read
     uses: ./.github/workflows/call_frontend_build.yml
