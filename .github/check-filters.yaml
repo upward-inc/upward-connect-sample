@@ -19,7 +19,7 @@ common: &common
   # ルートの postinstall が scripts/install-lefthook.ts を実行し、依存のインストールに加わるため。
   - "scripts/**"
 
-# common 以外のフィルタ名は job 名に対応させる規約である。
+# common 以外のフィルタ名は、参照するワークフローのファイル名（拡張子なし）に対応させる規約である。
 
 backend_test:
   - *common
