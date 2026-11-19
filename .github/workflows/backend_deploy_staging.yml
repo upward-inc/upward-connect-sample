@@ -7,6 +7,9 @@ on:
       - staging
     paths:
       - 'apps/backend/**'
+      # 本番イメージの依存はルートの bun.lock・package.json で決まるため
+      - 'bun.lock'
+      - 'package.json'
       - '.github/workflows/backend_deploy_staging.yml'
       - '.github/workflows/call_backend_*.yml'
 
@@ -17,6 +20,9 @@ on:
       - staging
     paths:
       - 'apps/backend/**'
+      # 本番イメージの依存はルートの bun.lock・package.json で決まるため
+      - 'bun.lock'
+      - 'package.json'
       - '.github/workflows/backend_deploy_staging.yml'
       - '.github/workflows/call_backend_*.yml'
 
@@ -58,7 +64,8 @@ jobs:
       # PR ではビルドの確認だけを行い、マージ前のイメージをレジストリに置かない
       push: ${{ github.event_name != 'pull_request' }}
       dockerfile_path: './apps/backend/Dockerfile'
-      context_path: './apps/backend'
+      # ルートの bun.lock で依存を固定するため、コンテキストはリポジトリのルートにする（除外は apps/backend/Dockerfile.dockerignore）
+      context_path: '.'
     secrets:
       CONTAINER_REGISTRY_USERNAME: ${{ secrets.CONTAINER_REGISTRY_USERNAME }}
       CONTAINER_REGISTRY_PASSWORD: ${{ secrets.CONTAINER_REGISTRY_PASSWORD }}
