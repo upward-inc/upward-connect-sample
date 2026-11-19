@@ -13,7 +13,7 @@
 		"format": "biome format --write",
 		"lint": "biome lint --write",
 		"check": "biome check --write",
-		"typecheck": "tsc --noEmit"
+		"typecheck": "tsc"
 	},
 	"dependencies": {
 		"@formkit/tempo": "^1.2.0",
