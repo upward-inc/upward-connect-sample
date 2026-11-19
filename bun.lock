@@ -28,6 +28,7 @@
         "@types/jsonwebtoken": "^9.0.10",
         "@vitest/ui": "^4.1.12",
         "prisma": "^7.10.1",
+        "typescript": "~6.0.3",
         "vitest": "^4.1.12",
       },
     },

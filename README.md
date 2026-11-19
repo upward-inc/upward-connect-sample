@@ -51,6 +51,7 @@
    1. `bun install`
    2. Node.js は不要（`bunfig.toml` の設定により、`bun run` のスクリプトは Bun ランタイムで実行される）
    3. Node.js がインストールされている場合、`bun install` のライフサイクルスクリプトと `bunx` はその Node.js で動くため、セキュリティ修正版に更新しておく
+   4. `bun install` は Prisma クライアントも生成する
 6. 環境変数ファイルの作成
    1. `mise run env#init`（`apps/backend/.env` と `apps/frontend/.env` を、それぞれの `.env.template` から作る）
 7. （必要に応じて）環境変数ファイル内の値を調整
@@ -60,9 +61,7 @@
    1. `bun db#migrate`
 10. ビューの作成
     1. `apps/backend/prisma/views/dbo`配下のビュー作成スクリプトを手動で実行
-11. Prismaクライアントの最新化
-    1. `bun prisma#generate`
-12. サンプルデータの投入
+11. サンプルデータの投入
     1. `bun db#seed`
 
 ## コマンド
