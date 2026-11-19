@@ -1,0 +1,27 @@
+# self-gating する job は on.paths を使えないため、変更パスの判定をここに集約する。
+# on.paths で絞ると required status check に登録したとき、一致しない PR で発火せず Expected のまま止まる。
+# common は依存解決とツールチェーンの入力である。
+# common を入力に持つ check は、ここに触れる変更で必ず走らせる。
+# 参照側の比較は != 'false' にすること。
+# フィルタ名を打ち間違えると出力が空文字になり、== 'true' だと全 step が無言で skip されて job が緑になるため、fail-open にしている。
+# package.json のような接頭辞なしのパターンはリポジトリルートのファイルにだけ一致する。
+# dorny/paths-filter は picomatch に basename / matchBase を渡さないため。
+# common はアンカーの供給元であり、対応する job を持たない。
+#
+# mise.toml / mise.lock は含めない。
+# CI は mise を使わず、各ワークフローの setup-bun で bun の版を指定しているため、CI の結果に効かない。
+# CI を mise に移したときは common に足すこと。
+common: &common
+  - ".github/check-filters.yaml"
+  - "bun.lock"
+  - "bunfig.toml"
+  - "package.json"
+  # ルートの postinstall が scripts/install-lefthook.ts を実行し、依存のインストールに加わるため。
+  - "scripts/**"
+
+# common 以外のフィルタ名は job 名に対応させる規約である。
+
+backend_test:
+  - *common
+  - "apps/backend/**"
+  - ".github/workflows/backend_test.yml"

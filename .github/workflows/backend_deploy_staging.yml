@@ -9,6 +9,7 @@ on:
       - 'apps/backend/**'
       - '.github/workflows/backend_deploy_staging.yml'
       - '.github/workflows/call_backend_*.yml'
+      - '.github/workflows/backend_test.yml'
 
   # stagingブランチへのPR操作時
   pull_request:
@@ -19,6 +20,7 @@ on:
       - 'apps/backend/**'
       - '.github/workflows/backend_deploy_staging.yml'
       - '.github/workflows/call_backend_*.yml'
+      - '.github/workflows/backend_test.yml'
 
   # 手動トリガー
   workflow_dispatch:
@@ -31,21 +33,23 @@ concurrency:
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
-  # コード品質チェック
-  lint:
-    permissions:
-      contents: read
-    uses: ./.github/workflows/call_backend_lint.yml
-
   # ユニットテスト実行
+  # PR 時は backend_test.yml が単独で走るため、ここでも実行すると同じテストが二重に動く。
+  # lint と型チェックは backend_lint.yml が PR 時にだけ実行する。
   test:
+    if: github.event_name != 'pull_request'
     permissions:
       contents: read
-    uses: ./.github/workflows/call_backend_test.yml
+      # backend_test.yml が dorny/paths-filter のために要求する。
+      # 呼ばれた側は呼び出し元より広い権限を持てず、渡さないとワークフローが起動時に失敗する。
+      pull-requests: read
+    uses: ./.github/workflows/backend_test.yml
 
   # Dockerイメージのビルド/プッシュ
+  # PR 時は test が skipped になるため、skipped でも進める。
   build:
-    needs: [lint, test]
+    if: ${{ !cancelled() && (needs.test.result == 'success' || needs.test.result == 'skipped') }}
+    needs: test
     permissions:
       contents: read
     uses: ./.github/workflows/call_backend_build.yml
