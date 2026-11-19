@@ -42,8 +42,6 @@ jobs:
 
       - name: Generate Prisma Client
         working-directory: ./apps/backend
-        env:
-          DATABASE_URL: "sqlserver://localhost:1433"
         run: bun run prisma#generate
 
       - name: Test
