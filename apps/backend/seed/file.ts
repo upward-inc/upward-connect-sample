@@ -1,4 +1,4 @@
-import type { Prisma, user } from "@prisma/client"
+import type { Prisma, user } from "../prisma/generated/client"
 import { getAnyRow } from "./utility"
 
 const UPWARD_LOGO_PATH = `${import.meta.dir}/static/upward.png`

@@ -1,5 +1,5 @@
 import { addMinute, addYear, date, format } from "@formkit/tempo"
-import type { Prisma, user } from "@prisma/client"
+import type { Prisma, user } from "../prisma/generated/client"
 import {
 	getAnyRow,
 	getRandomBoolean,
