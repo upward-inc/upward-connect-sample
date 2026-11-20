@@ -13,7 +13,7 @@ lockfile = true
 # - Docker / Azure CLI: CI では action が用意し、ローカルで版を揃える必要がない
 # - Biome: package.json の devDependencies で管理している
 [tools]
-# .github/workflows/call_*.yml の setup-bun と apps/backend/Dockerfile のベースイメージ
+# .github/workflows/*.yml の setup-bun と apps/backend/Dockerfile のベースイメージ
 bun = "1.4.4"
 # pre-commit の lefthook から呼ぶ。.github/workflows/gitleaks.yml の GITLEAKS_VERSION
 gitleaks = "8.30.1"
@@ -21,9 +21,9 @@ gitleaks = "8.30.1"
 lefthook = "2.2.0"
 # .github/workflows/pinact.yml の pinact-action が同梱する aqua の設定（aqua/imports/pinact.yaml）
 pinact = "4.0.0"
-# .github/workflows/lint-workflows.yml の GHALINT_VERSION
+# .github/workflows/workflows_lint.yml の GHALINT_VERSION
 ghalint = "1.5.5"
-# .github/workflows/lint-workflows.yml の ACTIONLINT_VERSION
+# .github/workflows/workflows_lint.yml の ACTIONLINT_VERSION
 actionlint = "1.7.12"
 # .github/workflows/osv-scanner.yml の osv-scanner-action が使う Docker イメージのタグ
 osv-scanner = "2.3.5"

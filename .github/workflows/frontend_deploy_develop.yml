@@ -9,6 +9,7 @@ on:
       - 'apps/frontend/**'
       - '.github/workflows/frontend_deploy_develop.yml'
       - '.github/workflows/call_frontend_*.yml'
+      - '.github/workflows/frontend_test.yml'
       - 'staticwebapp.config.json'
 
   # developブランチへのPR操作時（closed含む：プレビュー環境削除のため）
@@ -20,6 +21,7 @@ on:
       - 'apps/frontend/**'
       - '.github/workflows/frontend_deploy_develop.yml'
       - '.github/workflows/call_frontend_*.yml'
+      - '.github/workflows/frontend_test.yml'
       - 'staticwebapp.config.json'
 
   # 手動トリガー
@@ -34,28 +36,23 @@ concurrency:
   cancel-in-progress: ${{ github.event_name == 'pull_request' && github.event.action != 'closed' }}
 
 jobs:
-  # コード品質チェック
-  lint:
-    if: github.event.action != 'closed'
-    permissions:
-      contents: read
-    uses: ./.github/workflows/call_frontend_lint.yml
-    with:
-      target: 'frontend'
-
   # ユニットテスト実行
+  # PR 時は frontend_test.yml が単独で走るため、ここでも実行すると同じテストが二重に動く。
+  # lint と型チェックは frontend_lint.yml が PR 時にだけ実行する。
   test:
-    if: github.event.action != 'closed'
+    if: github.event_name != 'pull_request'
     permissions:
       contents: read
-    uses: ./.github/workflows/call_frontend_test.yml
-    with:
-      target: 'frontend'
+      # frontend_test.yml が dorny/paths-filter のために要求する。
+      # 呼ばれた側は呼び出し元より広い権限を持てず、渡さないとワークフローが起動時に失敗する。
+      pull-requests: read
+    uses: ./.github/workflows/frontend_test.yml
 
   # フロントエンドのビルド
+  # PR 時は test が skipped になるため、skipped でも進める。
   build:
-    if: github.event.action != 'closed'
-    needs: [lint, test]
+    if: ${{ !cancelled() && github.event.action != 'closed' && (needs.test.result == 'success' || needs.test.result == 'skipped') }}
+    needs: test
     permissions:
       contents: read
     uses: ./.github/workflows/call_frontend_build.yml

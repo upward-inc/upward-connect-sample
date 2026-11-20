@@ -1,0 +1,83 @@
+name: backend test
+
+# PR では単独で走り、required status check の対象になる。
+# デプロイ時は backend deploy - * から workflow_call で呼ばれる。
+# required に登録するため on.paths で絞らず、変更パスの判定は job 内で行う。
+on:
+  workflow_call:
+
+  pull_request:
+    branches: [develop, staging, main]
+
+# デプロイ側は push 実行を cancel-in-progress: false にして、進行中のデプロイを途中でキャンセルしない保証をしている。
+# ここを無条件 true にすると呼び出し元からの実行でその保証が壊れるため、PR イベント時のみキャンセルする。
+concurrency:
+  group: backend-test-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  # job 名は required status check の context 名になるため、リポジトリ内で一意にする
+  test:
+    name: Backend Test
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      # dorny/paths-filter が pull_request イベントで変更ファイル一覧を API から取得するために要る。
+      # 呼ばれた側は呼び出し元より広い権限を要求できず、超えるとワークフローが起動時に失敗する。
+      # workflow_call で呼ぶ側にも同じ権限を持たせること。
+      pull-requests: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          persist-credentials: false
+
+      # フィルタ定義をチェックアウト済みのワークツリーから読むため、この判定は checkout の直後に置く。
+      - name: Detect relevant changes
+        id: changes
+        if: github.event_name == 'pull_request'
+        uses: dorny/paths-filter@ceb8a2b8f2d89434be7ff52d3de7ec3738c5cc9d # v4.0.3
+        with:
+          filters: .github/check-filters.yaml
+
+      # 以降の step は、変更が backend_test に該当しない PR で skip し、job を success で終える。
+      # pull_request 以外では判定 step が skip されて出力が無いため、前段の条件で短絡させて全実行にする。
+      # != 'false' はフィルタ名の打ち間違いで出力が空文字になったときに fail-open にするため。
+      - name: Setup Bun
+        if: github.event_name != 'pull_request' || steps.changes.outputs.backend_test != 'false'
+        uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
+        with:
+          bun-version: 1.4.4
+
+      # bunfig.toml の `[run] bun = true` は `bun install` のライフサイクルスクリプトに効かないため、`node` を Bun に差し替えてランナーの Node.js を使わないようにする
+      - name: Use Bun as node
+        if: github.event_name != 'pull_request' || steps.changes.outputs.backend_test != 'false'
+        run: |
+          mkdir -p "$RUNNER_TEMP/bun-as-node"
+          ln -s "$(command -v bun)" "$RUNNER_TEMP/bun-as-node/node"
+          echo "$RUNNER_TEMP/bun-as-node" >> "$GITHUB_PATH"
+
+      - name: Cache Bun dependencies
+        if: github.event_name != 'pull_request' || steps.changes.outputs.backend_test != 'false'
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.bun/install/cache
+          key: ${{ runner.os }}-bun-backend-${{ hashFiles('bun.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-bun-backend-
+
+      - name: Install dependencies
+        if: github.event_name != 'pull_request' || steps.changes.outputs.backend_test != 'false'
+        working-directory: ./apps/backend
+        run: bun install --frozen-lockfile
+
+      - name: Generate Prisma Client
+        if: github.event_name != 'pull_request' || steps.changes.outputs.backend_test != 'false'
+        working-directory: ./apps/backend
+        run: bun run prisma#generate
+
+      - name: Test
+        if: github.event_name != 'pull_request' || steps.changes.outputs.backend_test != 'false'
+        working-directory: ./apps/backend
+        run: bun run test
