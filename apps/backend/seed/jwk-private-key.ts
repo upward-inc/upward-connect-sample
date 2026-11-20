@@ -1,5 +1,5 @@
 import { addDay, date, dayEnd, dayStart } from "@formkit/tempo"
-import type { Prisma } from "@prisma/client"
+import type { Prisma } from "../prisma/generated/client"
 import { configuration } from "../src/configuration"
 import {
 	encryptAndEncodeByBase64,

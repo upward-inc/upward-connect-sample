@@ -19,10 +19,18 @@ jobs:
       UPWARD_SHARED_WORKFLOWS_APP_ID: ${{ vars.UPWARD_SHARED_WORKFLOWS_APP_ID }}
       UPWARD_SHARED_WORKFLOWS_APP_PRIVATE_KEY: ${{ secrets.UPWARD_SHARED_WORKFLOWS_APP_PRIVATE_KEY }}
       SLACK_DEVOPS_BOT_TOKEN: ${{ secrets.SLACK_DEVOPS_BOT_TOKEN }}
+      EVENT_WEBHOOK_URL: https://api.github.com/repos/${{ github.repository }}/dispatches
+      EVENT_WEBHOOK_HEADERS: |
+        Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}
+        Accept: application/vnd.github+json
+        X-GitHub-Api-Version: 2022-11-28
     with:
       slack-channel: ${{ vars.SECURITY_ALERT_SLACK_CHANNEL_ID }}
       slack-severity: ${{ vars.SECURITY_ALERT_SEVERITY }}
-      slack-mentions: ${{ vars.SECURITY_ALERT_MENTIONS }}
+      # slack-mentions は渡さない。通知されるアラートが多く、通知ごとにメンションすると煩わしいため。
+      # 人の対応が要る自動起票の失敗の通知にだけ、メンションを付ける（受け口 .github/workflows/security-alert-intake.yml の input slack-mentions）。
+      # 起票したアラートが必ず Slack にも通知され、そのスレッドに Issue へのリンクを返信できるよう、slack-severity と同じ variable を渡す
+      webhook-severity: ${{ vars.SECURITY_ALERT_SEVERITY }}
 
   code-scanning:
     uses: upward-inc/github-foundation/.github/workflows/code-scanning-security-alert.yml@main
@@ -34,7 +42,15 @@ jobs:
       UPWARD_SHARED_WORKFLOWS_APP_ID: ${{ vars.UPWARD_SHARED_WORKFLOWS_APP_ID }}
       UPWARD_SHARED_WORKFLOWS_APP_PRIVATE_KEY: ${{ secrets.UPWARD_SHARED_WORKFLOWS_APP_PRIVATE_KEY }}
       SLACK_DEVOPS_BOT_TOKEN: ${{ secrets.SLACK_DEVOPS_BOT_TOKEN }}
+      EVENT_WEBHOOK_URL: https://api.github.com/repos/${{ github.repository }}/dispatches
+      EVENT_WEBHOOK_HEADERS: |
+        Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}
+        Accept: application/vnd.github+json
+        X-GitHub-Api-Version: 2022-11-28
     with:
       slack-channel: ${{ vars.SECURITY_ALERT_SLACK_CHANNEL_ID }}
       slack-severity: ${{ vars.SECURITY_ALERT_SEVERITY }}
-      slack-mentions: ${{ vars.SECURITY_ALERT_MENTIONS }}
+      # slack-mentions は渡さない。通知されるアラートが多く、通知ごとにメンションすると煩わしいため。
+      # 人の対応が要る自動起票の失敗の通知にだけ、メンションを付ける（受け口 .github/workflows/security-alert-intake.yml の input slack-mentions）。
+      # 起票したアラートが必ず Slack にも通知され、そのスレッドに Issue へのリンクを返信できるよう、slack-severity と同じ variable を渡す
+      webhook-severity: ${{ vars.SECURITY_ALERT_SEVERITY }}

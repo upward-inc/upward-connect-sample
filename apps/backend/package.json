@@ -9,28 +9,30 @@
 		"db#pull": "prisma db pull",
 		"db#migratefile": "dir=$(mkdir -p prisma/migrations/$(date +%Y%m%d%H%M%S) && echo $_) && cp ./migration.template.sql $dir/migration.sql",
 		"db#seed": "bun run seed/index.ts",
-		"prisma#generate": "bun --env-file=.env run prisma generate",
+		"prisma#generate": "DATABASE_URL=sqlserver://localhost:1433 bun run prisma generate",
 		"format": "biome format --write",
 		"lint": "biome lint --write",
-		"check": "biome check --write"
+		"check": "biome check --write",
+		"typecheck": "tsc"
 	},
 	"dependencies": {
-		"@formkit/tempo": "^1.1.0",
+		"@formkit/tempo": "^1.2.0",
 		"@hono/zod-openapi": "^1.6.3",
-		"@prisma/adapter-mssql": "^7.10.0",
-		"@prisma/client": "^7.10.0",
+		"@prisma/adapter-mssql": "^7.10.1",
+		"@prisma/client": "^7.10.1",
 		"@scalar/hono-api-reference": "^0.11.16",
-		"hono": "^4.13.7",
+		"hono": "^4.13.19",
 		"jsonwebtoken": "^9.0.3",
 		"nanoid": "^5.1.16",
-		"zod": "^4.6.1"
+		"zod": "^4.6.7"
 	},
 	"devDependencies": {
-		"@testcontainers/mssqlserver": "^12.1.0",
+		"@testcontainers/mssqlserver": "^12.2.1",
 		"@types/bun": "latest",
 		"@types/jsonwebtoken": "^9.0.10",
 		"@vitest/ui": "^4.1.12",
-		"prisma": "^7.10.0",
+		"prisma": "^7.10.1",
+		"typescript": "~6.0.3",
 		"vitest": "^4.1.12"
 	}
 }

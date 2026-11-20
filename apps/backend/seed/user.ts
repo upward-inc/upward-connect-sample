@@ -1,4 +1,4 @@
-import type { Prisma } from "@prisma/client"
+import type { Prisma } from "../prisma/generated/client"
 import { getRandomBoolean, getUniquePersons } from "./utility"
 
 export async function seedUsers(prisma: Prisma.TransactionClient) {

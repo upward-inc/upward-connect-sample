@@ -1,3 +1,9 @@
+# lefthook 本体を解決できないとき、警告のみで通さず hook を失敗させる
+assert_lefthook_installed: true
+
+# 各 job は `mise exec <ツール名> --` のように、使うツールを明示して呼ぶ。
+# ツール名を省くと、hook と関係のないツールも含めて `mise.toml` の未導入のツールがすべて取得の対象になるため。
+
 post-checkout:
   jobs:
     # ブランチ切替で依存ファイルが変わっていたら `bun install` を実施
@@ -11,8 +17,26 @@ post-checkout:
           exit 0
         fi
         if git diff --name-only "$prev" "$next" 2>/dev/null | grep -qE '^(package\.json|bun\.lock|apps/[^/]+/package\.json)$'; then
-          bun install
+          mise exec bun -- bun install
         fi
+
+    # ブランチ切替で Prisma スキーマが変わっていたら Prisma Client を生成し直す
+    # 古い生成物のままだと、pre-commit の型チェックが新しいスキーマに合わない型を読んで失敗する
+    # 生成に失敗しても hook は成功扱いにする（checkout の終了コードを失敗にしない）
+    - name: sync-prisma-client
+      run: |
+        prev="{1}"
+        next="{2}"
+        flag="{3}"
+        if [ "$flag" != "1" ] || [ "$prev" = "$next" ] || [ "$prev" = "0000000000000000000000000000000000000000" ]; then
+          exit 0
+        fi
+        if git diff --name-only "$prev" "$next" 2>/dev/null | grep -qE '^apps/backend/prisma/schema\.prisma$'; then
+          if ! mise exec bun -- bun run prisma#generate; then
+            echo "prisma#generate failed (see above); continuing checkout" >&2
+          fi
+        fi
+        exit 0
 
 post-merge:
   jobs:
@@ -23,13 +47,25 @@ post-merge:
         - "package.json"
         - "bun.lock"
         - "apps/*/package.json"
-      run: bun install
+      run: mise exec bun -- bun install
+
+    # マージ / pull で Prisma スキーマが変わっていたら Prisma Client を生成し直す
+    # 生成に失敗しても hook は成功扱いにする
+    - name: sync-prisma-client
+      files: git diff --name-only ORIG_HEAD HEAD
+      glob:
+        - "apps/backend/prisma/schema.prisma"
+      run: |
+        if ! mise exec bun -- bun run prisma#generate; then
+          echo "prisma#generate failed (see above); continuing" >&2
+        fi
+        exit 0
 
 pre-commit:
   parallel: true
   jobs:
-    # コミット前にコード整形を実施
-    - name: auto-fix
+    # コミット前にコード整形と型チェックを直列で実施
+    - name: format-and-check
       group:
         piped: true
         jobs:
@@ -38,28 +74,49 @@ pre-commit:
             exclude:
               - "**/prisma/generated/**"
               - "**/routeTree.gen.ts"
-            run: bun run biome lint --write {staged_files}
+            run: mise exec bun -- bun run biome lint --write {staged_files}
             stage_fixed: true
           - name: format
             glob: "*.{ts,tsx,js,jsx}"
             exclude:
               - "**/prisma/generated/**"
               - "**/routeTree.gen.ts"
-            run: bun run biome format --write {staged_files}
+            run: mise exec bun -- bun run biome format --write {staged_files}
             stage_fixed: true
+          # 変更のあった app と scripts/ の型チェックを実施
+          #
+          # lint / format がファイルを書き換えるため、並行実行すると型チェックが整形中のファイルを読みうる。
+          # 整形の後に置く。
+          #
+          # 型チェックが読むのはステージした内容ではなく作業ツリー。
+          # ステージした内容だけを検査するには一時ディレクトリへの取り出しが必要で、pre-commit の目的に対して過剰。
+          #
+          # glob の `*` はディレクトリ区切りを跨ぐため、`apps/backend/*.ts` で直下と配下の両方が対象になる。
+          # `**` はディレクトリを 0 個含む形にマッチせず、直下のファイルを取りこぼす。
+          - name: backend-typecheck
+            glob:
+              - "apps/backend/*.ts"
+              - "apps/backend/tsconfig.json"
+            exclude:
+              - "**/prisma/generated/**"
+            run: mise exec bun -- bun run --filter backend typecheck
+          - name: frontend-typecheck
+            glob:
+              - "apps/frontend/*.{ts,tsx}"
+              - "apps/frontend/tsconfig*.json"
+            exclude:
+              - "**/routeTree.gen.ts"
+            run: mise exec bun -- bun run --filter frontend typecheck
+          # scripts/ は app ではないため、ルートの scripts#typecheck で型チェックする
+          - name: scripts-typecheck
+            glob:
+              - "scripts/*.ts"
+              - "scripts/tsconfig.json"
+            run: mise exec bun -- bun run scripts#typecheck
 
     # コミット前にステージ済みファイルに機密情報が含まれていないかを検証
     - name: gitleaks
-      run: |
-        if ! command -v gitleaks >/dev/null 2>&1; then
-          echo ""
-          echo "gitleaks is not installed. Install it before committing."
-          echo "  macOS:  brew install gitleaks"
-          echo "  Linux:  https://github.com/gitleaks/gitleaks/releases"
-          echo "See docs/security/secret-scanning.md for details."
-          exit 1
-        fi
-        gitleaks git --pre-commit --staged --redact --no-banner --verbose
+      run: mise exec gitleaks -- gitleaks git --pre-commit --staged --redact --no-banner --verbose
 
 pre-push:
   parallel: true
@@ -72,9 +129,9 @@ pre-push:
         - "apps/*/package.json"
       run: |
         set -euo pipefail
-        if ! bun install --ignore-scripts; then
+        if ! mise exec bun -- bun install --ignore-scripts; then
           echo ""
-          echo "bun install --ignore-scripts failed; cannot verify bun.lock drift"
+          echo "mise exec bun -- bun install --ignore-scripts failed; cannot verify bun.lock drift"
           echo "See the error output above for details"
           exit 1
         fi
@@ -92,9 +149,9 @@ pre-push:
       glob: "apps/frontend/src/routes/**"
       run: |
         set -euo pipefail
-        if ! bun run fe#build; then
+        if ! mise exec bun -- bun run fe#build; then
           echo ""
-          echo "bun run fe#build failed; cannot verify apps/frontend/src/routeTree.gen.ts drift"
+          echo "mise exec bun -- bun run fe#build failed; cannot verify apps/frontend/src/routeTree.gen.ts drift"
           echo "See the error output above for details"
           exit 1
         fi
