@@ -7,27 +7,9 @@
 [run]
 bun = true
 
-# 公開から 7 日経過していないバージョンは install しない
-# 乗っ取られたアカウントなどから公開された悪意のある版や、取り下げられる版・重大な退行を含む版は、公開から数日のうちに見つかることが多いため
-# 効くのは新しく解決するときだけで、bun.lock に記録済みの版は変わらない
-#
-# [run] と違い、[install] はこのルートにだけ置けばよい
-# app のディレクトリを cwd にした `bun add` / `bun install` も、このファイルの [install] で解決する
-# この挙動は Bun のドキュメントに書かれておらず Bun 1.4.4 で確かめたものなので、Bun を上げるときは確認し直すこと
-#
-# 待機期間の正はこのファイル
-# Dependabot が更新先の版を選ぶ処理は bunfig.toml を読まず、.github/dependabot.yml の bun の cooldown（default-days）で決まる
-# 一方で bun.lock の更新はリポジトリのルートで実行する bun が行うため、このファイルの [install] が効く
-# cooldown の方が短いと、Dependabot が選んだ版がここで弾かれて更新に失敗するため、どちらかを変えるときはもう一方も同じ値に書き換えること
-# 待機期間は間接依存にも効くが cooldown は更新対象の直接依存にしか効かないため、値を揃えても、新しく入る間接依存が待機期間に掛かると失敗することがある
 [install]
+# 公開から 7 日経過していないバージョンは install しない
 minimumReleaseAge = 604800
-# 以下の免除は、人が緊急の修正で待たずに入れるための回避手段で、Dependabot の自動更新には適用しない（cooldown に exclude を書かない）
-# bun-types は @types/bun が完全一致で固定する依存
-# @types/bun を新しいバージョンへ上げるとき、bun-types 側が経過待ちに掛かって解決に失敗するため併せて免除する
-#
-# 脆弱性の修正版が公開から 7 日経っておらず、待たずに入れる必要があるときは、"<package>@<version>" の形で修正版だけを免除する
-# 版を書かないとそのパッケージの全ての版が免除されるため、必ず完全一致の版を書き、免除する理由をコメントに残す。公開から 7 日経って不要になったら消す
-# Dependabot の security updates は cooldown の対象外で 7 日未満の修正版も選ぶが、bun.lock の更新はこのファイルの待機期間で失敗する
-# この免除が develop に入れば Dependabot の security update も通る
-minimumReleaseAgeExcludes = ["@types/bun", "bun-types", "typescript"]
+# 以下のパッケージは 7 日の経過待ちを免除する
+# bun-types は @types/bun が完全一致で固定する依存のため、@types/bun と併せて免除する
+minimumReleaseAgeExcludes = ["@types/bun", "bun-types"]
