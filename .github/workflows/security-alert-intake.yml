@@ -1,0 +1,54 @@
+# 共有ワークフロー（security-alert.yml）が送る Security Alert（Dependabot / Code scanning）を受けて、triage-to-linear の reusable workflow で Linear に Issue を起票し、アラート通知の Slack スレッドに返信する。
+# 設定と評価の手順は .github/triage-to-linear/ にある。仕組みは docs/security/security-alert-intake.md を参照。
+# workflow_dispatch は、起票に失敗したアラートの送り直しと検証に使う。
+name: Security Alert Intake
+
+on:
+  repository_dispatch:
+    types: [dependabot-security-alert, code-scanning-security-alert]
+  workflow_dispatch:
+    inputs:
+      alert-url:
+        description: GitHub のアラートの画面の URL
+        type: string
+        required: true
+      slack-channel:
+        description: 返信先の Slack のチャンネルの ID（slack-ts と両方指定する）
+        type: string
+        default: ""
+      slack-ts:
+        description: 返信先の Slack のスレッドの ts（slack-channel と両方指定する）
+        type: string
+        default: ""
+
+permissions: {}
+
+jobs:
+  security-alert:
+    # triage-to-linear は internal のリポジトリで、pinact と Dependabot から読めないため、.pinact.yaml と dependabot.yml で除外している。
+    # 版は手で上げる。リリースのタグが指す commit の SHA に差し替え、コメントの版もそのタグにする（main の commit ではビルド済みの action がなく起動しない）。
+    # SHA は gh api repos/upward-inc/triage-to-linear/git/ref/tags/<タグ> --jq .object.sha で引く。
+    # 参照の形を変えるときは .pinact.yaml と dependabot.yml の除外も見直す。
+    uses: upward-inc/triage-to-linear/.github/workflows/security-alert.yml@34fa8639d41dcf4fba9169a26c8d8b0d6d8a243e # v1.1.0
+    # 呼び出された側の job の権限は、ここで渡した権限を超えられない。reusable workflow の各 job が要る権限の和を渡す
+    permissions:
+      contents: read
+      id-token: write
+      security-events: read
+      vulnerability-alerts: read
+    with:
+      linear-client-id: ${{ vars.SECURITY_ALERT_LINEAR_CLIENT_ID }}
+      anthropic-federation-rule-id: ${{ vars.ANTHROPIC_FEDERATION_RULE_ID }}
+      anthropic-organization-id: ${{ vars.ANTHROPIC_ORGANIZATION_ID }}
+      anthropic-service-account-id: ${{ vars.ANTHROPIC_SERVICE_ACCOUNT_ID }}
+      # repository_dispatch のときは空文字になり、イベントのアラートを処理する
+      alert-url: ${{ inputs.alert-url }}
+      slack-channel: ${{ inputs.slack-channel }}
+      slack-ts: ${{ inputs.slack-ts }}
+      # 失敗の通知にだけ付くメンション。Slack の記法のメンションをカンマで区切る（設定ファイルの slack.mentions と同じ書式）。
+      # variable を定義しなければ空になり、設定ファイルの slack.mentions もこのリポジトリでは書いていないため、メンションは付かない。
+      slack-mentions: ${{ vars.SECURITY_ALERT_MENTIONS }}
+    secrets:
+      linear-client-secret: ${{ secrets.SECURITY_ALERT_LINEAR_CLIENT_SECRET }}
+      # Slack に返信しないときは省く
+      slack-bot-token: ${{ secrets.SLACK_DEVOPS_BOT_TOKEN }}

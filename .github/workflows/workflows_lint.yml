@@ -1,11 +1,16 @@
 name: Lint GitHub Actions workflows
 
+# required status check に登録するため、on.paths で絞らず対象ブランチ宛の全 PR で発火させる。
+# on.paths で絞ると、一致しない PR で発火せず Expected のまま止まり merge できなくなる。
+# 各 job は 10 秒ほどで終わり、判定 step を足しても節約にならないため、変更パスによる skip は入れない。
 on:
   pull_request:
-    paths:
-      - ".github/workflows/**"
-      - ".github/actions/**"
-      - ".ghalint.yaml"
+    branches: [develop, staging, main]
+
+# 同一 PR で push が続いたとき、古い実行をキャンセルして最新のみ走らせる
+concurrency:
+  group: workflows-lint-${{ github.ref }}
+  cancel-in-progress: true
 
 permissions: {}
 

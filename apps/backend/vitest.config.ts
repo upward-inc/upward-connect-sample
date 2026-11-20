@@ -14,9 +14,6 @@ export default defineConfig({
 		},
 		fileParallelism: false,
 		pool: "forks",
-		forks: {
-			singleInstance: true,
-		},
 		// Test environment variables (will be overridden by testcontainers)
 		env: {
 			DATABASE_URL:

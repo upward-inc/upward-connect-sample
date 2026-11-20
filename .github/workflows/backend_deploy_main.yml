@@ -7,8 +7,12 @@ on:
       - main
     paths:
       - 'apps/backend/**'
+      # 本番イメージの依存はルートの bun.lock・package.json で決まるため
+      - 'bun.lock'
+      - 'package.json'
       - '.github/workflows/backend_deploy_main.yml'
       - '.github/workflows/call_backend_*.yml'
+      - '.github/workflows/backend_test.yml'
 
   # mainブランチへのPR操作時
   pull_request:
@@ -17,8 +21,12 @@ on:
       - main
     paths:
       - 'apps/backend/**'
+      # 本番イメージの依存はルートの bun.lock・package.json で決まるため
+      - 'bun.lock'
+      - 'package.json'
       - '.github/workflows/backend_deploy_main.yml'
       - '.github/workflows/call_backend_*.yml'
+      - '.github/workflows/backend_test.yml'
 
   # 手動トリガー
   workflow_dispatch:
@@ -31,21 +39,23 @@ concurrency:
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
-  # コード品質チェック
-  lint:
-    permissions:
-      contents: read
-    uses: ./.github/workflows/call_backend_lint.yml
-
   # ユニットテスト実行
+  # PR 時は backend_test.yml が単独で走るため、ここでも実行すると同じテストが二重に動く。
+  # lint と型チェックは backend_lint.yml が PR 時にだけ実行する。
   test:
+    if: github.event_name != 'pull_request'
     permissions:
       contents: read
-    uses: ./.github/workflows/call_backend_test.yml
+      # backend_test.yml が dorny/paths-filter のために要求する。
+      # 呼ばれた側は呼び出し元より広い権限を持てず、渡さないとワークフローが起動時に失敗する。
+      pull-requests: read
+    uses: ./.github/workflows/backend_test.yml
 
   # Dockerイメージのビルド/プッシュ
+  # PR 時は test が skipped になるため、skipped でも進める。
   build:
-    needs: [lint, test]
+    if: ${{ !cancelled() && (needs.test.result == 'success' || needs.test.result == 'skipped') }}
+    needs: test
     permissions:
       contents: read
     uses: ./.github/workflows/call_backend_build.yml
@@ -53,9 +63,13 @@ jobs:
       environment: 'main'
       registry_domain: 'connectsampleprodjecr01.azurecr.io'
       repository_name: 'connect-sample-backend-01'
-      tag: 'latest'
+      tag: ${{ github.sha }}
+      additional_tag: 'latest'
+      # PR ではビルドの確認だけを行い、マージ前のイメージをレジストリに置かない
+      push: ${{ github.event_name != 'pull_request' }}
       dockerfile_path: './apps/backend/Dockerfile'
-      context_path: './apps/backend'
+      # ルートの bun.lock で依存を固定するため、コンテキストはリポジトリのルートにする（除外は apps/backend/Dockerfile.dockerignore）
+      context_path: '.'
     secrets:
       CONTAINER_REGISTRY_USERNAME: ${{ secrets.CONTAINER_REGISTRY_USERNAME }}
       CONTAINER_REGISTRY_PASSWORD: ${{ secrets.CONTAINER_REGISTRY_PASSWORD }}
@@ -73,7 +87,7 @@ jobs:
       resource_group: 'connect-sample-prod-je'
       registry_domain: 'connectsampleprodjecr01.azurecr.io'
       repository_name: 'connect-sample-backend-01'
-      tag: 'latest'
+      tag: ${{ github.sha }}
     secrets:
       DEPLOY_APP_CREDENTIALS: ${{ secrets.DEPLOY_APP_CREDENTIALS }}
       CONTAINER_REGISTRY_USERNAME: ${{ secrets.CONTAINER_REGISTRY_USERNAME }}

@@ -24,8 +24,32 @@ if (/[/\\]worktrees[/\\]/.test(gitDir)) {
 	process.exit(0)
 }
 
-const result = Bun.spawnSync(["lefthook", "install"], {
-	stdout: "inherit",
-	stderr: "inherit",
-})
-process.exit(result.exitCode ?? 0)
+// フックを入れられなかった、または更新できなかったとき、コミット前の検査が行われない恐れと復旧手順を伝える。
+const HOOKS_NOT_INSTALLED_HINT =
+	"Git hooks may not be installed or up to date, so commits may not be checked (biome, gitleaks). Fix the cause, then run `bun install` again. See the setup steps in README.md"
+
+// lefthook は mise.toml で版を固定しているため、mise 経由で起動する。
+// mise 未インストール環境では実行ファイルが見つからず spawnSync が例外を投げる。
+// bun install 全体を失敗させないよう捕捉し、終了コード 0 で抜ける。
+try {
+	const result = Bun.spawnSync(
+		["mise", "exec", "lefthook", "--", "lefthook", "install"],
+		{
+			stdout: "inherit",
+			stderr: "inherit",
+		},
+	)
+	// lefthook install の失敗は補助処理の失敗であり、bun install 全体を落とすべきではないため、終了コードは 0 のままにする。
+	if (!result.success) {
+		console.error("lefthook install failed; see output above for details")
+		console.error(HOOKS_NOT_INSTALLED_HINT)
+	}
+	process.exit(0)
+} catch (error) {
+	console.error(
+		"Skipping lefthook install: mise not found",
+		error instanceof Error ? error.message : error,
+	)
+	console.error(HOOKS_NOT_INSTALLED_HINT)
+	process.exit(0)
+}
