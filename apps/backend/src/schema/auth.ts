@@ -208,6 +208,16 @@ export const GetOAuthClientParamSchema = z.object({
 export const GetOAuthClientResultSchema = OAuthClientSchema.pick({
 	id: true,
 	name: true,
+}).extend({
+	// OAuthClientSchema の scopes・redirect_uris は DB のカンマ区切り文字列を変換するスキーマのため、応答では配列として定義し直す
+	scopes: z.array(z.string()).meta({
+		description: "クライアントに登録されたスコープ",
+		example: ["openid", "profile", "email", "offline_access"],
+	}),
+	redirect_uris: z.array(z.string()).meta({
+		description: "クライアントに登録されたリダイレクト URI",
+		example: ["https://example.com/callback"],
+	}),
 })
 
 export const OidcConfigurationResultSchema = z

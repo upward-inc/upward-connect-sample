@@ -1,5 +1,5 @@
-import type { Prisma } from "@prisma/client"
 import { nanoid } from "nanoid"
+import type { Prisma } from "../prisma/generated/client"
 
 export async function seedOauthClients(prisma: Prisma.TransactionClient) {
 	const oauthClients: Prisma.oauth_clientCreateManyInput[] = [

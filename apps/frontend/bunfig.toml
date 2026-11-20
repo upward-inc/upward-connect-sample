@@ -2,7 +2,8 @@
 # CLI の shebang が `node` を指していても、環境にインストールされた Node.js を使わなくなる
 # `bun install` のライフサイクルスクリプトと `bunx` には効かない（CI では `node` を Bun に差し替えて対処している）
 #
-# Bun は cwd の bunfig.toml しか読まないため、同じ内容を各 app（apps/*/bunfig.toml）にも置いている
-# CI やテストは app のディレクトリを cwd にして実行するので、app を追加するときは bunfig.toml も複製すること
+# `bun run` は cwd の bunfig.toml しか読まないため、[run] は同じ内容をルートと各 app（apps/*/bunfig.toml）に置いている
+# CI やテストは app のディレクトリを cwd にして実行するので、app を追加するときは [run] も複製すること
+# [install] はルートの bunfig.toml にだけ置く（app を cwd にした install もルートの設定で解決する）
 [run]
 bun = true

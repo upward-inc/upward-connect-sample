@@ -76,7 +76,8 @@ export const internalAuthRouter = honoApp()
 		createRoute({
 			method: "get",
 			path: "/clients/{id}",
-			description: "OAuth 2.0 クライアントアプリケーション名を返却する",
+			description:
+				"OAuth 2.0 クライアントアプリケーション名と、クライアントに登録されたスコープ・リダイレクト URI を返却する",
 			request: {
 				params: GetOAuthClientParamSchema,
 			},
@@ -116,7 +117,15 @@ export const internalAuthRouter = honoApp()
 			}
 
 			// 必要最低限のフィールドのみ返却
-			return c.json({ id: client.id, name: client.name }, 200)
+			return c.json(
+				{
+					id: client.id,
+					name: client.name,
+					scopes: client.scopes,
+					redirect_uris: client.redirect_uris,
+				},
+				200,
+			)
 		},
 	)
 	.openapi(
