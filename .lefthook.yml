@@ -83,7 +83,7 @@ pre-commit:
               - "**/routeTree.gen.ts"
             run: mise exec bun -- bun run biome format --write {staged_files}
             stage_fixed: true
-          # 変更のあった app の型チェックを実施
+          # 変更のあった app と scripts/ の型チェックを実施
           #
           # lint / format がファイルを書き換えるため、並行実行すると型チェックが整形中のファイルを読みうる。
           # 整形の後に置く。
@@ -107,6 +107,12 @@ pre-commit:
             exclude:
               - "**/routeTree.gen.ts"
             run: mise exec bun -- bun run --filter frontend typecheck
+          # scripts/ は app ではないため、ルートの scripts#typecheck で型チェックする
+          - name: scripts-typecheck
+            glob:
+              - "scripts/*.ts"
+              - "scripts/tsconfig.json"
+            run: mise exec bun -- bun run scripts#typecheck
 
     # コミット前にステージ済みファイルに機密情報が含まれていないかを検証
     - name: gitleaks
