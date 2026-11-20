@@ -32,3 +32,9 @@ frontend_test:
   - "apps/frontend/**"
   - "staticwebapp.config.json"
   - ".github/workflows/frontend_test.yml"
+
+# scripts/ と bun.lock は common に含まれる。
+# bun.lock の変更で dependency submission の dry-run を走らせるため、common を入力に持つ。
+scripts_test:
+  - *common
+  - ".github/workflows/scripts_test.yml"

@@ -19,11 +19,15 @@
 		"format": "bun run --filter '*' format",
 		"lint": "bun run --filter '*' lint",
 		"check": "bun run --filter '*' check",
-		"typecheck": "bun run --filter '*' typecheck"
+		"typecheck": "bun run --filter '*' typecheck",
+		"deps#submit": "bun scripts/submit-bun-lock-dependencies.ts",
+		"scripts#test": "bun test ./scripts",
+		"scripts#typecheck": "tsc -p scripts"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "^2.6.8",
-		"@types/bun": "latest"
+		"@types/bun": "latest",
+		"typescript": "~6.0.3"
 	},
 	"workspaces": [
 		"apps/*"
