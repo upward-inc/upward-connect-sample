@@ -14,6 +14,7 @@ updates:
       - "dependencies"
     commit-message:
       prefix: "deps"
+    # ルートの bunfig.toml の minimumReleaseAge と同じ日数にする（理由は docs/security/dependency-vulnerability-policy.md の「install の待機期間」）。
     cooldown:
       default-days: 7
     open-pull-requests-limit: 999
