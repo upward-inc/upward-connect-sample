@@ -341,7 +341,6 @@ describe("buildSnapshot", () => {
 			{
 				sha: "0123456789abcdef0123456789abcdef01234567",
 				ref: "refs/heads/develop",
-				correlator: "Dependency submission_submit",
 				runId: "42",
 				scanned: "2026-10-30T00:00:00.000Z",
 			},
@@ -351,7 +350,7 @@ describe("buildSnapshot", () => {
 			version: 0,
 			sha: "0123456789abcdef0123456789abcdef01234567",
 			ref: "refs/heads/develop",
-			job: { correlator: "Dependency submission_submit", id: "42" },
+			job: { correlator: "submit-bun-lock-dependencies", id: "42" },
 			detector: {
 				name: "submit-bun-lock-dependencies",
 				version: "1.0.0",

@@ -10,7 +10,7 @@
  * 送った snapshot は依存関係グラフの bun.lock 由来の依存を丸ごと置き換える。
  * 読み違えた snapshot を送ると推移依存がグラフから消えるため、想定外の形の bun.lock や、辿れないパッケージが残る結果は送る前に止める。
  *
- * 実行には GITHUB_REPOSITORY / GITHUB_SHA / GITHUB_REF / GITHUB_WORKFLOW / GITHUB_JOB / GITHUB_RUN_ID / GITHUB_TOKEN が要る。
+ * 実行には GITHUB_REPOSITORY / GITHUB_SHA / GITHUB_REF / GITHUB_RUN_ID / GITHUB_TOKEN が要る。
  * `--dry-run` を付けると送らずに snapshot を標準出力へ書く（GITHUB_REPOSITORY と GITHUB_TOKEN は不要）。
  */
 
@@ -56,10 +56,14 @@ interface ResolvedDependency {
 	dependencies: string[]
 }
 
+// snapshot は correlator と detector 名の組ごとに置き換わる。
+// correlator を workflow 名やジョブ名から作ると、それらを変えたときに古い snapshot が置き換わらずに残るため、detector 名と同じ固定の値にする。
+// 同じ理由で、この値も変えないこと。
+const DETECTOR_NAME = "submit-bun-lock-dependencies"
+
 interface SnapshotMeta {
 	sha: string
 	ref: string
-	correlator: string
 	runId: string
 	scanned: string
 }
@@ -216,9 +220,9 @@ export function buildSnapshot(lockfile: Lockfile, meta: SnapshotMeta) {
 		version: 0,
 		sha: meta.sha,
 		ref: meta.ref,
-		job: { correlator: meta.correlator, id: meta.runId },
+		job: { correlator: DETECTOR_NAME, id: meta.runId },
 		detector: {
-			name: "submit-bun-lock-dependencies",
+			name: DETECTOR_NAME,
 			version: "1.0.0",
 			url: "https://github.com/upward-inc/upward-connect-internal/blob/develop/scripts/submit-bun-lock-dependencies.ts",
 		},
@@ -343,7 +347,6 @@ async function main(): Promise<void> {
 	const snapshot = buildSnapshot(lockfile, {
 		sha: requireEnv("GITHUB_SHA"),
 		ref: requireEnv("GITHUB_REF"),
-		correlator: `${requireEnv("GITHUB_WORKFLOW")}_${requireEnv("GITHUB_JOB")}`,
 		runId: requireEnv("GITHUB_RUN_ID"),
 		scanned: new Date().toISOString(),
 	})
