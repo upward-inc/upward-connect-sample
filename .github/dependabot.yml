@@ -14,6 +14,7 @@ updates:
       - "dependencies"
     commit-message:
       prefix: "deps"
+    # 待機期間の正はルートの bunfig.toml（minimumReleaseAge）で、揃える理由もそこに書いている。どちらかを変えるときは、もう一方も同じ値に書き換えること。
     cooldown:
       default-days: 7
     open-pull-requests-limit: 999
