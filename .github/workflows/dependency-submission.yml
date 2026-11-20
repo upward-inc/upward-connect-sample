@@ -1,76 +1,43 @@
 # bun.lock の解決済み依存を Dependency submission API へ送り、npm の推移依存を Dependabot alert と security update の対象にする。
 # 依存関係グラフは bun.lock を静的解析しないため、送らないと package.json に宣言した直接依存しか見えない。
+# PR でのスクリプトの検査と dry-run は scripts_lint.yml・scripts_test.yml が単独で行う。
 name: Dependency submission
 
 on:
-  # bun.lock の形が変わってスクリプトが止まるようになったことを、送る前に PR で知るため、bun.lock の変更でも dry-run を走らせる。
-  # package.json はスクリプトの呼び出し方と型チェックに使う typescript の版を決めるため、変わったら検査する。
-  pull_request:
-    branches: [develop]
-    paths:
-      - bun.lock
-      - package.json
-      - scripts/submit-bun-lock-dependencies.ts
-      - scripts/submit-bun-lock-dependencies.test.ts
-      - scripts/tsconfig.json
-      - .github/workflows/dependency-submission.yml
   # Dependabot alert は既定ブランチの依存だけが対象のため、送るのは develop だけにする。
-  # snapshot は次に送るまで残るので、bun.lock・スクリプト・本 workflow が変わらない限り送り直さない。
-  # 本 workflow は Bun の版を決めるため、変わったら送り直して壊れていないことを確かめる。
+  # snapshot は次に送るまで残るので、bun.lock・スクリプト・送る前の検査を行う workflow が変わらない限り送り直さない。
+  # これらの workflow は Bun の版を決めるため、変わったら送り直して壊れていないことを確かめる。
   push:
     branches: [develop]
     paths:
       - bun.lock
       - scripts/submit-bun-lock-dependencies.ts
       - .github/workflows/dependency-submission.yml
+      - .github/workflows/scripts_test.yml
   workflow_dispatch:
 
-# PR では最新の push だけを検査する。
-# develop への push は実行中の run を取り消さないが、同一 group で待機できる run は 1 本なので、連続した push では中間の run が走らずに消える。
+# 実行中の run は取り消さないが、同一 group で待機できる run は 1 本なので、連続した push では中間の run が走らずに消える。
 # 最後に送られるのは最新の bun.lock になるため、これを許容している。
 concurrency:
   group: dependency-submission-${{ github.ref }}
-  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+  cancel-in-progress: false
 
 jobs:
+  # snapshot は送るたびに丸ごと置き換わるため、解析を誤った snapshot を送ると推移依存がグラフから消える。
+  # PR の検査は最新の develop を取り込まずに通りうるため、送る前に develop の状態でテストと dry-run を通す。
+  # 型チェックは送る内容に関わらず、依存のインストールも要るため、ここでは行わない。
   test:
-    if: ${{ github.event_name == 'pull_request' }}
-    runs-on: ubuntu-24.04
-    timeout-minutes: 10
+    # workflow_dispatch は任意のブランチから起動できるため、develop 以外からは送らない
+    if: ${{ github.ref == 'refs/heads/develop' }}
     permissions:
       contents: read
-    steps:
-      - name: Checkout
-        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
-        with:
-          persist-credentials: false
-
-      # 版は mise.toml の bun と揃える
-      - name: Setup Bun
-        uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
-        with:
-          bun-version: 1.4.4
-
-      # bun のキャッシュは置かない。
-      # このジョブは PR でしか動かず、PR で保存したキャッシュはほかの PR から使えないため、容量を圧迫するだけになる。
-      # 型チェックとテストに要る @types/bun と typescript を入れる。
-      # ルートの postinstall（lefthook の導入と Prisma Client の生成）は検査に要らないため走らせない。
-      - name: Install dependencies
-        run: bun install --frozen-lockfile --ignore-scripts
-
-      - name: Typecheck
-        run: bun run scripts#typecheck
-
-      - name: Test
-        run: bun run scripts#test
-
-      # 実際の bun.lock を読み、送る前の検査で止まらないことを確かめる。GITHUB_* は Actions が設定する
-      - name: Dry run
-        run: bun run deps#submit -- --dry-run > /dev/null
+      # scripts_test.yml が dorny/paths-filter のために要求する。
+      # 呼ばれた側は呼び出し元より広い権限を持てず、渡さないとワークフローが起動時に失敗する。
+      pull-requests: read
+    uses: ./.github/workflows/scripts_test.yml
 
   submit:
-    # workflow_dispatch は任意のブランチから起動できるため、develop 以外からは送らない
-    if: ${{ github.event_name != 'pull_request' && github.ref == 'refs/heads/develop' }}
+    needs: test
     runs-on: ubuntu-24.04
     timeout-minutes: 5
     permissions:
