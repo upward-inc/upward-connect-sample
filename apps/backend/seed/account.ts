@@ -1,4 +1,4 @@
-import type { Prisma, user } from "@prisma/client"
+import type { Prisma, user } from "../prisma/generated/client"
 import { addresses } from "./static/address"
 import {
 	getAnyRow,

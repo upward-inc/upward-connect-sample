@@ -1,18 +1,19 @@
 import z from "zod"
 
-// 指定可能なスコープ
-export const specifiedScopes = ["openid", "profile", "email", "offline_access"]
+/**
+ * RFC 6749 3.3 の scope の形式（scope-token を半角スペース 1 つで区切ったもの）。
+ *
+ * `scope-token = 1*( %x21 / %x23-5B / %x5D-7E )`
+ *
+ * @see [RFC6749 OAuth 2.0 - 3.3. Access Token Scope](https://www.rfc-editor.org/rfc/rfc6749.html#section-3.3)
+ */
+const scopeFormat = /^[\x21\x23-\x5B\x5D-\x7E]+(?: [\x21\x23-\x5B\x5D-\x7E]+)*$/
 
 export const ResponseTypeSchema = z.literal("code")
 export const ClientIdSchema = z.string().min(1)
 export const AuthorizeParamsRedirectUriSchema = z.string().min(1)
-export const ScopeSchema = z
-	.string()
-	.refine(
-		(value) =>
-			value.trim().length > 0 &&
-			value.split(" ").every((scope) => specifiedScopes.includes(scope)),
-	)
+// クライアントに登録されたスコープかどうかは、クライアント情報の取得後に `hasOnlyRegisteredScopes` で判定する
+export const ScopeSchema = z.string().regex(scopeFormat)
 export const StateSchema = z.string().min(1)
 export const NonceSchema = z.string().min(1)
 export const CodeChallengeSchema = z.string().min(43).max(128)
@@ -44,6 +45,19 @@ export const AuthorizeParamsSchema = z.object({
 	code_challenge: CodeChallengeSchema,
 	code_challenge_method: CodeChallengeMethodSchema,
 })
+
+export type AuthorizeParams = z.output<typeof AuthorizeParamsSchema>
+
+/**
+ * 要求されたスコープがすべてクライアントに登録されているかを判定する。
+ *
+ * @param scope - 認可リクエストの `scope`（{@link ScopeSchema} で検証済みの、半角スペース区切りの文字列）
+ */
+export const hasOnlyRegisteredScopes = (
+	scope: string,
+	registeredScopes: readonly string[],
+): boolean =>
+	scope.split(" ").every((value) => registeredScopes.includes(value))
 
 export interface AuthorizeResultSuccess {
 	code: string

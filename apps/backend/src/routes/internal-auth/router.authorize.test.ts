@@ -211,6 +211,39 @@ describe("POST /auth/authorize - 認可エンドポイント", () => {
 		expect(data).toHaveProperty("state", stateValue)
 	})
 
+	it("クライアントに登録した追加スコープを含む認可リクエストで、追加スコープを含めて認可コードを発行すること", async () => {
+		// Arrange
+		const testClient = await createTestOAuthClient({
+			name: "add_scope",
+			secret: "test_secret_12345",
+			redirect_uris: "https://example.com/callback",
+			scopes: "openid,profile,email,offline_access,example_scope",
+		})
+
+		// Act
+		const response = await requestAuthorize({
+			response_type: "code",
+			client_id: testClient.id,
+			redirect_uri: "https://example.com/callback",
+			scope: "openid profile email offline_access example_scope",
+			state: "random-state-value-12345",
+			nonce: "random-nonce-value-12345",
+			code_challenge: "E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM",
+			code_challenge_method: "S256",
+		})
+
+		// Assert
+		const data = await response.json()
+		expect(response.status).toBe(200)
+
+		const authCode = await prisma.published_auth_code.findUnique({
+			where: { auth_code: data.code },
+		})
+		expect(authCode?.scope).toBe(
+			"openid profile email offline_access example_scope",
+		)
+	})
+
 	describe("不正なパラメータ(state付きエラー)の場合にエラーレスポンスを返すこと", () => {
 		it.each([
 			{
@@ -642,6 +675,11 @@ describe("POST /auth/authorize - 認可エンドポイント", () => {
 				title: "未認識のスコープ値を要求した場合",
 				clientScopes: "openid,profile,email",
 				scope: "openid profile unknown_scope",
+			},
+			{
+				title: "OAuthクライアントに未登録の追加スコープを要求した場合",
+				clientScopes: "openid,profile,email,offline_access",
+				scope: "openid profile email offline_access example_scope",
 			},
 		])("$title", async ({ clientScopes, scope }) => {
 			// Arrange

@@ -4,10 +4,12 @@ import { verify } from "jsonwebtoken"
 import { configuration } from "../configuration"
 import type { AuthContexts } from "../schema/auth"
 
-export const bearerAuth = createMiddleware<{
+interface AuthEnv {
 	Variables: AuthContexts
-}>(async (c, next) => {
-	const bearer = honoBearerAuth({
+}
+
+export const bearerAuth = createMiddleware<AuthEnv>(async (c, next) => {
+	const bearer = honoBearerAuth<AuthEnv>({
 		verifyToken: async (token, c) => {
 			try {
 				// トークンの検証

@@ -1,4 +1,4 @@
-import type { Prisma } from "@prisma/client"
+import type { Prisma } from "../prisma/generated/client"
 
 type RoleSnippet = Omit<
 	Prisma.roleCreateManyInput,

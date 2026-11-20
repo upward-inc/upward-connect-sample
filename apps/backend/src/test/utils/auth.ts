@@ -1,7 +1,6 @@
 import { addDay, date } from "@formkit/tempo"
-import type { Prisma } from "@prisma/client"
-import { sign } from "jsonwebtoken"
-import type * as ms from "ms"
+import { type SignOptions, sign } from "jsonwebtoken"
+import type { Prisma } from "../../../prisma/generated/client"
 import { configuration } from "../../configuration"
 import {
 	encryptAndEncodeByBase64,
@@ -30,7 +29,7 @@ export interface PrivateKeyData
 	closed_at?: Date
 }
 
-function createToken(userId: string, expiresIn?: ms.StringValue) {
+function createToken(userId: string, expiresIn?: SignOptions["expiresIn"]) {
 	const secret = process.env.OIDC_TOKEN_SECRET
 	if (!secret) {
 		throw new Error("OIDC_TOKEN_SECRET environment variable is not set")
@@ -43,7 +42,7 @@ function createToken(userId: string, expiresIn?: ms.StringValue) {
 		issuer,
 		subject: userId,
 		audience,
-		expiresIn: expiresIn || "1h", // Default to 1 hour if not provided
+		expiresIn: expiresIn ?? "1h", // Default to 1 hour if not provided
 	})
 }
 

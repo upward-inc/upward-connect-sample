@@ -1,0 +1,23 @@
+# apps/backend/Dockerfile 専用の除外設定。ビルドコンテキストはリポジトリのルート。
+# 既定ですべて除外し、必要なものだけを許可リストとして戻す。
+**
+
+# ルートの workspace
+!/package.json
+!/bun.lock
+
+# apps/backend: イメージのビルドに必要なファイル
+!/apps/backend/package.json
+!/apps/backend/prisma.config.ts
+!/apps/backend/prisma/**
+!/apps/backend/src/**
+
+# 他の workspace: --frozen-lockfile が bun.lock の全 workspace と照合するため package.json のみ
+!/apps/frontend/package.json
+
+# 戻した範囲から、イメージのビルドに不要な種類のファイルを除外する
+**/node_modules
+**/*.test.ts
+**/*.md
+# ローカルで生成した Prisma Client は持ち込まず、prisma ステージで生成し直す
+/apps/backend/prisma/generated

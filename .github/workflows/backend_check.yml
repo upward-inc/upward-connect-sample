@@ -7,6 +7,8 @@ on:
       - main
     paths:
       - 'apps/backend/**'
+      - 'package.json'
+      - 'bun.lock'
       - '.github/workflows/backend_check.yml'
       - '.github/workflows/call_backend_*.yml'
 
@@ -17,6 +19,8 @@ on:
       - main
     paths:
       - 'apps/backend/**'
+      - 'package.json'
+      - 'bun.lock'
       - '.github/workflows/backend_check.yml'
       - '.github/workflows/call_backend_*.yml'
 
@@ -43,5 +47,5 @@ jobs:
     uses: ./.github/workflows/call_backend_build.yml
     with:
       dockerfile_path: './apps/backend/Dockerfile'
-      context_path: './apps/backend'
+      context_path: '.'
     secrets: inherit

@@ -2,10 +2,12 @@
 	"name": "upward-connect-sample",
 	"version": "1.0.0",
 	"scripts": {
+		"postinstall": "bun run --filter backend prisma#generate",
 		"be#dev": "bun run --filter backend dev",
 		"be#test": "bun run --filter backend test",
 		"fe#dev": "bun run --filter frontend dev",
 		"fe#test": "bun run --filter frontend test",
+		"fe#build": "bun run --filter frontend build",
 		"db#up": "bun run --filter backend db#up",
 		"db#down": "bun run --filter backend db#down",
 		"db#migrate": "bun run --filter backend db#migrate",
@@ -15,21 +17,19 @@
 		"prisma#generate": "bun run --filter backend prisma#generate",
 		"format": "bun run --filter '*' format",
 		"lint": "bun run --filter '*' lint",
-		"check": "bun run --filter '*' check"
+		"check": "bun run --filter '*' check",
+		"typecheck": "bun run --filter '*' typecheck"
 	},
 	"devDependencies": {
-		"@biomejs/biome": "^2.5.15",
-		"@types/bun": "latest"
+		"@biomejs/biome": "^2.6.8",
+		"@types/bun": "latest",
+		"typescript": "~6.0.3"
 	},
 	"workspaces": [
 		"apps/*"
 	],
 	"overrides": {
-		"protobufjs": "^7.5.5",
-		"find-my-way": "^9.7.0",
-		"deepmerge-ts": "^8.0.0",
-		"mysql2": "^3.23.1",
-		"katex": "^0.18.2",
-		"postcss-selector-parser": "^7.1.6"
+		"glob": "^14.0.2",
+		"katex": "^0.18.2"
 	}
 }

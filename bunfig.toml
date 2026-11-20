@@ -2,7 +2,14 @@
 # CLI の shebang が `node` を指していても、環境にインストールされた Node.js を使わなくなる
 # `bun install` のライフサイクルスクリプトと `bunx` には効かない（CI では `node` を Bun に差し替えて対処している）
 #
-# Bun は cwd の bunfig.toml しか読まないため、同じ内容を各 app（apps/*/bunfig.toml）にも置いている
-# CI やテストは app のディレクトリを cwd にして実行するので、app を追加するときは bunfig.toml も複製すること
+# `bun run` は cwd の bunfig.toml しか読まないため、[run] は同じ内容を各 app（apps/*/bunfig.toml）にも置いている
+# CI やテストは app のディレクトリを cwd にして実行するので、app を追加するときは [run] も複製すること
 [run]
 bun = true
+
+[install]
+# 公開から 7 日経過していないバージョンは install しない
+minimumReleaseAge = 604800
+# 以下のパッケージは 7 日の経過待ちを免除する
+# bun-types は @types/bun が完全一致で固定する依存のため、@types/bun と併せて免除する
+minimumReleaseAgeExcludes = ["@types/bun", "bun-types"]
