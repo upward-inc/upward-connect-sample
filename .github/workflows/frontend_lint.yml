@@ -1,11 +1,20 @@
-name: call backend lint
+name: frontend lint
 
+# required status check に登録するため、on.paths で絞らず対象ブランチ宛の全 PR で発火させる。
+# on.paths で絞ると、一致しない PR で発火せず Expected のまま止まり merge できなくなる。
 on:
-  workflow_call:
+  pull_request:
+    branches: [develop, staging, main]
+
+# 同一 PR で push が続いたとき、古い実行をキャンセルして最新のみ走らせる
+concurrency:
+  group: frontend-lint-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
+  # job 名は required status check の context 名になるため、リポジトリ内で一意にする
   lint:
-    name: Lint
+    name: Frontend Lint
     runs-on: ubuntu-24.04
     timeout-minutes: 5
     permissions:
@@ -32,20 +41,22 @@ jobs:
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: ~/.bun/install/cache
-          key: ${{ runner.os }}-bun-backend-${{ hashFiles('bun.lock') }}
+          key: ${{ runner.os }}-bun-frontend-${{ hashFiles('bun.lock') }}
           restore-keys: |
-            ${{ runner.os }}-bun-backend-
+            ${{ runner.os }}-bun-frontend-
 
       - name: Install dependencies
-        working-directory: ./apps/backend
+        working-directory: ./apps/frontend
         run: bun install --frozen-lockfile
 
       - name: Lint
-        working-directory: ./apps/backend
+        working-directory: ./apps/frontend
         run: bun run lint
 
+  # deploy 側の build（tsc -b && vite build）でも型チェックは走るが、on.paths 付きのため required にできない。
+  # 全 PR で結論を出すため、ここで単独に実行する。
   typecheck:
-    name: Typecheck
+    name: Frontend Typecheck
     runs-on: ubuntu-24.04
     timeout-minutes: 5
     permissions:
@@ -72,20 +83,14 @@ jobs:
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: ~/.bun/install/cache
-          key: ${{ runner.os }}-bun-backend-${{ hashFiles('bun.lock') }}
+          key: ${{ runner.os }}-bun-frontend-${{ hashFiles('bun.lock') }}
           restore-keys: |
-            ${{ runner.os }}-bun-backend-
+            ${{ runner.os }}-bun-frontend-
 
       - name: Install dependencies
-        working-directory: ./apps/backend
+        working-directory: ./apps/frontend
         run: bun install --frozen-lockfile
 
-      # 型の解決が Prisma Client の生成物を参照する。
-      # postinstall でも生成するが、型チェックが生成物に依存することをワークフロー上で明示するため、ここでも生成する。
-      - name: Generate Prisma Client
-        working-directory: ./apps/backend
-        run: bun run prisma#generate
-
       - name: Typecheck
-        working-directory: ./apps/backend
+        working-directory: ./apps/frontend
         run: bun run typecheck
